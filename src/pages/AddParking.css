@@ -1,0 +1,1363 @@
+.add-parking-page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  direction: rtl;
+
+  background:
+    linear-gradient(
+      180deg,
+      #f8fafc 0%,
+      #f1f5f9 100%
+    );
+}
+
+.add-parking-background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.add-parking-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(4px);
+  opacity: 0.55;
+}
+
+.add-parking-orb--one {
+  width: 320px;
+  height: 320px;
+  top: 260px;
+  right: -180px;
+
+  background:
+    rgba(124, 58, 237, 0.15);
+}
+
+.add-parking-orb--two {
+  width: 380px;
+  height: 380px;
+  top: 650px;
+  left: -230px;
+
+  background:
+    rgba(6, 182, 212, 0.14);
+}
+
+.add-parking-orb--three {
+  width: 220px;
+  height: 220px;
+  bottom: 60px;
+  right: 30%;
+
+  background:
+    rgba(37, 99, 235, 0.09);
+}
+
+.add-parking-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 28px 0 110px;
+
+  background:
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(124, 58, 237, 0.34),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 85% 80%,
+      rgba(6, 182, 212, 0.3),
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      #0f172a 0%,
+      #172554 50%,
+      #164e63 100%
+    );
+
+  color: white;
+}
+
+.add-parking-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background-image:
+    linear-gradient(
+      rgba(255, 255, 255, 0.035) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.035) 1px,
+      transparent 1px
+    );
+
+  background-size: 42px 42px;
+  mask-image:
+    linear-gradient(
+      to bottom,
+      black,
+      transparent
+    );
+}
+
+.add-parking-back {
+  position: relative;
+  z-index: 2;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  min-height: 42px;
+  padding: 9px 14px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.14);
+  border-radius: 13px;
+
+  background:
+    rgba(255, 255, 255, 0.08);
+
+  color: white;
+  backdrop-filter: blur(14px);
+
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 850;
+
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.add-parking-back:hover {
+  transform: translateY(-2px);
+
+  background:
+    rgba(255, 255, 255, 0.14);
+}
+
+.add-parking-hero__content {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+
+  margin-top: 42px;
+}
+
+.add-parking-eyebrow {
+  display: inline-flex;
+  align-items: center;
+
+  margin-bottom: 10px;
+  padding: 7px 12px;
+
+  border: 1px solid
+    rgba(165, 243, 252, 0.18);
+  border-radius: 999px;
+
+  background:
+    rgba(6, 182, 212, 0.12);
+
+  color: #a5f3fc;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.add-parking-hero h1 {
+  max-width: 720px;
+  margin: 0 0 12px;
+
+  color: white;
+  font-size: clamp(
+    2rem,
+    5vw,
+    3.8rem
+  );
+  font-weight: 950;
+  line-height: 1.4;
+}
+
+.add-parking-hero p {
+  max-width: 610px;
+  margin: 0;
+
+  color:
+    rgba(226, 232, 240, 0.78);
+
+  font-size: 0.96rem;
+  line-height: 2;
+}
+
+.add-parking-hero__badge {
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  gap: 13px;
+
+  min-width: 210px;
+  padding: 18px;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.14);
+  border-radius: 22px;
+
+  background:
+    rgba(255, 255, 255, 0.09);
+
+  backdrop-filter: blur(16px);
+}
+
+.add-parking-hero__badge > span {
+  width: 52px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 17px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #06b6d4
+    );
+
+  box-shadow:
+    0 12px 30px
+      rgba(6, 182, 212, 0.22);
+
+  color: white;
+  font-size: 1.35rem;
+  font-weight: 950;
+}
+
+.add-parking-hero__badge div {
+  display: flex;
+  flex-direction: column;
+}
+
+.add-parking-hero__badge strong {
+  font-size: 0.85rem;
+  font-weight: 950;
+}
+
+.add-parking-hero__badge small {
+  color:
+    rgba(226, 232, 240, 0.65);
+  font-size: 0.7rem;
+}
+
+.add-parking-content {
+  position: relative;
+  z-index: 3;
+
+  margin-top: -62px;
+  padding-bottom: 90px;
+}
+
+.add-parking-layout {
+  display: grid;
+  grid-template-columns:
+    310px minmax(0, 1fr);
+  align-items: start;
+  gap: 25px;
+}
+
+.add-parking-sidebar {
+  position: sticky;
+  top: 95px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.add-parking-progress-card,
+.add-parking-form-card,
+.add-parking-tip {
+  border: 1px solid
+    rgba(226, 232, 240, 0.92);
+  border-radius: 27px;
+
+  background:
+    rgba(255, 255, 255, 0.96);
+
+  box-shadow:
+    0 20px 50px
+      rgba(15, 23, 42, 0.08);
+}
+
+.add-parking-progress-card {
+  padding: 22px;
+}
+
+.add-parking-progress-card__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+
+  margin-bottom: 15px;
+}
+
+.add-parking-progress-card__heading div {
+  display: flex;
+  flex-direction: column;
+}
+
+.add-parking-progress-card__heading div span {
+  color: #94a3b8;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.add-parking-progress-card__heading strong {
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 950;
+}
+
+.add-parking-progress-card__percent {
+  color: #7c3aed;
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.add-parking-progress {
+  height: 7px;
+  overflow: hidden;
+
+  margin-bottom: 22px;
+  border-radius: 999px;
+
+  background: #edf2f7;
+}
+
+.add-parking-progress span {
+  display: block;
+  height: 100%;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      #7c3aed,
+      #2563eb,
+      #06b6d4
+    );
+
+  transition: width 0.4s ease;
+}
+
+.add-parking-steps {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.add-parking-step {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  width: 100%;
+  padding: 12px;
+
+  border: 1px solid transparent;
+  border-radius: 16px;
+
+  background: transparent;
+  text-align: right;
+
+  cursor: default;
+  font-family: inherit;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.add-parking-step--completed {
+  cursor: pointer;
+}
+
+.add-parking-step--completed:hover {
+  transform: translateX(-3px);
+  background: #f8fafc;
+}
+
+.add-parking-step--active {
+  border-color:
+    rgba(124, 58, 237, 0.15);
+
+  background:
+    linear-gradient(
+      135deg,
+      #f5f3ff,
+      #eff6ff
+    );
+}
+
+.add-parking-step__number {
+  flex: 0 0 auto;
+
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+
+  background: white;
+  color: #94a3b8;
+
+  font-size: 0.8rem;
+  font-weight: 950;
+}
+
+.add-parking-step--active
+  .add-parking-step__number {
+  border-color: transparent;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #2563eb
+    );
+
+  color: white;
+
+  box-shadow:
+    0 9px 20px
+      rgba(124, 58, 237, 0.22);
+}
+
+.add-parking-step--completed
+  .add-parking-step__number {
+  border-color:
+    rgba(22, 163, 74, 0.15);
+
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.add-parking-step__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.add-parking-step__text strong {
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.add-parking-step__text small {
+  overflow: hidden;
+  color: #94a3b8;
+  font-size: 0.65rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.add-parking-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+
+  padding: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #fffbeb,
+      #fff7ed
+    );
+}
+
+.add-parking-tip__icon {
+  flex: 0 0 auto;
+
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+  background: white;
+
+  color: #f59e0b;
+  font-size: 1rem;
+}
+
+.add-parking-tip strong {
+  color: #92400e;
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.add-parking-tip p {
+  margin: 4px 0 0;
+  color: #a16207;
+  font-size: 0.68rem;
+  line-height: 1.75;
+}
+
+.add-parking-form-card {
+  overflow: hidden;
+}
+
+.add-parking-form-card form {
+  min-height: 690px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.add-parking-form-header {
+  padding: 27px 30px 22px;
+
+  border-bottom: 1px solid #edf2f7;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(245, 243, 255, 0.8),
+      rgba(236, 254, 255, 0.7)
+    );
+}
+
+.add-parking-form-header__step {
+  display: inline-flex;
+
+  margin-bottom: 5px;
+  padding: 5px 10px;
+
+  border-radius: 999px;
+  background: white;
+
+  color: #7c3aed;
+  font-size: 0.67rem;
+  font-weight: 950;
+}
+
+.add-parking-form-header h2 {
+  margin: 0 0 4px;
+
+  color: #0f172a;
+  font-size: 1.4rem;
+  font-weight: 950;
+}
+
+.add-parking-form-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.add-parking-step-content {
+  flex: 1;
+  padding: 30px;
+  animation:
+    addParkingFadeIn 0.35s ease;
+}
+
+@keyframes addParkingFadeIn {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.add-parking-intro {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+
+  margin-bottom: 28px;
+  padding: 16px;
+
+  border: 1px solid
+    rgba(124, 58, 237, 0.11);
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #faf5ff,
+      #eff6ff
+    );
+}
+
+.add-parking-intro > span {
+  flex: 0 0 auto;
+
+  width: 45px;
+  height: 45px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 15px;
+  background: white;
+
+  box-shadow:
+    0 10px 22px
+      rgba(124, 58, 237, 0.1);
+
+  font-size: 1.25rem;
+}
+
+.add-parking-intro--image {
+  border-color:
+    rgba(6, 182, 212, 0.13);
+
+  background:
+    linear-gradient(
+      135deg,
+      #ecfeff,
+      #eff6ff
+    );
+}
+
+.add-parking-intro--contact {
+  border-color:
+    rgba(22, 163, 74, 0.12);
+
+  background:
+    linear-gradient(
+      135deg,
+      #f0fdf4,
+      #ecfeff
+    );
+}
+
+.add-parking-intro div {
+  display: flex;
+  flex-direction: column;
+}
+
+.add-parking-intro strong {
+  color: #1e293b;
+  font-size: 0.88rem;
+  font-weight: 950;
+}
+
+.add-parking-intro p {
+  margin: 3px 0 0;
+  color: #64748b;
+  font-size: 0.72rem;
+}
+
+.add-parking-fields-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 17px;
+}
+
+.add-parking-field {
+  margin-bottom: 20px;
+}
+
+.add-parking-field label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  margin-bottom: 8px;
+
+  color: #334155;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.add-parking-field label > span {
+  color: #ef4444;
+}
+
+.add-parking-input,
+.add-parking-textarea {
+  display: flex;
+  align-items: center;
+
+  border: 1px solid #dbe3ee;
+  border-radius: 16px;
+
+  background: #f8fafc;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.add-parking-input:focus-within,
+.add-parking-textarea:focus-within {
+  border-color:
+    rgba(37, 99, 235, 0.55);
+
+  background: white;
+
+  box-shadow:
+    0 0 0 4px
+      rgba(37, 99, 235, 0.08);
+}
+
+.add-parking-input--error {
+  border-color:
+    rgba(239, 68, 68, 0.55);
+
+  background: #fffafa;
+}
+
+.add-parking-input--error:focus-within {
+  border-color: #ef4444;
+
+  box-shadow:
+    0 0 0 4px
+      rgba(239, 68, 68, 0.08);
+}
+
+.add-parking-input__icon {
+  flex: 0 0 auto;
+
+  width: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #7c3aed;
+  font-size: 0.95rem;
+}
+
+.add-parking-input input {
+  width: 100%;
+  min-width: 0;
+  height: 52px;
+
+  padding: 0 0 0 14px;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+  color: #0f172a;
+
+  font-family: inherit;
+  font-size: 0.83rem;
+  font-weight: 750;
+}
+
+.add-parking-input input::placeholder,
+.add-parking-textarea textarea::placeholder {
+  color: #a0aec0;
+  font-weight: 500;
+}
+
+.add-parking-input input:disabled,
+.add-parking-textarea textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.add-parking-input__suffix {
+  flex: 0 0 auto;
+
+  padding: 0 13px;
+
+  color: #94a3b8;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.add-parking-textarea {
+  align-items: stretch;
+}
+
+.add-parking-textarea textarea {
+  width: 100%;
+  min-height: 160px;
+  resize: vertical;
+
+  padding: 16px;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+  color: #0f172a;
+
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.9;
+}
+
+.add-parking-field__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  margin-top: 7px;
+
+  color: #94a3b8;
+  font-size: 0.65rem;
+}
+
+.add-parking-error {
+  display: block;
+  margin-top: 7px;
+
+  color: #dc2626;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.add-parking-error--block {
+  margin-top: 10px;
+}
+
+.add-parking-uploader {
+  overflow: hidden;
+
+  padding: 16px;
+
+  border: 2px dashed #cbd5e1;
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f8fafc,
+      #f1f5f9
+    );
+
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.add-parking-uploader:hover {
+  border-color:
+    rgba(37, 99, 235, 0.4);
+}
+
+.add-parking-uploader--error {
+  border-color:
+    rgba(239, 68, 68, 0.55);
+
+  background: #fffafa;
+}
+
+.add-parking-uploader--completed {
+  border-style: solid;
+  border-color:
+    rgba(22, 163, 74, 0.25);
+
+  background: #f7fff9;
+}
+
+.add-parking-uploader img {
+  max-width: 100%;
+  border-radius: 16px;
+}
+
+.add-parking-upload-success {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  margin-top: 14px;
+  padding: 14px;
+
+  border: 1px solid
+    rgba(22, 163, 74, 0.14);
+  border-radius: 16px;
+
+  background: #f0fdf4;
+}
+
+.add-parking-upload-success > span {
+  width: 35px;
+  height: 35px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+  background: #16a34a;
+  color: white;
+
+  font-weight: 950;
+}
+
+.add-parking-upload-success div {
+  display: flex;
+  flex-direction: column;
+}
+
+.add-parking-upload-success strong {
+  color: #166534;
+  font-size: 0.77rem;
+  font-weight: 950;
+}
+
+.add-parking-upload-success p {
+  margin: 2px 0 0;
+  color: #15803d;
+  font-size: 0.66rem;
+}
+
+.add-parking-image-guide {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  margin-top: 24px;
+}
+
+.add-parking-image-guide > div {
+  padding: 15px;
+
+  border: 1px solid #edf2f7;
+  border-radius: 16px;
+
+  background: #f8fafc;
+  text-align: center;
+}
+
+.add-parking-image-guide span {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 1.1rem;
+}
+
+.add-parking-image-guide strong {
+  display: block;
+  color: #334155;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.add-parking-image-guide p {
+  margin: 4px 0 0;
+  color: #94a3b8;
+  font-size: 0.62rem;
+  line-height: 1.7;
+}
+
+.add-parking-preview {
+  overflow: hidden;
+
+  margin-top: 8px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+
+  background: #f8fafc;
+}
+
+.add-parking-preview__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 14px 16px;
+
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.add-parking-preview__heading > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.add-parking-preview__heading span {
+  color: #94a3b8;
+  font-size: 0.65rem;
+}
+
+.add-parking-preview__heading strong {
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.add-parking-preview__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 10px;
+
+  border-radius: 999px;
+  background: #f0fdf4;
+
+  color: #15803d !important;
+  font-weight: 900;
+}
+
+.add-parking-preview__status i {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+.add-parking-preview__card {
+  display: grid;
+  grid-template-columns:
+    150px minmax(0, 1fr);
+  gap: 16px;
+
+  padding: 16px;
+}
+
+.add-parking-preview__image {
+  height: 115px;
+  overflow: hidden;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 15px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ede9fe,
+      #cffafe
+    );
+
+  font-size: 2rem;
+}
+
+.add-parking-preview__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.add-parking-preview__content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.add-parking-preview__content > span {
+  color: #7c3aed;
+  font-size: 0.67rem;
+  font-weight: 900;
+}
+
+.add-parking-preview__content h3 {
+  overflow: hidden;
+  margin: 4px 0 10px;
+
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 950;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.add-parking-preview__content div {
+  display: flex;
+  flex-direction: column;
+}
+
+.add-parking-preview__content strong {
+  color: #16a34a;
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
+.add-parking-preview__content small {
+  color: #94a3b8;
+  font-size: 0.65rem;
+}
+
+.add-parking-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 13px;
+
+  padding: 21px 30px;
+
+  border-top: 1px solid #edf2f7;
+  background: #fbfdff;
+}
+
+.add-parking-button {
+  min-height: 48px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  padding: 10px 21px;
+
+  border: none;
+  border-radius: 14px;
+
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 950;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.add-parking-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.add-parking-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.add-parking-button--secondary {
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #475569;
+}
+
+.add-parking-button--primary {
+  min-width: 140px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c3aed,
+      #2563eb
+    );
+
+  color: white;
+
+  box-shadow:
+    0 12px 27px
+      rgba(37, 99, 235, 0.22);
+}
+
+.add-parking-button--publish {
+  min-width: 165px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #16a34a,
+      #10b981
+    );
+
+  color: white;
+
+  box-shadow:
+    0 12px 27px
+      rgba(22, 163, 74, 0.22);
+}
+
+.add-parking-spinner {
+  width: 17px;
+  height: 17px;
+
+  border: 2px solid
+    rgba(255, 255, 255, 0.35);
+  border-top-color: white;
+  border-radius: 50%;
+
+  animation:
+    addParkingSpin 0.75s linear
+    infinite;
+}
+
+@keyframes addParkingSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 960px) {
+  .add-parking-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .add-parking-sidebar {
+    position: static;
+  }
+
+  .add-parking-progress-card {
+    padding: 18px;
+  }
+
+  .add-parking-steps {
+    display: grid;
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+  .add-parking-step {
+    align-items: center;
+    flex-direction: column;
+
+    text-align: center;
+  }
+
+  .add-parking-step__text small {
+    white-space: normal;
+  }
+
+  .add-parking-tip {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .add-parking-hero {
+    padding-bottom: 90px;
+  }
+
+  .add-parking-hero__content {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .add-parking-hero__badge {
+    width: fit-content;
+  }
+
+  .add-parking-fields-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .add-parking-image-guide {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .add-parking-hero {
+    padding-top: 20px;
+  }
+
+  .add-parking-hero h1 {
+    font-size: 2rem;
+  }
+
+  .add-parking-content {
+    margin-top: -48px;
+  }
+
+  .add-parking-progress-card,
+  .add-parking-form-card {
+    border-radius: 22px;
+  }
+
+  .add-parking-progress-card__heading {
+    margin-bottom: 12px;
+  }
+
+  .add-parking-steps {
+    gap: 5px;
+  }
+
+  .add-parking-step {
+    padding: 8px 4px;
+  }
+
+  .add-parking-step__number {
+    width: 32px;
+    height: 32px;
+  }
+
+  .add-parking-step__text strong {
+    font-size: 0.65rem;
+  }
+
+  .add-parking-step__text small {
+    display: none;
+  }
+
+  .add-parking-form-header,
+  .add-parking-step-content {
+    padding: 22px 18px;
+  }
+
+  .add-parking-actions {
+    padding: 17px 18px;
+  }
+
+  .add-parking-button {
+    flex: 1;
+    padding-inline: 12px;
+  }
+
+  .add-parking-preview__card {
+    grid-template-columns: 1fr;
+  }
+
+  .add-parking-preview__image {
+    height: 180px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .add-parking-progress span,
+  .add-parking-step,
+  .add-parking-back,
+  .add-parking-button,
+  .add-parking-spinner {
+    transition: none;
+    animation: none;
+  }
+}

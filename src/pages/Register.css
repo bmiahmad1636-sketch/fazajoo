@@ -1,0 +1,607 @@
+.register-page {
+  --register-primary: #5b4ff5;
+  --register-primary-dark: #4338ca;
+  --register-text: #19172b;
+  --register-muted: #77758a;
+  --register-border: rgba(91, 79, 245, 0.16);
+
+  position: relative;
+  min-height: calc(100vh - 72px);
+  padding: 48px 20px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(91, 79, 245, 0.13),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(6, 182, 212, 0.1),
+      transparent 34%
+    ),
+    #f7f7fc;
+  color: var(--register-text);
+}
+
+.register-decoration {
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.register-decoration-one {
+  width: 330px;
+  height: 330px;
+  top: -150px;
+  right: -80px;
+  background: rgba(91, 79, 245, 0.1);
+}
+
+.register-decoration-two {
+  width: 270px;
+  height: 270px;
+  bottom: -120px;
+  left: -80px;
+  background: rgba(6, 182, 212, 0.09);
+}
+
+.register-shell {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 1080px);
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 34px;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 30px 80px rgba(42, 37, 99, 0.13);
+  backdrop-filter: blur(24px);
+}
+
+.register-intro {
+  position: relative;
+  min-height: 720px;
+  padding: 38px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(
+      circle at 20% 10%,
+      rgba(255, 255, 255, 0.19),
+      transparent 28%
+    ),
+    linear-gradient(
+      145deg,
+      #6357f8 0%,
+      #493fcf 52%,
+      #342b9e 100%
+    );
+}
+
+.register-intro::after {
+  content: "";
+  position: absolute;
+  width: 290px;
+  height: 290px;
+  bottom: -145px;
+  left: -110px;
+  border: 1px solid rgba(255, 255, 255, 0.19);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 45px rgba(255, 255, 255, 0.04),
+    0 0 0 90px rgba(255, 255, 255, 0.025);
+}
+
+.register-brand {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.register-brand-logo {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.17);
+  font-size: 23px;
+  font-weight: 900;
+  backdrop-filter: blur(10px);
+}
+
+.register-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.register-brand-text strong {
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.register-brand-text small {
+  color: rgba(255, 255, 255, 0.69);
+  font-size: 12px;
+}
+
+.register-intro-content {
+  position: relative;
+  z-index: 1;
+  margin: auto 0;
+}
+
+.register-intro-badge {
+  display: inline-flex;
+  padding: 8px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.19);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.11);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.register-intro h1 {
+  margin: 22px 0 16px;
+  font-size: clamp(32px, 4vw, 47px);
+  line-height: 1.45;
+  letter-spacing: -1.6px;
+}
+
+.register-intro h1 span {
+  display: block;
+  color: #bff5ff;
+}
+
+.register-intro-content > p {
+  max-width: 390px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 15px;
+  line-height: 2;
+}
+
+.register-benefits {
+  margin-top: 32px;
+  display: grid;
+  gap: 14px;
+}
+
+.register-benefit {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.register-benefit > span {
+  width: 27px;
+  height: 27px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #bff5ff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.register-benefit p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 14px;
+}
+
+.register-intro-footer {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.59);
+  font-size: 12px;
+}
+
+.register-card {
+  padding: 48px clamp(30px, 6vw, 74px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.87);
+}
+
+.register-card-header {
+  margin-bottom: 24px;
+}
+
+.register-card-header > span {
+  color: var(--register-primary);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.register-card-header h2 {
+  margin: 8px 0 8px;
+  font-size: clamp(28px, 3vw, 36px);
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+
+.register-card-header p {
+  margin: 0;
+  color: var(--register-muted);
+  line-height: 1.9;
+}
+
+.register-alert {
+  margin-bottom: 19px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.register-alert > span {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-weight: 900;
+}
+
+.register-alert p {
+  margin: 0;
+}
+
+.register-alert-error {
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  background: rgba(239, 68, 68, 0.08);
+  color: #b42318;
+}
+
+.register-alert-error > span {
+  background: rgba(239, 68, 68, 0.13);
+}
+
+.register-form {
+  display: grid;
+  gap: 18px;
+}
+
+.register-field {
+  display: grid;
+  gap: 8px;
+}
+
+.register-field > label {
+  color: #343145;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.register-field > input,
+.register-phone-input,
+.register-password-input {
+  min-height: 55px;
+  border: 1px solid var(--register-border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 7px 22px rgba(42, 37, 99, 0.045);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.register-field > input {
+  width: 100%;
+  padding: 0 17px;
+  outline: 0;
+  color: var(--register-text);
+  font-family: inherit;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.register-field > input:focus,
+.register-phone-input:focus-within,
+.register-password-input:focus-within {
+  border-color: rgba(91, 79, 245, 0.65);
+  box-shadow: 0 0 0 4px rgba(91, 79, 245, 0.1);
+  transform: translateY(-1px);
+}
+
+.register-field input::placeholder {
+  color: #bbb9c7;
+}
+
+.register-field input:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.register-field > small {
+  color: #9694a5;
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.register-phone-input {
+  display: flex;
+  align-items: center;
+  direction: ltr;
+  overflow: hidden;
+}
+
+.register-phone-input > span {
+  height: 30px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid #ecebf3;
+  color: var(--register-primary);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.register-phone-input input {
+  width: 100%;
+  height: 53px;
+  padding: 0 17px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--register-text);
+  font-family: inherit;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.register-password-input {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.register-password-input input {
+  width: 100%;
+  height: 53px;
+  padding: 0 17px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--register-text);
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.register-password-input button {
+  min-width: 65px;
+  height: 38px;
+  margin-left: 8px;
+  border: 0;
+  border-radius: 11px;
+  background: rgba(91, 79, 245, 0.08);
+  color: var(--register-primary);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.register-password-input button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.register-password-strength {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.register-strength-bars {
+  width: 105px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.register-strength-bars span {
+  height: 4px;
+  border-radius: 999px;
+  background: #e9e8f1;
+  transition: background 0.2s ease;
+}
+
+.register-strength-bars span.active {
+  background: var(--register-primary);
+}
+
+.register-password-strength small {
+  color: #9694a5;
+  font-size: 11px;
+}
+
+.register-rules {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  color: #77758a;
+  font-size: 12px;
+  line-height: 1.8;
+  cursor: pointer;
+}
+
+.register-rules input {
+  width: 17px;
+  height: 17px;
+  margin-top: 3px;
+  flex: 0 0 auto;
+  accent-color: var(--register-primary);
+  cursor: pointer;
+}
+
+.register-submit-button {
+  min-height: 56px;
+  padding: 0 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  border: 0;
+  border-radius: 17px;
+  background: linear-gradient(
+    135deg,
+    var(--register-primary),
+    var(--register-primary-dark)
+  );
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 13px 28px rgba(91, 79, 245, 0.23);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.register-submit-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 17px 33px rgba(91, 79, 245, 0.3);
+}
+
+.register-submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.register-submit-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
+}
+
+.register-spinner {
+  width: 19px;
+  height: 19px;
+  border: 2px solid rgba(255, 255, 255, 0.36);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: register-spin 0.75s linear infinite;
+}
+
+.register-login-link {
+  margin-top: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #858293;
+  font-size: 12px;
+}
+
+.register-login-link a {
+  color: var(--register-primary);
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.register-login-link a:hover {
+  text-decoration: underline;
+}
+
+@keyframes register-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 850px) {
+  .register-page {
+    padding: 24px 16px;
+  }
+
+  .register-shell {
+    max-width: 590px;
+    grid-template-columns: 1fr;
+  }
+
+  .register-intro {
+    min-height: auto;
+    padding: 28px;
+  }
+
+  .register-intro-content {
+    margin: 42px 0 22px;
+  }
+
+  .register-intro h1 {
+    font-size: 34px;
+  }
+
+  .register-benefits,
+  .register-intro-footer {
+    display: none;
+  }
+
+  .register-card {
+    padding: 42px 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-page {
+    min-height: calc(100vh - 64px);
+    padding: 0;
+    place-items: stretch;
+  }
+
+  .register-shell {
+    min-height: 100vh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .register-intro {
+    padding: 22px;
+  }
+
+  .register-intro-content {
+    margin: 30px 0 10px;
+  }
+
+  .register-intro h1 {
+    margin: 16px 0 10px;
+    font-size: 28px;
+  }
+
+  .register-intro-content > p {
+    font-size: 13px;
+  }
+
+  .register-card {
+    padding: 34px 21px 42px;
+    border-radius: 28px 28px 0 0;
+  }
+
+  .register-card-header h2 {
+    font-size: 27px;
+  }
+}

@@ -1,9 +1,656 @@
-function App() {
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
+
+import {
+  onAuthStateChanged,
+} from "firebase/auth";
+
+import {
+  collection,
+  onSnapshot,
+  query,
+} from "firebase/firestore";
+
+import Header from "./components/Header";
+import Hero from "./components/Hero";
+import SearchFilter from "./components/SearchFilter";
+
+import Parking from "./pages/parking";
+import ParkingDetails from "./pages/ParkingDetails";
+import AddParking from "./pages/AddParking";
+import EditParking from "./pages/EditParking";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import MyParkings from "./pages/MyParkings";
+import Favorites from "./pages/Favorites";
+import Chat from "./pages/Chat";
+import Inbox from "./pages/Inbox";
+
+import parkingData from "./data/parkingData";
+
+import { auth, db } from "./firebase";
+
+function convertToNumber(value) {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return 0;
+  }
+
+  if (typeof value === "number") {
+    return value;
+  }
+
+  const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
+  const arabicDigits = "٠١٢٣٤٥٦٧٨٩";
+
+  const normalizedValue = String(value)
+    .replace(/[۰-۹]/g, (digit) =>
+      persianDigits.indexOf(digit)
+    )
+    .replace(/[٠-٩]/g, (digit) =>
+      arabicDigits.indexOf(digit)
+    )
+    .replace(/,/g, "")
+    .replace(/٬/g, "");
+
+  const numbers =
+    normalizedValue.match(/\d+(\.\d+)?/g);
+
+  if (!numbers) {
+    return 0;
+  }
+
+  return Number(numbers.join(""));
+}
+
+function normalizeFirebaseParking(document) {
+  const data = document.data();
+
+  return {
+    id: document.id,
+    ...data,
+
+    imageUrl:
+      data.imageUrl ||
+      data.image ||
+      data.images?.[0] ||
+      "",
+
+    createdAt:
+      data.createdAt?.toDate?.() ||
+      data.createdAt ||
+      null,
+  };
+}
+
+function mergeParkings(
+  defaultParkings,
+  firebaseParkings
+) {
+  const allParkings = [
+    ...defaultParkings,
+    ...firebaseParkings,
+  ];
+
+  return [
+    ...new Map(
+      allParkings.map((parking) => [
+        String(parking.id),
+        parking,
+      ])
+    ).values(),
+  ];
+}
+
+function Home({
+  parkings,
+  parkingsLoading,
+  parkingsError,
+}) {
+  const [searchText, setSearchText] =
+    useState("");
+
+  const [selectedCity, setSelectedCity] =
+    useState("");
+
+  const [minPrice, setMinPrice] =
+    useState("");
+
+  const [maxPrice, setMaxPrice] =
+    useState("");
+
+  const [minArea, setMinArea] =
+    useState("");
+
+  const [maxArea, setMaxArea] =
+    useState("");
+
+  const filteredParkings = useMemo(() => {
+    const normalizedSearch = searchText
+      .trim()
+      .toLowerCase();
+
+    return parkings.filter((parking) => {
+      const title = String(
+        parking.title || ""
+      ).toLowerCase();
+
+      const description = String(
+        parking.description || ""
+      ).toLowerCase();
+
+      const city = String(
+        parking.city || ""
+      );
+
+      const parkingPrice =
+        convertToNumber(parking.price);
+
+      const parkingArea =
+        convertToNumber(parking.area);
+
+      const matchesSearch =
+        !normalizedSearch ||
+        title.includes(normalizedSearch) ||
+        description.includes(
+          normalizedSearch
+        ) ||
+        city
+          .toLowerCase()
+          .includes(normalizedSearch);
+
+      const matchesCity =
+        !selectedCity ||
+        city === selectedCity;
+
+      const matchesMinPrice =
+        !minPrice ||
+        parkingPrice >= Number(minPrice);
+
+      const matchesMaxPrice =
+        !maxPrice ||
+        parkingPrice <= Number(maxPrice);
+
+      const matchesMinArea =
+        !minArea ||
+        parkingArea >= Number(minArea);
+
+      const matchesMaxArea =
+        !maxArea ||
+        parkingArea <= Number(maxArea);
+
+      return (
+        matchesSearch &&
+        matchesCity &&
+        matchesMinPrice &&
+        matchesMaxPrice &&
+        matchesMinArea &&
+        matchesMaxArea
+      );
+    });
+  }, [
+    parkings,
+    searchText,
+    selectedCity,
+    minPrice,
+    maxPrice,
+    minArea,
+    maxArea,
+  ]);
+
   return (
-    <div>
-      <h1>فضاجو</h1>
-      <p>به فضاجو خوش آمدید</p>
-    </div>
+    <>
+      <Hero />
+
+      <SearchFilter
+        parkings={parkings}
+        searchText={searchText}
+        setSearchText={setSearchText}
+        selectedCity={selectedCity}
+        setSelectedCity={setSelectedCity}
+        minPrice={minPrice}
+        setMinPrice={setMinPrice}
+        maxPrice={maxPrice}
+        setMaxPrice={setMaxPrice}
+        minArea={minArea}
+        setMinArea={setMinArea}
+        maxArea={maxArea}
+        setMaxArea={setMaxArea}
+      />
+
+      {parkingsError && (
+        <div
+          style={{
+            maxWidth: "1100px",
+            margin: "20px auto",
+            padding: "14px 20px",
+            direction: "rtl",
+            borderRadius: "14px",
+            background: "#fff1f2",
+            border: "1px solid #fecdd3",
+            color: "#be123c",
+          }}
+        >
+          دریافت آگهی‌های آنلاین با مشکل
+          مواجه شد. آگهی‌های پیش‌فرض
+          نمایش داده می‌شوند.
+        </div>
+      )}
+
+      <div
+        style={{
+          maxWidth: "1100px",
+          margin: "0 auto 15px",
+          padding: "0 20px",
+          direction: "rtl",
+          color: "#4b5563",
+        }}
+      >
+        {parkingsLoading
+          ? "در حال دریافت آگهی‌ها..."
+          : `تعداد نتایج: ${filteredParkings.length}`}
+      </div>
+
+      {parkingsLoading ? (
+        <div
+          style={{
+            maxWidth: "1100px",
+            margin: "30px auto",
+            padding: "50px 20px",
+            textAlign: "center",
+            direction: "rtl",
+            color: "#6b7280",
+          }}
+        >
+          در حال دریافت آگهی‌ها...
+        </div>
+      ) : filteredParkings.length > 0 ? (
+        <Parking
+          parkings={filteredParkings}
+        />
+      ) : (
+        <div
+          style={{
+            maxWidth: "1100px",
+            margin: "30px auto",
+            padding: "40px 20px",
+            textAlign: "center",
+            direction: "rtl",
+            backgroundColor: "#f9fafb",
+            borderRadius: "16px",
+            color: "#6b7280",
+            fontSize: "18px",
+          }}
+        >
+          آگهی‌ای با این مشخصات پیدا
+          نشد.
+        </div>
+      )}
+    </>
+  );
+}
+
+function ProtectedRoute({
+  user,
+  authLoading,
+  children,
+}) {
+  if (authLoading) {
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          padding: "50px",
+          fontSize: "20px",
+          direction: "rtl",
+        }}
+      >
+        در حال بررسی حساب کاربری...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
+  }
+
+  return children;
+}
+
+function App() {
+  const [parkings, setParkings] =
+    useState(parkingData);
+
+  const [parkingsLoading, setParkingsLoading] =
+    useState(true);
+
+  const [parkingsError, setParkingsError] =
+    useState("");
+
+  const [user, setUser] =
+    useState(null);
+
+  const [authLoading, setAuthLoading] =
+    useState(true);
+
+  useEffect(() => {
+    const unsubscribe =
+      onAuthStateChanged(
+        auth,
+        (currentUser) => {
+          setUser(currentUser);
+          setAuthLoading(false);
+        },
+        (error) => {
+          console.error(
+            "Authentication listener error:",
+            error
+          );
+
+          setUser(null);
+          setAuthLoading(false);
+        }
+      );
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    setParkingsLoading(true);
+    setParkingsError("");
+
+    const spacesQuery = query(
+      collection(db, "spaces")
+    );
+
+    const unsubscribe = onSnapshot(
+      spacesQuery,
+      (snapshot) => {
+        const firebaseParkings =
+          snapshot.docs.map(
+            normalizeFirebaseParking
+          );
+
+        const mergedParkings =
+          mergeParkings(
+            parkingData,
+            firebaseParkings
+          );
+
+        setParkings(mergedParkings);
+        setParkingsLoading(false);
+        setParkingsError("");
+      },
+      (error) => {
+        console.error(
+          "Load parkings error:",
+          error
+        );
+
+        setParkings(parkingData);
+
+        setParkingsError(
+          "دریافت آگهی‌های Firebase انجام نشد."
+        );
+
+        setParkingsLoading(false);
+      }
+    );
+
+    return unsubscribe;
+  }, []);
+
+  const deleteParking = (id) => {
+    setParkings((currentParkings) =>
+      currentParkings.filter(
+        (parking) =>
+          String(parking.id) !== String(id)
+      )
+    );
+  };
+
+  const updateParkingInState = (
+    id,
+    updatedData
+  ) => {
+    setParkings((currentParkings) =>
+      currentParkings.map((parking) =>
+        String(parking.id) === String(id)
+          ? {
+              ...parking,
+              ...updatedData,
+            }
+          : parking
+      )
+    );
+  };
+
+  return (
+    <>
+      <Header />
+
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Home
+              parkings={parkings}
+              parkingsLoading={
+                parkingsLoading
+              }
+              parkingsError={
+                parkingsError
+              }
+            />
+          }
+        />
+
+        <Route
+          path="/parking"
+          element={
+            parkingsLoading ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "50px",
+                  direction: "rtl",
+                }}
+              >
+                در حال دریافت
+                آگهی‌ها...
+              </div>
+            ) : (
+              <Parking
+                parkings={parkings}
+              />
+            )
+          }
+        />
+
+        <Route
+          path="/parking/:id"
+          element={
+            <ParkingDetails
+              parkings={parkings}
+              deleteParking={
+                deleteParking
+              }
+            />
+          }
+        />
+
+        <Route
+          path="/edit-parking/:id"
+          element={
+            <ProtectedRoute
+              user={user}
+              authLoading={
+                authLoading
+              }
+            >
+              <EditParking
+                parkings={parkings}
+                updateParkingInState={
+                  updateParkingInState
+                }
+              />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/add-parking"
+          element={
+            <ProtectedRoute
+              user={user}
+              authLoading={
+                authLoading
+              }
+            >
+              <AddParking />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/my-parkings"
+          element={
+            <ProtectedRoute
+              user={user}
+              authLoading={
+                authLoading
+              }
+            >
+              <MyParkings />
+            </ProtectedRoute>
+          }
+        />
+
+
+        <Route
+          path="/favorites"
+          element={
+            <ProtectedRoute
+              user={user}
+              authLoading={
+                authLoading
+              }
+            >
+              <Favorites />
+            </ProtectedRoute>
+          }
+        />
+
+
+        <Route
+          path="/chat/:parkingId"
+          element={
+            <ProtectedRoute
+              user={user}
+              authLoading={
+                authLoading
+              }
+            >
+              <Chat
+                parkings={parkings}
+              />
+            </ProtectedRoute>
+          }
+        />
+
+
+        <Route
+          path="/inbox"
+          element={
+            <ProtectedRoute
+              user={user}
+              authLoading={
+                authLoading
+              }
+            >
+              <Inbox />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/register"
+          element={
+            authLoading ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "50px",
+                  direction: "rtl",
+                }}
+              >
+                در حال بررسی حساب
+                کاربری...
+              </div>
+            ) : user ? (
+              <Navigate
+                to="/"
+                replace
+              />
+            ) : (
+              <Register />
+            )
+          }
+        />
+
+        <Route
+          path="/login"
+          element={
+            authLoading ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "50px",
+                  direction: "rtl",
+                }}
+              >
+                در حال بررسی حساب
+                کاربری...
+              </div>
+            ) : user ? (
+              <Navigate
+                to="/"
+                replace
+              />
+            ) : (
+              <Login />
+            )
+          }
+        />
+
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/"
+              replace
+            />
+          }
+        />
+      </Routes>
+    </>
   );
 }
 
