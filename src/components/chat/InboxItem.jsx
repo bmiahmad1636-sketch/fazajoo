@@ -7,11 +7,21 @@ function InboxItem({
   otherUserName,
   otherUserRole,
   formattedTime,
+  unreadCount = 0,
+  isUnread = false,
+  isLastMessageMine = false,
 }) {
   return (
     <Link
       to={`/chat/${chat.parkingId}?conversationId=${chat.id}`}
-      className="inbox-item"
+      className={[
+        "inbox-item",
+        isUnread
+          ? "inbox-item--unread"
+          : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       <div className="inbox-item__image">
         {chat.parkingImageUrl ? (
@@ -23,7 +33,16 @@ function InboxItem({
             }
           />
         ) : (
-          <span>🚘</span>
+          <span>
+            🚘
+          </span>
+        )}
+
+        {isUnread && (
+          <span
+            className="inbox-item__unread-dot"
+            aria-hidden="true"
+          />
         )}
       </div>
 
@@ -39,9 +58,24 @@ function InboxItem({
             </strong>
           </div>
 
-          <time>
-            {formattedTime}
-          </time>
+          <div className="inbox-item__meta">
+            <time>
+              {formattedTime}
+            </time>
+
+            {unreadCount > 0 && (
+              <span
+                className="inbox-item__unread-count"
+                aria-label={`${unreadCount} پیام خوانده‌نشده`}
+              >
+                {unreadCount > 99
+                  ? "+۹۹"
+                  : unreadCount.toLocaleString(
+                      "fa-IR"
+                    )}
+              </span>
+            )}
+          </div>
         </div>
 
         <h3>
@@ -49,10 +83,18 @@ function InboxItem({
             "آگهی پارکینگ"}
         </h3>
 
-        <p>
-          {chat.lastMessage ||
-            "هنوز پیامی در این گفتگو ارسال نشده است."}
-        </p>
+        <div className="inbox-item__message-row">
+          {isLastMessageMine && (
+            <span className="inbox-item__sent-label">
+              شما:
+            </span>
+          )}
+
+          <p>
+            {chat.lastMessage ||
+              "هنوز پیامی در این گفتگو ارسال نشده است."}
+          </p>
+        </div>
 
         <div className="inbox-item__footer">
           <span>
@@ -63,7 +105,10 @@ function InboxItem({
 
           <strong>
             ورود به گفتگو
-            <span>←</span>
+
+            <span aria-hidden="true">
+              ←
+            </span>
           </strong>
         </div>
       </div>

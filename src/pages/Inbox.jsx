@@ -20,8 +20,10 @@ import {
 } from "firebase/auth";
 
 import { auth, db } from "../firebase";
-import "./Inbox.css";
+
 import InboxItem from "../components/chat/InboxItem";
+
+import "./Inbox.css";
 
 function Inbox() {
   const [user, setUser] =
@@ -37,6 +39,9 @@ function Inbox() {
     useState(true);
 
   const [chatsError, setChatsError] =
+    useState("");
+
+  const [searchText, setSearchText] =
     useState("");
 
   useEffect(() => {
@@ -108,7 +113,9 @@ function Inbox() {
             );
 
           setChats(chatItems);
+
           setChatsLoading(false);
+
           setChatsError("");
         },
         (error) => {
@@ -118,6 +125,7 @@ function Inbox() {
           );
 
           setChats([]);
+
           setChatsLoading(false);
 
           setChatsError(
@@ -132,23 +140,6 @@ function Inbox() {
     user,
   ]);
 
-  const sortedChats =
-    useMemo(() => {
-      return [...chats].sort(
-        (firstChat, secondChat) => {
-          const firstTime =
-            firstChat.updatedAt
-              ?.toMillis?.() || 0;
-
-          const secondTime =
-            secondChat.updatedAt
-              ?.toMillis?.() || 0;
-
-          return secondTime - firstTime;
-        }
-      );
-    }, [chats]);
-
   const getUserTitle = () => {
     if (!user?.email) {
       return "کاربر فضاجو";
@@ -159,19 +150,27 @@ function Inbox() {
       .trim();
   };
 
-  const getOtherUserName = (
+  const getOtherUserId = (
     chat
   ) => {
     if (!user) {
-      return "کاربر فضاجو";
+      return "";
     }
 
-    const otherUserId =
+    return (
       chat.participants?.find(
         (participantId) =>
           participantId !==
           user.uid
-      );
+      ) || ""
+    );
+  };
+
+  const getOtherUserName = (
+    chat
+  ) => {
+    const otherUserId =
+      getOtherUserId(chat);
 
     if (!otherUserId) {
       return "کاربر فضاجو";
@@ -201,6 +200,20 @@ function Inbox() {
     return "آگهی‌دهنده";
   };
 
+  const getUnreadCount = (
+    chat
+  ) => {
+    if (!user) {
+      return 0;
+    }
+
+    return Number(
+      chat.unreadCounts?.[
+        user.uid
+      ] || 0
+    );
+  };
+
   const formatChatTime = (
     updatedAt
   ) => {
@@ -213,16 +226,56 @@ function Inbox() {
 
     const now = new Date();
 
-    const isToday =
-      chatDate.toDateString() ===
-      now.toDateString();
+    const todayStart =
+      new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate()
+      );
 
-    if (isToday) {
+    const chatDayStart =
+      new Date(
+        chatDate.getFullYear(),
+        chatDate.getMonth(),
+        chatDate.getDate()
+      );
+
+    const differenceInDays =
+      Math.round(
+        (
+          todayStart -
+          chatDayStart
+        ) /
+          (
+            1000 *
+            60 *
+            60 *
+            24
+          )
+      );
+
+    if (differenceInDays === 0) {
       return new Intl.DateTimeFormat(
         "fa-IR",
         {
           hour: "2-digit",
           minute: "2-digit",
+        }
+      ).format(chatDate);
+    }
+
+    if (differenceInDays === 1) {
+      return "دیروز";
+    }
+
+    if (
+      differenceInDays > 1 &&
+      differenceInDays < 7
+    ) {
+      return new Intl.DateTimeFormat(
+        "fa-IR",
+        {
+          weekday: "long",
         }
       ).format(chatDate);
     }
@@ -236,6 +289,87 @@ function Inbox() {
       }
     ).format(chatDate);
   };
+
+  const sortedChats =
+    useMemo(() => {
+      return [...chats].sort(
+        (
+          firstChat,
+          secondChat
+        ) => {
+          const firstTime =
+            firstChat.updatedAt
+              ?.toMillis?.() || 0;
+
+          const secondTime =
+            secondChat.updatedAt
+              ?.toMillis?.() || 0;
+
+          return (
+            secondTime -
+            firstTime
+          );
+        }
+      );
+    }, [chats]);
+
+  const filteredChats =
+    useMemo(() => {
+      const normalizedSearch =
+        searchText
+          .trim()
+          .toLowerCase();
+
+      if (!normalizedSearch) {
+        return sortedChats;
+      }
+
+      return sortedChats.filter(
+        (chat) => {
+          const searchableValues = [
+            chat.parkingTitle,
+            chat.parkingCity,
+            chat.lastMessage,
+            getOtherUserName(chat),
+            getOtherUserRole(chat),
+          ];
+
+          return searchableValues
+            .filter(Boolean)
+            .some((value) =>
+              String(value)
+                .toLowerCase()
+                .includes(
+                  normalizedSearch
+                )
+            );
+        }
+      );
+    }, [
+      sortedChats,
+      searchText,
+      user,
+    ]);
+
+  const totalUnreadCount =
+    useMemo(() => {
+      if (!user) {
+        return 0;
+      }
+
+      return chats.reduce(
+        (
+          total,
+          chat
+        ) =>
+          total +
+          getUnreadCount(chat),
+        0
+      );
+    }, [
+      chats,
+      user,
+    ]);
 
   if (
     authLoading ||
@@ -263,7 +397,9 @@ function Inbox() {
         <section className="inbox-content">
           <div className="container">
             <div className="inbox-loading">
-              <span>💬</span>
+              <span>
+                💬
+              </span>
 
               <strong>
                 کمی صبر کنید...
@@ -321,7 +457,10 @@ function Inbox() {
                 className="inbox-empty__button"
               >
                 ورود به حساب
-                <span>←</span>
+
+                <span>
+                  ←
+                </span>
               </Link>
             </div>
           </div>
@@ -334,6 +473,7 @@ function Inbox() {
     <main className="inbox-page">
       <section className="inbox-hero">
         <div className="inbox-hero__shape inbox-hero__shape--one" />
+
         <div className="inbox-hero__shape inbox-hero__shape--two" />
 
         <div className="container inbox-hero__content">
@@ -353,16 +493,30 @@ function Inbox() {
             </p>
           </div>
 
-          <div className="inbox-hero__count">
-            <strong>
-              {sortedChats.length.toLocaleString(
-                "fa-IR"
-              )}
-            </strong>
+          <div className="inbox-hero__stats">
+            <div className="inbox-hero__count">
+              <strong>
+                {sortedChats.length.toLocaleString(
+                  "fa-IR"
+                )}
+              </strong>
 
-            <span>
-              گفتگوی فعال
-            </span>
+              <span>
+                گفتگوی فعال
+              </span>
+            </div>
+
+            <div className="inbox-hero__count inbox-hero__count--unread">
+              <strong>
+                {totalUnreadCount.toLocaleString(
+                  "fa-IR"
+                )}
+              </strong>
+
+              <span>
+                پیام جدید
+              </span>
+            </div>
           </div>
         </div>
       </section>
@@ -372,7 +526,8 @@ function Inbox() {
           <div className="inbox-heading">
             <div>
               <span>
-                حساب {getUserTitle()}
+                حساب{" "}
+                {getUserTitle()}
               </span>
 
               <h2>
@@ -385,13 +540,72 @@ function Inbox() {
               className="inbox-heading__link"
             >
               مشاهده آگهی‌ها
-              <span>←</span>
+
+              <span>
+                ←
+              </span>
             </Link>
+          </div>
+
+          <div className="inbox-toolbar">
+            <div className="inbox-search">
+              <span
+                className="inbox-search__icon"
+                aria-hidden="true"
+              >
+                🔍
+              </span>
+
+              <input
+                type="text"
+                value={searchText}
+                onChange={(event) =>
+                  setSearchText(
+                    event.target.value
+                  )
+                }
+                placeholder="جستجو در گفتگوها، آگهی یا پیام‌ها..."
+                aria-label="جستجو در گفتگوها"
+              />
+
+              {searchText && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSearchText("")
+                  }
+                  className="inbox-search__clear"
+                  aria-label="پاک کردن جستجو"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+
+            <div className="inbox-toolbar__info">
+              <span>
+                {filteredChats.length.toLocaleString(
+                  "fa-IR"
+                )}{" "}
+                گفتگو
+              </span>
+
+              {totalUnreadCount > 0 && (
+                <strong>
+                  {totalUnreadCount.toLocaleString(
+                    "fa-IR"
+                  )}{" "}
+                  پیام خوانده‌نشده
+                </strong>
+              )}
+            </div>
           </div>
 
           {chatsError && (
             <div className="inbox-error">
-              <span>⚠</span>
+              <span>
+                ⚠
+              </span>
 
               <p>
                 {chatsError}
@@ -399,84 +613,7 @@ function Inbox() {
             </div>
           )}
 
-          {sortedChats.length > 0 ? (
-            <div className="inbox-list">
-              {sortedChats.map(
-                (chat) => (
-                  <Link
-                    key={chat.id}
-                    to={`/chat/${chat.parkingId}?conversationId=${chat.id}`}
-                    className="inbox-item"
-                  >
-                    <div className="inbox-item__image">
-                      {chat.parkingImageUrl ? (
-                        <img
-                          src={
-                            chat.parkingImageUrl
-                          }
-                          alt={
-                            chat.parkingTitle ||
-                            "تصویر آگهی"
-                          }
-                        />
-                      ) : (
-                        <span>
-                          🚘
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="inbox-item__body">
-                      <div className="inbox-item__top">
-                        <div>
-                          <span className="inbox-item__role">
-                            {getOtherUserRole(
-                              chat
-                            )}
-                          </span>
-
-                          <strong>
-                            {getOtherUserName(
-                              chat
-                            )}
-                          </strong>
-                        </div>
-
-                        <time>
-                          {formatChatTime(
-                            chat.updatedAt
-                          )}
-                        </time>
-                      </div>
-
-                      <h3>
-                        {chat.parkingTitle ||
-                          "آگهی پارکینگ"}
-                      </h3>
-
-                      <p>
-                        {chat.lastMessage ||
-                          "هنوز پیامی در این گفتگو ارسال نشده است."}
-                      </p>
-
-                      <div className="inbox-item__footer">
-                        <span>
-                          📍{" "}
-                          {chat.parkingCity ||
-                            "شهر ثبت نشده"}
-                        </span>
-
-                        <strong>
-                          ورود به گفتگو
-                          <span>←</span>
-                        </strong>
-                      </div>
-                    </div>
-                  </Link>
-                )
-              )}
-            </div>
-          ) : (
+          {sortedChats.length === 0 ? (
             <div className="inbox-empty">
               <div className="inbox-empty__icon">
                 💬
@@ -487,14 +624,15 @@ function Inbox() {
               </span>
 
               <h2>
-                صندوق پیام‌های شما خالی است
+                صندوق پیام‌های شما
+                خالی است
               </h2>
 
               <p>
-                از صفحه جزئیات یک آگهی،
-                گزینه «ارسال پیام به
-                آگهی‌دهنده» را انتخاب
-                کنید.
+                از صفحه جزئیات یک
+                آگهی، گزینه «ارسال
+                پیام به آگهی‌دهنده»
+                را انتخاب کنید.
               </p>
 
               <Link
@@ -502,8 +640,86 @@ function Inbox() {
                 className="inbox-empty__button"
               >
                 مشاهده آگهی‌ها
-                <span>←</span>
+
+                <span>
+                  ←
+                </span>
               </Link>
+            </div>
+          ) : filteredChats.length ===
+            0 ? (
+            <div className="inbox-empty">
+              <div className="inbox-empty__icon">
+                🔍
+              </div>
+
+              <span>
+                نتیجه‌ای پیدا نشد
+              </span>
+
+              <h2>
+                گفتگویی مطابق جستجو
+                وجود ندارد
+              </h2>
+
+              <p>
+                عبارت دیگری جستجو
+                کنید یا فیلتر جستجو
+                را پاک کنید.
+              </p>
+
+              <button
+                type="button"
+                className="inbox-empty__button"
+                onClick={() =>
+                  setSearchText("")
+                }
+              >
+                پاک کردن جستجو
+              </button>
+            </div>
+          ) : (
+            <div className="inbox-list">
+              {filteredChats.map(
+                (chat) => {
+                  const unreadCount =
+                    getUnreadCount(
+                      chat
+                    );
+
+                  return (
+                    <InboxItem
+                      key={chat.id}
+                      chat={chat}
+                      otherUserName={
+                        getOtherUserName(
+                          chat
+                        )
+                      }
+                      otherUserRole={
+                        getOtherUserRole(
+                          chat
+                        )
+                      }
+                      formattedTime={
+                        formatChatTime(
+                          chat.updatedAt
+                        )
+                      }
+                      unreadCount={
+                        unreadCount
+                      }
+                      isUnread={
+                        unreadCount > 0
+                      }
+                      isLastMessageMine={
+                        chat.lastSenderId ===
+                        user.uid
+                      }
+                    />
+                  );
+                }
+              )}
             </div>
           )}
         </div>
