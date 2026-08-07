@@ -30,6 +30,7 @@ import {
 } from "firebase/auth";
 
 import { auth, db } from "../firebase";
+import ChatMessage from "../components/chat/ChatMessage";
 import "./Chat.css";
 
 function Chat({
@@ -348,6 +349,9 @@ function Chat({
             {
               [`unreadCounts.${user.uid}`]:
                 0,
+
+              [`lastReadAt.${user.uid}`]:
+                serverTimestamp(),
             }
           );
         } catch (error) {
@@ -468,6 +472,38 @@ function Chat({
       behavior: "smooth",
     });
   }, [messages]);
+
+  const isMessageRead = (
+    message
+  ) => {
+    if (
+      !recipientId ||
+      message.senderId !== user?.uid
+    ) {
+      return false;
+    }
+
+    const messageTime =
+      message.createdAt
+        ?.toMillis?.();
+
+    const recipientReadTime =
+      chatMeta?.lastReadAt?.[
+        recipientId
+      ]?.toMillis?.();
+
+    if (
+      !messageTime ||
+      !recipientReadTime
+    ) {
+      return false;
+    }
+
+    return (
+      recipientReadTime >=
+      messageTime
+    );
+  };
 
   const getUserTitle = (
     email = ""
@@ -678,19 +714,19 @@ function Chat({
           <>
             {messages.map(
               (message) => (
-                <div
+                <ChatMessage
                   key={message.id}
-                  className={
+                  message={message}
+                  isMine={
                     message.senderId ===
                     user.uid
-                      ? "chat-message chat-message--mine"
-                      : "chat-message"
                   }
-                >
-                  <p>
-                    {message.text}
-                  </p>
-                </div>
+                  isRead={
+                    isMessageRead(
+                      message
+                    )
+                  }
+                />
               )
             )}
 

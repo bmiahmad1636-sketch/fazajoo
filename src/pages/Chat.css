@@ -702,6 +702,58 @@
   color: #a2958d;
 }
 
+
+
+/* =========================
+   MESSAGE META / READ STATUS
+========================= */
+
+.chat-message__meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+
+  margin-top: 5px;
+
+  direction: ltr;
+
+  font-size: 0.62rem;
+  line-height: 1;
+}
+
+.chat-message--mine
+  .chat-message__meta {
+  color: rgba(
+    255,
+    255,
+    255,
+    0.76
+  );
+}
+
+.chat-message--other
+  .chat-message__meta {
+  color: #a2958d;
+}
+
+.chat-message__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 18px;
+
+  font-size: 0.78rem;
+  font-weight: 950;
+  letter-spacing: -3px;
+}
+
+.chat-message--mine
+  .chat-message__status {
+  color: #fff3e8;
+}
+
 /* =========================
    ERROR
 ========================= */
