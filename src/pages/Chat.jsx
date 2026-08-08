@@ -609,164 +609,217 @@ function Chat({
     }
   };  if (authLoading) {
     return (
-      <div className="chat-page">
-        <p>در حال بررسی حساب کاربری...</p>
-      </div>
+      <main className="chat-page">
+        <div className="container">
+          <div className="chat-state-card">
+            <span>💬</span>
+            <h1>در حال آماده‌سازی گفتگو</h1>
+            <p>چند لحظه صبر کنید تا اطلاعات حساب و گفتگو بررسی شود.</p>
+          </div>
+        </div>
+      </main>
     );
   }
 
   if (!user) {
     return (
-      <div className="chat-page">
-        <h2>ورود لازم است</h2>
-
-        <p>
-          برای ارسال پیام ابتدا وارد
-          حساب کاربری شوید.
-        </p>
-
-        <Link to="/login">
-          ورود به حساب
-        </Link>
-      </div>
+      <main className="chat-page">
+        <div className="container">
+          <div className="chat-state-card">
+            <span>🔐</span>
+            <h1>ورود لازم است</h1>
+            <p>برای مشاهده و ارسال پیام ابتدا وارد حساب کاربری خود شوید.</p>
+            <Link to="/login" className="chat-state-card__button">
+              ورود به حساب
+            </Link>
+          </div>
+        </div>
+      </main>
     );
   }
 
   if (!parking) {
     return (
-      <div className="chat-page">
-        <h2>
-          آگهی پیدا نشد.
-        </h2>
-
-        <button
-          type="button"
-          onClick={() =>
-            navigate(-1)
-          }
-        >
-          بازگشت
-        </button>
-      </div>
+      <main className="chat-page">
+        <div className="container">
+          <div className="chat-state-card">
+            <span>🔎</span>
+            <h1>آگهی پیدا نشد</h1>
+            <p>ممکن است آگهی حذف شده باشد یا نشانی آن درست نباشد.</p>
+            <button
+              type="button"
+              className="chat-state-card__button"
+              onClick={() => navigate(-1)}
+            >
+              بازگشت
+            </button>
+          </div>
+        </div>
+      </main>
     );
   }
 
-  if (
-    isOwner &&
-    !requestedConversationId
-  ) {
+  if (isOwner && !requestedConversationId) {
     return (
-      <div className="chat-page">
-        <h2>
-          این آگهی متعلق به شماست.
-        </h2>
-
-        <p>
-          برای پاسخ به متقاضیان،
-          گفتگو را از بخش
-          «گفتگوهای من» باز کنید.
-        </p>
-
-        <button
-          type="button"
-          onClick={() =>
-            navigate(-1)
-          }
-        >
-          بازگشت
-        </button>
-      </div>
+      <main className="chat-page">
+        <div className="container">
+          <div className="chat-state-card">
+            <span>📨</span>
+            <h1>این آگهی متعلق به شماست</h1>
+            <p>
+              برای پاسخ به متقاضیان، گفتگو را از بخش «گفتگوهای من» باز کنید.
+            </p>
+            <Link to="/inbox" className="chat-state-card__button">
+              رفتن به گفتگوهای من
+            </Link>
+          </div>
+        </div>
+      </main>
     );
   }
+
+  const recipientName =
+    chatMeta?.participantNames?.[recipientId] || "کاربر فضاجو";
 
   return (
-    <section className="chat-page">
-      <header className="chat-header">
-        <div>
-          <h2>
-            {isOwner
-              ? "پاسخ به متقاضی"
-              : "پیام به آگهی‌دهنده"}
-          </h2>
+    <main className="chat-page">
+      <section className="chat-hero">
+        <div className="container">
+          <button
+            type="button"
+            className="chat-hero__back"
+            onClick={() => navigate(-1)}
+          >
+            <span>→</span>
+            بازگشت
+          </button>
 
-          <p>
-            {chatMeta?.participantNames?.[
-              recipientId
-            ] ||
-              "کاربر فضاجو"}
-          </p>
+          <div className="chat-hero__content">
+            <div>
+              <span className="chat-hero__eyebrow">گفتگوی امن در فضاجو</span>
+              <h1>{isOwner ? "پاسخ به متقاضی" : "پیام به آگهی‌دهنده"}</h1>
+              <p>
+                درباره همین آگهی گفتگو کنید و برای حفظ امنیت، اطلاعات حساس را
+                فقط در صورت نیاز به اشتراک بگذارید.
+              </p>
+            </div>
+
+            <div className="chat-hero__security">
+              <span>🛡️</span>
+              <div>
+                <strong>گفتگوی مستقیم</strong>
+                <small>بین دو طرف همین آگهی</small>
+              </div>
+            </div>
+          </div>
         </div>
-      </header>
+      </section>
 
-      {chatError && (
-        <p className="chat-error">
-          {chatError}
-        </p>
-      )}
+      <section className="chat-content">
+        <div className="container">
+          <div className="chat-layout">
+            <aside className="chat-ad-card">
+              <div className="chat-ad-card__image">
+                {parking.imageUrl ? (
+                  <img
+                    src={parking.imageUrl}
+                    alt={parking.title || "تصویر آگهی"}
+                  />
+                ) : (
+                  <span>🚘</span>
+                )}
+              </div>
 
-      <div className="chat-messages">
-        {messagesLoading ? (
-          <p>
-            در حال دریافت
-            پیام‌ها...
-          </p>
-        ) : (
-          <>
-            {messages.map(
-              (message) => (
-                <ChatMessage
-                  key={message.id}
-                  message={message}
-                  isMine={
-                    message.senderId ===
-                    user.uid
-                  }
-                  isRead={
-                    isMessageRead(
-                      message
-                    )
-                  }
+              <div className="chat-ad-card__body">
+                <span>آگهی مورد گفتگو</span>
+                <h2>{parking.title || "آگهی پارکینگ"}</h2>
+                <p>📍 {parking.city || "شهر ثبت نشده"}</p>
+                <strong>{parking.price || "قیمت توافقی"}</strong>
+                <Link to={`/parking/${parkingId}`}>مشاهده جزئیات آگهی</Link>
+              </div>
+
+              <div className="chat-ad-card__notice">
+                <span>💡</span>
+                <p>
+                  پیش از هر توافق، مشخصات آگهی و شرایط معامله را بررسی کنید.
+                </p>
+              </div>
+            </aside>
+
+            <section className="chat-box">
+              <header className="chat-box__header">
+                <div className="chat-box__avatar">
+                  {recipientName.slice(0, 1)}
+                </div>
+                <div>
+                  <strong>{recipientName}</strong>
+                  <span>{parking.title || "گفتگوی آگهی"}</span>
+                </div>
+              </header>
+
+              {chatError && (
+                <div className="chat-box__error">
+                  <span>⚠️</span>
+                  <p>{chatError}</p>
+                </div>
+              )}
+
+              <div className="chat-box__messages">
+                {messagesLoading ? (
+                  <div className="chat-box__loading">
+                    <span>💬</span>
+                    <p>در حال دریافت پیام‌ها...</p>
+                  </div>
+                ) : messages.length === 0 ? (
+                  <div className="chat-box__empty">
+                    <span>👋</span>
+                    <h2>شروع گفتگو</h2>
+                    <p>
+                      هنوز پیامی رد و بدل نشده است. اولین پیام را درباره این آگهی
+                      ارسال کنید.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {messages.map((message) => (
+                      <ChatMessage
+                        key={message.id}
+                        message={message}
+                        isMine={message.senderId === user.uid}
+                        isRead={isMessageRead(message)}
+                      />
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </>
+                )}
+              </div>
+
+              <form className="chat-form" onSubmit={handleSubmit}>
+                <textarea
+                  value={messageText}
+                  onChange={(event) => setMessageText(event.target.value)}
+                  placeholder="پیام خود را بنویسید..."
+                  rows={3}
+                  maxLength={1000}
+                  disabled={sending}
                 />
-              )
-            )}
 
-            <div
-              ref={
-                messagesEndRef
-              }
-            />
-          </>
-        )}
-      </div>      <form
-        className="chat-form"
-        onSubmit={handleSubmit}
-      >
-        <textarea
-          value={messageText}
-          onChange={(event) =>
-            setMessageText(
-              event.target.value
-            )
-          }
-          placeholder="پیام خود را بنویسید..."
-          rows={3}
-          maxLength={1000}
-          disabled={sending}
-        />
-
-        <button
-          type="submit"
-          disabled={
-            sending ||
-            !messageText.trim()
-          }
-        >
-          {sending
-            ? "در حال ارسال..."
-            : "ارسال پیام"}
-        </button>
-      </form>
-    </section>
+                <div className="chat-form__footer">
+                  <span>{messageText.length}/1000</span>
+                  <button
+                    type="submit"
+                    disabled={sending || !messageText.trim()}
+                  >
+                    <span>✉️</span>
+                    {sending ? "در حال ارسال..." : "ارسال پیام"}
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
 
