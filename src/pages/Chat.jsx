@@ -511,6 +511,73 @@ function Chat({
     return email.split("@")[0];
   };
 
+  const getMessageDate = (createdAt) => {
+    return createdAt?.toDate?.() || null;
+  };
+
+  const isSameDay = (firstDate, secondDate) => {
+    if (!firstDate || !secondDate) {
+      return false;
+    }
+
+    return (
+      firstDate.getFullYear() === secondDate.getFullYear() &&
+      firstDate.getMonth() === secondDate.getMonth() &&
+      firstDate.getDate() === secondDate.getDate()
+    );
+  };
+
+  const formatMessageDate = (createdAt) => {
+    const date = getMessageDate(createdAt);
+
+    if (!date) {
+      return "";
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const messageDay = new Date(date);
+    messageDay.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (messageDay.getTime() === today.getTime()) {
+      return "امروز";
+    }
+
+    if (messageDay.getTime() === yesterday.getTime()) {
+      return "دیروز";
+    }
+
+    return new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(date);
+  };
+
+  const shouldShowDateSeparator = (message, previousMessage) => {
+    const currentDate = getMessageDate(message?.createdAt);
+
+    if (!currentDate) {
+      return false;
+    }
+
+    if (!previousMessage) {
+      return true;
+    }
+
+    const previousDate = getMessageDate(previousMessage?.createdAt);
+
+    if (!previousDate) {
+      return true;
+    }
+
+    return !isSameDay(currentDate, previousDate);
+  };
+
   const handleSubmit = async (
     event
   ) => {
@@ -781,14 +848,37 @@ function Chat({
                   </div>
                 ) : (
                   <>
-                    {messages.map((message) => (
-                      <ChatMessage
-                        key={message.id}
-                        message={message}
-                        isMine={message.senderId === user.uid}
-                        isRead={isMessageRead(message)}
-                      />
-                    ))}
+                    {messages.map((message, index) => {
+                      const previousMessage =
+                        index > 0 ? messages[index - 1] : null;
+
+                      const showDateSeparator =
+                        shouldShowDateSeparator(
+                          message,
+                          previousMessage
+                        );
+
+                      return (
+                        <div
+                          className="chat-message-row"
+                          key={message.id}
+                        >
+                          {showDateSeparator && (
+                            <div className="chat-date-separator">
+                              <span>
+                                {formatMessageDate(message.createdAt)}
+                              </span>
+                            </div>
+                          )}
+
+                          <ChatMessage
+                            message={message}
+                            isMine={message.senderId === user.uid}
+                            isRead={isMessageRead(message)}
+                          />
+                        </div>
+                      );
+                    })}
                     <div ref={messagesEndRef} />
                   </>
                 )}
