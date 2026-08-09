@@ -27,6 +27,33 @@ import {
 
 import "./ParkingCard.css";
 
+const CATEGORY_INFO = {
+  parking: {
+    label: "پارکینگ",
+    icon: "🚘",
+  },
+  storage: {
+    label: "انبار",
+    icon: "📦",
+  },
+  warehouse: {
+    label: "سوله",
+    icon: "🏭",
+  },
+  shop: {
+    label: "مغازه",
+    icon: "🏪",
+  },
+  land: {
+    label: "زمین",
+    icon: "🌱",
+  },
+  other: {
+    label: "سایر فضاها",
+    icon: "✨",
+  },
+};
+
 function ParkingCard({ parking }) {
   const navigate = useNavigate();
 
@@ -38,6 +65,10 @@ function ParkingCard({ parking }) {
     price,
     imageUrl,
     status = "active",
+    listingType = "offer",
+    category = "parking",
+    categoryLabel,
+    customCategory,
   } = parking;
 
   const [user, setUser] =
@@ -56,7 +87,74 @@ function ParkingCard({ parking }) {
     setFavoriteChanging,
   ] = useState(false);
 
+  const isWanted =
+    listingType === "wanted";
+
+  const categoryInfo =
+    CATEGORY_INFO[category] ||
+    CATEGORY_INFO.other;
+
+  const visibleCategory =
+    category === "other"
+      ? customCategory?.trim() ||
+        categoryLabel?.trim() ||
+        "سایر فضاها"
+      : categoryLabel?.trim() ||
+        categoryInfo.label;
+
+  const typeInfo = isWanted
+    ? {
+        label: "دنبال فضا",
+        detail:
+          "متقاضی این نوع فضاست",
+        icon: "🔎",
+        className:
+          "parking-card__listing-type--wanted",
+      }
+    : {
+        label: "فضا برای اجاره",
+        detail:
+          "مالک این فضا را عرضه کرده",
+        icon: "🏠",
+        className:
+          "parking-card__listing-type--offer",
+      };
+
   const getStatusInfo = () => {
+    if (isWanted) {
+      switch (status) {
+        case "rented":
+          return {
+            label:
+              "فضا پیدا شد",
+            detail:
+              "نیاز متقاضی برطرف شده",
+            className:
+              "parking-card__status--rented",
+          };
+
+        case "inactive":
+          return {
+            label:
+              "غیرفعال",
+            detail:
+              "درخواست موقتاً غیرفعال است",
+            className:
+              "parking-card__status--inactive",
+          };
+
+        default:
+          return {
+            label:
+              "درخواست فعال",
+            detail:
+              "هنوز در جستجوی فضاست",
+            className:
+              "parking-card__status--active",
+          };
+      }
+    }
+
     switch (status) {
       case "rented":
         return {
@@ -106,9 +204,14 @@ function ParkingCard({ parking }) {
 
           setUser(currentUser);
 
-          if (!currentUser || !id) {
+          if (
+            !currentUser ||
+            !id
+          ) {
             setIsFavorite(false);
-            setFavoriteLoading(false);
+            setFavoriteLoading(
+              false
+            );
             return;
           }
 
@@ -201,7 +304,7 @@ function ParkingCard({ parking }) {
 
               title:
                 title ||
-                "پارکینگ بدون عنوان",
+                "آگهی بدون عنوان",
 
               city:
                 city ||
@@ -218,6 +321,16 @@ function ParkingCard({ parking }) {
                 imageUrl || "",
 
               status,
+
+              listingType,
+
+              category,
+
+              categoryLabel:
+                visibleCategory,
+
+              customCategory:
+                customCategory || "",
 
               savedAt:
                 serverTimestamp(),
@@ -236,44 +349,70 @@ function ParkingCard({ parking }) {
           "ذخیره علاقه‌مندی انجام نشد. دوباره تلاش کنید."
         );
       } finally {
-        setFavoriteChanging(false);
+        setFavoriteChanging(
+          false
+        );
       }
     };
 
   return (
     <article
-      className={`parking-card ${
+      className={[
+        "parking-card",
+        isWanted
+          ? "parking-card--wanted"
+          : "parking-card--offer",
         status === "inactive"
           ? "parking-card--inactive"
-          : ""
-      }`}
+          : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       <Link
         to={`/parking/${id}`}
         className="parking-card__image-link"
         aria-label={`مشاهده آگهی ${
-          title || "پارکینگ"
+          title || visibleCategory
         }`}
       >
         <div className="parking-card__image-wrapper">
-          {imageUrl ? (
+          {isWanted ? (
+            <div className="parking-card__request-hero">
+              <div className="parking-card__request-icon">
+                🔎
+              </div>
+
+              <span className="parking-card__request-kicker">
+                درخواست فضا
+              </span>
+
+              <strong className="parking-card__request-title">
+                دنبال {visibleCategory}
+              </strong>
+
+              <span className="parking-card__request-city">
+                در {city || "شهر ثبت نشده"}
+              </span>
+            </div>
+          ) : imageUrl ? (
             <img
               className="parking-card__image"
               src={imageUrl}
               alt={
                 title ||
-                "تصویر پارکینگ"
+                `تصویر ${visibleCategory}`
               }
               loading="lazy"
             />
           ) : (
             <div className="parking-card__placeholder">
-              <span>
-                🚗
-              </span>
+              <div className="parking-card__placeholder-icon">
+                {categoryInfo.icon}
+              </div>
 
               <span>
-                تصویر پارکینگ
+                تصویر {visibleCategory}
               </span>
             </div>
           )}
@@ -287,7 +426,21 @@ function ParkingCard({ parking }) {
           </div>
 
           <div className="parking-card__category">
-            پارکینگ
+            <span>
+              {categoryInfo.icon}
+            </span>
+
+            {visibleCategory}
+          </div>
+
+          <div
+            className={`parking-card__listing-type ${typeInfo.className}`}
+          >
+            <span>
+              {typeInfo.icon}
+            </span>
+
+            {typeInfo.label}
           </div>
         </div>
       </Link>
@@ -295,13 +448,19 @@ function ParkingCard({ parking }) {
       <div className="parking-card__content">
         <div className="parking-card__top">
           <div>
+            <div className="parking-card__type-caption">
+              {typeInfo.detail}
+            </div>
+
             <Link
               to={`/parking/${id}`}
               className="parking-card__title-link"
             >
               <h3 className="parking-card__title">
                 {title ||
-                  "پارکینگ بدون عنوان"}
+                  (isWanted
+                    ? `دنبال ${visibleCategory}`
+                    : `${visibleCategory} برای اجاره`)}
               </h3>
             </Link>
 
@@ -358,7 +517,9 @@ function ParkingCard({ parking }) {
 
             <div>
               <span className="parking-card__feature-label">
-                متراژ
+                {isWanted
+                  ? "متراژ مدنظر"
+                  : "متراژ"}
               </span>
 
               <strong>
@@ -371,7 +532,9 @@ function ParkingCard({ parking }) {
 
           <div className="parking-card__feature">
             <span className="parking-card__feature-icon parking-card__feature-icon--cyan">
-              🛡
+              {isWanted
+                ? "🔎"
+                : "🛡"}
             </span>
 
             <div>
@@ -380,7 +543,9 @@ function ParkingCard({ parking }) {
               </span>
 
               <strong>
-                {statusInfo.detail}
+                {
+                  statusInfo.detail
+                }
               </strong>
             </div>
           </div>
@@ -391,11 +556,14 @@ function ParkingCard({ parking }) {
         <div className="parking-card__footer">
           <div className="parking-card__price">
             <span className="parking-card__price-label">
-              قیمت
+              {isWanted
+                ? "بودجه"
+                : "قیمت"}
             </span>
 
             <strong>
-              {price || "توافقی"}
+              {price ||
+                "توافقی"}
             </strong>
           </div>
 

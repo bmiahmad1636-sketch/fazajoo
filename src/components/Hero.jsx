@@ -1,19 +1,41 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import AnimatedLogo from "./AnimatedLogo";
 import "./Hero.css";
 
 const categories = [
-  { title: "پارکینگ", search: "پارکینگ" },
-  { title: "انبار", search: "انبار" },
-  { title: "سوله", search: "سوله" },
-  { title: "مغازه", search: "مغازه" },
-  { title: "زمین", search: "زمین" },
+  {
+    title: "پارکینگ",
+    search: "پارکینگ",
+  },
+  {
+    title: "انبار",
+    search: "انبار",
+  },
+  {
+    title: "سوله",
+    search: "سوله",
+  },
+  {
+    title: "مغازه",
+    search: "مغازه",
+  },
+  {
+    title: "زمین",
+    search: "زمین",
+  },
+  {
+    title: "سایر فضاها",
+    search: "سایر فضاها",
+  },
 ];
 
 function Hero() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
+
+  const [search, setSearch] =
+    useState("");
 
   const handleSearch = (event) => {
     event.preventDefault();
@@ -26,11 +48,15 @@ function Hero() {
     }
 
     navigate(
-      `/parking?search=${encodeURIComponent(value)}`
+      `/parking?search=${encodeURIComponent(
+        value
+      )}`
     );
   };
 
-  const handleCategoryClick = (category) => {
+  const handleCategoryClick = (
+    category
+  ) => {
     navigate(
       `/parking?search=${encodeURIComponent(
         category.search
@@ -39,8 +65,9 @@ function Hero() {
   };
 
   return (
-    <section className="home-hero" dir="rtl">
+    <section className="home-hero">
       <div className="home-hero__decoration home-hero__decoration--one" />
+
       <div className="home-hero__decoration home-hero__decoration--two" />
 
       <div className="home-hero__container">
@@ -55,8 +82,9 @@ function Hero() {
           </h1>
 
           <p className="home-hero__description">
-            پارکینگ، انبار، سوله، مغازه و زمین؛
-            مستقیم از مالک و بدون واسطه.
+            پارکینگ، انبار، سوله، مغازه،
+            زمین و سایر فضاها؛ مستقیم از
+            مالک و بدون واسطه.
           </p>
 
           <form
@@ -64,13 +92,17 @@ function Hero() {
             onSubmit={handleSearch}
           >
             <div className="home-hero__search-input">
-              <span aria-hidden="true">⌕</span>
+              <span aria-hidden="true">
+                ⌕
+              </span>
 
               <input
                 type="text"
                 value={search}
                 onChange={(event) =>
-                  setSearch(event.target.value)
+                  setSearch(
+                    event.target.value
+                  )
                 }
                 placeholder="شهر، محله یا نوع فضا را جستجو کن..."
                 aria-label="جستجوی فضا"
@@ -79,45 +111,63 @@ function Hero() {
 
             <button type="submit">
               جستجوی فضا
-              <span aria-hidden="true">←</span>
+
+              <span aria-hidden="true">
+                ←
+              </span>
             </button>
           </form>
 
           <div className="home-hero__categories">
-            {categories.map((category) => (
-              <button
-                type="button"
-                key={category.title}
-                onClick={() =>
-                  handleCategoryClick(category)
-                }
-              >
-                {category.title}
-              </button>
-            ))}
+            {categories.map(
+              (category) => (
+                <button
+                  type="button"
+                  key={
+                    category.title
+                  }
+                  onClick={() =>
+                    handleCategoryClick(
+                      category
+                    )
+                  }
+                >
+                  {category.title}
+                </button>
+              )
+            )}
           </div>
 
           <div className="home-hero__benefits">
-            <span>آگهی‌های واقعی</span>
+            <span>
+              آگهی‌های واقعی
+            </span>
+
             <i />
-            <span>ارتباط مستقیم با مالک</span>
+
+            <span>
+              ارتباط مستقیم با مالک
+            </span>
+
             <i />
-            <span>ثبت آگهی آسان</span>
+
+            <span>
+              ثبت آگهی آسان
+            </span>
           </div>
         </div>
 
         <div className="home-hero__brand">
           <div className="home-hero__brand-glow" />
 
-          <img
-            src="/fazajoo-logo.png"
-            alt="فضاجو"
-            className="home-hero__logo"
+          <AnimatedLogo
+            size={205}
+            className="home-hero__animated-logo"
           />
 
           <p>
-            فضای مناسب، نزدیک‌تر از چیزی است
-            که فکر می‌کنی.
+            فضای مناسب، نزدیک‌تر از چیزی
+            است که فکر می‌کنی.
           </p>
         </div>
       </div>

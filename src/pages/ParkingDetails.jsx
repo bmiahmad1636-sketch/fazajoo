@@ -13,6 +13,34 @@ import {
 import { auth, db } from "../firebase";
 import "./ParkingDetails.css";
 
+
+const CATEGORY_INFO = {
+  parking: {
+    label: "پارکینگ",
+    icon: "🚘",
+  },
+  storage: {
+    label: "انبار",
+    icon: "📦",
+  },
+  warehouse: {
+    label: "سوله",
+    icon: "🏭",
+  },
+  shop: {
+    label: "مغازه",
+    icon: "🏪",
+  },
+  land: {
+    label: "زمین",
+    icon: "🌱",
+  },
+  other: {
+    label: "سایر فضاها",
+    icon: "✨",
+  },
+};
+
 function ParkingDetails({
   parkings = [],
   deleteParking,
@@ -57,43 +85,93 @@ function ParkingDetails({
     Boolean(parking?.ownerId) &&
     user.uid === parking.ownerId;
 
+  const listingType =
+    parking?.listingType || "offer";
+
+  const isWanted =
+    listingType === "wanted";
+
+  const category =
+    parking?.category || "parking";
+
+  const categoryInfo =
+    CATEGORY_INFO[category] ||
+    CATEGORY_INFO.other;
+
+  const visibleCategory =
+    category === "other"
+      ? String(
+          parking?.customCategory ||
+            parking?.categoryLabel ||
+            "سایر فضاها"
+        ).trim()
+      : String(
+          parking?.categoryLabel ||
+            categoryInfo.label
+        ).trim();
+
+  const categoryIcon =
+    categoryInfo.icon;
+
+  const listingTypeLabel =
+    isWanted
+      ? "دنبال فضا"
+      : "فضا برای اجاره";
+
   const status = parking?.status || "active";
 
   const isRented = status === "rented";
   const isInactive = status === "inactive";
 
-  const statusLabel = isRented
-    ? "اجاره داده شد"
-    : isInactive
-      ? "غیرفعال"
-      : "در دسترس";
+  const statusLabel = isWanted
+    ? isRented
+      ? "فضا پیدا شد"
+      : isInactive
+        ? "غیرفعال"
+        : "درخواست فعال"
+    : isRented
+      ? "اجاره داده شد"
+      : isInactive
+        ? "غیرفعال"
+        : "در دسترس";
 
-  const statusDescription = isRented
-    ? "این فضا اجاره داده شده است"
-    : isInactive
-      ? "این آگهی موقتاً غیرفعال است"
-      : "آماده استفاده";
+  const statusDescription = isWanted
+    ? isRented
+      ? "نیاز متقاضی برطرف شده است"
+      : isInactive
+        ? "این درخواست موقتاً غیرفعال است"
+        : "متقاضی هنوز در جستجوی فضاست"
+    : isRented
+      ? "این فضا اجاره داده شده است"
+      : isInactive
+        ? "این آگهی موقتاً غیرفعال است"
+        : "آماده استفاده";
 
   const ownerDisplayName = (() => {
+    const phone = String(
+      parking?.phone || ""
+    )
+      .replace(/\s/g, "")
+      .trim();
+
+    if (/^09\d{9}$/.test(phone)) {
+      return phone;
+    }
+
     const ownerEmail = String(
       parking?.ownerEmail || ""
     ).trim();
 
-    if (!ownerEmail) {
-      return parking?.phone || "کاربر فضاجو";
+    const mobileMatch =
+      ownerEmail.match(/09\d{9}/);
+
+    if (mobileMatch) {
+      return mobileMatch[0];
     }
 
-    const [localPart, domainPart] =
-      ownerEmail.split("@");
-
-    if (
-      domainPart === "auth.fazajoo.local" &&
-      localPart
-    ) {
-      return localPart;
-    }
-
-    return parking?.phone || "آگهی‌دهنده فضاجو";
+    return isWanted
+      ? "متقاضی فضاجو"
+      : "آگهی‌دهنده فضاجو";
   })();
 
   const handleDelete = async () => {
@@ -184,9 +262,10 @@ function ParkingDetails({
     const shareData = {
       title:
         parking?.title ||
-        "آگهی پارکینگ",
-      text:
-        "این آگهی پارکینگ را در فضاجو ببین.",
+        `آگهی ${visibleCategory}`,
+      text: isWanted
+        ? `این درخواست ${visibleCategory} را در فضاجو ببین.`
+        : `این آگهی ${visibleCategory} را در فضاجو ببین.`,
       url: window.location.href,
     };
 
@@ -306,13 +385,19 @@ function ParkingDetails({
                 </span>
 
                 <span className="parking-details-badge parking-details-badge--type">
-                  پارکینگ
+                  {categoryIcon} {visibleCategory}
+                </span>
+
+                <span className="parking-details-badge parking-details-badge--type">
+                  {isWanted ? "🔎" : "🏠"} {listingTypeLabel}
                 </span>
               </div>
 
               <h1>
                 {parking.title ||
-                  "پارکینگ بدون عنوان"}
+                  (isWanted
+                    ? `دنبال ${visibleCategory}`
+                    : `${visibleCategory} برای اجاره`)}
               </h1>
 
               <p>
@@ -325,7 +410,7 @@ function ParkingDetails({
 
             <div className="parking-details-hero__price">
               <span>
-                قیمت آگهی
+                {isWanted ? "بودجه" : "قیمت آگهی"}
               </span>
 
               <strong>
@@ -334,8 +419,9 @@ function ParkingDetails({
               </strong>
 
               <small>
-                مبلغ ثبت‌شده توسط
-                آگهی‌دهنده
+                {isWanted
+                  ? "بودجه ثبت‌شده توسط متقاضی"
+                  : "مبلغ ثبت‌شده توسط آگهی‌دهنده"}
               </small>
             </div>
           </div>
@@ -346,7 +432,19 @@ function ParkingDetails({
         <div className="container">
           <div className="parking-details-layout">
             <div className="parking-details-main">
-              <article className="parking-details-gallery">
+              <article
+                className={[
+                  "parking-details-gallery",
+                  !parking.imageUrl
+                    ? "parking-details-gallery--empty"
+                    : "",
+                  isWanted
+                    ? "parking-details-gallery--wanted"
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
                 {parking.imageUrl ? (
                   <img
                     src={
@@ -354,20 +452,25 @@ function ParkingDetails({
                     }
                     alt={
                       parking.title ||
-                      "تصویر پارکینگ"
+                      `تصویر ${visibleCategory}`
                     }
                   />
                 ) : (
                   <div className="parking-details-gallery__placeholder">
-                    <span>🚘</span>
+                    <span>
+                      {isWanted ? "🔎" : categoryIcon}
+                    </span>
 
                     <strong>
-                      تصویر پارکینگ
+                      {isWanted
+                        ? `درخواست ${visibleCategory}`
+                        : `تصویر ${visibleCategory}`}
                     </strong>
 
                     <p>
-                      تصویری برای این
-                      آگهی ثبت نشده است.
+                      {isWanted
+                        ? "برای این درخواست تصویری ثبت نشده است."
+                        : "تصویری برای این آگهی ثبت نشده است."}
                     </p>
                   </div>
                 )}
@@ -391,7 +494,9 @@ function ParkingDetails({
                     </span>
 
                     <h2>
-                      اطلاعات پارکینگ
+                      {isWanted
+                        ? `نیازمندی ${visibleCategory}`
+                        : `اطلاعات ${visibleCategory}`}
                     </h2>
                   </div>
                 </div>
@@ -421,7 +526,7 @@ function ParkingDetails({
 
                     <div>
                       <span>
-                        متراژ
+                        {isWanted ? "متراژ مدنظر" : "متراژ"}
                       </span>
 
                       <strong>
@@ -455,7 +560,7 @@ function ParkingDetails({
 
                     <div>
                       <span>
-                        قیمت
+                        {isWanted ? "بودجه" : "قیمت"}
                       </span>
 
                       <strong>
@@ -479,7 +584,9 @@ function ParkingDetails({
                     </span>
 
                     <h2>
-                      توضیحات پارکینگ
+                      {isWanted
+                        ? `توضیحات نیاز به ${visibleCategory}`
+                        : `توضیحات ${visibleCategory}`}
                     </h2>
                   </div>
                 </div>
@@ -502,10 +609,9 @@ function ParkingDetails({
                   </h2>
 
                   <p>
-                    موقعیت دقیق پارکینگ
-                    را از طریق تماس با
-                    آگهی‌دهنده دریافت
-                    کنید.
+                    {isWanted
+                      ? `محدوده دقیق موردنظر برای ${visibleCategory} را از طریق تماس با متقاضی دریافت کنید.`
+                      : `موقعیت دقیق ${visibleCategory} را از طریق تماس با آگهی‌دهنده دریافت کنید.`}
                   </p>
                 </div>
 
@@ -522,23 +628,37 @@ function ParkingDetails({
               <div className="parking-contact-card">
                 <div className="parking-contact-card__header">
                   <span className="parking-contact-card__eyebrow">
-                    ارتباط با آگهی‌دهنده
+                    {isWanted
+                      ? "ارتباط با متقاضی"
+                      : "ارتباط با آگهی‌دهنده"}
                   </span>
 
                   <h2>
-                    {isRented
-                      ? "این پارکینگ اجاره داده شده"
-                      : isInactive
-                        ? "این آگهی غیرفعال است"
-                        : "این پارکینگ را پسندیدی؟"}
+                    {isWanted
+                      ? isRented
+                        ? "این درخواست تأمین شده"
+                        : isInactive
+                          ? "این درخواست غیرفعال است"
+                          : "این نیاز را می‌توانی تأمین کنی؟"
+                      : isRented
+                        ? `این ${visibleCategory} اجاره داده شده`
+                        : isInactive
+                          ? "این آگهی غیرفعال است"
+                          : `این ${visibleCategory} را پسندیدی؟`}
                   </h2>
 
                   <p>
-                    {isRented
-                      ? "این فضا دیگر برای اجاره در دسترس نیست."
-                      : isInactive
-                        ? "این آگهی فعلاً توسط صاحب آن غیرفعال شده است."
-                        : "برای دریافت اطلاعات بیشتر و هماهنگی، شماره تماس را مشاهده کن."}
+                    {isWanted
+                      ? isRented
+                        ? "متقاضی فضای موردنظرش را پیدا کرده است."
+                        : isInactive
+                          ? "این درخواست فعلاً توسط ثبت‌کننده غیرفعال شده است."
+                          : `اگر ${visibleCategory} مناسب داری، برای هماهنگی با متقاضی تماس بگیر یا پیام بده.`
+                      : isRented
+                        ? "این فضا دیگر برای اجاره در دسترس نیست."
+                        : isInactive
+                          ? "این آگهی فعلاً توسط صاحب آن غیرفعال شده است."
+                          : "برای دریافت اطلاعات بیشتر و هماهنگی، شماره تماس را مشاهده کن."}
                   </p>
                 </div>
 
@@ -547,9 +667,13 @@ function ParkingDetails({
                     <span>{isRented ? "✅" : "⏸"}</span>
 
                     <p>
-                      {isRented
-                        ? "این فضا اجاره داده شده و امکان تماس یا شروع گفتگوی جدید برای آن غیرفعال است."
-                        : "این آگهی موقتاً غیرفعال است و امکان تماس یا شروع گفتگوی جدید برای آن وجود ندارد."}
+                      {isWanted
+                        ? isRented
+                          ? "این درخواست تأمین شده و امکان تماس یا شروع گفتگوی جدید برای آن غیرفعال است."
+                          : "این درخواست موقتاً غیرفعال است و امکان تماس یا شروع گفتگوی جدید برای آن وجود ندارد."
+                        : isRented
+                          ? "این فضا اجاره داده شده و امکان تماس یا شروع گفتگوی جدید برای آن غیرفعال است."
+                          : "این آگهی موقتاً غیرفعال است و امکان تماس یا شروع گفتگوی جدید برای آن وجود ندارد."}
                     </p>
                   </div>
                 ) : parking.phone ? (
@@ -570,7 +694,9 @@ function ParkingDetails({
 
                       {showPhone
                         ? "پنهان کردن شماره"
-                        : "نمایش شماره تماس"}
+                        : isWanted
+                          ? "نمایش شماره متقاضی"
+                          : "نمایش شماره تماس"}
                     </button>
 
                     {showPhone && (
@@ -612,7 +738,9 @@ function ParkingDetails({
                       }}
                     >
                       <span>💬</span>
-                      ارسال پیام به آگهی‌دهنده
+                      {isWanted
+                        ? "ارسال پیام به متقاضی"
+                        : "ارسال پیام به آگهی‌دهنده"}
                     </Link>
                   )}
 
@@ -629,7 +757,9 @@ function ParkingDetails({
 
                   <div>
                     <span>
-                      ثبت‌کننده آگهی
+                      {isWanted
+                        ? "ثبت‌کننده درخواست"
+                        : "ثبت‌کننده آگهی"}
                     </span>
 
                     <strong>
@@ -642,9 +772,9 @@ function ParkingDetails({
                   <span>🛡</span>
 
                   <p>
-                    پیش از پرداخت یا
-                    توافق، اطلاعات آگهی
-                    را بررسی کنید.
+                    {isWanted
+                      ? "پیش از هماهنگی یا توافق، جزئیات درخواست را بررسی کنید."
+                      : "پیش از پرداخت یا توافق، اطلاعات آگهی را بررسی کنید."}
                   </p>
                 </div>
               </div>

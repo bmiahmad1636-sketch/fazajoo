@@ -22,7 +22,7 @@
   position: relative;
   overflow: hidden;
 
-  padding: 76px 0 105px;
+  padding: 40px 0 62px;
 
   background:
     radial-gradient(
@@ -79,10 +79,10 @@
 
   position: absolute;
 
-  width: 420px;
-  height: 420px;
+  width: 300px;
+  height: 300px;
 
-  top: -250px;
+  top: -190px;
   left: 42%;
 
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -102,10 +102,10 @@
 }
 
 .parking-page__hero-shape--one {
-  width: 310px;
-  height: 310px;
+  width: 220px;
+  height: 220px;
 
-  top: -185px;
+  top: -135px;
   right: 15%;
 
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -114,10 +114,10 @@
 }
 
 .parking-page__hero-shape--two {
-  width: 230px;
-  height: 230px;
+  width: 170px;
+  height: 170px;
 
-  bottom: -140px;
+  bottom: -105px;
   left: 10%;
 
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -132,7 +132,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 48px;
+  gap: 30px;
 }
 
 .parking-page__eyebrow {
@@ -140,8 +140,8 @@
   align-items: center;
   gap: 9px;
 
-  margin-bottom: 20px;
-  padding: 9px 16px;
+  margin-bottom: 10px;
+  padding: 7px 13px;
 
   border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 999px;
@@ -162,18 +162,18 @@
 .parking-page__title {
   max-width: 710px;
 
-  margin: 0 0 18px;
+  margin: 0 0 10px;
 
   color: #ffffff;
 
   font-size: clamp(
-    2.3rem,
-    5vw,
-    4.25rem
+    2.05rem,
+    4vw,
+    3.5rem
   );
 
   font-weight: 950;
-  line-height: 1.35;
+  line-height: 1.22;
 }
 
 .parking-page__title span {
@@ -199,24 +199,24 @@
 
   color: rgba(255, 244, 235, 0.77);
 
-  font-size: 1.02rem;
+  font-size: 0.92rem;
   font-weight: 500;
-  line-height: 2.05;
+  line-height: 1.75;
 }
 
 .parking-page__hero-stat {
   flex: 0 0 auto;
 
-  min-width: 192px;
+  min-width: 168px;
 
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 
-  padding: 19px;
+  padding: 13px 15px;
 
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 23px;
+  border-radius: 18px;
 
   background: rgba(255, 255, 255, 0.075);
 
@@ -231,14 +231,14 @@
 .parking-page__hero-stat-icon {
   flex: 0 0 auto;
 
-  width: 54px;
-  height: 54px;
+  width: 44px;
+  height: 44px;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
-  border-radius: 17px;
+  border-radius: 13px;
 
   background:
     linear-gradient(
@@ -250,7 +250,7 @@
   box-shadow:
     0 13px 28px rgba(244, 122, 31, 0.27);
 
-  font-size: 1.45rem;
+  font-size: 1.15rem;
 }
 
 .parking-page__hero-stat div {
@@ -261,7 +261,7 @@
 .parking-page__hero-stat strong {
   color: white;
 
-  font-size: 1.7rem;
+  font-size: 1.4rem;
   font-weight: 950;
   line-height: 1.2;
 }
@@ -280,8 +280,8 @@
 .parking-page__content {
   position: relative;
 
-  margin-top: -50px;
-  padding-bottom: 80px;
+  margin-top: -34px;
+  padding-bottom: 54px;
 }
 
 /* =========================
@@ -292,10 +292,10 @@
   position: relative;
   z-index: 3;
 
-  padding: 28px;
+  padding: 22px;
 
   border: 1px solid rgba(236, 220, 207, 0.92);
-  border-radius: 28px;
+  border-radius: 22px;
 
   background: rgba(255, 255, 255, 0.95);
 
@@ -332,7 +332,7 @@
   justify-content: space-between;
   gap: 20px;
 
-  margin-bottom: 25px;
+  margin-bottom: 17px;
 }
 
 .parking-filter__label,
@@ -448,9 +448,9 @@
 .parking-filter select,
 .parking-filter input {
   width: 100%;
-  min-height: 50px;
+  min-height: 44px;
 
-  padding: 11px 14px;
+  padding: 9px 12px;
 
   border: 1px solid #eadfd7;
   border-radius: 14px;
@@ -490,7 +490,7 @@
 }
 
 .parking-page .parking-filter .parking-filter__clear-button {
-  min-height: 50px;
+  min-height: 44px;
 
   display: flex;
   align-items: center;
@@ -553,7 +553,7 @@
   justify-content: space-between;
   gap: 20px;
 
-  margin: 56px 0 23px;
+  margin: 34px 0 18px;
 }
 
 .parking-results__count {
@@ -629,7 +629,7 @@
   display: grid;
   grid-template-columns:
     repeat(3, minmax(0, 1fr));
-  gap: 26px;
+  gap: 20px;
 }
 
 /* =========================
@@ -763,8 +763,8 @@
   align-items: center;
   gap: 21px;
 
-  margin-top: 60px;
-  padding: 30px;
+  margin-top: 40px;
+  padding: 22px;
 
   border-radius: 28px;
 
@@ -955,13 +955,13 @@
 
 @media (max-width: 850px) {
   .parking-page__hero {
-    padding: 60px 0 92px;
+    padding: 36px 0 58px;
   }
 
   .parking-page__hero-content {
     align-items: flex-start;
     flex-direction: column;
-    gap: 30px;
+    gap: 20px;
   }
 
   .parking-page__hero-stat {
@@ -981,7 +981,7 @@
 
 @media (max-width: 650px) {
   .parking-page__hero {
-    padding: 48px 0 82px;
+    padding: 30px 0 50px;
   }
 
   .parking-page__title {
@@ -993,13 +993,13 @@
   }
 
   .parking-page__content {
-    margin-top: -40px;
+    margin-top: -28px;
   }
 
   .parking-filter {
-    padding: 22px 18px;
+    padding: 18px 15px;
 
-    border-radius: 23px;
+    border-radius: 20px;
   }
 
   .parking-filter::before {
@@ -1018,7 +1018,7 @@
     align-items: flex-start;
     flex-direction: column;
 
-    margin-top: 43px;
+    margin-top: 30px;
   }
 
   .parking-grid {

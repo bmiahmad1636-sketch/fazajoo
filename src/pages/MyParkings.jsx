@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -25,6 +26,8 @@ import {
   db,
 } from "../firebase";
 
+import "./MyParkings.css";
+
 function MyParkings() {
   const [user, setUser] =
     useState(null);
@@ -36,6 +39,12 @@ function MyParkings() {
     useState(true);
 
   const [updatingId, setUpdatingId] =
+    useState("");
+
+  const [statusFilter, setStatusFilter] =
+    useState("all");
+
+  const [searchTerm, setSearchTerm] =
     useState("");
 
   useEffect(() => {
@@ -73,9 +82,9 @@ function MyParkings() {
             const userParkings =
               snapshot.docs.map(
                 (document) => ({
-                  id: document.id,
+                  id:
+                    document.id,
                   ...document.data(),
-
                   status:
                     document.data()
                       .status ||
@@ -87,13 +96,17 @@ function MyParkings() {
               userParkings
             );
           } catch (error) {
-            console.error(error);
+            console.error(
+              error
+            );
 
             alert(
               "خطا در دریافت آگهی‌های شما"
             );
           } finally {
-            setLoading(false);
+            setLoading(
+              false
+            );
           }
         }
       );
@@ -132,7 +145,9 @@ function MyParkings() {
         );
 
         setParkings(
-          (currentParkings) =>
+          (
+            currentParkings
+          ) =>
             currentParkings.map(
               (parking) =>
                 parking.id ===
@@ -155,7 +170,9 @@ function MyParkings() {
           "تغییر وضعیت آگهی انجام نشد."
         );
       } finally {
-        setUpdatingId("");
+        setUpdatingId(
+          ""
+        );
       }
     };
 
@@ -167,436 +184,641 @@ function MyParkings() {
         return {
           label:
             "اجاره داده شد",
-          background:
-            "#fff7ed",
-          color:
-            "#c2410c",
+          badge:
+            "my-parkings-status my-parkings-status--rented",
+          icon: "✓",
+          short:
+            "این فضا اجاره رفته",
         };
 
       case "inactive":
         return {
           label:
             "غیرفعال",
-          background:
-            "#f1f5f9",
-          color:
-            "#475569",
+          badge:
+            "my-parkings-status my-parkings-status--inactive",
+          icon: "Ⅱ",
+          short:
+            "نمایش عمومی متوقف است",
         };
 
       default:
         return {
           label:
             "فعال",
-          background:
-            "#ecfdf5",
-          color:
-            "#15803d",
+          badge:
+            "my-parkings-status my-parkings-status--active",
+          icon: "●",
+          short:
+            "در نتایج عمومی نمایش داده می‌شود",
         };
     }
   };
 
+  const counts =
+    useMemo(() => {
+      const result = {
+        all:
+          parkings.length,
+        active: 0,
+        rented: 0,
+        inactive: 0,
+      };
+
+      parkings.forEach(
+        (parking) => {
+          const status =
+            parking.status ||
+            "active";
+
+          if (
+            Object.prototype.hasOwnProperty.call(
+              result,
+              status
+            )
+          ) {
+            result[
+              status
+            ] += 1;
+          }
+        }
+      );
+
+      return result;
+    }, [parkings]);
+
+  const filteredParkings =
+    useMemo(() => {
+      const normalized =
+        searchTerm
+          .trim()
+          .toLocaleLowerCase(
+            "fa-IR"
+          );
+
+      return parkings.filter(
+        (parking) => {
+          const status =
+            parking.status ||
+            "active";
+
+          const matchesStatus =
+            statusFilter ===
+              "all" ||
+            status ===
+              statusFilter;
+
+          const searchable =
+            `${parking.title || ""} ${parking.city || ""}`.toLocaleLowerCase(
+              "fa-IR"
+            );
+
+          const matchesSearch =
+            normalized ===
+              "" ||
+            searchable.includes(
+              normalized
+            );
+
+          return (
+            matchesStatus &&
+            matchesSearch
+          );
+        }
+      );
+    }, [
+      parkings,
+      statusFilter,
+      searchTerm,
+    ]);
+
   if (loading) {
     return (
-      <div
-        style={{
-          textAlign:
-            "center",
-          padding:
-            "50px",
-          direction:
-            "rtl",
-        }}
-      >
-        در حال دریافت
-        آگهی‌های شما...
-      </div>
+      <main className="my-parkings-page">
+        <div className="my-parkings-state">
+          <div className="my-parkings-state__icon">
+            ⏳
+          </div>
+
+          <h1>
+            در حال دریافت آگهی‌ها
+          </h1>
+
+          <p>
+            چند لحظه صبر کنید...
+          </p>
+        </div>
+      </main>
     );
   }
 
   if (!user) {
     return (
-      <div
-        style={{
-          textAlign:
-            "center",
-          padding:
-            "50px",
-          direction:
-            "rtl",
-        }}
-      >
-        <p>
-          برای مشاهده
-          آگهی‌های خود وارد
-          شوید.
-        </p>
+      <main className="my-parkings-page">
+        <div className="my-parkings-state">
+          <div className="my-parkings-state__icon">
+            🔐
+          </div>
 
-        <Link to="/login">
-          رفتن به صفحه
-          ورود
-        </Link>
-      </div>
+          <h1>
+            ورود به حساب لازم است
+          </h1>
+
+          <p>
+            برای مشاهده و مدیریت آگهی‌های خود وارد حساب شوید.
+          </p>
+
+          <Link
+            className="my-parkings-primary-button"
+            to="/login"
+          >
+            رفتن به صفحه ورود
+          </Link>
+        </div>
+      </main>
     );
   }
 
   return (
-    <div
-      style={{
-        padding:
-          "40px",
-        direction:
-          "rtl",
-        maxWidth:
-          "1100px",
-        margin:
-          "auto",
-      }}
-    >
-      <h1
-        style={{
-          textAlign:
-            "center",
-        }}
-      >
-        آگهی‌های من
-      </h1>
+    <main className="my-parkings-page">
+      <section className="my-parkings-hero">
+        <div className="container my-parkings-hero__content">
+          <div>
+            <span className="my-parkings-eyebrow">
+              پنل شخصی فضاجو
+            </span>
 
-      {parkings.length ===
-      0 ? (
-        <div
-          style={{
-            textAlign:
-              "center",
-            padding:
-              "40px",
-          }}
-        >
-          <p>
-            هنوز آگهی‌ای
-            ثبت نکرده‌اید.
-          </p>
+            <h1>
+              آگهی‌های من
+            </h1>
 
-          <Link to="/add-parking">
-            ثبت اولین آگهی
+            <p>
+              وضعیت آگهی‌ها، نمایش عمومی و ویرایش اطلاعات را از همین‌جا مدیریت کنید.
+            </p>
+          </div>
+
+          <Link
+            to="/add-parking"
+            className="my-parkings-add-button"
+          >
+            <span>
+              ＋
+            </span>
+            ثبت آگهی جدید
           </Link>
         </div>
-      ) : (
-        <div
-          style={{
-            display:
-              "grid",
+      </section>
 
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(250px, 1fr))",
+      <section className="my-parkings-content">
+        <div className="container">
+          <div className="my-parkings-summary">
+            <button
+              type="button"
+              className={`my-parkings-summary-card ${
+                statusFilter ===
+                "all"
+                  ? "my-parkings-summary-card--selected"
+                  : ""
+              }`}
+              onClick={() =>
+                setStatusFilter(
+                  "all"
+                )
+              }
+            >
+              <span className="my-parkings-summary-card__icon">
+                ▦
+              </span>
 
-            gap:
-              "20px",
+              <div>
+                <span>
+                  همه آگهی‌ها
+                </span>
 
-            marginTop:
-              "30px",
-          }}
-        >
-          {parkings.map(
-            (parking) => {
-              const statusInfo =
-                getStatusInfo(
-                  parking.status
-                );
-
-              return (
-                <div
-                  key={
-                    parking.id
-                  }
-                  style={{
-                    border:
-                      "1px solid #eadfd7",
-
-                    borderRadius:
-                      "18px",
-
-                    padding:
-                      "15px",
-
-                    background:
-                      "white",
-
-                    boxShadow:
-                      "0 8px 24px rgba(70, 45, 28, 0.08)",
-                  }}
-                >
-                  {parking.imageUrl && (
-                    <img
-                      src={
-                        parking.imageUrl
-                      }
-                      alt={
-                        parking.title
-                      }
-                      style={{
-                        width:
-                          "100%",
-
-                        height:
-                          "180px",
-
-                        objectFit:
-                          "cover",
-
-                        borderRadius:
-                          "12px",
-                      }}
-                    />
+                <strong>
+                  {counts.all.toLocaleString(
+                    "fa-IR"
                   )}
+                </strong>
+              </div>
+            </button>
 
-                  <div
-                    style={{
-                      display:
-                        "flex",
+            <button
+              type="button"
+              className={`my-parkings-summary-card ${
+                statusFilter ===
+                "active"
+                  ? "my-parkings-summary-card--selected"
+                  : ""
+              }`}
+              onClick={() =>
+                setStatusFilter(
+                  "active"
+                )
+              }
+            >
+              <span className="my-parkings-summary-card__icon my-parkings-summary-card__icon--active">
+                ●
+              </span>
 
-                      alignItems:
-                        "center",
+              <div>
+                <span>
+                  فعال
+                </span>
 
-                      justifyContent:
-                        "space-between",
+                <strong>
+                  {counts.active.toLocaleString(
+                    "fa-IR"
+                  )}
+                </strong>
+              </div>
+            </button>
 
-                      gap:
-                        "10px",
+            <button
+              type="button"
+              className={`my-parkings-summary-card ${
+                statusFilter ===
+                "rented"
+                  ? "my-parkings-summary-card--selected"
+                  : ""
+              }`}
+              onClick={() =>
+                setStatusFilter(
+                  "rented"
+                )
+              }
+            >
+              <span className="my-parkings-summary-card__icon my-parkings-summary-card__icon--rented">
+                ✓
+              </span>
 
-                      marginTop:
-                        "14px",
-                    }}
-                  >
-                    <h3
-                      style={{
-                        margin:
-                          "0",
-                      }}
-                    >
-                      {
-                        parking.title
-                      }
-                    </h3>
+              <div>
+                <span>
+                  اجاره داده شد
+                </span>
 
-                    <span
-                      style={{
-                        background:
-                          statusInfo.background,
+                <strong>
+                  {counts.rented.toLocaleString(
+                    "fa-IR"
+                  )}
+                </strong>
+              </div>
+            </button>
 
-                        color:
-                          statusInfo.color,
+            <button
+              type="button"
+              className={`my-parkings-summary-card ${
+                statusFilter ===
+                "inactive"
+                  ? "my-parkings-summary-card--selected"
+                  : ""
+              }`}
+              onClick={() =>
+                setStatusFilter(
+                  "inactive"
+                )
+              }
+            >
+              <span className="my-parkings-summary-card__icon my-parkings-summary-card__icon--inactive">
+                Ⅱ
+              </span>
 
-                        padding:
-                          "5px 9px",
+              <div>
+                <span>
+                  غیرفعال
+                </span>
 
-                        borderRadius:
-                          "999px",
+                <strong>
+                  {counts.inactive.toLocaleString(
+                    "fa-IR"
+                  )}
+                </strong>
+              </div>
+            </button>
+          </div>
 
-                        fontSize:
-                          "12px",
+          <div className="my-parkings-toolbar">
+            <div className="my-parkings-toolbar__heading">
+              <span>
+                مدیریت آگهی‌ها
+              </span>
 
-                        fontWeight:
-                          "bold",
+              <h2>
+                {statusFilter ===
+                "all"
+                  ? "همه آگهی‌های شما"
+                  : statusFilter ===
+                      "active"
+                    ? "آگهی‌های فعال"
+                    : statusFilter ===
+                        "rented"
+                      ? "آگهی‌های اجاره داده شده"
+                      : "آگهی‌های غیرفعال"}
+              </h2>
+            </div>
 
-                        whiteSpace:
-                          "nowrap",
-                      }}
-                    >
-                      {
-                        statusInfo.label
-                      }
-                    </span>
-                  </div>
+            <div className="my-parkings-search">
+              <span>
+                🔎
+              </span>
 
-                  <p>
-                    📍{" "}
-                    {parking.city ||
-                      "شهر ثبت نشده"}
-                  </p>
+              <input
+                type="text"
+                value={
+                  searchTerm
+                }
+                onChange={(
+                  event
+                ) =>
+                  setSearchTerm(
+                    event.target
+                      .value
+                  )
+                }
+                placeholder="جستجو در عنوان یا شهر..."
+              />
+            </div>
+          </div>
 
-                  <p>
-                    📐{" "}
-                    {parking.area ||
-                      "نامشخص"}{" "}
-                    متر
-                  </p>
+          {parkings.length ===
+          0 ? (
+            <div className="my-parkings-empty">
+              <div className="my-parkings-empty__icon">
+                🅿
+              </div>
 
-                  <p>
-                    💰{" "}
-                    {parking.price ||
-                      "قیمت ثبت نشده"}
-                  </p>
+              <h2>
+                هنوز آگهی‌ای ثبت نکرده‌اید
+              </h2>
 
-                  <div
-                    style={{
-                      margin:
-                        "18px 0",
+              <p>
+                اولین فضای خالی خود را در فضاجو ثبت کنید و مدیریت آن را از همین صفحه انجام دهید.
+              </p>
 
-                      padding:
-                        "14px",
+              <Link
+                to="/add-parking"
+                className="my-parkings-primary-button"
+              >
+                ثبت اولین آگهی
+              </Link>
+            </div>
+          ) : filteredParkings.length ===
+            0 ? (
+            <div className="my-parkings-empty">
+              <div className="my-parkings-empty__icon">
+                🔍
+              </div>
 
-                      borderRadius:
-                        "12px",
+              <h2>
+                آگهی‌ای پیدا نشد
+              </h2>
 
-                      background:
-                        "#fffaf6",
+              <p>
+                فیلتر وضعیت یا عبارت جستجو را تغییر دهید.
+              </p>
 
-                      border:
-                        "1px solid #f1dfd2",
-                    }}
-                  >
-                    <div
-                      style={{
-                        marginBottom:
-                          "9px",
+              <button
+                type="button"
+                className="my-parkings-primary-button"
+                onClick={() => {
+                  setStatusFilter(
+                    "all"
+                  );
+                  setSearchTerm(
+                    ""
+                  );
+                }}
+              >
+                نمایش همه آگهی‌ها
+              </button>
+            </div>
+          ) : (
+            <div className="my-parkings-grid">
+              {filteredParkings.map(
+                (parking) => {
+                  const status =
+                    parking.status ||
+                    "active";
 
-                        fontWeight:
-                          "bold",
+                  const statusInfo =
+                    getStatusInfo(
+                      status
+                    );
 
-                        fontSize:
-                          "13px",
-                      }}
-                    >
-                      وضعیت آگهی
-                    </div>
-
-                    <select
-                      value={
-                        parking.status ||
-                        "active"
-                      }
-                      disabled={
-                        updatingId ===
+                  return (
+                    <article
+                      key={
                         parking.id
                       }
-                      onChange={(
-                        event
-                      ) =>
-                        handleStatusChange(
-                          parking.id,
-                          event.target
-                            .value
-                        )
-                      }
-                      style={{
-                        width:
-                          "100%",
-
-                        padding:
-                          "10px",
-
-                        border:
-                          "1px solid #e5d3c5",
-
-                        borderRadius:
-                          "10px",
-
-                        background:
-                          "white",
-
-                        fontFamily:
-                          "inherit",
-
-                        cursor:
-                          "pointer",
-                      }}
+                      className={`my-parking-card my-parking-card--${status}`}
                     >
-                      <option value="active">
-                        فعال
-                      </option>
+                      <div className="my-parking-card__media">
+                        {parking.imageUrl ? (
+                          <img
+                            src={
+                              parking.imageUrl
+                            }
+                            alt={
+                              parking.title ||
+                              "تصویر آگهی"
+                            }
+                          />
+                        ) : (
+                          <div className="my-parking-card__placeholder">
+                            <span>
+                              🅿
+                            </span>
 
-                      <option value="rented">
-                        اجاره داده شد
-                      </option>
+                            <small>
+                              بدون تصویر
+                            </small>
+                          </div>
+                        )}
 
-                      <option value="inactive">
-                        غیرفعال
-                      </option>
-                    </select>
+                        <span
+                          className={
+                            statusInfo.badge
+                          }
+                        >
+                          <span>
+                            {
+                              statusInfo.icon
+                            }
+                          </span>
 
-                    {updatingId ===
-                      parking.id && (
-                      <div
-                        style={{
-                          marginTop:
-                            "7px",
-
-                          fontSize:
-                            "12px",
-
-                          color:
-                            "#888",
-                        }}
-                      >
-                        در حال
-                        ذخیره...
+                          {
+                            statusInfo.label
+                          }
+                        </span>
                       </div>
-                    )}
-                  </div>
 
-                  <div
-                    style={{
-                      display:
-                        "flex",
+                      <div className="my-parking-card__body">
+                        <div className="my-parking-card__heading">
+                          <div>
+                            <span className="my-parking-card__eyebrow">
+                              آگهی شما
+                            </span>
 
-                      gap:
-                        "10px",
+                            <h3>
+                              {parking.title ||
+                                "پارکینگ بدون عنوان"}
+                            </h3>
+                          </div>
 
-                      flexWrap:
-                        "wrap",
-                    }}
-                  >
-                    <Link
-                      to={`/parking/${parking.id}`}
-                      style={{
-                        background:
-                          "#16a34a",
+                          <Link
+                            to={`/parking/${parking.id}`}
+                            className="my-parking-card__open"
+                            title="مشاهده آگهی"
+                            aria-label="مشاهده آگهی"
+                          >
+                            ↗
+                          </Link>
+                        </div>
 
-                        color:
-                          "white",
+                        <div className="my-parking-card__facts">
+                          <div>
+                            <span>
+                              📍
+                            </span>
 
-                        padding:
-                          "8px 12px",
+                            <div>
+                              <small>
+                                شهر
+                              </small>
 
-                        borderRadius:
-                          "8px",
+                              <strong>
+                                {parking.city ||
+                                  "ثبت نشده"}
+                              </strong>
+                            </div>
+                          </div>
 
-                        textDecoration:
-                          "none",
-                      }}
-                    >
-                      مشاهده
-                    </Link>
+                          <div>
+                            <span>
+                              ↔
+                            </span>
 
-                    <Link
-                      to={`/edit-parking/${parking.id}`}
-                      style={{
-                        background:
-                          "#f47a1f",
+                            <div>
+                              <small>
+                                متراژ
+                              </small>
 
-                        color:
-                          "white",
+                              <strong>
+                                {parking.area
+                                  ? `${parking.area} متر`
+                                  : "ثبت نشده"}
+                              </strong>
+                            </div>
+                          </div>
 
-                        padding:
-                          "8px 12px",
+                          <div>
+                            <span>
+                              💰
+                            </span>
 
-                        borderRadius:
-                          "8px",
+                            <div>
+                              <small>
+                                قیمت
+                              </small>
 
-                        textDecoration:
-                          "none",
-                      }}
-                    >
-                      ویرایش
-                    </Link>
-                  </div>
-                </div>
-              );
-            }
+                              <strong>
+                                {parking.price ||
+                                  "توافقی"}
+                              </strong>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="my-parking-card__status-copy">
+                          <span>
+                            وضعیت فعلی
+                          </span>
+
+                          <strong>
+                            {
+                              statusInfo.short
+                            }
+                          </strong>
+                        </div>
+
+                        <div className="my-parking-card__status-control">
+                          <label
+                            htmlFor={`status-${parking.id}`}
+                          >
+                            تغییر وضعیت آگهی
+                          </label>
+
+                          <div className="my-parking-card__select-wrap">
+                            <select
+                              id={`status-${parking.id}`}
+                              value={
+                                status
+                              }
+                              disabled={
+                                updatingId ===
+                                parking.id
+                              }
+                              onChange={(
+                                event
+                              ) =>
+                                handleStatusChange(
+                                  parking.id,
+                                  event.target
+                                    .value
+                                )
+                              }
+                            >
+                              <option value="active">
+                                فعال
+                              </option>
+
+                              <option value="rented">
+                                اجاره داده شد
+                              </option>
+
+                              <option value="inactive">
+                                غیرفعال
+                              </option>
+                            </select>
+
+                            <span>
+                              ▾
+                            </span>
+                          </div>
+
+                          {updatingId ===
+                            parking.id && (
+                            <div className="my-parking-card__saving">
+                              در حال ذخیره تغییرات...
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="my-parking-card__actions">
+                          <Link
+                            to={`/parking/${parking.id}`}
+                            className="my-parking-card__action my-parking-card__action--secondary"
+                          >
+                            مشاهده آگهی
+                          </Link>
+
+                          <Link
+                            to={`/edit-parking/${parking.id}`}
+                            className="my-parking-card__action my-parking-card__action--primary"
+                          >
+                            ویرایش آگهی
+                          </Link>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                }
+              )}
+            </div>
           )}
         </div>
-      )}
-    </div>
+      </section>
+    </main>
   );
 }
 

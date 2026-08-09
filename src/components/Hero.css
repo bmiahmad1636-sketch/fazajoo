@@ -2,18 +2,18 @@
   position: relative;
   overflow: hidden;
 
-  padding: 72px 0 82px;
+  padding: 34px 0 40px;
 
   background:
     radial-gradient(
       circle at 8% 15%,
-      rgba(247, 126, 32, 0.14),
-      transparent 28%
+      rgba(247, 126, 32, 0.12),
+      transparent 26%
     ),
     radial-gradient(
       circle at 92% 80%,
-      rgba(247, 126, 32, 0.08),
-      transparent 30%
+      rgba(247, 126, 32, 0.07),
+      transparent 28%
     ),
     linear-gradient(
       145deg,
@@ -28,31 +28,31 @@
   z-index: 2;
 
   width: min(
-    calc(100% - 32px),
-    1200px
+    calc(100% - 36px),
+    1160px
   );
 
   margin-inline: auto;
 
   display: grid;
   grid-template-columns:
-    minmax(0, 1.25fr)
-    minmax(310px, 0.75fr);
+    minmax(0, 1.35fr)
+    minmax(260px, 0.65fr);
 
   align-items: center;
-  gap: 65px;
+  gap: 42px;
 }
 
 .home-hero__content {
-  max-width: 720px;
+  max-width: 700px;
 }
 
 .home-hero__badge {
   display: inline-flex;
   align-items: center;
 
-  margin-bottom: 17px;
-  padding: 7px 13px;
+  margin-bottom: 10px;
+  padding: 6px 11px;
 
   border: 1px solid
     rgba(240, 112, 20, 0.14);
@@ -64,21 +64,21 @@
 
   color: #dc6819;
 
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 900;
 }
 
 .home-hero__title {
-  margin: 0 0 13px;
+  margin: 0 0 8px;
 
   color: #302a27;
 
   font-size:
-    clamp(3rem, 6vw, 5.5rem);
+    clamp(2.5rem, 4.4vw, 4.25rem);
 
   font-weight: 950;
-  line-height: 1.25;
-  letter-spacing: -2px;
+  line-height: 1.18;
+  letter-spacing: -1.5px;
 }
 
 .home-hero__title span {
@@ -86,13 +86,13 @@
 }
 
 .home-hero__description {
-  margin: 0 0 29px;
+  margin: 0 0 18px;
 
   color: #756961;
 
-  font-size: 1rem;
+  font-size: 0.92rem;
   font-weight: 600;
-  line-height: 2;
+  line-height: 1.8;
 }
 
 .home-hero__search {
@@ -100,21 +100,21 @@
 
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 
-  padding: 9px;
+  padding: 7px;
 
   border: 1px solid
     rgba(65, 54, 47, 0.1);
 
-  border-radius: 21px;
+  border-radius: 18px;
 
   background:
-    rgba(255, 255, 255, 0.92);
+    rgba(255, 255, 255, 0.94);
 
   box-shadow:
-    0 22px 55px
-      rgba(65, 45, 32, 0.11);
+    0 16px 40px
+      rgba(65, 45, 32, 0.09);
 
   transition:
     transform 0.2s ease,
@@ -122,11 +122,11 @@
 }
 
 .home-hero__search:focus-within {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 
   box-shadow:
-    0 27px 65px
-      rgba(65, 45, 32, 0.15);
+    0 20px 48px
+      rgba(65, 45, 32, 0.12);
 }
 
 .home-hero__search-input {
@@ -135,20 +135,20 @@
 
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
 
-  padding-inline: 13px;
+  padding-inline: 11px;
 }
 
 .home-hero__search-input span {
   color: #ef741b;
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 900;
 }
 
 .home-hero__search-input input {
   width: 100%;
-  height: 52px;
+  height: 44px;
 
   border: none;
   outline: none;
@@ -157,7 +157,7 @@
   color: #302a27;
 
   font-family: inherit;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 700;
 }
 
@@ -169,17 +169,17 @@
 .home-hero__search > button {
   flex: 0 0 auto;
 
-  min-height: 52px;
+  min-height: 44px;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
+  gap: 8px;
 
-  padding: 10px 23px;
+  padding: 9px 19px;
 
   border: none;
-  border-radius: 15px;
+  border-radius: 13px;
 
   background:
     linear-gradient(
@@ -193,12 +193,12 @@
   cursor: pointer;
 
   font-family: inherit;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 950;
 
   box-shadow:
-    0 12px 27px
-      rgba(228, 106, 24, 0.24);
+    0 10px 22px
+      rgba(228, 106, 24, 0.22);
 
   transition:
     transform 0.2s ease,
@@ -206,26 +206,26 @@
 }
 
 .home-hero__search > button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 
   box-shadow:
-    0 17px 34px
-      rgba(228, 106, 24, 0.31);
+    0 14px 28px
+      rgba(228, 106, 24, 0.28);
 }
 
 .home-hero__categories {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 9px;
+  gap: 7px;
 
-  margin-top: 21px;
+  margin-top: 13px;
 }
 
 .home-hero__categories button {
-  min-height: 39px;
+  min-height: 34px;
 
-  padding: 8px 15px;
+  padding: 6px 12px;
 
   border: 1px solid
     rgba(65, 54, 47, 0.09);
@@ -240,7 +240,7 @@
   cursor: pointer;
 
   font-family: inherit;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 850;
 
   transition:
@@ -251,7 +251,7 @@
 }
 
 .home-hero__categories button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 
   border-color:
     rgba(239, 116, 27, 0.26);
@@ -263,13 +263,13 @@
 .home-hero__benefits {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 
-  margin-top: 22px;
+  margin-top: 13px;
 
   color: #897d75;
 
-  font-size: 0.64rem;
+  font-size: 0.61rem;
   font-weight: 750;
 }
 
@@ -284,26 +284,26 @@
 .home-hero__brand {
   position: relative;
 
-  min-height: 390px;
+  min-height: 270px;
 
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
 
-  padding: 30px;
+  padding: 20px;
 
   border: 1px solid
     rgba(255, 255, 255, 0.8);
 
-  border-radius: 35px;
+  border-radius: 28px;
 
   background:
     rgba(255, 255, 255, 0.52);
 
   box-shadow:
-    0 30px 85px
-      rgba(69, 49, 36, 0.12);
+    0 22px 60px
+      rgba(69, 49, 36, 0.1);
 
   backdrop-filter: blur(18px);
 }
@@ -311,23 +311,23 @@
 .home-hero__brand-glow {
   position: absolute;
 
-  width: 250px;
-  height: 250px;
+  width: 180px;
+  height: 180px;
 
   border-radius: 50%;
 
   background:
-    rgba(245, 126, 32, 0.18);
+    rgba(245, 126, 32, 0.16);
 
-  filter: blur(45px);
+  filter: blur(38px);
 }
 
 .home-hero__logo {
   position: relative;
   z-index: 2;
 
-  width: min(100%, 285px);
-  height: 285px;
+  width: min(100%, 205px);
+  height: 205px;
 
   object-fit: contain;
 
@@ -338,25 +338,25 @@
 }
 
 .home-hero__brand:hover
-  .home-hero__logo {
-  transform: translateY(-5px);
+.home-hero__logo {
+  transform: translateY(-3px);
 }
 
 .home-hero__brand p {
   position: relative;
   z-index: 2;
 
-  max-width: 270px;
+  max-width: 245px;
 
-  margin: 6px 0 0;
+  margin: 2px 0 0;
 
   text-align: center;
 
   color: #776b63;
 
-  font-size: 0.73rem;
+  font-size: 0.68rem;
   font-weight: 750;
-  line-height: 1.9;
+  line-height: 1.75;
 }
 
 .home-hero__decoration {
@@ -368,62 +368,68 @@
 }
 
 .home-hero__decoration--one {
-  width: 300px;
-  height: 300px;
+  width: 220px;
+  height: 220px;
 
-  top: -170px;
-  right: -120px;
+  top: -140px;
+  right: -90px;
 
   background:
-    rgba(245, 126, 32, 0.08);
+    rgba(245, 126, 32, 0.07);
 }
 
 .home-hero__decoration--two {
-  width: 350px;
-  height: 350px;
+  width: 260px;
+  height: 260px;
 
-  bottom: -230px;
-  left: -150px;
+  bottom: -180px;
+  left: -120px;
 
   background:
-    rgba(48, 42, 39, 0.04);
+    rgba(48, 42, 39, 0.035);
 }
 
 @media (max-width: 980px) {
+  .home-hero {
+    padding: 28px 0 34px;
+  }
+
   .home-hero__container {
     grid-template-columns: 1fr;
+    gap: 24px;
   }
 
   .home-hero__brand {
-    max-width: 560px;
-    min-height: 330px;
+    max-width: 520px;
+    min-height: 220px;
   }
 
   .home-hero__logo {
-    width: 235px;
-    height: 235px;
+    width: 170px;
+    height: 170px;
   }
 }
 
 @media (max-width: 650px) {
   .home-hero {
-    padding: 50px 0 60px;
+    padding: 24px 0 28px;
   }
 
   .home-hero__container {
     width:
       calc(100% - 22px);
 
-    gap: 37px;
+    gap: 22px;
   }
 
   .home-hero__title {
-    font-size: 3rem;
-    letter-spacing: -1px;
+    font-size: 2.45rem;
+    letter-spacing: -0.7px;
   }
 
   .home-hero__description {
-    font-size: 0.84rem;
+    font-size: 0.82rem;
+    margin-bottom: 14px;
   }
 
   .home-hero__search {
@@ -438,7 +444,7 @@
   .home-hero__benefits {
     align-items: flex-start;
     flex-direction: column;
-    gap: 8px;
+    gap: 7px;
   }
 
   .home-hero__benefits i {
@@ -446,12 +452,12 @@
   }
 
   .home-hero__brand {
-    min-height: 290px;
-    padding: 22px;
+    min-height: 200px;
+    padding: 16px;
   }
 
   .home-hero__logo {
-    width: 205px;
-    height: 205px;
+    width: 155px;
+    height: 155px;
   }
 }

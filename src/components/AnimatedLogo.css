@@ -1,0 +1,302 @@
+.fazajoo-animated-logo {
+  --fazajoo-logo-size: 180px;
+
+  width: var(--fazajoo-logo-size);
+
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  user-select: none;
+  -webkit-user-select: none;
+
+  perspective: 900px;
+}
+
+.fazajoo-animated-logo__mark {
+  position: relative;
+
+  width: 60%;
+  aspect-ratio: 0.9 / 1;
+
+  margin-bottom: -4%;
+}
+
+.fazajoo-animated-logo__frame {
+  position: absolute;
+  inset: 4% 4% 12% 4%;
+
+  filter:
+    drop-shadow(
+      0 7px 11px
+      rgba(213, 105, 15, 0.18)
+    );
+}
+
+.fazajoo-animated-logo__frame-top,
+.fazajoo-animated-logo__frame-side {
+  position: absolute;
+
+  display: block;
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffae2f 0%,
+      #f48a16 56%,
+      #e56b08 100%
+    );
+}
+
+.fazajoo-animated-logo__frame-top {
+  top: 4%;
+  right: 7%;
+
+  width: 82%;
+  height: 9%;
+
+  border-radius: 999px;
+
+  transform:
+    rotate(20deg);
+  transform-origin: right center;
+}
+
+.fazajoo-animated-logo__frame-side {
+  top: 6%;
+  left: 8%;
+
+  width: 11%;
+  height: 80%;
+
+  border-radius:
+    999px 999px 10px 10px;
+
+  transform:
+    skewY(-5deg);
+}
+
+.fazajoo-animated-logo__door-wrap {
+  position: absolute;
+
+  top: 22%;
+  right: 3%;
+
+  width: 69%;
+  height: 68%;
+
+  transform-style:
+    preserve-3d;
+
+  transform-origin:
+    right center;
+}
+
+.fazajoo-animated-logo__door {
+  position: absolute;
+  inset: 0;
+
+  overflow: hidden;
+
+  border-radius:
+    10% 5% 5% 10%;
+
+  background:
+    linear-gradient(
+      145deg,
+      #303b46 0%,
+      #18232d 62%,
+      #111b24 100%
+    );
+
+  box-shadow:
+    0 12px 19px
+      rgba(21, 27, 33, 0.22),
+    inset 1px 1px 0
+      rgba(255, 255, 255, 0.14);
+
+  transform-origin:
+    right center;
+
+  animation:
+    fazajooDoorCycle
+    5.2s
+    cubic-bezier(
+      0.4,
+      0,
+      0.2,
+      1
+    )
+    infinite;
+
+  will-change: transform;
+}
+
+.fazajoo-animated-logo__door-shine {
+  position: absolute;
+
+  inset:
+    4% auto 6% 5%;
+
+  width: 16%;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.09),
+      transparent
+    );
+
+  opacity: 0.7;
+}
+
+.fazajoo-animated-logo__knob {
+  position: absolute;
+
+  top: 48%;
+  right: 13%;
+
+  width: 10%;
+  aspect-ratio: 1;
+
+  border-radius: 50%;
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffd06b,
+      #f39a21 62%,
+      #d9780c
+    );
+
+  box-shadow:
+    0 2px 5px
+      rgba(0, 0, 0, 0.24),
+    inset 0 1px 1px
+      rgba(255, 255, 255, 0.68);
+}
+
+.fazajoo-animated-logo__shadow {
+  position: absolute;
+
+  right: 10%;
+  bottom: 4%;
+
+  width: 58%;
+  height: 8%;
+
+  border-radius: 50%;
+
+  background:
+    rgba(55, 38, 26, 0.18);
+
+  filter: blur(9px);
+
+  transform-origin: right center;
+
+  animation:
+    fazajooDoorShadow
+    5.2s
+    ease-in-out
+    infinite;
+}
+
+.fazajoo-animated-logo__wordmark {
+  direction: rtl;
+
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+
+  margin-top: -2%;
+
+  font-family:
+    Vazirmatn,
+    Tahoma,
+    sans-serif;
+
+  font-size:
+    calc(
+      var(--fazajoo-logo-size)
+      * 0.255
+    );
+
+  font-weight: 950;
+  line-height: 1;
+
+  letter-spacing: -0.075em;
+
+  filter:
+    drop-shadow(
+      0 5px 6px
+      rgba(54, 39, 29, 0.12)
+    );
+}
+
+.fazajoo-animated-logo__wordmark-dark {
+  color: #17212b;
+}
+
+.fazajoo-animated-logo__wordmark-orange {
+  color: #f58a16;
+}
+
+.fazajoo-animated-logo--compact
+.fazajoo-animated-logo__mark {
+  margin-bottom: -7%;
+}
+
+@keyframes fazajooDoorCycle {
+  0%,
+  16% {
+    transform:
+      rotateY(0deg)
+      translateZ(0);
+  }
+
+  28%,
+  46% {
+    transform:
+      rotateY(-57deg)
+      translateZ(2px);
+  }
+
+  58%,
+  100% {
+    transform:
+      rotateY(0deg)
+      translateZ(0);
+  }
+}
+
+@keyframes fazajooDoorShadow {
+  0%,
+  16%,
+  58%,
+  100% {
+    transform:
+      scaleX(1);
+    opacity: 0.62;
+  }
+
+  28%,
+  46% {
+    transform:
+      scaleX(0.62)
+      translateX(-7%);
+    opacity: 0.3;
+  }
+}
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+  .fazajoo-animated-logo__door,
+  .fazajoo-animated-logo__shadow {
+    animation: none;
+  }
+}

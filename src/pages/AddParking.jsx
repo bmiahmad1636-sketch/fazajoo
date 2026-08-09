@@ -12,6 +12,9 @@ import ImageUploader from "../components/ImageUploader";
 import "./AddParking.css";
 
 const INITIAL_FORM = {
+  listingType: "offer",
+  category: "parking",
+  customCategory: "",
   title: "",
   city: "",
   area: "",
@@ -24,18 +27,51 @@ const INITIAL_FORM = {
 const STEPS = [
   {
     id: 1,
-    title: "مشخصات اصلی",
-    description: "عنوان، شهر و متراژ",
+    title: "نوع و مشخصات فضا",
+    description: "نوع آگهی، دسته‌بندی، عنوان و شهر",
   },
   {
     id: 2,
     title: "تصویر آگهی",
-    description: "افزودن تصویر پارکینگ",
+    description: "افزودن تصویر فضای موردنظر",
   },
   {
     id: 3,
-    title: "اطلاعات تماس",
+    title: "اطلاعات نهایی",
     description: "قیمت، تماس و توضیحات",
+  },
+];
+
+const SPACE_CATEGORIES = [
+  {
+    value: "parking",
+    label: "پارکینگ",
+    icon: "🚘",
+  },
+  {
+    value: "storage",
+    label: "انبار",
+    icon: "📦",
+  },
+  {
+    value: "warehouse",
+    label: "سوله",
+    icon: "🏭",
+  },
+  {
+    value: "shop",
+    label: "مغازه",
+    icon: "🏪",
+  },
+  {
+    value: "land",
+    label: "زمین",
+    icon: "🌱",
+  },
+  {
+    value: "other",
+    label: "سایر فضاها",
+    icon: "✨",
   },
 ];
 
@@ -50,6 +86,26 @@ function AddParking() {
   const progress = useMemo(() => {
     return (currentStep / STEPS.length) * 100;
   }, [currentStep]);
+
+  const selectedCategory = useMemo(() => {
+    return SPACE_CATEGORIES.find(
+      (item) => item.value === form.category
+    );
+  }, [form.category]);
+
+  const spaceLabel =
+    form.category === "other"
+      ? form.customCategory.trim() ||
+        "فضای دیگر"
+      : selectedCategory?.label ||
+        "فضا";
+
+  const isWantedAd =
+    form.listingType === "wanted";
+
+  const listingTypeLabel = isWantedAd
+    ? "دنبال فضا هستم"
+    : "فضا برای اجاره دارم";
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -81,6 +137,14 @@ function AddParking() {
     const newErrors = {};
 
     if (step === 1) {
+      if (
+        form.category === "other" &&
+        !form.customCategory.trim()
+      ) {
+        newErrors.customCategory =
+          "نوع فضای موردنظر را وارد کنید.";
+      }
+
       if (!form.title.trim()) {
         newErrors.title =
           "عنوان آگهی را وارد کنید.";
@@ -88,7 +152,7 @@ function AddParking() {
 
       if (!form.city.trim()) {
         newErrors.city =
-          "شهر پارکینگ را وارد کنید.";
+          "شهر موردنظر را وارد کنید.";
       }
 
       if (
@@ -101,9 +165,12 @@ function AddParking() {
     }
 
     if (step === 2) {
-      if (!form.imageUrl) {
+      if (
+        !isWantedAd &&
+        !form.imageUrl
+      ) {
         newErrors.imageUrl =
-          "برای آگهی یک تصویر انتخاب کنید.";
+          "برای آگهی فضای قابل اجاره یک تصویر انتخاب کنید.";
       }
     }
 
@@ -207,6 +274,22 @@ function AddParking() {
       await addDoc(
         collection(db, "spaces"),
         {
+          listingType:
+            form.listingType,
+
+          category:
+            form.category,
+
+          customCategory:
+            form.category === "other"
+              ? form.customCategory.trim()
+              : "",
+
+          categoryLabel:
+            spaceLabel,
+
+          status: "active",
+
           title: form.title.trim(),
           city: form.city.trim(),
 
@@ -277,19 +360,17 @@ function AddParking() {
           <div className="add-parking-hero__content">
             <div>
               <span className="add-parking-eyebrow">
-                ثبت فضای جدید
+                ثبت آگهی جدید
               </span>
 
               <h1>
-                پارکینگت را در فضاجو
-                معرفی کن
+                فضای مناسب را در فضاجو
+                پیدا کن یا معرفی کن
               </h1>
 
               <p>
-                اطلاعات پارکینگ را در سه
-                مرحله کوتاه وارد کن و
-                آگهی حرفه‌ای خودت را
-                منتشر کن.
+                چه فضایی برای اجاره داشته باشی و چه دنبال فضای مناسب باشی،
+                اطلاعات را در سه مرحله کوتاه وارد کن و آگهی خودت را منتشر کن.
               </p>
             </div>
 
@@ -437,21 +518,212 @@ function AddParking() {
                 {currentStep === 1 && (
                   <div className="add-parking-step-content">
                     <div className="add-parking-intro">
-                      <span>🚘</span>
+                      <span>
+                        {selectedCategory?.icon || "✨"}
+                      </span>
 
                       <div>
                         <strong>
-                          مشخصات اصلی
-                          پارکینگ
+                          نوع آگهی و فضای موردنظر
                         </strong>
 
                         <p>
-                          اطلاعاتی وارد کن
-                          که کاربران در نگاه
-                          اول باید بدانند.
+                          اول مشخص کن فضا برای اجاره داری یا دنبال اجاره فضا هستی،
+                          سپس نوع فضا را انتخاب کن.
                         </p>
                       </div>
                     </div>
+
+                    <div className="add-parking-field">
+                      <label>
+                        نوع آگهی
+                        <span>*</span>
+                      </label>
+
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(2, minmax(0, 1fr))",
+                          gap: "12px",
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm((currentForm) => ({
+                              ...currentForm,
+                              listingType: "offer",
+                            }))
+                          }
+                          disabled={loading}
+                          style={{
+                            minHeight: "72px",
+                            padding: "12px 14px",
+                            borderRadius: "16px",
+                            border:
+                              form.listingType === "offer"
+                                ? "2px solid #f47a1f"
+                                : "1px solid #eadfd7",
+                            background:
+                              form.listingType === "offer"
+                                ? "#fff4ea"
+                                : "white",
+                            color: "#342d29",
+                            cursor: "pointer",
+                            fontFamily: "inherit",
+                            fontWeight: "900",
+                          }}
+                        >
+                          🏠 فضا برای اجاره دارم
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm((currentForm) => ({
+                              ...currentForm,
+                              listingType: "wanted",
+                            }))
+                          }
+                          disabled={loading}
+                          style={{
+                            minHeight: "72px",
+                            padding: "12px 14px",
+                            borderRadius: "16px",
+                            border:
+                              form.listingType === "wanted"
+                                ? "2px solid #f47a1f"
+                                : "1px solid #eadfd7",
+                            background:
+                              form.listingType === "wanted"
+                                ? "#fff4ea"
+                                : "white",
+                            color: "#342d29",
+                            cursor: "pointer",
+                            fontFamily: "inherit",
+                            fontWeight: "900",
+                          }}
+                        >
+                          🔎 دنبال فضا برای اجاره هستم
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="add-parking-field">
+                      <label>
+                        نوع فضا
+                        <span>*</span>
+                      </label>
+
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns:
+                            "repeat(auto-fit, minmax(120px, 1fr))",
+                          gap: "10px",
+                        }}
+                      >
+                        {SPACE_CATEGORIES.map((category) => {
+                          const isSelected =
+                            form.category === category.value;
+
+                          return (
+                            <button
+                              type="button"
+                              key={category.value}
+                              disabled={loading}
+                              onClick={() => {
+                                setForm((currentForm) => ({
+                                  ...currentForm,
+                                  category: category.value,
+                                  customCategory:
+                                    category.value === "other"
+                                      ? currentForm.customCategory
+                                      : "",
+                                }));
+
+                                setErrors((currentErrors) => ({
+                                  ...currentErrors,
+                                  customCategory: "",
+                                }));
+                              }}
+                              style={{
+                                minHeight: "82px",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "6px",
+                                padding: "10px",
+                                borderRadius: "15px",
+                                border: isSelected
+                                  ? "2px solid #f47a1f"
+                                  : "1px solid #eadfd7",
+                                background: isSelected
+                                  ? "#fff4ea"
+                                  : "white",
+                                color: "#342d29",
+                                cursor: "pointer",
+                                fontFamily: "inherit",
+                                fontWeight: "900",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  fontSize: "1.45rem",
+                                }}
+                              >
+                                {category.icon}
+                              </span>
+
+                              {category.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {form.category === "other" && (
+                      <div className="add-parking-field">
+                        <label htmlFor="customCategory">
+                          نوع فضای دیگر
+                          <span>*</span>
+                        </label>
+
+                        <div
+                          className={[
+                            "add-parking-input",
+                            errors.customCategory
+                              ? "add-parking-input--error"
+                              : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" ")}
+                        >
+                          <span className="add-parking-input__icon">
+                            ✨
+                          </span>
+
+                          <input
+                            id="customCategory"
+                            name="customCategory"
+                            type="text"
+                            placeholder="مثلاً حیاط، زیرزمین، اتاق کار یا محوطه باز"
+                            value={form.customCategory}
+                            onChange={handleChange}
+                            disabled={loading}
+                            maxLength={50}
+                          />
+                        </div>
+
+                        {errors.customCategory && (
+                          <span className="add-parking-error">
+                            {errors.customCategory}
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     <div className="add-parking-field">
                       <label htmlFor="title">
@@ -477,7 +749,11 @@ function AddParking() {
                           id="title"
                           name="title"
                           type="text"
-                          placeholder="مثلاً پارکینگ مسقف در مرکز شهر"
+                          placeholder={
+                            isWantedAd
+                              ? `مثلاً دنبال ${spaceLabel} در مرکز شهر هستم`
+                              : `مثلاً ${spaceLabel} مناسب در مرکز شهر`
+                          }
                           value={form.title}
                           onChange={handleChange}
                           disabled={loading}
@@ -600,13 +876,15 @@ function AddParking() {
 
                       <div>
                         <strong>
-                          تصویر اصلی آگهی
+                          {isWantedAd
+                            ? "تصویر آگهی (اختیاری)"
+                            : "تصویر اصلی فضا"}
                         </strong>
 
                         <p>
-                          یک تصویر روشن،
-                          واضح و واقعی از
-                          پارکینگ انتخاب کن.
+                          {isWantedAd
+                            ? "اگر تصویر یا نمونه‌ای از فضای مدنظرت داری می‌توانی اضافه کنی؛ برای آگهی درخواست، تصویر اجباری نیست."
+                            : `یک تصویر روشن، واضح و واقعی از ${spaceLabel} انتخاب کن.`}
                         </p>
                       </div>
                     </div>
@@ -680,7 +958,7 @@ function AddParking() {
                         </strong>
 
                         <p>
-                          فضای پارکینگ مشخص
+                          فضای موردنظر مشخص
                           باشد.
                         </p>
                       </div>
@@ -722,7 +1000,9 @@ function AddParking() {
                     <div className="add-parking-fields-grid">
                       <div className="add-parking-field">
                         <label htmlFor="price">
-                          قیمت
+                          {isWantedAd
+                            ? "بودجه"
+                            : "قیمت"}
                           <span>*</span>
                         </label>
 
@@ -744,7 +1024,11 @@ function AddParking() {
                             id="price"
                             name="price"
                             type="text"
-                            placeholder="مثلاً ماهانه ۳ میلیون"
+                            placeholder={
+                              isWantedAd
+                                ? "مثلاً تا ماهانه ۳ میلیون"
+                                : "مثلاً ماهانه ۳ میلیون"
+                            }
                             value={form.price}
                             onChange={
                               handleChange
@@ -823,7 +1107,11 @@ function AddParking() {
                         <textarea
                           id="description"
                           name="description"
-                          placeholder="درباره موقعیت، دسترسی، مسقف بودن، امنیت و سایر ویژگی‌های پارکینگ توضیح بده..."
+                          placeholder={
+                            isWantedAd
+                              ? `درباره ${spaceLabel} موردنیازت، محدوده، متراژ، امکانات و شرایط مدنظر توضیح بده...`
+                              : `درباره ${spaceLabel}، موقعیت، دسترسی، امکانات و سایر ویژگی‌ها توضیح بده...`
+                          }
                           value={
                             form.description
                           }
@@ -899,8 +1187,41 @@ function AddParking() {
                         <div className="add-parking-preview__content">
                           <span>
                             {form.city ||
-                              "شهر پارکینگ"}
+                              "شهر موردنظر"}
                           </span>
+
+                          <div
+                            style={{
+                              display: "flex",
+                              flexWrap: "wrap",
+                              gap: "7px",
+                              marginBottom: "6px",
+                            }}
+                          >
+                            <small
+                              style={{
+                                padding: "4px 8px",
+                                borderRadius: "999px",
+                                background: "#fff1e6",
+                                color: "#d95f0b",
+                                fontWeight: "900",
+                              }}
+                            >
+                              {listingTypeLabel}
+                            </small>
+
+                            <small
+                              style={{
+                                padding: "4px 8px",
+                                borderRadius: "999px",
+                                background: "#f8f5f2",
+                                color: "#65574f",
+                                fontWeight: "900",
+                              }}
+                            >
+                              {spaceLabel}
+                            </small>
+                          </div>
 
                           <h3>
                             {form.title ||

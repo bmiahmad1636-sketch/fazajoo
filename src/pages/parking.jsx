@@ -22,6 +22,16 @@ function Parking({ parkings = [] }) {
   ] = useState("");
 
   const [
+    selectedListingType,
+    setSelectedListingType,
+  ] = useState("");
+
+  const [
+    selectedCategory,
+    setSelectedCategory,
+  ] = useState("");
+
+  const [
     minimumPrice,
     setMinimumPrice,
   ] = useState("");
@@ -133,6 +143,25 @@ function Parking({ parkings = [] }) {
     );
   };
 
+  const categories = [
+    { value: "parking", label: "پارکینگ", icon: "🚘" },
+    { value: "storage", label: "انبار", icon: "📦" },
+    { value: "warehouse", label: "سوله", icon: "🏭" },
+    { value: "shop", label: "مغازه", icon: "🏪" },
+    { value: "land", label: "زمین", icon: "🌱" },
+    { value: "other", label: "سایر فضاها", icon: "✨" },
+  ];
+
+  const getItemCategory = (item) => {
+    // آگهی‌های قدیمی قبل از چنددسته‌ای شدن فضاجو، پارکینگ محسوب می‌شوند.
+    return item.category || "parking";
+  };
+
+  const getItemListingType = (item) => {
+    // آگهی‌های قدیمی از نوع «فضا برای اجاره دارم» هستند.
+    return item.listingType || "offer";
+  };
+
   const publicParkings =
     useMemo(() => {
       return parkings.filter(
@@ -193,8 +222,32 @@ function Parking({ parkings = [] }) {
                 item.price
               );
 
+            const category =
+              getItemCategory(item);
+
+            const listingType =
+              getItemListingType(item);
+
+            const categoryLabel =
+              String(
+                item.categoryLabel ||
+                  (category === "parking"
+                    ? "پارکینگ"
+                    : "")
+              );
+
+            const customCategory =
+              String(
+                item.customCategory || ""
+              );
+
+            const description =
+              String(
+                item.description || ""
+              );
+
             const searchableText =
-              `${title} ${city}`.toLocaleLowerCase(
+              `${title} ${city} ${categoryLabel} ${customCategory} ${description}`.toLocaleLowerCase(
                 "fa-IR"
               );
 
@@ -211,6 +264,18 @@ function Parking({ parkings = [] }) {
               city ===
                 selectedCity;
 
+            const matchesListingType =
+              selectedListingType ===
+                "" ||
+              listingType ===
+                selectedListingType;
+
+            const matchesCategory =
+              selectedCategory ===
+                "" ||
+              category ===
+                selectedCategory;
+
             const matchesMinimum =
               minimum === null ||
               itemPrice >=
@@ -224,6 +289,8 @@ function Parking({ parkings = [] }) {
             return (
               matchesSearch &&
               matchesCity &&
+              matchesListingType &&
+              matchesCategory &&
               matchesMinimum &&
               matchesMaximum
             );
@@ -275,6 +342,8 @@ function Parking({ parkings = [] }) {
       publicParkings,
       search,
       selectedCity,
+      selectedListingType,
+      selectedCategory,
       minimumPrice,
       maximumPrice,
       sortType,
@@ -282,6 +351,8 @@ function Parking({ parkings = [] }) {
 
   const clearFilters = () => {
     setSelectedCity("");
+    setSelectedListingType("");
+    setSelectedCategory("");
     setMinimumPrice("");
     setMaximumPrice("");
     setSortType("");
@@ -289,6 +360,8 @@ function Parking({ parkings = [] }) {
 
   const hasActiveFilters =
     selectedCity !== "" ||
+    selectedListingType !== "" ||
+    selectedCategory !== "" ||
     minimumPrice !== "" ||
     maximumPrice !== "" ||
     sortType !== "";
@@ -302,19 +375,19 @@ function Parking({ parkings = [] }) {
         <div className="container parking-page__hero-content">
           <div>
             <span className="parking-page__eyebrow">
-              <span>🚘</span>
-              انتخاب مطمئن برای خودروی شما
+              <span>✨</span>
+              بازار تخصصی اجاره فضا
             </span>
 
             <h1 className="parking-page__title">
-              پارکینگ مناسب خودت را
+              فضای مناسب خودت را
               <span> سریع پیدا کن</span>
             </h1>
 
             <p className="parking-page__description">
-              بین آگهی‌های ثبت‌شده جستجو کن،
-              قیمت‌ها را مقایسه کن و بهترین
-              فضای پارک را انتخاب کن.
+              بین انواع فضاها جستجو کن؛
+              چه فضای خالی برای اجاره بخواهی،
+              چه دنبال فضای مناسب باشی.
             </p>
           </div>
 
@@ -348,13 +421,13 @@ function Parking({ parkings = [] }) {
                 </span>
 
                 <h2>
-                  فیلتر پارکینگ‌ها
+                  فیلتر آگهی‌ها
                 </h2>
 
                 <p>
-                  با انتخاب شهر، قیمت و
-                  مرتب‌سازی، نتیجه مناسب‌تر را
-                  پیدا کن.
+                  نوع آگهی، نوع فضا، شهر و
+                  محدوده قیمت را انتخاب کن تا
+                  سریع‌تر به نتیجه برسی.
                 </p>
               </div>
 
@@ -372,6 +445,72 @@ function Parking({ parkings = [] }) {
             </div>
 
             <div className="parking-filter__grid">
+              <label className="parking-filter__field">
+                <span>
+                  <span className="parking-filter__field-icon parking-filter__field-icon--orange">
+                    ↔
+                  </span>
+
+                  نوع آگهی
+                </span>
+
+                <select
+                  value={selectedListingType}
+                  onChange={(event) =>
+                    setSelectedListingType(
+                      event.target.value
+                    )
+                  }
+                >
+                  <option value="">
+                    همه آگهی‌ها
+                  </option>
+
+                  <option value="offer">
+                    فضا برای اجاره دارم
+                  </option>
+
+                  <option value="wanted">
+                    دنبال فضا هستم
+                  </option>
+                </select>
+              </label>
+
+              <label className="parking-filter__field">
+                <span>
+                  <span className="parking-filter__field-icon parking-filter__field-icon--cyan">
+                    ◫
+                  </span>
+
+                  نوع فضا
+                </span>
+
+                <select
+                  value={selectedCategory}
+                  onChange={(event) =>
+                    setSelectedCategory(
+                      event.target.value
+                    )
+                  }
+                >
+                  <option value="">
+                    همه فضاها
+                  </option>
+
+                  {categories.map(
+                    (category) => (
+                      <option
+                        key={category.value}
+                        value={category.value}
+                      >
+                        {category.icon}{" "}
+                        {category.label}
+                      </option>
+                    )
+                  )}
+                </select>
+              </label>
+
               <label className="parking-filter__field">
                 <span>
                   <span className="parking-filter__field-icon parking-filter__field-icon--purple">
@@ -528,7 +667,7 @@ function Parking({ parkings = [] }) {
               </span>
 
               <h2>
-                پارکینگ‌های موجود
+                آگهی‌های فضا
               </h2>
             </div>
 
@@ -586,13 +725,13 @@ function Parking({ parkings = [] }) {
               </span>
 
               <h3>
-                پارکینگی مطابق فیلترهای انتخابی
+                آگهی‌ای مطابق فیلترهای انتخابی
                 وجود ندارد
               </h3>
 
               <p>
-                محدوده قیمت یا شهر انتخاب‌شده
-                را تغییر بده و دوباره جستجو کن.
+                نوع آگهی، نوع فضا، شهر یا محدوده
+                قیمت را تغییر بده و دوباره جستجو کن.
               </p>
 
               <button
@@ -613,17 +752,17 @@ function Parking({ parkings = [] }) {
 
             <div className="parking-add-banner__content">
               <span>
-                جای پارک خالی داری؟
+                فضایی داری یا دنبال فضا هستی؟
               </span>
 
               <h3>
-                پارکینگت را در فضاجو آگهی کن
+                در فضاجو آگهی خودت را ثبت کن
               </h3>
 
               <p>
-                در چند دقیقه آگهی بساز و فضای
-                خالی خودت را به متقاضیان معرفی
-                کن.
+                در چند دقیقه آگهی بساز؛ فضای
+                خالی‌ات را معرفی کن یا نیازت به
+                یک فضای مناسب را ثبت کن.
               </p>
             </div>
 

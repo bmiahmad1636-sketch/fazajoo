@@ -1,6 +1,5 @@
 import {
   useEffect,
-  useMemo,
   useState,
 } from "react";
 
@@ -22,7 +21,6 @@ import {
 
 import Header from "./components/Header";
 import Hero from "./components/Hero";
-import SearchFilter from "./components/SearchFilter";
 
 import Parking from "./pages/parking";
 import ParkingDetails from "./pages/ParkingDetails";
@@ -119,116 +117,9 @@ function Home({
   parkingsLoading,
   parkingsError,
 }) {
-  const [searchText, setSearchText] =
-    useState("");
-
-  const [selectedCity, setSelectedCity] =
-    useState("");
-
-  const [minPrice, setMinPrice] =
-    useState("");
-
-  const [maxPrice, setMaxPrice] =
-    useState("");
-
-  const [minArea, setMinArea] =
-    useState("");
-
-  const [maxArea, setMaxArea] =
-    useState("");
-
-  const filteredParkings = useMemo(() => {
-    const normalizedSearch = searchText
-      .trim()
-      .toLowerCase();
-
-    return parkings.filter((parking) => {
-      const title = String(
-        parking.title || ""
-      ).toLowerCase();
-
-      const description = String(
-        parking.description || ""
-      ).toLowerCase();
-
-      const city = String(
-        parking.city || ""
-      );
-
-      const parkingPrice =
-        convertToNumber(parking.price);
-
-      const parkingArea =
-        convertToNumber(parking.area);
-
-      const matchesSearch =
-        !normalizedSearch ||
-        title.includes(normalizedSearch) ||
-        description.includes(
-          normalizedSearch
-        ) ||
-        city
-          .toLowerCase()
-          .includes(normalizedSearch);
-
-      const matchesCity =
-        !selectedCity ||
-        city === selectedCity;
-
-      const matchesMinPrice =
-        !minPrice ||
-        parkingPrice >= Number(minPrice);
-
-      const matchesMaxPrice =
-        !maxPrice ||
-        parkingPrice <= Number(maxPrice);
-
-      const matchesMinArea =
-        !minArea ||
-        parkingArea >= Number(minArea);
-
-      const matchesMaxArea =
-        !maxArea ||
-        parkingArea <= Number(maxArea);
-
-      return (
-        matchesSearch &&
-        matchesCity &&
-        matchesMinPrice &&
-        matchesMaxPrice &&
-        matchesMinArea &&
-        matchesMaxArea
-      );
-    });
-  }, [
-    parkings,
-    searchText,
-    selectedCity,
-    minPrice,
-    maxPrice,
-    minArea,
-    maxArea,
-  ]);
-
   return (
     <>
       <Hero />
-
-      <SearchFilter
-        parkings={parkings}
-        searchText={searchText}
-        setSearchText={setSearchText}
-        selectedCity={selectedCity}
-        setSelectedCity={setSelectedCity}
-        minPrice={minPrice}
-        setMinPrice={setMinPrice}
-        maxPrice={maxPrice}
-        setMaxPrice={setMaxPrice}
-        minArea={minArea}
-        setMinArea={setMinArea}
-        maxArea={maxArea}
-        setMaxArea={setMaxArea}
-      />
 
       {parkingsError && (
         <div
@@ -260,7 +151,7 @@ function Home({
       >
         {parkingsLoading
           ? "در حال دریافت آگهی‌ها..."
-          : `تعداد نتایج: ${filteredParkings.length}`}
+          : `تعداد آگهی‌ها: ${parkings.length}`}
       </div>
 
       {parkingsLoading ? (
@@ -276,9 +167,9 @@ function Home({
         >
           در حال دریافت آگهی‌ها...
         </div>
-      ) : filteredParkings.length > 0 ? (
+      ) : parkings.length > 0 ? (
         <Parking
-          parkings={filteredParkings}
+          parkings={parkings}
         />
       ) : (
         <div
@@ -294,8 +185,7 @@ function Home({
             fontSize: "18px",
           }}
         >
-          آگهی‌ای با این مشخصات پیدا
-          نشد.
+          هنوز آگهی‌ای ثبت نشده است.
         </div>
       )}
     </>

@@ -1391,3 +1391,447 @@
     transition: none;
   }
 }
+
+/* =========================================================
+   ParkingDetails Compact Layout
+   نسخه فشرده‌تر برای کاهش اسکرول بدون تغییر ساختار JSX
+   ========================================================= */
+
+.parking-details-hero {
+  padding: 20px 0 62px;
+}
+
+.parking-details-toolbar {
+  margin-bottom: 28px;
+}
+
+.parking-details-toolbar__back,
+.parking-details-toolbar__actions button {
+  min-height: 38px;
+  padding: 7px 12px;
+}
+
+.parking-details-hero__content {
+  gap: 28px;
+}
+
+.parking-details-hero__badges {
+  margin-bottom: 10px;
+}
+
+.parking-details-badge {
+  min-height: 30px;
+  padding: 5px 10px;
+  font-size: 0.72rem;
+}
+
+.parking-details-hero h1 {
+  max-width: 760px;
+  margin-bottom: 7px;
+  font-size: clamp(
+    1.9rem,
+    4vw,
+    3.45rem
+  );
+  line-height: 1.22;
+}
+
+.parking-details-hero__content > div:first-child > p {
+  font-size: 0.9rem;
+}
+
+.parking-details-hero__price {
+  min-width: 210px;
+  padding: 15px 17px;
+  border-radius: 18px;
+}
+
+.parking-details-hero__price strong {
+  margin: 2px 0;
+  font-size: 1.25rem;
+}
+
+.parking-details-content {
+  margin-top: -36px;
+  padding-bottom: 48px;
+}
+
+.parking-details-layout {
+  grid-template-columns:
+    minmax(0, 1fr) 330px;
+  gap: 20px;
+}
+
+.parking-details-main {
+  gap: 16px;
+}
+
+.parking-details-gallery,
+.parking-details-section,
+.parking-details-location,
+.parking-contact-card,
+.parking-owner-card,
+.parking-owner-note {
+  border-radius: 22px;
+}
+
+.parking-details-gallery {
+  height: 340px;
+}
+
+.parking-details-gallery__placeholder > span {
+  width: 66px;
+  height: 66px;
+  margin-bottom: 9px;
+  border-radius: 20px;
+  font-size: 2rem;
+}
+
+.parking-details-gallery__placeholder strong {
+  font-size: 1.05rem;
+}
+
+.parking-details-gallery__placeholder p {
+  font-size: 0.82rem;
+}
+
+.parking-details-gallery__overlay {
+  right: 15px;
+  bottom: 15px;
+  padding: 6px 11px;
+}
+
+.parking-details-section {
+  padding: 19px 21px;
+}
+
+.parking-details-section__heading {
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.parking-details-section__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  font-size: 1rem;
+}
+
+.parking-details-section__heading h2 {
+  font-size: 1.12rem;
+}
+
+.parking-details-features {
+  gap: 10px;
+}
+
+.parking-details-feature {
+  gap: 10px;
+  padding: 11px 13px;
+  border-radius: 14px;
+}
+
+.parking-details-feature__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  font-size: 0.9rem;
+}
+
+.parking-details-feature div span {
+  font-size: 0.66rem;
+}
+
+.parking-details-feature strong {
+  font-size: 0.82rem;
+}
+
+.parking-details-description {
+  font-size: 0.9rem;
+  line-height: 1.9;
+}
+
+.parking-details-location {
+  grid-template-columns: 1fr 120px;
+  gap: 14px;
+  min-height: 145px;
+  padding: 18px 21px;
+}
+
+.parking-details-location h2 {
+  margin: 2px 0 5px;
+  font-size: 1.2rem;
+}
+
+.parking-details-location p {
+  max-width: 560px;
+  font-size: 0.83rem;
+  line-height: 1.7;
+}
+
+.parking-details-location__visual {
+  width: 92px;
+  height: 92px;
+  font-size: 1.9rem;
+  box-shadow:
+    0 14px 30px
+      rgba(244, 122, 31, 0.18);
+}
+
+.parking-details-location__ring--one {
+  width: 116px;
+  height: 116px;
+}
+
+.parking-details-location__ring--two {
+  width: 140px;
+  height: 140px;
+}
+
+.parking-details-sidebar {
+  top: 82px;
+  gap: 13px;
+}
+
+.parking-contact-card {
+  padding: 18px;
+}
+
+.parking-contact-card::before {
+  height: 3px;
+  margin: -18px -18px 14px;
+}
+
+.parking-contact-card__header h2 {
+  margin: 3px 0 5px;
+  font-size: 1.15rem;
+}
+
+.parking-contact-card__header p {
+  margin-bottom: 13px;
+  font-size: 0.79rem;
+  line-height: 1.65;
+}
+
+.parking-contact-card__phone {
+  gap: 8px;
+}
+
+.parking-contact-card__phone-button {
+  min-height: 44px;
+  padding: 8px 13px;
+  border-radius: 12px;
+  font-size: 0.81rem;
+}
+
+.parking-contact-card__phone-number {
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.parking-contact-card__divider {
+  margin: 14px 0;
+}
+
+.parking-contact-card__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+}
+
+.parking-contact-card__notice {
+  margin-top: 12px;
+  padding: 9px 10px;
+}
+
+.parking-owner-card {
+  padding: 15px;
+}
+
+.parking-owner-card__heading {
+  margin-bottom: 11px;
+}
+
+.parking-owner-card button {
+  min-height: 40px;
+}
+
+.parking-owner-note {
+  padding: 12px;
+}
+
+/* تبلت */
+@media (max-width: 1000px) {
+  .parking-details-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .parking-details-sidebar {
+    top: auto;
+  }
+}
+
+/* موبایل و تبلت کوچک */
+@media (max-width: 760px) {
+  .parking-details-hero {
+    padding: 18px 0 50px;
+  }
+
+  .parking-details-toolbar {
+    margin-bottom: 20px;
+  }
+
+  .parking-details-hero__content {
+    gap: 18px;
+  }
+
+  .parking-details-content {
+    margin-top: -28px;
+  }
+
+  .parking-details-gallery {
+    height: 290px;
+  }
+
+  .parking-details-section {
+    padding: 17px;
+  }
+
+  .parking-details-location {
+    min-height: auto;
+    padding: 17px;
+  }
+
+  .parking-details-location__visual {
+    width: 82px;
+    height: 82px;
+  }
+
+  .parking-details-location__ring--one {
+    width: 104px;
+    height: 104px;
+  }
+
+  .parking-details-location__ring--two {
+    width: 126px;
+    height: 126px;
+  }
+}
+
+@media (max-width: 560px) {
+  .parking-details-hero h1 {
+    font-size: 1.85rem;
+  }
+
+  .parking-details-gallery {
+    height: 240px;
+  }
+
+  .parking-details-section,
+  .parking-details-location {
+    padding: 15px;
+    border-radius: 18px;
+  }
+
+  .parking-details-feature {
+    padding: 10px 11px;
+  }
+
+  .parking-contact-card {
+    padding: 15px;
+  }
+
+  .parking-contact-card::before {
+    margin: -15px -15px 12px;
+  }
+}
+
+
+/* ===== فضای خالی کوچک‌تر برای آگهی بدون تصویر ===== */
+
+.parking-details-gallery--empty {
+  height: 175px;
+  min-height: 0;
+}
+
+.parking-details-gallery--empty::after {
+  display: none;
+}
+
+.parking-details-gallery--empty
+.parking-details-gallery__placeholder {
+  min-height: 175px;
+
+  flex-direction: row;
+  gap: 14px;
+
+  padding: 20px 24px;
+
+  text-align: right;
+}
+
+.parking-details-gallery--empty
+.parking-details-gallery__placeholder > span {
+  flex: 0 0 auto;
+
+  width: 58px;
+  height: 58px;
+
+  margin: 0;
+
+  border-radius: 17px;
+
+  font-size: 1.7rem;
+}
+
+.parking-details-gallery--empty
+.parking-details-gallery__placeholder strong {
+  font-size: 1rem;
+}
+
+.parking-details-gallery--empty
+.parking-details-gallery__placeholder p {
+  margin: 2px 0 0;
+
+  font-size: 0.78rem;
+}
+
+.parking-details-gallery--empty
+.parking-details-gallery__overlay {
+  display: none;
+}
+
+/* برای درخواست فضا بدون تصویر، حتی جمع‌وجورتر */
+.parking-details-gallery--empty.parking-details-gallery--wanted {
+  height: 150px;
+}
+
+.parking-details-gallery--empty.parking-details-gallery--wanted
+.parking-details-gallery__placeholder {
+  min-height: 150px;
+}
+
+@media (max-width: 760px) {
+  .parking-details-gallery--empty,
+  .parking-details-gallery--empty.parking-details-gallery--wanted {
+    height: 145px;
+  }
+
+  .parking-details-gallery--empty
+  .parking-details-gallery__placeholder,
+  .parking-details-gallery--empty.parking-details-gallery--wanted
+  .parking-details-gallery__placeholder {
+    min-height: 145px;
+  }
+}
+
+@media (max-width: 560px) {
+  .parking-details-gallery--empty
+  .parking-details-gallery__placeholder {
+    padding: 16px;
+
+    flex-direction: column;
+
+    text-align: center;
+  }
+}
