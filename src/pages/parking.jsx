@@ -1,45 +1,64 @@
 import { useMemo, useState } from "react";
+
 import {
   Link,
   useSearchParams,
 } from "react-router-dom";
+
 import ParkingCard from "../components/ParkingCard";
 import "./Parking.css";
 
 function Parking({ parkings = [] }) {
-  const [searchParams] = useSearchParams();
+  const [searchParams] =
+    useSearchParams();
 
   const search = (
     searchParams.get("search") || ""
   ).trim();
 
-  const [selectedCity, setSelectedCity] =
-    useState("");
+  const [
+    selectedCity,
+    setSelectedCity,
+  ] = useState("");
 
-  const [minimumPrice, setMinimumPrice] =
-    useState("");
+  const [
+    minimumPrice,
+    setMinimumPrice,
+  ] = useState("");
 
-  const [maximumPrice, setMaximumPrice] =
-    useState("");
+  const [
+    maximumPrice,
+    setMaximumPrice,
+  ] = useState("");
 
-  const [sortType, setSortType] =
-    useState("");
+  const [
+    sortType,
+    setSortType,
+  ] = useState("");
 
-  const convertToEnglishDigits = (value) => {
+  const convertToEnglishDigits = (
+    value
+  ) => {
     return String(value || "")
       .replace(
         /[۰-۹]/g,
         (digit) =>
-          "۰۱۲۳۴۵۶۷۸۹".indexOf(digit)
+          "۰۱۲۳۴۵۶۷۸۹".indexOf(
+            digit
+          )
       )
       .replace(
         /[٠-٩]/g,
         (digit) =>
-          "٠١٢٣٤٥٦٧٨٩".indexOf(digit)
+          "٠١٢٣٤٥٦٧٨٩".indexOf(
+            digit
+          )
       );
   };
 
-  const getNumericPrice = (price) => {
+  const getNumericPrice = (
+    price
+  ) => {
     if (
       price === null ||
       price === undefined
@@ -47,155 +66,219 @@ function Parking({ parkings = [] }) {
       return 0;
     }
 
-    if (typeof price === "number") {
+    if (
+      typeof price === "number"
+    ) {
       return price;
     }
 
     const normalizedPrice =
-      convertToEnglishDigits(price)
+      convertToEnglishDigits(
+        price
+      )
         .replace(/,/g, "")
         .replace(/،/g, "")
         .trim();
 
     const numberMatch =
-      normalizedPrice.match(/[\d.]+/);
+      normalizedPrice.match(
+        /[\d.]+/
+      );
 
     if (!numberMatch) {
       return 0;
     }
 
-    let numericPrice = Number(
-      numberMatch[0]
-    );
+    let numericPrice =
+      Number(
+        numberMatch[0]
+      );
 
     if (
-      normalizedPrice.includes("میلیارد")
+      normalizedPrice.includes(
+        "میلیارد"
+      )
     ) {
-      numericPrice *= 1_000_000_000;
+      numericPrice *=
+        1_000_000_000;
     } else if (
-      normalizedPrice.includes("میلیون")
+      normalizedPrice.includes(
+        "میلیون"
+      )
     ) {
-      numericPrice *= 1_000_000;
+      numericPrice *=
+        1_000_000;
     } else if (
-      normalizedPrice.includes("هزار")
+      normalizedPrice.includes(
+        "هزار"
+      )
     ) {
-      numericPrice *= 1_000;
+      numericPrice *=
+        1_000;
     }
 
     return numericPrice;
   };
 
-  const normalizePriceInput = (value) => {
+  const normalizePriceInput = (
+    value
+  ) => {
     return Number(
-      convertToEnglishDigits(value)
+      convertToEnglishDigits(
+        value
+      )
         .replace(/,/g, "")
         .replace(/،/g, "")
         .trim()
     );
   };
 
+  const publicParkings =
+    useMemo(() => {
+      return parkings.filter(
+        (item) =>
+          item.status !==
+          "inactive"
+      );
+    }, [parkings]);
+
   const cities = useMemo(() => {
     return [
       ...new Set(
-        parkings
+        publicParkings
           .map((item) =>
             item.city?.trim()
           )
           .filter(Boolean)
       ),
     ];
-  }, [parkings]);
+  }, [publicParkings]);
 
-  const filteredParkings = useMemo(() => {
-    const minimum = minimumPrice
-      ? normalizePriceInput(minimumPrice)
-      : null;
+  const filteredParkings =
+    useMemo(() => {
+      const minimum =
+        minimumPrice
+          ? normalizePriceInput(
+              minimumPrice
+            )
+          : null;
 
-    const maximum = maximumPrice
-      ? normalizePriceInput(maximumPrice)
-      : null;
+      const maximum =
+        maximumPrice
+          ? normalizePriceInput(
+              maximumPrice
+            )
+          : null;
 
-    const normalizedSearch =
-      search.toLocaleLowerCase("fa-IR");
-
-    const results = parkings.filter(
-      (item) => {
-        const title = String(
-          item.title || ""
+      const normalizedSearch =
+        search.toLocaleLowerCase(
+          "fa-IR"
         );
 
-        const city = String(
-          item.city || ""
+      const results =
+        publicParkings.filter(
+          (item) => {
+            const title =
+              String(
+                item.title || ""
+              );
+
+            const city =
+              String(
+                item.city || ""
+              );
+
+            const itemPrice =
+              getNumericPrice(
+                item.price
+              );
+
+            const searchableText =
+              `${title} ${city}`.toLocaleLowerCase(
+                "fa-IR"
+              );
+
+            const matchesSearch =
+              normalizedSearch ===
+                "" ||
+              searchableText.includes(
+                normalizedSearch
+              );
+
+            const matchesCity =
+              selectedCity ===
+                "" ||
+              city ===
+                selectedCity;
+
+            const matchesMinimum =
+              minimum === null ||
+              itemPrice >=
+                minimum;
+
+            const matchesMaximum =
+              maximum === null ||
+              itemPrice <=
+                maximum;
+
+            return (
+              matchesSearch &&
+              matchesCity &&
+              matchesMinimum &&
+              matchesMaximum
+            );
+          }
         );
 
-        const itemPrice =
-          getNumericPrice(item.price);
-
-        const searchableText =
-          `${title} ${city}`.toLocaleLowerCase(
-            "fa-IR"
-          );
-
-        const matchesSearch =
-          normalizedSearch === "" ||
-          searchableText.includes(
-            normalizedSearch
-          );
-
-        const matchesCity =
-          selectedCity === "" ||
-          city === selectedCity;
-
-        const matchesMinimum =
-          minimum === null ||
-          itemPrice >= minimum;
-
-        const matchesMaximum =
-          maximum === null ||
-          itemPrice <= maximum;
-
-        return (
-          matchesSearch &&
-          matchesCity &&
-          matchesMinimum &&
-          matchesMaximum
+      if (
+        sortType ===
+        "lowest"
+      ) {
+        return [
+          ...results,
+        ].sort(
+          (
+            firstItem,
+            secondItem
+          ) =>
+            getNumericPrice(
+              firstItem.price
+            ) -
+            getNumericPrice(
+              secondItem.price
+            )
         );
       }
-    );
 
-    if (sortType === "lowest") {
-      return [...results].sort(
-        (firstItem, secondItem) =>
-          getNumericPrice(
-            firstItem.price
-          ) -
-          getNumericPrice(
-            secondItem.price
-          )
-      );
-    }
+      if (
+        sortType ===
+        "highest"
+      ) {
+        return [
+          ...results,
+        ].sort(
+          (
+            firstItem,
+            secondItem
+          ) =>
+            getNumericPrice(
+              secondItem.price
+            ) -
+            getNumericPrice(
+              firstItem.price
+            )
+        );
+      }
 
-    if (sortType === "highest") {
-      return [...results].sort(
-        (firstItem, secondItem) =>
-          getNumericPrice(
-            secondItem.price
-          ) -
-          getNumericPrice(
-            firstItem.price
-          )
-      );
-    }
-
-    return results;
-  }, [
-    parkings,
-    search,
-    selectedCity,
-    minimumPrice,
-    maximumPrice,
-    sortType,
-  ]);
+      return results;
+    }, [
+      publicParkings,
+      search,
+      selectedCity,
+      minimumPrice,
+      maximumPrice,
+      sortType,
+    ]);
 
   const clearFilters = () => {
     setSelectedCity("");
@@ -242,12 +325,14 @@ function Parking({ parkings = [] }) {
 
             <div>
               <strong>
-                {parkings.length.toLocaleString(
+                {publicParkings.length.toLocaleString(
                   "fa-IR"
                 )}
               </strong>
 
-              <span>آگهی ثبت‌شده</span>
+              <span>
+                آگهی ثبت‌شده
+              </span>
             </div>
           </div>
         </div>
@@ -277,7 +362,9 @@ function Parking({ parkings = [] }) {
                 <button
                   type="button"
                   className="parking-filter__clear-top"
-                  onClick={clearFilters}
+                  onClick={
+                    clearFilters
+                  }
                 >
                   پاک‌کردن همه
                 </button>
@@ -295,10 +382,15 @@ function Parking({ parkings = [] }) {
                 </span>
 
                 <select
-                  value={selectedCity}
-                  onChange={(event) =>
+                  value={
+                    selectedCity
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setSelectedCity(
-                      event.target.value
+                      event.target
+                        .value
                     )
                   }
                 >
@@ -306,14 +398,20 @@ function Parking({ parkings = [] }) {
                     همه شهرها
                   </option>
 
-                  {cities.map((city) => (
-                    <option
-                      key={city}
-                      value={city}
-                    >
-                      {city}
-                    </option>
-                  ))}
+                  {cities.map(
+                    (city) => (
+                      <option
+                        key={
+                          city
+                        }
+                        value={
+                          city
+                        }
+                      >
+                        {city}
+                      </option>
+                    )
+                  )}
                 </select>
               </label>
 
@@ -329,10 +427,15 @@ function Parking({ parkings = [] }) {
                 <input
                   type="text"
                   inputMode="numeric"
-                  value={minimumPrice}
-                  onChange={(event) =>
+                  value={
+                    minimumPrice
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setMinimumPrice(
-                      event.target.value
+                      event.target
+                        .value
                     )
                   }
                   placeholder="مثلاً ۵۰۰۰۰"
@@ -351,10 +454,15 @@ function Parking({ parkings = [] }) {
                 <input
                   type="text"
                   inputMode="numeric"
-                  value={maximumPrice}
-                  onChange={(event) =>
+                  value={
+                    maximumPrice
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setMaximumPrice(
-                      event.target.value
+                      event.target
+                        .value
                     )
                   }
                   placeholder="مثلاً ۲۰۰۰۰۰"
@@ -371,10 +479,15 @@ function Parking({ parkings = [] }) {
                 </span>
 
                 <select
-                  value={sortType}
-                  onChange={(event) =>
+                  value={
+                    sortType
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setSortType(
-                      event.target.value
+                      event.target
+                        .value
                     )
                   }
                 >
@@ -395,8 +508,12 @@ function Parking({ parkings = [] }) {
               <button
                 type="button"
                 className="parking-filter__clear-button"
-                onClick={clearFilters}
-                disabled={!hasActiveFilters}
+                onClick={
+                  clearFilters
+                }
+                disabled={
+                  !hasActiveFilters
+                }
               >
                 <span>↻</span>
                 پاک‌کردن فیلترها
@@ -422,7 +539,9 @@ function Parking({ parkings = [] }) {
                 )}
               </strong>
 
-              <span>آگهی پیدا شد</span>
+              <span>
+                آگهی پیدا شد
+              </span>
             </div>
           </div>
 
@@ -432,18 +551,26 @@ function Parking({ parkings = [] }) {
 
               <p>
                 نتایج جستجو برای:
-                <strong> «{search}»</strong>
+                <strong>
+                  {" "}
+                  «{search}»
+                </strong>
               </p>
             </div>
           )}
 
-          {filteredParkings.length > 0 ? (
+          {filteredParkings.length >
+          0 ? (
             <div className="parking-grid">
               {filteredParkings.map(
                 (parking) => (
                   <ParkingCard
-                    key={parking.id}
-                    parking={parking}
+                    key={
+                      parking.id
+                    }
+                    parking={
+                      parking
+                    }
                   />
                 )
               )}
@@ -470,7 +597,9 @@ function Parking({ parkings = [] }) {
 
               <button
                 type="button"
-                onClick={clearFilters}
+                onClick={
+                  clearFilters
+                }
               >
                 نمایش همه آگهی‌ها
               </button>

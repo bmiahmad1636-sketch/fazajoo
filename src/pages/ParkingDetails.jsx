@@ -57,6 +57,45 @@ function ParkingDetails({
     Boolean(parking?.ownerId) &&
     user.uid === parking.ownerId;
 
+  const status = parking?.status || "active";
+
+  const isRented = status === "rented";
+  const isInactive = status === "inactive";
+
+  const statusLabel = isRented
+    ? "اجاره داده شد"
+    : isInactive
+      ? "غیرفعال"
+      : "در دسترس";
+
+  const statusDescription = isRented
+    ? "این فضا اجاره داده شده است"
+    : isInactive
+      ? "این آگهی موقتاً غیرفعال است"
+      : "آماده استفاده";
+
+  const ownerDisplayName = (() => {
+    const ownerEmail = String(
+      parking?.ownerEmail || ""
+    ).trim();
+
+    if (!ownerEmail) {
+      return parking?.phone || "کاربر فضاجو";
+    }
+
+    const [localPart, domainPart] =
+      ownerEmail.split("@");
+
+    if (
+      domainPart === "auth.fazajoo.local" &&
+      localPart
+    ) {
+      return localPart;
+    }
+
+    return parking?.phone || "آگهی‌دهنده فضاجو";
+  })();
+
   const handleDelete = async () => {
     if (!user) {
       alert(
@@ -253,9 +292,17 @@ function ParkingDetails({
           <div className="parking-details-hero__content">
             <div>
               <div className="parking-details-hero__badges">
-                <span className="parking-details-badge parking-details-badge--available">
+                <span
+                  className={`parking-details-badge ${
+                    isRented
+                      ? "parking-details-badge--rented"
+                      : isInactive
+                        ? "parking-details-badge--inactive"
+                        : "parking-details-badge--available"
+                  }`}
+                >
                   <span />
-                  در دسترس
+                  {statusLabel}
                 </span>
 
                 <span className="parking-details-badge parking-details-badge--type">
@@ -396,7 +443,7 @@ function ParkingDetails({
                       </span>
 
                       <strong>
-                        آماده استفاده
+                        {statusDescription}
                       </strong>
                     </div>
                   </div>
@@ -479,19 +526,33 @@ function ParkingDetails({
                   </span>
 
                   <h2>
-                    این پارکینگ را
-                    پسندیدی؟
+                    {isRented
+                      ? "این پارکینگ اجاره داده شده"
+                      : isInactive
+                        ? "این آگهی غیرفعال است"
+                        : "این پارکینگ را پسندیدی؟"}
                   </h2>
 
                   <p>
-                    برای دریافت اطلاعات
-                    بیشتر و هماهنگی،
-                    شماره تماس را مشاهده
-                    کن.
+                    {isRented
+                      ? "این فضا دیگر برای اجاره در دسترس نیست."
+                      : isInactive
+                        ? "این آگهی فعلاً توسط صاحب آن غیرفعال شده است."
+                        : "برای دریافت اطلاعات بیشتر و هماهنگی، شماره تماس را مشاهده کن."}
                   </p>
                 </div>
 
-                {parking.phone ? (
+                {isRented || isInactive ? (
+                  <div className="parking-contact-card__unavailable">
+                    <span>{isRented ? "✅" : "⏸"}</span>
+
+                    <p>
+                      {isRented
+                        ? "این فضا اجاره داده شده و امکان تماس یا شروع گفتگوی جدید برای آن غیرفعال است."
+                        : "این آگهی موقتاً غیرفعال است و امکان تماس یا شروع گفتگوی جدید برای آن وجود ندارد."}
+                    </p>
+                  </div>
+                ) : parking.phone ? (
                   <div className="parking-contact-card__phone">
                     <button
                       type="button"
@@ -538,19 +599,22 @@ function ParkingDetails({
                   </div>
                 )}
 
-                {!authLoading && !isOwner && (
-                  <Link
-                    to={`/chat/${parking.id}`}
-                    className="parking-contact-card__phone-button"
-                    style={{
-                      marginTop: "12px",
-                      textDecoration: "none",
-                    }}
-                  >
-                    <span>💬</span>
-                    ارسال پیام به آگهی‌دهنده
-                  </Link>
-                )}
+                {!authLoading &&
+                  !isOwner &&
+                  !isRented &&
+                  !isInactive && (
+                    <Link
+                      to={`/chat/${parking.id}`}
+                      className="parking-contact-card__phone-button"
+                      style={{
+                        marginTop: "12px",
+                        textDecoration: "none",
+                      }}
+                    >
+                      <span>💬</span>
+                      ارسال پیام به آگهی‌دهنده
+                    </Link>
+                  )}
 
                 <div className="parking-contact-card__divider" />
 
@@ -569,8 +633,7 @@ function ParkingDetails({
                     </span>
 
                     <strong>
-                      {parking.ownerEmail ||
-                        "کاربر فضاجو"}
+                      {ownerDisplayName}
                     </strong>
                   </div>
                 </div>

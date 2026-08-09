@@ -2,7 +2,12 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Link, useNavigate } from "react-router-dom";
+
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
 import {
   deleteDoc,
   doc,
@@ -10,11 +15,16 @@ import {
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
+
 import {
   onAuthStateChanged,
 } from "firebase/auth";
 
-import { auth, db } from "../firebase";
+import {
+  auth,
+  db,
+} from "../firebase";
+
 import "./ParkingCard.css";
 
 function ParkingCard({ parking }) {
@@ -27,6 +37,7 @@ function ParkingCard({ parking }) {
     area,
     price,
     imageUrl,
+    status = "active",
   } = parking;
 
   const [user, setUser] =
@@ -35,11 +46,52 @@ function ParkingCard({ parking }) {
   const [isFavorite, setIsFavorite] =
     useState(false);
 
-  const [favoriteLoading, setFavoriteLoading] =
-    useState(true);
+  const [
+    favoriteLoading,
+    setFavoriteLoading,
+  ] = useState(true);
 
-  const [favoriteChanging, setFavoriteChanging] =
-    useState(false);
+  const [
+    favoriteChanging,
+    setFavoriteChanging,
+  ] = useState(false);
+
+  const getStatusInfo = () => {
+    switch (status) {
+      case "rented":
+        return {
+          label:
+            "اجاره داده شد",
+          detail:
+            "در حال حاضر در دسترس نیست",
+          className:
+            "parking-card__status--rented",
+        };
+
+      case "inactive":
+        return {
+          label:
+            "غیرفعال",
+          detail:
+            "آگهی موقتاً غیرفعال است",
+          className:
+            "parking-card__status--inactive",
+        };
+
+      default:
+        return {
+          label:
+            "در دسترس",
+          detail:
+            "آماده استفاده",
+          className:
+            "parking-card__status--active",
+        };
+    }
+  };
+
+  const statusInfo =
+    getStatusInfo();
 
   useEffect(() => {
     let isMounted = true;
@@ -61,13 +113,14 @@ function ParkingCard({ parking }) {
           }
 
           try {
-            const favoriteReference = doc(
-              db,
-              "users",
-              currentUser.uid,
-              "favorites",
-              String(id)
-            );
+            const favoriteReference =
+              doc(
+                db,
+                "users",
+                currentUser.uid,
+                "favorites",
+                String(id)
+              );
 
             const favoriteSnapshot =
               await getDoc(
@@ -86,7 +139,9 @@ function ParkingCard({ parking }) {
             );
           } finally {
             if (isMounted) {
-              setFavoriteLoading(false);
+              setFavoriteLoading(
+                false
+              );
             }
           }
         }
@@ -98,85 +153,101 @@ function ParkingCard({ parking }) {
     };
   }, [id]);
 
-  const handleFavorite = async (
-    event
-  ) => {
-    event.preventDefault();
-    event.stopPropagation();
+  const handleFavorite =
+    async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-    if (!user) {
-      alert(
-        "برای ذخیره آگهی ابتدا وارد حساب شوید."
-      );
-
-      navigate("/login");
-      return;
-    }
-
-    if (
-      favoriteChanging ||
-      favoriteLoading
-    ) {
-      return;
-    }
-
-    setFavoriteChanging(true);
-
-    const favoriteReference = doc(
-      db,
-      "users",
-      user.uid,
-      "favorites",
-      String(id)
-    );
-
-    try {
-      if (isFavorite) {
-        await deleteDoc(
-          favoriteReference
+      if (!user) {
+        alert(
+          "برای ذخیره آگهی ابتدا وارد حساب شوید."
         );
 
-        setIsFavorite(false);
-      } else {
-        await setDoc(
-          favoriteReference,
-          {
-            parkingId: String(id),
-            title:
-              title ||
-              "پارکینگ بدون عنوان",
-            city:
-              city ||
-              "شهر ثبت نشده",
-            area:
-              area || "",
-            price:
-              price || "توافقی",
-            imageUrl:
-              imageUrl || "",
-            savedAt:
-              serverTimestamp(),
-          }
-        );
-
-        setIsFavorite(true);
+        navigate("/login");
+        return;
       }
-    } catch (error) {
-      console.error(
-        "خطا در تغییر علاقه‌مندی:",
-        error
-      );
 
-      alert(
-        "ذخیره علاقه‌مندی انجام نشد. دوباره تلاش کنید."
-      );
-    } finally {
-      setFavoriteChanging(false);
-    }
-  };
+      if (
+        favoriteChanging ||
+        favoriteLoading
+      ) {
+        return;
+      }
+
+      setFavoriteChanging(true);
+
+      const favoriteReference =
+        doc(
+          db,
+          "users",
+          user.uid,
+          "favorites",
+          String(id)
+        );
+
+      try {
+        if (isFavorite) {
+          await deleteDoc(
+            favoriteReference
+          );
+
+          setIsFavorite(false);
+        } else {
+          await setDoc(
+            favoriteReference,
+            {
+              parkingId:
+                String(id),
+
+              title:
+                title ||
+                "پارکینگ بدون عنوان",
+
+              city:
+                city ||
+                "شهر ثبت نشده",
+
+              area:
+                area || "",
+
+              price:
+                price ||
+                "توافقی",
+
+              imageUrl:
+                imageUrl || "",
+
+              status,
+
+              savedAt:
+                serverTimestamp(),
+            }
+          );
+
+          setIsFavorite(true);
+        }
+      } catch (error) {
+        console.error(
+          "خطا در تغییر علاقه‌مندی:",
+          error
+        );
+
+        alert(
+          "ذخیره علاقه‌مندی انجام نشد. دوباره تلاش کنید."
+        );
+      } finally {
+        setFavoriteChanging(false);
+      }
+    };
 
   return (
-    <article className="parking-card">
+    <article
+      className={`parking-card ${
+        status === "inactive"
+          ? "parking-card--inactive"
+          : ""
+      }`}
+    >
       <Link
         to={`/parking/${id}`}
         className="parking-card__image-link"
@@ -197,9 +268,9 @@ function ParkingCard({ parking }) {
             />
           ) : (
             <div className="parking-card__placeholder">
-              <div className="parking-card__placeholder-icon">
+              <span>
                 🚗
-              </div>
+              </span>
 
               <span>
                 تصویر پارکینگ
@@ -207,9 +278,12 @@ function ParkingCard({ parking }) {
             </div>
           )}
 
-          <div className="parking-card__status">
+          <div
+            className={`parking-card__status ${statusInfo.className}`}
+          >
             <span className="parking-card__status-dot" />
-            در دسترس
+
+            {statusInfo.label}
           </div>
 
           <div className="parking-card__category">
@@ -250,7 +324,9 @@ function ParkingCard({ parking }) {
                 ? "parking-card__favorite--active"
                 : ""
             }`}
-            onClick={handleFavorite}
+            onClick={
+              handleFavorite
+            }
             disabled={
               favoriteLoading ||
               favoriteChanging
@@ -304,7 +380,7 @@ function ParkingCard({ parking }) {
               </span>
 
               <strong>
-                آماده استفاده
+                {statusInfo.detail}
               </strong>
             </div>
           </div>
