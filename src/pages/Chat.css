@@ -1159,3 +1159,262 @@
   font-weight: 900;
   white-space: nowrap;
 }
+
+/* =========================================================
+   FINAL CHAT LAYOUT
+   نسخه یکپارچه و نهایی
+   ========================================================= */
+
+/* هدر جمع‌وجور */
+.chat-hero {
+  padding: 12px 0 42px;
+}
+
+.chat-hero__back {
+  min-height: 34px;
+  margin-bottom: 12px;
+  padding: 6px 11px;
+}
+
+.chat-hero__content {
+  gap: 22px;
+}
+
+.chat-hero__eyebrow {
+  margin-bottom: 5px;
+  padding: 5px 10px;
+  font-size: 0.72rem;
+}
+
+.chat-hero h1 {
+  margin-bottom: 3px;
+  font-size: clamp(1.65rem, 3.2vw, 2.7rem);
+  line-height: 1.22;
+}
+
+.chat-hero p {
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.chat-hero__security {
+  min-width: 185px;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 17px;
+}
+
+.chat-hero__security > span {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  font-size: 1.05rem;
+}
+
+.chat-hero__security strong {
+  font-size: 0.82rem;
+}
+
+.chat-hero__security small {
+  font-size: 0.63rem;
+}
+
+.chat-content {
+  margin-top: -22px;
+  padding-bottom: 55px;
+}
+
+/* کارت درخواست/آگهی بدون تصویر */
+.chat-ad-card--no-image .chat-ad-card__image {
+  height: 105px;
+  min-height: 0;
+  padding: 0 18px;
+}
+
+.chat-ad-card__placeholder {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.chat-ad-card__placeholder > span {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 22px rgba(70, 45, 28, 0.09);
+
+  font-size: 1.4rem;
+}
+
+.chat-ad-card__placeholder div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: right;
+}
+
+.chat-ad-card__placeholder strong {
+  color: #3a312c;
+  font-size: 0.9rem;
+  font-weight: 950;
+}
+
+.chat-ad-card__placeholder small {
+  color: #9a8d84;
+  font-size: 0.66rem;
+}
+
+.chat-ad-card--wanted .chat-ad-card__image {
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(244, 122, 31, 0.13),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      #fff6ee,
+      #fffaf6
+    );
+}
+
+.chat-ad-card__body {
+  padding: 17px;
+}
+
+.chat-ad-card__body h2 {
+  margin: 4px 0 7px;
+  font-size: 1.05rem;
+}
+
+.chat-ad-card__body strong {
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.chat-ad-card__body a {
+  min-height: 40px;
+}
+
+.chat-ad-card__notice {
+  margin: 0 14px 14px;
+  padding: 9px 10px;
+}
+
+/* حالت عادی: وقتی پیام وجود دارد */
+.chat-box__messages {
+  min-height: 460px;
+  max-height: 560px;
+}
+
+/* حالت خالی: بدون :has و کاملاً صریح */
+.chat-box__messages--empty {
+  min-height: 225px;
+  height: 225px;
+  max-height: 225px;
+  padding: 14px 20px;
+  overflow: hidden;
+}
+
+.chat-box__messages--empty .chat-box__empty {
+  min-height: 0;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-box__messages--empty .chat-box__empty > span {
+  width: 54px;
+  height: 54px;
+
+  margin-bottom: 7px;
+
+  border-radius: 17px;
+
+  font-size: 1.4rem;
+}
+
+.chat-box__messages--empty .chat-box__empty h2 {
+  margin-bottom: 3px;
+
+  font-size: 1.08rem;
+}
+
+.chat-box__messages--empty .chat-box__empty p {
+  max-width: 470px;
+
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+/* لودینگ هم بی‌دلیل بلند نباشد */
+.chat-box__messages--loading {
+  min-height: 225px;
+  height: 225px;
+  max-height: 225px;
+}
+
+.chat-box__messages--loading .chat-box__loading {
+  min-height: 0;
+  height: 100%;
+}
+
+/* تبلت */
+@media (max-width: 950px) {
+  .chat-ad-card--no-image .chat-ad-card__image {
+    height: 105px;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .chat-hero {
+    padding: 12px 0 38px;
+  }
+
+  .chat-hero__content {
+    gap: 14px;
+  }
+
+  .chat-hero__security {
+    width: 100%;
+  }
+
+  .chat-content {
+    margin-top: -20px;
+  }
+}
+
+/* موبایل */
+@media (max-width: 620px) {
+  .chat-ad-card--no-image .chat-ad-card__image {
+    height: 92px;
+    min-height: 0;
+  }
+
+  .chat-box__messages--empty,
+  .chat-box__messages--loading {
+    min-height: 205px;
+    height: 205px;
+    max-height: 205px;
+    padding: 12px 14px;
+  }
+
+  .chat-box__messages--empty .chat-box__empty > span {
+    width: 48px;
+    height: 48px;
+    font-size: 1.25rem;
+  }
+}

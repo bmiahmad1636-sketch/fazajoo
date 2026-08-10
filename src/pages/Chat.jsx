@@ -33,6 +33,34 @@ import { auth, db } from "../firebase";
 import ChatMessage from "../components/chat/ChatMessage";
 import "./Chat.css";
 
+
+const CHAT_CATEGORY_INFO = {
+  parking: {
+    label: "پارکینگ",
+    icon: "🚗",
+  },
+  storage: {
+    label: "انبار",
+    icon: "📦",
+  },
+  warehouse: {
+    label: "سوله",
+    icon: "🏭",
+  },
+  shop: {
+    label: "مغازه",
+    icon: "🏪",
+  },
+  land: {
+    label: "زمین",
+    icon: "🌱",
+  },
+  other: {
+    label: "سایر فضاها",
+    icon: "✨",
+  },
+};
+
 function Chat({
   parkings = [],
 }) {
@@ -90,6 +118,34 @@ function Chat({
     Boolean(user) &&
     Boolean(ownerId) &&
     user.uid === ownerId;
+
+  const listingType =
+    parking?.listingType || "offer";
+
+  const isWanted =
+    listingType === "wanted";
+
+  const category =
+    parking?.category || "parking";
+
+  const categoryInfo =
+    CHAT_CATEGORY_INFO[category] ||
+    CHAT_CATEGORY_INFO.other;
+
+  const visibleCategory =
+    category === "other"
+      ? String(
+          parking?.customCategory ||
+            parking?.categoryLabel ||
+            "سایر فضاها"
+        ).trim()
+      : String(
+          parking?.categoryLabel ||
+            categoryInfo.label
+        ).trim();
+
+  const categoryIcon =
+    categoryInfo.icon;
 
   const requestedConversationId =
     searchParams.get(
@@ -188,13 +244,23 @@ function Chat({
 
             parkingTitle:
               parking.title ||
-              "آگهی پارکینگ",
+              (isWanted
+                ? `دنبال ${visibleCategory}`
+                : `${visibleCategory} برای اجاره`),
 
             parkingCity:
               parking.city || "",
 
             parkingImageUrl:
               parking.imageUrl || "",
+
+            listingType,
+
+            parkingCategory:
+              category,
+
+            parkingCategoryLabel:
+              visibleCategory,
 
             ownerId,
 
@@ -763,11 +829,24 @@ function Chat({
 
           <div className="chat-hero__content">
             <div>
-              <span className="chat-hero__eyebrow">گفتگوی امن در فضاجو</span>
-              <h1>{isOwner ? "پاسخ به متقاضی" : "پیام به آگهی‌دهنده"}</h1>
+              <span className="chat-hero__eyebrow">
+                گفتگوی مستقیم در فضاجو
+              </span>
+
+              <h1>
+                {isWanted
+                  ? isOwner
+                    ? "پاسخ به پیشنهاددهنده"
+                    : "پیام به متقاضی"
+                  : isOwner
+                    ? "پاسخ به متقاضی"
+                    : "پیام به آگهی‌دهنده"}
+              </h1>
+
               <p>
-                درباره همین آگهی گفتگو کنید و برای حفظ امنیت، اطلاعات حساس را
-                فقط در صورت نیاز به اشتراک بگذارید.
+                {isWanted
+                  ? `درباره نیاز به ${visibleCategory} گفتگو کنید.`
+                  : `درباره این ${visibleCategory} گفتگو کنید.`}
               </p>
             </div>
 
@@ -775,7 +854,11 @@ function Chat({
               <span>🛡️</span>
               <div>
                 <strong>گفتگوی مستقیم</strong>
-                <small>بین دو طرف همین آگهی</small>
+                <small>
+                  {isWanted
+                    ? "بین متقاضی و پیشنهاددهنده"
+                    : "بین دو طرف آگهی"}
+                </small>
               </div>
             </div>
           </div>
@@ -785,7 +868,19 @@ function Chat({
       <section className="chat-content">
         <div className="container">
           <div className="chat-layout">
-            <aside className="chat-ad-card">
+            <aside
+              className={[
+                "chat-ad-card",
+                !parking.imageUrl
+                  ? "chat-ad-card--no-image"
+                  : "",
+                isWanted
+                  ? "chat-ad-card--wanted"
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
               <div className="chat-ad-card__image">
                 {parking.imageUrl ? (
                   <img
@@ -793,22 +888,65 @@ function Chat({
                     alt={parking.title || "تصویر آگهی"}
                   />
                 ) : (
-                  <span>🚘</span>
+                  <div className="chat-ad-card__placeholder">
+                    <span>
+                      {isWanted ? "🔎" : categoryIcon}
+                    </span>
+
+                    <div>
+                      <strong>
+                        {isWanted
+                          ? `درخواست ${visibleCategory}`
+                          : visibleCategory}
+                      </strong>
+
+                      <small>
+                        بدون تصویر
+                      </small>
+                    </div>
+                  </div>
                 )}
               </div>
 
               <div className="chat-ad-card__body">
-                <span>آگهی مورد گفتگو</span>
-                <h2>{parking.title || "آگهی پارکینگ"}</h2>
-                <p>📍 {parking.city || "شهر ثبت نشده"}</p>
-                <strong>{parking.price || "قیمت توافقی"}</strong>
-                <Link to={`/parking/${parkingId}`}>مشاهده جزئیات آگهی</Link>
+                <span>
+                  {isWanted
+                    ? "درخواست مورد گفتگو"
+                    : "آگهی مورد گفتگو"}
+                </span>
+
+                <h2>
+                  {parking.title ||
+                    (isWanted
+                      ? `دنبال ${visibleCategory}`
+                      : `${visibleCategory} برای اجاره`)}
+                </h2>
+
+                <p>
+                  📍 {parking.city || "شهر ثبت نشده"}
+                </p>
+
+                <strong>
+                  {isWanted ? "بودجه: " : ""}
+                  {parking.price ||
+                    (isWanted
+                      ? "بودجه توافقی"
+                      : "قیمت توافقی")}
+                </strong>
+
+                <Link to={`/parking/${parkingId}`}>
+                  {isWanted
+                    ? "مشاهده جزئیات درخواست"
+                    : "مشاهده جزئیات آگهی"}
+                </Link>
               </div>
 
               <div className="chat-ad-card__notice">
                 <span>💡</span>
                 <p>
-                  پیش از هر توافق، مشخصات آگهی و شرایط معامله را بررسی کنید.
+                  {isWanted
+                    ? "پیش از توافق، جزئیات درخواست و شرایط را بررسی کنید."
+                    : "پیش از هر توافق، مشخصات آگهی و شرایط معامله را بررسی کنید."}
                 </p>
               </div>
             </aside>
@@ -831,7 +969,19 @@ function Chat({
                 </div>
               )}
 
-              <div className="chat-box__messages">
+              <div
+                className={[
+                  "chat-box__messages",
+                  messagesLoading
+                    ? "chat-box__messages--loading"
+                    : "",
+                  !messagesLoading && messages.length === 0
+                    ? "chat-box__messages--empty"
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
                 {messagesLoading ? (
                   <div className="chat-box__loading">
                     <span>💬</span>
@@ -842,8 +992,9 @@ function Chat({
                     <span>👋</span>
                     <h2>شروع گفتگو</h2>
                     <p>
-                      هنوز پیامی رد و بدل نشده است. اولین پیام را درباره این آگهی
-                      ارسال کنید.
+                      {isWanted
+                        ? "هنوز پیامی رد و بدل نشده است. اولین پیام را درباره این درخواست ارسال کنید."
+                        : "هنوز پیامی رد و بدل نشده است. اولین پیام را درباره این آگهی ارسال کنید."}
                     </p>
                   </div>
                 ) : (
