@@ -572,7 +572,7 @@ function ParkingDetails({
                 </div>
               </article>
 
-              <article className="parking-details-section">
+              <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">
                     ☰
@@ -719,8 +719,9 @@ function ParkingDetails({
                     <span>📵</span>
 
                     <p>
-                      شماره تماس برای این
-                      آگهی ثبت نشده است.
+                      {isWanted
+                        ? "شماره تماس برای این درخواست ثبت نشده است."
+                        : "شماره تماس برای این آگهی ثبت نشده است."}
                     </p>
                   </div>
                 )}
@@ -748,11 +749,7 @@ function ParkingDetails({
 
                 <div className="parking-contact-card__owner">
                   <div className="parking-contact-card__avatar">
-                    {parking.ownerEmail
-                      ? parking.ownerEmail
-                          .charAt(0)
-                          .toUpperCase()
-                      : "ف"}
+                    {isWanted ? "م" : "ف"}
                   </div>
 
                   <div>
@@ -786,12 +783,15 @@ function ParkingDetails({
 
                     <div>
                       <strong>
-                        مدیریت آگهی
+                        {isWanted
+                          ? "مدیریت درخواست"
+                          : "مدیریت آگهی"}
                       </strong>
 
                       <small>
-                        این آگهی متعلق به
-                        شماست
+                        {isWanted
+                          ? "این درخواست متعلق به شماست"
+                          : "این آگهی متعلق به شماست"}
                       </small>
                     </div>
                   </div>
@@ -802,7 +802,9 @@ function ParkingDetails({
                     onClick={handleEdit}
                   >
                     <span>✎</span>
-                    ویرایش آگهی
+                    {isWanted
+                      ? "ویرایش درخواست"
+                      : "ویرایش آگهی"}
                   </button>
 
                   <button
@@ -817,7 +819,9 @@ function ParkingDetails({
 
                     {deleting
                       ? "در حال حذف..."
-                      : "حذف آگهی"}
+                      : isWanted
+                        ? "حذف درخواست"
+                        : "حذف آگهی"}
                   </button>
                 </div>
               )}
@@ -829,9 +833,9 @@ function ParkingDetails({
                     <span>ℹ</span>
 
                     <p>
-                      فقط صاحب آگهی
-                      می‌تواند آن را
-                      ویرایش یا حذف کند.
+                      {isWanted
+                        ? "فقط ثبت‌کننده درخواست می‌تواند آن را ویرایش یا حذف کند."
+                        : "فقط صاحب آگهی می‌تواند آن را ویرایش یا حذف کند."}
                     </p>
                   </div>
                 )}

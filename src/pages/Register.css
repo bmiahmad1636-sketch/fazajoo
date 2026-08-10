@@ -1,9 +1,9 @@
 .register-page {
-  --register-primary: #5b4ff5;
-  --register-primary-dark: #4338ca;
-  --register-text: #19172b;
-  --register-muted: #77758a;
-  --register-border: rgba(91, 79, 245, 0.16);
+  --register-primary: #f06b16;
+  --register-primary-dark: #c94f08;
+  --register-text: #2f241d;
+  --register-muted: #79675c;
+  --register-border: rgba(240, 107, 22, 0.22);
 
   position: relative;
   min-height: calc(100vh - 72px);
@@ -14,15 +14,15 @@
   background:
     radial-gradient(
       circle at top right,
-      rgba(91, 79, 245, 0.13),
+      rgba(240, 107, 22, 0.18),
       transparent 38%
     ),
     radial-gradient(
       circle at bottom left,
-      rgba(6, 182, 212, 0.1),
+      rgba(255, 174, 66, 0.14),
       transparent 34%
     ),
-    #f7f7fc;
+    #fff7ef;
   color: var(--register-text);
 }
 
@@ -37,7 +37,7 @@
   height: 330px;
   top: -150px;
   right: -80px;
-  background: rgba(91, 79, 245, 0.1);
+  background: rgba(240, 107, 22, 0.12);
 }
 
 .register-decoration-two {
@@ -45,7 +45,7 @@
   height: 270px;
   bottom: -120px;
   left: -80px;
-  background: rgba(6, 182, 212, 0.09);
+  background: rgba(255, 174, 66, 0.13);
 }
 
 .register-shell {
@@ -58,7 +58,7 @@
   border: 1px solid rgba(255, 255, 255, 0.9);
   border-radius: 34px;
   background: rgba(255, 255, 255, 0.76);
-  box-shadow: 0 30px 80px rgba(42, 37, 99, 0.13);
+  box-shadow: 0 30px 80px rgba(91, 53, 28, 0.16);
   backdrop-filter: blur(24px);
 }
 
@@ -78,9 +78,9 @@
     ),
     linear-gradient(
       145deg,
-      #6357f8 0%,
-      #493fcf 52%,
-      #342b9e 100%
+      #f47a1f 0%,
+      #df5f0f 52%,
+      #a93d06 100%
     );
 }
 
@@ -162,7 +162,7 @@
 
 .register-intro h1 span {
   display: block;
-  color: #bff5ff;
+  color: #ffe0b8;
 }
 
 .register-intro-content > p {
@@ -193,7 +193,7 @@
   place-items: center;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.14);
-  color: #bff5ff;
+  color: #ffe0b8;
   font-size: 13px;
   font-weight: 900;
 }
@@ -289,7 +289,7 @@
 }
 
 .register-field > label {
-  color: #343145;
+  color: #493b33;
   font-size: 13px;
   font-weight: 800;
 }
@@ -301,7 +301,7 @@
   border: 1px solid var(--register-border);
   border-radius: 16px;
   background: #fff;
-  box-shadow: 0 7px 22px rgba(42, 37, 99, 0.045);
+  box-shadow: 0 7px 22px rgba(91, 53, 28, 0.06);
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
@@ -321,13 +321,13 @@
 .register-field > input:focus,
 .register-phone-input:focus-within,
 .register-password-input:focus-within {
-  border-color: rgba(91, 79, 245, 0.65);
-  box-shadow: 0 0 0 4px rgba(91, 79, 245, 0.1);
+  border-color: rgba(240, 107, 22, 0.68);
+  box-shadow: 0 0 0 4px rgba(240, 107, 22, 0.12);
   transform: translateY(-1px);
 }
 
 .register-field input::placeholder {
-  color: #bbb9c7;
+  color: #b9a89d;
 }
 
 .register-field input:disabled {
@@ -336,7 +336,7 @@
 }
 
 .register-field > small {
-  color: #9694a5;
+  color: #9b887d;
   font-size: 11px;
   line-height: 1.8;
 }
@@ -353,7 +353,7 @@
   padding: 0 16px;
   display: flex;
   align-items: center;
-  border-right: 1px solid #ecebf3;
+  border-right: 1px solid #f0dfd2;
   color: var(--register-primary);
   font-size: 14px;
   font-weight: 900;
@@ -396,7 +396,7 @@
   margin-left: 8px;
   border: 0;
   border-radius: 11px;
-  background: rgba(91, 79, 245, 0.08);
+  background: rgba(240, 107, 22, 0.10);
   color: var(--register-primary);
   font-family: inherit;
   font-size: 11px;
@@ -425,7 +425,7 @@
 .register-strength-bars span {
   height: 4px;
   border-radius: 999px;
-  background: #e9e8f1;
+  background: #f0dfd2;
   transition: background 0.2s ease;
 }
 
@@ -434,7 +434,7 @@
 }
 
 .register-password-strength small {
-  color: #9694a5;
+  color: #9b887d;
   font-size: 11px;
 }
 
@@ -442,7 +442,7 @@
   display: flex;
   align-items: flex-start;
   gap: 9px;
-  color: #77758a;
+  color: #79675c;
   font-size: 12px;
   line-height: 1.8;
   cursor: pointer;
@@ -476,7 +476,7 @@
   font-size: 14px;
   font-weight: 900;
   cursor: pointer;
-  box-shadow: 0 13px 28px rgba(91, 79, 245, 0.23);
+  box-shadow: 0 13px 28px rgba(201, 79, 8, 0.30);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
@@ -485,7 +485,7 @@
 
 .register-submit-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 17px 33px rgba(91, 79, 245, 0.3);
+  box-shadow: 0 17px 33px rgba(201, 79, 8, 0.38);
 }
 
 .register-submit-button:active:not(:disabled) {
@@ -604,4 +604,68 @@
   .register-card-header h2 {
     font-size: 27px;
   }
+}
+
+/* ===== تعادل رنگی نسخه نهایی ثبت‌نام ===== */
+.register-page {
+  --register-primary: #f47a1f;
+  --register-primary-dark: #d96818;
+  --register-text: #2f2925;
+  --register-muted: #7d7168;
+  --register-border: rgba(244, 122, 31, 0.18);
+
+  background:
+    radial-gradient(circle at top right, rgba(244, 122, 31, 0.08), transparent 38%),
+    radial-gradient(circle at bottom left, rgba(120, 86, 63, 0.05), transparent 34%),
+    #fffaf6;
+}
+
+.register-decoration-one {
+  background: rgba(244, 122, 31, 0.08);
+}
+
+.register-decoration-two {
+  background: rgba(120, 86, 63, 0.05);
+}
+
+.register-shell {
+  box-shadow: 0 26px 70px rgba(71, 48, 34, 0.11);
+}
+
+.register-intro {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.16), transparent 28%),
+    linear-gradient(145deg, #f28a3a 0%, #e57420 52%, #c85f18 100%);
+}
+
+.register-intro h1 span {
+  color: #fff1dd;
+}
+
+.register-benefit > span {
+  color: #fff4e7;
+}
+
+.register-card {
+  background: rgba(255, 255, 255, 0.90);
+}
+
+.register-field > input:focus,
+.register-phone-input:focus-within,
+.register-password-input:focus-within {
+  border-color: rgba(244, 122, 31, 0.52);
+  box-shadow: 0 0 0 4px rgba(244, 122, 31, 0.08);
+}
+
+.register-password-input button {
+  background: rgba(244, 122, 31, 0.08);
+}
+
+.register-submit-button {
+  background: linear-gradient(135deg, #f47a1f, #d96818);
+  box-shadow: 0 12px 26px rgba(217, 104, 24, 0.18);
+}
+
+.register-submit-button:hover:not(:disabled) {
+  box-shadow: 0 16px 30px rgba(217, 104, 24, 0.24);
 }

@@ -1835,3 +1835,83 @@
     text-align: center;
   }
 }
+
+/* ===== جمع‌وجورتر کردن بخش «درباره آگهی» ===== */
+
+.parking-details-section:has(.parking-details-description) {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  min-height: 0;
+  height: auto;
+}
+
+.parking-details-section:has(.parking-details-description)
+.parking-details-section__heading {
+  margin-bottom: 8px;
+}
+
+.parking-details-section:has(.parking-details-description)
+.parking-details-section__icon {
+  width: 36px;
+  height: 36px;
+}
+
+.parking-details-section:has(.parking-details-description)
+.parking-details-description {
+  margin: 0;
+  line-height: 1.75;
+}
+
+@media (max-width: 560px) {
+  .parking-details-section:has(.parking-details-description) {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+}
+
+/* ===== اصلاح قطعی ارتفاع بخش درباره آگهی ===== */
+
+.parking-details-section--description {
+  min-height: 0 !important;
+  height: auto !important;
+
+  padding: 12px 18px !important;
+}
+
+.parking-details-section--description
+.parking-details-section__heading {
+  margin-bottom: 6px !important;
+  gap: 8px;
+}
+
+.parking-details-section--description
+.parking-details-section__icon {
+  width: 34px !important;
+  height: 34px !important;
+
+  border-radius: 11px;
+
+  font-size: 0.9rem;
+}
+
+.parking-details-section--description
+.parking-details-section__heading h2 {
+  margin-top: 0;
+
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.parking-details-section--description
+.parking-details-description {
+  margin: 0 !important;
+
+  font-size: 0.86rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 560px) {
+  .parking-details-section--description {
+    padding: 11px 14px !important;
+  }
+}
