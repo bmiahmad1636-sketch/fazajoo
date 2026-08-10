@@ -15,9 +15,11 @@ import MessageBadge from "./MessageBadge";
 
 import "./Header.css";
 
-function Header() {
+function Header({
+  userProfile = null,
+  profileLoading = false,
+}) {
   const [user, setUser] = useState(null);
-
   const [menuOpen, setMenuOpen] =
     useState(false);
 
@@ -85,8 +87,23 @@ function Header() {
       .trim();
   };
 
-  const userTitle =
-    getUserTitle();
+  const userTitle = getUserTitle();
+
+  const isApprovedAgent =
+    userProfile?.accountType === "agent" &&
+    userProfile?.agencyStatus === "approved";
+
+  const agencyButtonText =
+    profileLoading
+      ? "در حال بررسی..."
+      : isApprovedAgent
+        ? "پنل حرفه‌ای مشاور"
+        : "ویژه مشاورین املاک";
+
+  const agencyButtonTo =
+    isApprovedAgent
+      ? "/agency"
+      : "/agency-access";
 
   return (
     <header className="fazajoo-header">
@@ -95,11 +112,10 @@ function Header() {
           to="/"
           className="fazajoo-header__brand"
           onClick={closeMenu}
-          aria-label="صفحه اصلی فضاجو"
         >
           <img
             src="/fazajoo-logo.png"
-            alt="لوگوی فضاجو"
+            alt="فضاجو"
             className="fazajoo-header__logo"
           />
         </Link>
@@ -139,9 +155,7 @@ function Header() {
             <NavLink
               to="/"
               end
-              className={
-                getNavLinkClass
-              }
+              className={getNavLinkClass}
               onClick={closeMenu}
             >
               خانه
@@ -149,9 +163,7 @@ function Header() {
 
             <NavLink
               to="/parking"
-              className={
-                getNavLinkClass
-              }
+              className={getNavLinkClass}
               onClick={closeMenu}
             >
               همه آگهی‌ها
@@ -161,9 +173,7 @@ function Header() {
               <>
                 <NavLink
                   to="/my-parkings"
-                  className={
-                    getNavLinkClass
-                  }
+                  className={getNavLinkClass}
                   onClick={closeMenu}
                 >
                   آگهی‌های من
@@ -171,9 +181,7 @@ function Header() {
 
                 <NavLink
                   to="/favorites"
-                  className={
-                    getNavLinkClass
-                  }
+                  className={getNavLinkClass}
                   onClick={closeMenu}
                 >
                   <span
@@ -204,8 +212,7 @@ function Header() {
                 title={user.email}
               >
                 <span className="fazajoo-header__user-avatar">
-                  {userTitle
-                    .slice(0, 1)}
+                  {userTitle.slice(0, 1)}
                 </span>
 
                 <div className="fazajoo-header__user-text">
@@ -220,6 +227,36 @@ function Header() {
               </div>
 
               <Link
+                to={agencyButtonTo}
+                className={[
+                  "fazajoo-header__agency-button",
+                  isApprovedAgent
+                    ? "fazajoo-header__agency-button--approved"
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                onClick={closeMenu}
+                aria-disabled={profileLoading}
+              >
+                <span className="fazajoo-header__agency-icon">
+                  🏢
+                </span>
+
+                <span className="fazajoo-header__agency-text">
+                  <small>
+                    {isApprovedAgent
+                      ? "حساب مشاور تأییدشده"
+                      : "ابزار حرفه‌ای املاک"}
+                  </small>
+
+                  <strong>
+                    {agencyButtonText}
+                  </strong>
+                </span>
+              </Link>
+
+              <Link
                 to="/add-parking"
                 className="fazajoo-header__publish-button"
                 onClick={closeMenu}
@@ -231,9 +268,7 @@ function Header() {
               <button
                 type="button"
                 className="fazajoo-header__logout-button"
-                onClick={
-                  handleLogout
-                }
+                onClick={handleLogout}
               >
                 خروج
               </button>

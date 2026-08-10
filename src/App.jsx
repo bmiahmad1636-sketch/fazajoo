@@ -15,7 +15,9 @@ import {
 
 import {
   collection,
+  doc,
   onSnapshot,
+  onSnapshot as onDocumentSnapshot,
   query,
 } from "firebase/firestore";
 
@@ -32,6 +34,8 @@ import MyParkings from "./pages/MyParkings";
 import Favorites from "./pages/Favorites";
 import Chat from "./pages/Chat";
 import Inbox from "./pages/Inbox";
+import AgencyDashboard from "./pages/AgencyDashboard";
+import AgencyAccess from "./pages/AgencyAccess";
 
 import parkingData from "./data/parkingData";
 
@@ -224,6 +228,54 @@ function ProtectedRoute({
   return children;
 }
 
+
+function AgentRoute({
+  user,
+  authLoading,
+  userProfile,
+  profileLoading,
+  children,
+}) {
+  if (authLoading || profileLoading) {
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          padding: "50px",
+          fontSize: "20px",
+          direction: "rtl",
+        }}
+      >
+        در حال بررسی دسترسی مشاور...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Navigate
+        to="/login"
+        replace
+      />
+    );
+  }
+
+  const isApprovedAgent =
+    userProfile?.accountType === "agent" &&
+    userProfile?.agencyStatus === "approved";
+
+  if (!isApprovedAgent) {
+    return (
+      <Navigate
+        to="/agency-access"
+        replace
+      />
+    );
+  }
+
+  return children;
+}
+
 function App() {
   const [parkings, setParkings] =
     useState(parkingData);
@@ -239,6 +291,12 @@ function App() {
 
   const [authLoading, setAuthLoading] =
     useState(true);
+
+  const [userProfile, setUserProfile] =
+    useState(null);
+
+  const [profileLoading, setProfileLoading] =
+    useState(false);
 
   useEffect(() => {
     const unsubscribe =
@@ -261,6 +319,50 @@ function App() {
 
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (!user?.uid) {
+      setUserProfile(null);
+      setProfileLoading(false);
+      return undefined;
+    }
+
+    setProfileLoading(true);
+
+    const userRef = doc(
+      db,
+      "users",
+      user.uid
+    );
+
+    const unsubscribe =
+      onDocumentSnapshot(
+        userRef,
+        (snapshot) => {
+          setUserProfile(
+            snapshot.exists()
+              ? {
+                  id: snapshot.id,
+                  ...snapshot.data(),
+                }
+              : null
+          );
+
+          setProfileLoading(false);
+        },
+        (error) => {
+          console.error(
+            "User profile listener error:",
+            error
+          );
+
+          setUserProfile(null);
+          setProfileLoading(false);
+        }
+      );
+
+    return unsubscribe;
+  }, [user]);
 
   useEffect(() => {
     setParkingsLoading(true);
@@ -334,7 +436,10 @@ function App() {
 
   return (
     <>
-      <Header />
+      <Header
+        userProfile={userProfile}
+        profileLoading={profileLoading}
+      />
 
       <Routes>
         <Route
@@ -479,6 +584,43 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+
+        <Route
+          path="/agency-access"
+          element={
+            <ProtectedRoute
+              user={user}
+              authLoading={
+                authLoading
+              }
+            >
+              <AgencyAccess
+                currentUser={user}
+                userProfile={userProfile}
+                profileLoading={profileLoading}
+              />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/agency"
+          element={
+            <AgentRoute
+              user={user}
+              authLoading={authLoading}
+              userProfile={userProfile}
+              profileLoading={profileLoading}
+            >
+              <AgencyDashboard
+                parkings={parkings}
+                currentUser={user}
+              />
+            </AgentRoute>
+          }
+        />
+
 
         <Route
           path="/register"
