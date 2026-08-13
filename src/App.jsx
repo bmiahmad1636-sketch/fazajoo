@@ -36,6 +36,7 @@ import Chat from "./pages/Chat";
 import Inbox from "./pages/Inbox";
 import AgencyDashboard from "./pages/AgencyDashboard";
 import AgencyAccess from "./pages/AgencyAccess";
+import AdminDashboard from "./pages/AdminDashboard";
 
 import parkingData from "./data/parkingData";
 
@@ -276,6 +277,43 @@ function AgentRoute({
   return children;
 }
 
+
+function AdminRoute({
+  user,
+  authLoading,
+  userProfile,
+  profileLoading,
+  children,
+}) {
+  if (authLoading || profileLoading) {
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          padding: "50px",
+          fontSize: "20px",
+          direction: "rtl",
+        }}
+      >
+        در حال بررسی دسترسی مدیریت...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const isAdmin =
+    userProfile?.systemRole === "admin";
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
+
 function App() {
   const [parkings, setParkings] =
     useState(parkingData);
@@ -296,7 +334,7 @@ function App() {
     useState(null);
 
   const [profileLoading, setProfileLoading] =
-    useState(false);
+    useState(true);
 
   useEffect(() => {
     const unsubscribe =
@@ -618,6 +656,21 @@ function App() {
                 currentUser={user}
               />
             </AgentRoute>
+          }
+        />
+
+
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute
+              user={user}
+              authLoading={authLoading}
+              userProfile={userProfile}
+              profileLoading={profileLoading}
+            >
+              <AdminDashboard />
+            </AdminRoute>
           }
         />
 

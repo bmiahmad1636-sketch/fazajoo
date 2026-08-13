@@ -1,20 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
+
 import {
   doc,
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
-import { Link, Navigate } from "react-router-dom";
+
+import {
+  Link,
+  Navigate,
+} from "react-router-dom";
 
 import { db } from "../firebase";
 
 import "./AgencyAccess.css";
+
 
 function AgencyAccess({
   currentUser = null,
   userProfile = null,
   profileLoading = false,
 }) {
+
   const [form, setForm] = useState({
     agencyName: "",
     agentName: "",
@@ -22,24 +29,37 @@ function AgencyAccess({
     phone: "",
   });
 
+
   const [saving, setSaving] =
     useState(false);
+
 
   const [message, setMessage] =
     useState("");
 
+
   useEffect(() => {
+
+    if (!userProfile) {
+      return;
+    }
+
     setForm({
       agencyName:
-        userProfile?.agencyName || "",
+        userProfile.agencyName || "",
+
       agentName:
-        userProfile?.agentName || "",
+        userProfile.agentName || "",
+
       city:
-        userProfile?.agencyCity || "",
+        userProfile.agencyCity || "",
+
       phone:
-        userProfile?.phone || "",
+        userProfile.phone || "",
     });
+
   }, [userProfile]);
+
 
   const isApprovedAgent =
     useMemo(
@@ -48,14 +68,18 @@ function AgencyAccess({
           "agent" &&
         userProfile?.agencyStatus ===
           "approved",
+
       [userProfile]
     );
+
 
   const isPending =
     userProfile?.agencyStatus ===
     "pending";
 
+
   if (profileLoading) {
+
     return (
       <main className="agency-access">
         <div className="agency-access__loading">
@@ -63,22 +87,42 @@ function AgencyAccess({
         </div>
       </main>
     );
+
   }
 
+
+  if (!userProfile) {
+
+    return (
+      <main className="agency-access">
+        <div className="agency-access__loading">
+          اطلاعات حساب در حال دریافت است...
+        </div>
+      </main>
+    );
+
+  }
+
+
   if (isApprovedAgent) {
+
     return (
       <Navigate
         to="/agency"
         replace
       />
     );
+
   }
 
+
   const handleChange = (event) => {
+
     const {
       name,
       value,
     } = event.target;
+
 
     setForm(
       (current) => ({
@@ -86,15 +130,20 @@ function AgencyAccess({
         [name]: value,
       })
     );
+
   };
+
 
   const handleSubmit =
     async (event) => {
+
       event.preventDefault();
+
 
       if (!currentUser?.uid) {
         return;
       }
+
 
       if (
         !form.agencyName.trim() ||
@@ -106,6 +155,7 @@ function AgencyAccess({
             .trim()
         )
       ) {
+
         setMessage(
           "لطفاً اطلاعات را کامل و شماره موبایل را صحیح وارد کنید."
         );
@@ -113,10 +163,13 @@ function AgencyAccess({
         return;
       }
 
+
       setSaving(true);
       setMessage("");
 
+
       try {
+
         await setDoc(
           doc(
             db,
@@ -124,6 +177,7 @@ function AgencyAccess({
             currentUser.uid
           ),
           {
+
             accountType:
               userProfile?.accountType ||
               "user",
@@ -150,28 +204,40 @@ function AgencyAccess({
 
             updatedAt:
               serverTimestamp(),
+
           },
           {
             merge: true,
           }
         );
 
+
         setMessage(
           "درخواست فعال‌سازی پنل مشاور ثبت شد. پس از تأیید، همین حساب کاربری مستقیماً به پنل حرفه‌ای دسترسی خواهد داشت."
         );
+
+
       } catch (error) {
+
         console.error(
           "Agency request error:",
           error
         );
 
+
         setMessage(
           "ثبت درخواست انجام نشد. دوباره تلاش کنید."
         );
+
+
       } finally {
+
         setSaving(false);
+
       }
+
     };
+
 
   return (
     <main className="agency-access">
@@ -197,11 +263,11 @@ function AgencyAccess({
             می‌کند.
           </p>
         </div>
-      </section>
-
-      <section className="agency-access__content">
+      </section>      <section className="agency-access__content">
         <div className="agency-access__container agency-access__grid">
+
           <div className="agency-access__info">
+
             <span className="agency-access__info-icon">
               🏢
             </span>
@@ -218,7 +284,9 @@ function AgencyAccess({
               می‌گیرد.
             </p>
 
+
             <div className="agency-access__benefits">
+
               <span>
                 ✓ یک حساب کاربری؛ بدون ورود دوباره
               </span>
@@ -230,17 +298,29 @@ function AgencyAccess({
               <span>
                 ✓ موتور تطبیق حرفه‌ای فایل و متقاضی
               </span>
+
             </div>
+
           </div>
 
+
+
           <div className="agency-access__form-card">
+
+
             {isPending ? (
+
               <div className="agency-access__pending">
-                <span>⏳</span>
+
+                <span>
+                  ⏳
+                </span>
+
 
                 <h2>
                   درخواست شما در انتظار بررسی است
                 </h2>
+
 
                 <p>
                   بعد از تأیید، دکمه «ویژه
@@ -249,62 +329,89 @@ function AgencyAccess({
                   می‌شود.
                 </p>
 
+
                 <Link to="/">
                   بازگشت به فضاجو
                 </Link>
+
               </div>
+
+
             ) : (
+
               <>
+
                 <div className="agency-access__form-heading">
+
                   <span>
                     درخواست فعال‌سازی
                   </span>
+
 
                   <h2>
                     مشخصات مشاور یا دفتر
                   </h2>
 
+
                   <p>
                     این مرحله فقط برای تشخیص و
                     تأیید حساب حرفه‌ای است.
                   </p>
+
                 </div>
+
+
 
                 <form
                   onSubmit={handleSubmit}
                 >
+
+
                   <label>
                     نام دفتر / آژانس
+
                     <input
                       name="agencyName"
                       value={form.agencyName}
                       onChange={handleChange}
                       placeholder="مثلاً املاک سپهر"
                     />
+
                   </label>
+
+
 
                   <label>
                     نام مشاور
+
                     <input
                       name="agentName"
                       value={form.agentName}
                       onChange={handleChange}
                       placeholder="نام و نام خانوادگی"
                     />
+
                   </label>
+
+
 
                   <label>
                     شهر فعالیت
+
                     <input
                       name="city"
                       value={form.city}
                       onChange={handleChange}
                       placeholder="مثلاً شهرضا"
                     />
+
                   </label>
+
+
 
                   <label>
                     شماره موبایل
+
                     <input
                       name="phone"
                       value={form.phone}
@@ -314,30 +421,48 @@ function AgencyAccess({
                       dir="ltr"
                       maxLength={11}
                     />
+
                   </label>
 
+
+
                   {message && (
+
                     <div className="agency-access__message">
                       {message}
                     </div>
+
                   )}
+
+
 
                   <button
                     type="submit"
                     disabled={saving}
                   >
+
                     {saving
                       ? "در حال ثبت..."
                       : "ثبت درخواست فعال‌سازی"}
+
                   </button>
+
+
                 </form>
+
               </>
+
             )}
+
           </div>
+
         </div>
       </section>
+
     </main>
   );
+
 }
+
 
 export default AgencyAccess;

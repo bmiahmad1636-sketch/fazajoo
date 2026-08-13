@@ -20,6 +20,7 @@ function Header({
   profileLoading = false,
 }) {
   const [user, setUser] = useState(null);
+
   const [menuOpen, setMenuOpen] =
     useState(false);
 
@@ -56,7 +57,9 @@ function Header({
         error
       );
 
-      alert("خروج از حساب انجام نشد.");
+      alert(
+        "خروج از حساب انجام نشد."
+      );
     }
   };
 
@@ -69,6 +72,7 @@ function Header({
   }) => {
     return [
       "fazajoo-header__nav-link",
+
       isActive
         ? "fazajoo-header__nav-link--active"
         : "",
@@ -87,11 +91,18 @@ function Header({
       .trim();
   };
 
-  const userTitle = getUserTitle();
+  const userTitle =
+    getUserTitle();
 
   const isApprovedAgent =
-    userProfile?.accountType === "agent" &&
-    userProfile?.agencyStatus === "approved";
+    userProfile?.accountType ===
+      "agent" &&
+    userProfile?.agencyStatus ===
+      "approved";
+
+  const isAdmin =
+    userProfile?.systemRole ===
+    "admin";
 
   const agencyButtonText =
     profileLoading
@@ -108,6 +119,7 @@ function Header({
   return (
     <header className="fazajoo-header">
       <div className="fazajoo-header__container">
+
         <Link
           to="/"
           className="fazajoo-header__brand"
@@ -119,6 +131,7 @@ function Header({
             className="fazajoo-header__logo"
           />
         </Link>
+
 
         <button
           type="button"
@@ -134,16 +147,20 @@ function Header({
               ? "بستن منو"
               : "باز کردن منو"
           }
-          aria-expanded={menuOpen}
+          aria-expanded={
+            menuOpen
+          }
         >
           <span />
           <span />
           <span />
         </button>
 
+
         <div
           className={[
             "fazajoo-header__menu",
+
             menuOpen
               ? "fazajoo-header__menu--open"
               : "",
@@ -151,43 +168,62 @@ function Header({
             .filter(Boolean)
             .join(" ")}
         >
+
           <nav className="fazajoo-header__nav">
+
             <NavLink
               to="/"
               end
-              className={getNavLinkClass}
+              className={
+                getNavLinkClass
+              }
               onClick={closeMenu}
             >
               خانه
             </NavLink>
 
+
             <NavLink
               to="/parking"
-              className={getNavLinkClass}
+              className={
+                getNavLinkClass
+              }
               onClick={closeMenu}
             >
               همه آگهی‌ها
             </NavLink>
 
+
             {user && (
               <>
+
                 <NavLink
                   to="/my-parkings"
-                  className={getNavLinkClass}
-                  onClick={closeMenu}
+                  className={
+                    getNavLinkClass
+                  }
+                  onClick={
+                    closeMenu
+                  }
                 >
                   آگهی‌های من
                 </NavLink>
 
+
                 <NavLink
                   to="/favorites"
-                  className={getNavLinkClass}
-                  onClick={closeMenu}
+                  className={
+                    getNavLinkClass
+                  }
+                  onClick={
+                    closeMenu
+                  }
                 >
                   <span
                     aria-hidden="true"
                     style={{
-                      marginLeft: "5px",
+                      marginLeft:
+                        "5px",
                     }}
                   >
                     ♥
@@ -195,27 +231,42 @@ function Header({
 
                   علاقه‌مندی‌های من
                 </NavLink>
+
               </>
             )}
+
           </nav>
+
 
           <div className="fazajoo-header__divider" />
 
+
           {user ? (
+
             <div className="fazajoo-header__account">
+
               <MessageBadge
-                onNavigate={closeMenu}
+                onNavigate={
+                  closeMenu
+                }
               />
+
 
               <div
                 className="fazajoo-header__user"
                 title={user.email}
               >
+
                 <span className="fazajoo-header__user-avatar">
-                  {userTitle.slice(0, 1)}
+                  {userTitle.slice(
+                    0,
+                    1
+                  )}
                 </span>
 
+
                 <div className="fazajoo-header__user-text">
+
                   <small>
                     حساب کاربری
                   </small>
@@ -223,27 +274,58 @@ function Header({
                   <strong>
                     {userTitle}
                   </strong>
+
                 </div>
+
               </div>
 
+
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className="fazajoo-header__login-button"
+                  onClick={
+                    closeMenu
+                  }
+                  title="مدیریت فضاجو"
+                >
+                  <span>
+                    ⚙
+                  </span>
+
+                  مدیریت
+                </Link>
+              )}
+
+
               <Link
-                to={agencyButtonTo}
+                to={
+                  agencyButtonTo
+                }
                 className={[
                   "fazajoo-header__agency-button",
+
                   isApprovedAgent
                     ? "fazajoo-header__agency-button--approved"
                     : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
-                onClick={closeMenu}
-                aria-disabled={profileLoading}
+                onClick={
+                  closeMenu
+                }
+                aria-disabled={
+                  profileLoading
+                }
               >
+
                 <span className="fazajoo-header__agency-icon">
                   🏢
                 </span>
 
+
                 <span className="fazajoo-header__agency-text">
+
                   <small>
                     {isApprovedAgent
                       ? "حساب مشاور تأییدشده"
@@ -251,48 +333,74 @@ function Header({
                   </small>
 
                   <strong>
-                    {agencyButtonText}
+                    {
+                      agencyButtonText
+                    }
                   </strong>
+
                 </span>
+
               </Link>
+
 
               <Link
                 to="/add-parking"
                 className="fazajoo-header__publish-button"
-                onClick={closeMenu}
+                onClick={
+                  closeMenu
+                }
               >
-                <span>＋</span>
+                <span>
+                  ＋
+                </span>
+
                 ثبت آگهی
               </Link>
+
 
               <button
                 type="button"
                 className="fazajoo-header__logout-button"
-                onClick={handleLogout}
+                onClick={
+                  handleLogout
+                }
               >
                 خروج
               </button>
+
             </div>
+
           ) : (
+
             <div className="fazajoo-header__guest-actions">
+
               <Link
                 to="/login"
                 className="fazajoo-header__login-button"
-                onClick={closeMenu}
+                onClick={
+                  closeMenu
+                }
               >
                 ورود
               </Link>
 
+
               <Link
                 to="/register"
                 className="fazajoo-header__publish-button"
-                onClick={closeMenu}
+                onClick={
+                  closeMenu
+                }
               >
                 ساخت حساب
               </Link>
+
             </div>
+
           )}
+
         </div>
+
       </div>
     </header>
   );
