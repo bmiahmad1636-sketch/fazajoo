@@ -83,18 +83,12 @@ const corsOptions = {
     origin,
     callback
   ) {
-    /*
-     * درخواست‌هایی مثل تست مستقیم
-     * از مرورگر ممکن است Origin
-     * نداشته باشند.
-     */
     if (!origin) {
       return callback(
         null,
         true
       );
     }
-
 
     if (
       allowedOrigins.has(
@@ -107,12 +101,10 @@ const corsOptions = {
       );
     }
 
-
     console.warn(
       "Blocked CORS origin:",
       origin
     );
-
 
     return callback(
       new Error(
@@ -132,8 +124,6 @@ const corsOptions = {
     "Authorization",
   ],
 
-  exposedHeaders: [],
-
   credentials: false,
 
   optionsSuccessStatus: 204,
@@ -147,9 +137,6 @@ app.use(
 );
 
 
-/*
- * پاسخ صریح به Preflight
- */
 app.options(
   /{*splat}/,
   cors(
@@ -229,13 +216,11 @@ function createDocumentPublicId({
       128
     );
 
-
   const safeDocumentType =
     sanitizeValue(
       documentType,
       50
     );
-
 
   const randomPart =
     crypto
@@ -249,7 +234,6 @@ function createDocumentPublicId({
         16
       );
 
-
   return [
     safeUserId,
     safeDocumentType,
@@ -258,6 +242,54 @@ function createDocumentPublicId({
   ].join(
     "_"
   );
+}
+
+
+function isAgencyDocumentPublicId(
+  publicId = ""
+) {
+  const normalizedPublicId =
+    String(
+      publicId
+    ).trim();
+
+  if (!normalizedPublicId) {
+    return false;
+  }
+
+  return normalizedPublicId.startsWith(
+    `${AGENCY_DOCUMENT_FOLDER}/`
+  );
+}
+
+
+function validateDocumentFormat(
+  format = ""
+) {
+  const safeFormat =
+    sanitizeValue(
+      format,
+      10
+    ).toLowerCase();
+
+  const allowedFormats =
+    new Set([
+      "jpg",
+      "jpeg",
+      "png",
+      "webp",
+    ]);
+
+  if (
+    !safeFormat ||
+    !allowedFormats.has(
+      safeFormat
+    )
+  ) {
+    return "";
+  }
+
+  return safeFormat;
 }
 
 
@@ -289,7 +321,7 @@ app.get(
 
 
 /* =========================
-   SIGN DOCUMENT
+   SIGN DOCUMENT UPLOAD
 ========================= */
 
 app.post(
@@ -300,11 +332,6 @@ app.post(
     response
   ) => {
     try {
-      console.log(
-        "Signature request received."
-      );
-
-
       if (
         !cloudinaryIsConfigured()
       ) {
@@ -349,9 +376,7 @@ app.post(
         );
 
 
-      if (
-        !safeUserId
-      ) {
+      if (!safeUserId) {
         return response
           .status(400)
           .json({
@@ -403,11 +428,6 @@ app.post(
         });
 
 
-      /*
-       * این پارامترها دقیقاً همان‌هایی
-       * هستند که React هنگام Upload
-       * به Cloudinary می‌فرستد.
-       */
       const paramsToSign = {
         folder:
           AGENCY_DOCUMENT_FOLDER,
@@ -432,13 +452,6 @@ app.post(
             paramsToSign,
             CLOUDINARY_API_SECRET
           );
-
-
-      console.log(
-        "Signature created:",
-        documentType,
-        safeUserId
-      );
 
 
       return response.json({
@@ -472,7 +485,6 @@ app.post(
         error
       );
 
-
       return response
         .status(500)
         .json({
@@ -480,6 +492,275 @@ app.post(
 
           message:
             "ساخت امضای امن مدارک انجام نشد.",
+        });
+    }
+  }
+);
+
+
+/* =========================
+   SECURE DOCUMENT VIEW
+========================= */
+
+app.post(
+  "/api/cloudinary/agency-document-view",
+
+  (
+    request,
+    response
+  ) => {
+    try {
+      if (
+        !cloudinaryIsConfigured()
+      ) {
+        return response
+          .status(500)
+          .json({
+            ok: false,
+
+            message:
+              "تنظیمات Cloudinary روی سرور کامل نیست.",
+          });
+      }
+
+
+      const {
+        publicId,
+        format,
+      } =
+        request.body || {};
+
+
+      if (
+        !publicId ||
+        typeof publicId !==
+          "string"
+      ) {
+        return response
+          .status(400)
+          .json({
+            ok: false,
+
+            message:
+              "شناسه مدرک معتبر نیست.",
+          });
+      }
+
+
+      if (
+        !isAgencyDocumentPublicId(
+          publicId
+        )
+      ) {
+        return response
+          .status(403)
+          .json({
+            ok: false,
+
+            message:
+              "دسترسی به این فایل مجاز نیست.",
+          });
+      }
+
+
+      const safeFormat =
+        validateDocumentFormat(
+          format
+        );
+
+
+      if (!safeFormat) {
+        return response
+          .status(400)
+          .json({
+            ok: false,
+
+            message:
+              "فرمت مدرک معتبر نیست.",
+          });
+      }
+
+
+      const secureUrl =
+        cloudinary.url(
+          publicId,
+          {
+            secure: true,
+
+            type:
+              "authenticated",
+
+            resource_type:
+              "image",
+
+            sign_url:
+              true,
+
+            format:
+              safeFormat,
+          }
+        );
+
+
+      return response.json({
+        ok: true,
+
+        url:
+          secureUrl,
+      });
+
+    } catch (error) {
+      console.error(
+        "Secure document view error:",
+        error
+      );
+
+      return response
+        .status(500)
+        .json({
+          ok: false,
+
+          message:
+            "ساخت لینک امن مشاهده مدرک انجام نشد.",
+        });
+    }
+  }
+);
+
+
+/* =========================
+   SECURE DOCUMENT DOWNLOAD
+========================= */
+
+app.post(
+  "/api/cloudinary/agency-document-download",
+
+  (
+    request,
+    response
+  ) => {
+    try {
+      if (
+        !cloudinaryIsConfigured()
+      ) {
+        return response
+          .status(500)
+          .json({
+            ok: false,
+
+            message:
+              "تنظیمات Cloudinary روی سرور کامل نیست.",
+          });
+      }
+
+
+      const {
+        publicId,
+        format,
+      } =
+        request.body || {};
+
+
+      if (
+        !publicId ||
+        typeof publicId !==
+          "string"
+      ) {
+        return response
+          .status(400)
+          .json({
+            ok: false,
+
+            message:
+              "شناسه مدرک معتبر نیست.",
+          });
+      }
+
+
+      if (
+        !isAgencyDocumentPublicId(
+          publicId
+        )
+      ) {
+        return response
+          .status(403)
+          .json({
+            ok: false,
+
+            message:
+              "دسترسی به این فایل مجاز نیست.",
+          });
+      }
+
+
+      const safeFormat =
+        validateDocumentFormat(
+          format
+        );
+
+
+      if (!safeFormat) {
+        return response
+          .status(400)
+          .json({
+            ok: false,
+
+            message:
+              "فرمت مدرک معتبر نیست.",
+          });
+      }
+
+
+      const expiresAt =
+        Math.floor(
+          Date.now() /
+            1000
+        ) +
+        5 * 60;
+
+
+      const downloadUrl =
+        cloudinary.utils.private_download_url(
+          publicId,
+          safeFormat,
+          {
+            resource_type:
+              "image",
+
+            type:
+              "authenticated",
+
+            attachment:
+              true,
+
+            expires_at:
+              expiresAt,
+          }
+        );
+
+
+      return response.json({
+        ok: true,
+
+        url:
+          downloadUrl,
+
+        expiresAt,
+      });
+
+    } catch (error) {
+      console.error(
+        "Secure document download error:",
+        error
+      );
+
+      return response
+        .status(500)
+        .json({
+          ok: false,
+
+          message:
+            "ساخت لینک دانلود مدرک انجام نشد.",
         });
     }
   }
@@ -581,10 +862,6 @@ app.listen(
     );
 
     console.log(
-      `🔏 Preset: ${AGENCY_DOCUMENT_PRESET}`
-    );
-
-    console.log(
       `☁️ Cloudinary configured: ${
         cloudinaryIsConfigured()
           ? "YES"
@@ -593,17 +870,16 @@ app.listen(
     );
 
     console.log(
-      "✅ Allowed origins:"
+      "👁️ Secure document viewing: ENABLED"
     );
 
-    for (
-      const origin of
-      allowedOrigins
-    ) {
-      console.log(
-        `   ${origin}`
-      );
-    }
+    console.log(
+      "⬇️ Secure document download: ENABLED"
+    );
+
+    console.log(
+      "⏱️ Download links expire after 5 minutes"
+    );
 
     console.log(
       "========================================\n"
