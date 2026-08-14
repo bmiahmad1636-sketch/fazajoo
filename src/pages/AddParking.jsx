@@ -75,6 +75,43 @@ const SPACE_CATEGORIES = [
   },
 ];
 
+function normalizePriceDigits(value = "") {
+  const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
+  const arabicDigits = "٠١٢٣٤٥٦٧٨٩";
+
+  return String(value)
+    .replace(/[۰-۹]/g, (digit) =>
+      persianDigits.indexOf(digit)
+    )
+    .replace(/[٠-٩]/g, (digit) =>
+      arabicDigits.indexOf(digit)
+    );
+}
+
+function formatPriceInput(value = "") {
+  const normalizedValue =
+    normalizePriceDigits(value);
+
+  const compactValue =
+    normalizedValue
+      .replace(/,/g, "")
+      .replace(/٬/g, "")
+      .replace(/\s/g, "");
+
+  if (/^\d*$/.test(compactValue)) {
+    if (!compactValue) {
+      return "";
+    }
+
+    return compactValue.replace(
+      /\B(?=(\d{3})+(?!\d))/g,
+      ","
+    );
+  }
+
+  return value;
+}
+
 function AddParking() {
   const navigate = useNavigate();
 
@@ -110,9 +147,14 @@ function AddParking() {
   const handleChange = (event) => {
     const { name, value } = event.target;
 
+    const nextValue =
+      name === "price"
+        ? formatPriceInput(value)
+        : value;
+
     setForm((currentForm) => ({
       ...currentForm,
-      [name]: value,
+      [name]: nextValue,
     }));
 
     setErrors((currentErrors) => ({
@@ -298,6 +340,7 @@ function AddParking() {
             : 0,
 
           price: form.price.trim(),
+
           phone: form.phone
             .replace(/\s/g, "")
             .trim(),
@@ -1026,8 +1069,8 @@ function AddParking() {
                             type="text"
                             placeholder={
                               isWantedAd
-                                ? "مثلاً تا ماهانه ۳ میلیون"
-                                : "مثلاً ماهانه ۳ میلیون"
+                                ? "مثلاً 3,000,000"
+                                : "مثلاً 3,000,000"
                             }
                             value={form.price}
                             onChange={
@@ -1035,6 +1078,10 @@ function AddParking() {
                             }
                             disabled={loading}
                           />
+
+                          <span className="add-parking-input__suffix">
+                            تومان
+                          </span>
                         </div>
 
                         {errors.price && (

@@ -588,6 +588,23 @@ export function scoreMatch(
     };
   }
 
+  /*
+   * یک کاربر نباید فایل خودش را
+   * با درخواست خودش Match کند.
+   */
+  if (
+    request.ownerId &&
+    offer.ownerId &&
+    request.ownerId ===
+      offer.ownerId
+  ) {
+    return {
+      score: 0,
+      reasons: [],
+      eligible: false,
+    };
+  }
+
   if (
     offer.status &&
     offer.status !==
@@ -774,6 +791,9 @@ export function buildMatchingDashboard({
         )
       : [];
 
+  /*
+   * درخواست‌های دیگران
+   */
   const publicRequests =
     currentUser
       ? requests.filter(
@@ -783,6 +803,22 @@ export function buildMatchingDashboard({
         )
       : requests;
 
+  /*
+   * فایل‌های دیگران
+   */
+  const publicOffers =
+    currentUser
+      ? offers.filter(
+          (item) =>
+            item.ownerId !==
+            currentUser.uid
+        )
+      : offers;
+
+  /*
+   * برای فایل‌های من،
+   * درخواست مناسب دیگران
+   */
   const myOfferOpportunities =
     publicRequests
       .map((request) => {
@@ -811,17 +847,17 @@ export function buildMatchingDashboard({
           a.bestScore
       );
 
+  /*
+   * برای درخواست‌های من،
+   * فایل مناسب دیگران
+   */
   const myRequestMatches =
     myRequests
       .map((request) => {
         const candidates =
           rankForRequest(
             request,
-            offers.filter(
-              (offer) =>
-                offer.ownerId !==
-                currentUser?.uid
-            )
+            publicOffers
           ).slice(0, 5);
 
         return {
@@ -843,13 +879,24 @@ export function buildMatchingDashboard({
           a.bestScore
       );
 
+  /*
+   * فرصت‌های شبکه فضاجو
+   *
+   * فقط:
+   * درخواست‌های دیگران
+   * ×
+   * فایل‌های دیگران
+   *
+   * هیچ فایل یا درخواست متعلق
+   * به currentUser وارد این بخش نمی‌شود.
+   */
   const networkOpportunities =
-    requests
+    publicRequests
       .map((request) => {
         const candidates =
           rankForRequest(
             request,
-            offers
+            publicOffers
           ).slice(0, 5);
 
         return {
