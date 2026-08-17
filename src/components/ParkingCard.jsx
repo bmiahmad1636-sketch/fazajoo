@@ -9,21 +9,15 @@ import {
 } from "react-router-dom";
 
 import {
-  deleteDoc,
-  doc,
-  getDoc,
-  serverTimestamp,
-  setDoc,
-} from "firebase/firestore";
+  getCurrentSessionUser,
+  subscribeToAuth,
+} from "../services/authService";
 
 import {
-  onAuthStateChanged,
-} from "firebase/auth";
-
-import {
-  auth,
-  db,
-} from "../firebase";
+  addFavorite,
+  getFavoriteStatus,
+  removeFavorite,
+} from "../services/favoriteService";
 
 import "./ParkingCard.css";
 
@@ -192,67 +186,73 @@ function ParkingCard({ parking }) {
     getStatusInfo();
 
   useEffect(() => {
-    let isMounted = true;
+    let active = true;
 
-    const unsubscribe =
-      onAuthStateChanged(
-        auth,
-        async (currentUser) => {
-          if (!isMounted) {
-            return;
-          }
+    const loadFavoriteStatus = async (sessionUser) => {
+      if (!active) {
+        return;
+      }
 
-          setUser(currentUser);
+      setUser(sessionUser || null);
 
-          if (
-            !currentUser ||
-            !id
-          ) {
-            setIsFavorite(false);
-            setFavoriteLoading(
-              false
-            );
-            return;
-          }
+      if (!sessionUser || !id) {
+        setIsFavorite(false);
+        setFavoriteLoading(false);
+        return;
+      }
 
-          try {
-            const favoriteReference =
-              doc(
-                db,
-                "users",
-                currentUser.uid,
-                "favorites",
-                String(id)
-              );
+      setFavoriteLoading(true);
 
-            const favoriteSnapshot =
-              await getDoc(
-                favoriteReference
-              );
+      try {
+        const result = await getFavoriteStatus(id);
 
-            if (isMounted) {
-              setIsFavorite(
-                favoriteSnapshot.exists()
-              );
-            }
-          } catch (error) {
-            console.error(
-              "خطا در بررسی علاقه‌مندی:",
-              error
-            );
-          } finally {
-            if (isMounted) {
-              setFavoriteLoading(
-                false
-              );
-            }
-          }
+        if (active) {
+          setIsFavorite(result);
         }
+      } catch (error) {
+        console.error(
+          "خطا در بررسی علاقه‌مندی:",
+          error
+        );
+
+        if (error?.status === 401 && active) {
+          setUser(null);
+          setIsFavorite(false);
+        }
+      } finally {
+        if (active) {
+          setFavoriteLoading(false);
+        }
+      }
+    };
+
+    loadFavoriteStatus(
+      getCurrentSessionUser()
+    );
+
+    const unsubscribeAuth =
+      subscribeToAuth((sessionUser) => {
+        loadFavoriteStatus(sessionUser);
+      });
+
+    const handleFavoritesChanged = () => {
+      loadFavoriteStatus(
+        getCurrentSessionUser()
       );
+    };
+
+    window.addEventListener(
+      "fazajoo:favorites-changed",
+      handleFavoritesChanged
+    );
 
     return () => {
-      isMounted = false;
-      unsubscribe();
+      active = false;
+      unsubscribeAuth();
+      window.removeEventListener(
+        "fazajoo:favorites-changed",
+        handleFavoritesChanged
+      );
     };
   }, [id]);
 
@@ -261,7 +261,10 @@ function ParkingCard({ parking }) {
       event.preventDefault();
       event.stopPropagation();
 
-      if (!user) {
+      const sessionUser =
+        getCurrentSessionUser();
+
+      if (!sessionUser) {
         alert(
           "برای ذخیره آگهی ابتدا وارد حساب شوید."
         );
@@ -277,66 +280,15 @@ function ParkingCard({ parking }) {
         return;
       }
 
+      setUser(sessionUser);
       setFavoriteChanging(true);
-
-      const favoriteReference =
-        doc(
-          db,
-          "users",
-          user.uid,
-          "favorites",
-          String(id)
-        );
 
       try {
         if (isFavorite) {
-          await deleteDoc(
-            favoriteReference
-          );
-
+          await removeFavorite(id);
           setIsFavorite(false);
         } else {
-          await setDoc(
-            favoriteReference,
-            {
-              parkingId:
-                String(id),
-
-              title:
-                title ||
-                "آگهی بدون عنوان",
-
-              city:
-                city ||
-                "شهر ثبت نشده",
-
-              area:
-                area || "",
-
-              price:
-                price ||
-                "توافقی",
-
-              imageUrl:
-                imageUrl || "",
-
-              status,
-
-              listingType,
-
-              category,
-
-              categoryLabel:
-                visibleCategory,
-
-              customCategory:
-                customCategory || "",
-
-              savedAt:
-                serverTimestamp(),
-            }
-          );
-
+          await addFavorite(id);
           setIsFavorite(true);
         }
       } catch (error) {
@@ -345,13 +297,19 @@ function ParkingCard({ parking }) {
           error
         );
 
-        alert(
-          "ذخیره علاقه‌مندی انجام نشد. دوباره تلاش کنید."
-        );
+        if (error?.status === 401) {
+          alert(
+            "نشست شما منقضی شده است. دوباره وارد شوید."
+          );
+          navigate("/login");
+        } else {
+          alert(
+            error?.message ||
+              "ذخیره علاقه‌مندی انجام نشد. دوباره تلاش کنید."
+          );
+        }
       } finally {
-        setFavoriteChanging(
-          false
-        );
+        setFavoriteChanging(false);
       }
     };
 

@@ -4,28 +4,26 @@ import {
   useState,
 } from "react";
 import { Link } from "react-router-dom";
-import {
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-} from "firebase/firestore";
-import {
-  onAuthStateChanged,
-} from "firebase/auth";
 
-import { auth, db } from "../firebase";
 import ParkingCard from "../components/ParkingCard";
+import {
+  getCurrentSessionUser,
+  subscribeToAuth,
+} from "../services/authService";
+import {
+  getFavorites,
+  removeFavorite,
+} from "../services/favoriteService";
 import "./Favorites.css";
 
 function Favorites() {
   const [user, setUser] =
-    useState(null);
+    useState(
+      getCurrentSessionUser()
+    );
 
   const [authLoading, setAuthLoading] =
-    useState(true);
+    useState(false);
 
   const [favorites, setFavorites] =
     useState([]);
@@ -39,115 +37,95 @@ function Favorites() {
   const [removingId, setRemovingId] =
     useState("");
 
-  useEffect(() => {
-    const unsubscribe =
-      onAuthStateChanged(
-        auth,
-        (currentUser) => {
-          setUser(currentUser);
-          setAuthLoading(false);
-        },
-        (error) => {
-          console.error(
-            "Favorite auth error:",
-            error
-          );
-
-          setUser(null);
-          setAuthLoading(false);
-        }
-      );
-
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    if (authLoading) {
-      return undefined;
-    }
-
-    if (!user) {
+  const loadFavorites = async (sessionUser = getCurrentSessionUser()) => {
+    if (!sessionUser) {
       setFavorites([]);
       setFavoritesLoading(false);
       setFavoritesError("");
-      return undefined;
+      return;
     }
 
     setFavoritesLoading(true);
     setFavoritesError("");
 
-    const favoritesReference =
-      collection(
-        db,
-        "users",
-        user.uid,
-        "favorites"
+    try {
+      const items = await getFavorites();
+      setFavorites(items);
+    } catch (error) {
+      console.error(
+        "Load favorites error:",
+        error
       );
 
-    const favoritesQuery = query(
-      favoritesReference,
-      orderBy("savedAt", "desc")
-    );
-
-    const unsubscribe = onSnapshot(
-      favoritesQuery,
-      (snapshot) => {
-        const favoriteItems =
-          snapshot.docs.map(
-            (favoriteDocument) => ({
-              id: favoriteDocument.id,
-              ...favoriteDocument.data(),
-            })
-          );
-
-        setFavorites(favoriteItems);
-        setFavoritesLoading(false);
-        setFavoritesError("");
-      },
-      (error) => {
-        console.error(
-          "Load favorites error:",
-          error
-        );
-
-        setFavorites([]);
-        setFavoritesLoading(false);
-
-        setFavoritesError(
+      setFavorites([]);
+      setFavoritesError(
+        error?.message ||
           "دریافت علاقه‌مندی‌ها انجام نشد."
-        );
+      );
+    } finally {
+      setFavoritesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let active = true;
+
+    const initialUser =
+      getCurrentSessionUser();
+
+    setUser(initialUser);
+    setAuthLoading(false);
+    loadFavorites(initialUser);
+
+    const unsubscribeAuth =
+      subscribeToAuth((sessionUser) => {
+        if (!active) {
+          return;
+        }
+
+        setUser(sessionUser || null);
+        setAuthLoading(false);
+        loadFavorites(sessionUser);
+      });
+
+    const handleChanged = () => {
+      if (active) {
+        loadFavorites();
       }
+    };
+
+    window.addEventListener(
+      "fazajoo:favorites-changed",
+      handleChanged
     );
 
-    return unsubscribe;
-  }, [
-    user,
-    authLoading,
-  ]);
+    return () => {
+      active = false;
+      unsubscribeAuth();
+      window.removeEventListener(
+        "fazajoo:favorites-changed",
+        handleChanged
+      );
+    };
+  }, []);
 
   const normalizedFavorites =
     useMemo(() => {
       return favorites.map(
         (favorite) => ({
-          id:
-            favorite.parkingId ||
-            favorite.id,
-
+          ...favorite,
+          id: favorite.id,
           title:
             favorite.title ||
-            "پارکینگ بدون عنوان",
-
+            "آگهی بدون عنوان",
           city:
             favorite.city ||
             "شهر ثبت نشده",
-
           area:
             favorite.area || "",
-
           price:
             favorite.price ||
             "توافقی",
-
           imageUrl:
             favorite.imageUrl || "",
         })
@@ -175,13 +153,13 @@ function Favorites() {
     );
 
     try {
-      await deleteDoc(
-        doc(
-          db,
-          "users",
-          user.uid,
-          "favorites",
-          String(parkingId)
+      await removeFavorite(parkingId);
+
+      setFavorites((current) =>
+        current.filter(
+          (item) =>
+            String(item.id) !==
+            String(parkingId)
         )
       );
     } catch (error) {
@@ -191,7 +169,8 @@ function Favorites() {
       );
 
       alert(
-        "حذف آگهی از علاقه‌مندی‌ها انجام نشد."
+        error?.message ||
+          "حذف آگهی از علاقه‌مندی‌ها انجام نشد."
       );
     } finally {
       setRemovingId("");

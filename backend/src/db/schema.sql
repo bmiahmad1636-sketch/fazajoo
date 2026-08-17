@@ -97,3 +97,32 @@ CREATE INDEX IF NOT EXISTS idx_spaces_owner_id ON spaces(owner_id);
 CREATE INDEX IF NOT EXISTS idx_spaces_created_at ON spaces(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_spaces_status ON spaces(status);
 CREATE INDEX IF NOT EXISTS idx_spaces_city ON spaces(city);
+
+CREATE TABLE IF NOT EXISTS favorites (
+  user_id UUID NOT NULL
+    REFERENCES users(id)
+    ON DELETE CASCADE,
+
+  space_id UUID NOT NULL
+    REFERENCES spaces(id)
+    ON DELETE CASCADE,
+
+  created_at TIMESTAMPTZ
+    NOT NULL
+    DEFAULT NOW(),
+
+  PRIMARY KEY (user_id, space_id)
+);
+
+CREATE INDEX IF NOT EXISTS
+  idx_favorites_user_created_at
+ON favorites (
+  user_id,
+  created_at DESC
+);
+
+CREATE INDEX IF NOT EXISTS
+  idx_favorites_space_id
+ON favorites (
+  space_id
+);
