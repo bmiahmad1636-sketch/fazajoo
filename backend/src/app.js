@@ -28,6 +28,8 @@ const authRoutes =
     "./routes/auth.routes"
   );
 
+const spacesRoutes = require("./routes/spaces.routes");
+
 
 const app =
   express();
@@ -129,6 +131,8 @@ app.use(
   "/api/auth",
   authRoutes
 );
+
+app.use("/api/spaces", spacesRoutes);
 
 
 app.use(

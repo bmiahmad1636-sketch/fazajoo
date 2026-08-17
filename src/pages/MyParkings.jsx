@@ -8,23 +8,8 @@ import {
   Link,
 } from "react-router-dom";
 
-import {
-  onAuthStateChanged,
-} from "firebase/auth";
-
-import {
-  collection,
-  doc,
-  getDocs,
-  query,
-  updateDoc,
-  where,
-} from "firebase/firestore";
-
-import {
-  auth,
-  db,
-} from "../firebase";
+import { getCurrentSessionUser, subscribeToAuth } from "../services/authService";
+import { getMySpaces, updateSpace } from "../services/spaceService";
 
 import "./MyParkings.css";
 
@@ -48,72 +33,26 @@ function MyParkings() {
     useState("");
 
   useEffect(() => {
-    const unsubscribe =
-      onAuthStateChanged(
-        auth,
-        async (currentUser) => {
-          setUser(currentUser);
-
-          if (!currentUser) {
-            setParkings([]);
-            setLoading(false);
-            return;
-          }
-
-          try {
-            const parkingsQuery =
-              query(
-                collection(
-                  db,
-                  "spaces"
-                ),
-                where(
-                  "ownerId",
-                  "==",
-                  currentUser.uid
-                )
-              );
-
-            const snapshot =
-              await getDocs(
-                parkingsQuery
-              );
-
-            const userParkings =
-              snapshot.docs.map(
-                (document) => ({
-                  id:
-                    document.id,
-                  ...document.data(),
-                  status:
-                    document.data()
-                      .status ||
-                    "active",
-                })
-              );
-
-            setParkings(
-              userParkings
-            );
-          } catch (error) {
-            console.error(
-              error
-            );
-
-            alert(
-              "خطا در دریافت آگهی‌های شما"
-            );
-          } finally {
-            setLoading(
-              false
-            );
-          }
-        }
-      );
-
-    return () =>
-      unsubscribe();
+    let active = true;
+    const loadMine = async (currentUser = getCurrentSessionUser()) => {
+      setUser(currentUser);
+      if (!currentUser) { setParkings([]); setLoading(false); return; }
+      setLoading(true);
+      try {
+        const items = await getMySpaces();
+        if (active) setParkings(items);
+      } catch (error) {
+        console.error(error);
+        if (active) alert("خطا در دریافت آگهی‌های شما");
+      } finally { if (active) setLoading(false); }
+    };
+    loadMine();
+    const unsubscribe = subscribeToAuth(loadMine);
+    const reload = () => loadMine();
+    window.addEventListener("fazajoo:spaces-changed", reload);
+    return () => { active=false; unsubscribe(); window.removeEventListener("fazajoo:spaces-changed", reload); };
   }, []);
+
 
   const handleStatusChange =
     async (
@@ -132,17 +71,7 @@ function MyParkings() {
       );
 
       try {
-        await updateDoc(
-          doc(
-            db,
-            "spaces",
-            parkingId
-          ),
-          {
-            status:
-              newStatus,
-          }
-        );
+        await updateSpace(parkingId, { status: newStatus });
 
         setParkings(
           (

@@ -9,13 +9,7 @@ import {
   useParams,
 } from "react-router-dom";
 
-import {
-  doc,
-  serverTimestamp,
-  updateDoc,
-} from "firebase/firestore";
-
-import { db } from "../firebase";
+import { updateSpace } from "../services/spaceService";
 import ImageUploader from "../components/ImageUploader";
 
 import "./EditParking.css";
@@ -275,14 +269,10 @@ function EditParking({
       description:
         form.description.trim(),
 
-      updatedAt: serverTimestamp(),
     };
 
     try {
-      await updateDoc(
-        doc(db, "spaces", id),
-        updatedData
-      );
+      await updateSpace(id, updatedData);
 
       if (updateParkingInState) {
         updateParkingInState(id, {

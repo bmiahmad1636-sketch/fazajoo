@@ -10,15 +10,8 @@ import {
 } from "react-router-dom";
 
 import {
-  onAuthStateChanged,
-} from "firebase/auth";
-
-import {
-  collection,
   doc,
-  onSnapshot,
   onSnapshot as onDocumentSnapshot,
-  query,
 } from "firebase/firestore";
 
 import Header from "./components/Header";
@@ -38,9 +31,15 @@ import AgencyDashboard from "./pages/AgencyDashboard";
 import AgencyAccess from "./pages/AgencyAccess";
 import AdminDashboard from "./pages/AdminDashboard";
 
-import parkingData from "./data/parkingData";
+import { getSpaces } from "./services/spaceService";
 
-import { auth, db } from "./firebase";
+import { db } from "./firebase";
+
+import {
+  initializeAuthSession,
+  logoutUser,
+  subscribeToAuth,
+} from "./services/authService";
 
 function convertToNumber(value) {
   if (
@@ -96,25 +95,6 @@ function normalizeFirebaseParking(document) {
       data.createdAt ||
       null,
   };
-}
-
-function mergeParkings(
-  defaultParkings,
-  firebaseParkings
-) {
-  const allParkings = [
-    ...defaultParkings,
-    ...firebaseParkings,
-  ];
-
-  return [
-    ...new Map(
-      allParkings.map((parking) => [
-        String(parking.id),
-        parking,
-      ])
-    ).values(),
-  ];
 }
 
 function Home({
@@ -316,7 +296,7 @@ function AdminRoute({
 
 function App() {
   const [parkings, setParkings] =
-    useState(parkingData);
+    useState([]);
 
   const [parkingsLoading, setParkingsLoading] =
     useState(true);
@@ -337,30 +317,60 @@ function App() {
     useState(true);
 
   useEffect(() => {
-    const unsubscribe =
-      onAuthStateChanged(
-        auth,
-        (currentUser) => {
-          setUser(currentUser);
-          setAuthLoading(false);
-        },
-        (error) => {
-          console.error(
-            "Authentication listener error:",
-            error
-          );
+    let active = true;
 
-          setUser(null);
-          setAuthLoading(false);
-        }
-      );
+    const unsubscribe = subscribeToAuth(
+      (currentUser) => {
+        if (!active) return;
+        setUser(currentUser);
+        setAuthLoading(false);
+      }
+    );
 
-    return unsubscribe;
+    initializeAuthSession()
+      .then((currentUser) => {
+        if (!active) return;
+        setUser(currentUser);
+        setAuthLoading(false);
+      })
+      .catch((error) => {
+        console.error(
+          "Backend authentication initialization error:",
+          error
+        );
+
+        if (!active) return;
+        setUser(null);
+        setAuthLoading(false);
+      });
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
-    if (!user?.uid) {
+    if (!user) {
       setUserProfile(null);
+      setProfileLoading(false);
+      return undefined;
+    }
+
+    const fallbackProfile = {
+      id: user.backendId || user.id,
+      phone: user.phone || "",
+      displayName: user.displayName || user.fullName || "",
+      accountType: user.accountType || "user",
+      systemRole: user.systemRole || "user",
+      agencyStatus: user.agencyStatus || "none",
+      backendAuth: true,
+    };
+
+    // Firestore profile is still used temporarily for legacy features
+    // until users/agents/admin data is migrated to PostgreSQL.
+    if (!user.firebaseUid) {
+      setUserProfile(fallbackProfile);
       setProfileLoading(false);
       return undefined;
     }
@@ -370,7 +380,7 @@ function App() {
     const userRef = doc(
       db,
       "users",
-      user.uid
+      user.firebaseUid
     );
 
     const unsubscribe =
@@ -380,21 +390,22 @@ function App() {
           setUserProfile(
             snapshot.exists()
               ? {
+                  ...fallbackProfile,
                   id: snapshot.id,
                   ...snapshot.data(),
                 }
-              : null
+              : fallbackProfile
           );
 
           setProfileLoading(false);
         },
         (error) => {
-          console.error(
-            "User profile listener error:",
+          console.warn(
+            "Legacy Firestore profile unavailable; using backend profile:",
             error
           );
 
-          setUserProfile(null);
+          setUserProfile(fallbackProfile);
           setProfileLoading(false);
         }
       );
@@ -403,48 +414,31 @@ function App() {
   }, [user]);
 
   useEffect(() => {
-    setParkingsLoading(true);
-    setParkingsError("");
+    let active = true;
 
-    const spacesQuery = query(
-      collection(db, "spaces")
-    );
-
-    const unsubscribe = onSnapshot(
-      spacesQuery,
-      (snapshot) => {
-        const firebaseParkings =
-          snapshot.docs.map(
-            normalizeFirebaseParking
-          );
-
-        const mergedParkings =
-          mergeParkings(
-            parkingData,
-            firebaseParkings
-          );
-
-        setParkings(mergedParkings);
-        setParkingsLoading(false);
-        setParkingsError("");
-      },
-      (error) => {
-        console.error(
-          "Load parkings error:",
-          error
-        );
-
-        setParkings(parkingData);
-
-        setParkingsError(
-          "دریافت آگهی‌های Firebase انجام نشد."
-        );
-
-        setParkingsLoading(false);
+    const loadSpaces = async () => {
+      setParkingsLoading(true);
+      setParkingsError("");
+      try {
+        const backendSpaces = await getSpaces();
+        if (!active) return;
+        setParkings(backendSpaces);
+      } catch (error) {
+        console.error("Load backend spaces error:", error);
+        if (!active) return;
+        setParkings([]);
+        setParkingsError("دریافت آگهی‌ها از سرور فضاجو انجام نشد.");
+      } finally {
+        if (active) setParkingsLoading(false);
       }
-    );
+    };
 
-    return unsubscribe;
+    loadSpaces();
+    window.addEventListener("fazajoo:spaces-changed", loadSpaces);
+    return () => {
+      active = false;
+      window.removeEventListener("fazajoo:spaces-changed", loadSpaces);
+    };
   }, []);
 
   const deleteParking = (id) => {
@@ -475,8 +469,10 @@ function App() {
   return (
     <>
       <Header
+        user={user}
         userProfile={userProfile}
         profileLoading={profileLoading}
+        onLogout={logoutUser}
       />
 
       <Routes>

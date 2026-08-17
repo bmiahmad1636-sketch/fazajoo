@@ -64,8 +64,8 @@ function Register() {
       return "شماره موبایل را به شکل 09123456789 وارد کنید.";
     }
 
-    if (password.length < 6) {
-      return "رمز عبور باید حداقل ۶ کاراکتر باشد.";
+    if (password.length < 8) {
+      return "رمز عبور باید حداقل ۸ کاراکتر باشد.";
     }
 
     if (password !== confirmPassword) {
@@ -130,8 +130,8 @@ function Register() {
 
     let score = 0;
 
-    if (password.length >= 6) score += 1;
     if (password.length >= 8) score += 1;
+    if (password.length >= 10) score += 1;
     if (/[A-Za-z]/.test(password) && /\d/.test(password)) {
       score += 1;
     }
@@ -285,11 +285,11 @@ function Register() {
                   name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
-                  placeholder="حداقل ۶ کاراکتر"
+                  placeholder="حداقل ۸ کاراکتر"
                   value={formData.password}
                   onChange={handleChange}
                   disabled={loading}
-                  minLength={6}
+                  minLength={8}
                   maxLength={128}
                 />
 
@@ -348,7 +348,7 @@ function Register() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   disabled={loading}
-                  minLength={6}
+                  minLength={8}
                   maxLength={128}
                 />
 
@@ -393,7 +393,7 @@ function Register() {
               disabled={
                 loading ||
                 !isValidIranianPhoneNumber(formData.phone) ||
-                formData.password.length < 6 ||
+                formData.password.length < 8 ||
                 !acceptedRules
               }
             >

@@ -4,13 +4,8 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-import { onAuthStateChanged } from "firebase/auth";
-import {
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
-
-import { auth, db } from "../firebase";
+import { getCurrentSessionUser, subscribeToAuth } from "../services/authService";
+import { deleteSpace } from "../services/spaceService";
 import "./ParkingDetails.css";
 
 
@@ -61,16 +56,13 @@ function ParkingDetails({
     useState(false);
 
   useEffect(() => {
-    const unsubscribe =
-      onAuthStateChanged(
-        auth,
-        (currentUser) => {
-          setUser(currentUser);
-          setAuthLoading(false);
-        }
-      );
-
-    return () => unsubscribe();
+    setUser(getCurrentSessionUser());
+    setAuthLoading(false);
+    const unsubscribe = subscribeToAuth((currentUser) => {
+      setUser(currentUser);
+      setAuthLoading(false);
+    });
+    return unsubscribe;
   }, []);
 
   const parking = useMemo(() => {
@@ -204,13 +196,7 @@ function ParkingDetails({
     setDeleting(true);
 
     try {
-      await deleteDoc(
-        doc(
-          db,
-          "spaces",
-          String(id)
-        )
-      );
+      await deleteSpace(id);
 
       if (
         typeof deleteParking ===

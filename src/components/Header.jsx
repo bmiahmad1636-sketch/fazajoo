@@ -1,52 +1,30 @@
-import { useEffect, useState } from "react";
 import {
-  onAuthStateChanged,
-  signOut,
-} from "firebase/auth";
+  useState,
+} from "react";
 
 import {
   Link,
   NavLink,
 } from "react-router-dom";
 
-import { auth } from "../firebase";
-
 import MessageBadge from "./MessageBadge";
 
 import "./Header.css";
 
 function Header({
+  user = null,
   userProfile = null,
   profileLoading = false,
+  onLogout = null,
 }) {
-  const [user, setUser] = useState(null);
-
   const [menuOpen, setMenuOpen] =
     useState(false);
 
-  useEffect(() => {
-    const unsubscribe =
-      onAuthStateChanged(
-        auth,
-        (currentUser) => {
-          setUser(currentUser);
-        },
-        (error) => {
-          console.error(
-            "Header authentication error:",
-            error
-          );
-
-          setUser(null);
-        }
-      );
-
-    return unsubscribe;
-  }, []);
-
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      if (onLogout) {
+        await onLogout();
+      }
 
       setMenuOpen(false);
 
@@ -81,18 +59,11 @@ function Header({
       .join(" ");
   };
 
-  const getUserTitle = () => {
-    if (!user?.email) {
-      return "";
-    }
-
-    return user.email
-      .split("@")[0]
-      .trim();
-  };
-
   const userTitle =
-    getUserTitle();
+    user?.displayName ||
+    user?.fullName ||
+    user?.phone ||
+    "کاربر فضاجو";
 
   const isApprovedAgent =
     userProfile?.accountType ===
@@ -254,7 +225,7 @@ function Header({
 
               <div
                 className="fazajoo-header__user"
-                title={user.email}
+                title={user.phone || userTitle}
               >
 
                 <span className="fazajoo-header__user-avatar">

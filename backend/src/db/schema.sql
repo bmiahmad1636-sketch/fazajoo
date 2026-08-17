@@ -81,3 +81,19 @@ CREATE INDEX IF NOT EXISTS
 ON users (
   account_type
 );
+CREATE TABLE IF NOT EXISTS spaces (
+  id UUID PRIMARY KEY,
+  listing_type VARCHAR(20) NOT NULL DEFAULT 'offer' CHECK (listing_type IN ('offer','wanted')),
+  category VARCHAR(30) NOT NULL DEFAULT 'parking' CHECK (category IN ('parking','storage','warehouse','shop','land','other')),
+  custom_category VARCHAR(80), category_label VARCHAR(80),
+  status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active','inactive','rented')),
+  title VARCHAR(160) NOT NULL, city VARCHAR(100) NOT NULL,
+  area NUMERIC(12,2) NOT NULL DEFAULT 0, price VARCHAR(100) NOT NULL,
+  phone VARCHAR(20) NOT NULL, image_url TEXT, description TEXT,
+  owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_spaces_owner_id ON spaces(owner_id);
+CREATE INDEX IF NOT EXISTS idx_spaces_created_at ON spaces(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_spaces_status ON spaces(status);
+CREATE INDEX IF NOT EXISTS idx_spaces_city ON spaces(city);

@@ -1,12 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  addDoc,
-  collection,
-  serverTimestamp,
-} from "firebase/firestore";
-
-import { auth, db } from "../firebase";
+import { getCurrentSessionUser } from "../services/authService";
+import { createSpace } from "../services/spaceService";
 import ImageUploader from "../components/ImageUploader";
 
 import "./AddParking.css";
@@ -299,7 +294,7 @@ function AddParking() {
       return;
     }
 
-    const currentUser = auth.currentUser;
+    const currentUser = getCurrentSessionUser();
 
     if (!currentUser) {
       alert(
@@ -313,51 +308,20 @@ function AddParking() {
     setLoading(true);
 
     try {
-      await addDoc(
-        collection(db, "spaces"),
-        {
-          listingType:
-            form.listingType,
-
-          category:
-            form.category,
-
-          customCategory:
-            form.category === "other"
-              ? form.customCategory.trim()
-              : "",
-
-          categoryLabel:
-            spaceLabel,
-
-          status: "active",
-
-          title: form.title.trim(),
-          city: form.city.trim(),
-
-          area: form.area
-            ? Number(form.area)
-            : 0,
-
-          price: form.price.trim(),
-
-          phone: form.phone
-            .replace(/\s/g, "")
-            .trim(),
-
-          imageUrl: form.imageUrl,
-
-          description:
-            form.description.trim(),
-
-          ownerId: currentUser.uid,
-
-          ownerEmail:
-            currentUser.email || "",
-
-          createdAt: serverTimestamp(),
-        }
-      );
+      await createSpace({
+        listingType: form.listingType,
+        category: form.category,
+        customCategory: form.category === "other" ? form.customCategory.trim() : "",
+        categoryLabel: spaceLabel,
+        status: "active",
+        title: form.title.trim(),
+        city: form.city.trim(),
+        area: form.area ? Number(form.area) : 0,
+        price: form.price.trim(),
+        phone: form.phone.replace(/\s/g, "").trim(),
+        imageUrl: form.imageUrl,
+        description: form.description.trim(),
+      });
 
       alert(
         "آگهی با موفقیت ثبت شد."
