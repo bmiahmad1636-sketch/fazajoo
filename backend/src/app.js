@@ -30,6 +30,7 @@ const authRoutes =
 
 const spacesRoutes = require("./routes/spaces.routes");
 const favoritesRoutes = require("./routes/favorites.routes");
+const chatsRoutes = require("./routes/chats.routes");
 
 
 const app =
@@ -135,6 +136,7 @@ app.use(
 
 app.use("/api/spaces", spacesRoutes);
 app.use("/api/favorites", favoritesRoutes);
+app.use("/api/chats", chatsRoutes);
 
 
 app.use(

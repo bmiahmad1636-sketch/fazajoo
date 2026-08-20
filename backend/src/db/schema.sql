@@ -126,3 +126,30 @@ CREATE INDEX IF NOT EXISTS
 ON favorites (
   space_id
 );
+
+CREATE TABLE IF NOT EXISTS chats (
+  id UUID PRIMARY KEY,
+  space_id UUID NOT NULL REFERENCES spaces(id) ON DELETE CASCADE,
+  owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  requester_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT chats_different_users CHECK (owner_id <> requester_id),
+  CONSTRAINT chats_space_requester_unique UNIQUE (space_id, requester_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_chats_owner_updated ON chats(owner_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_chats_requester_updated ON chats(requester_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_chats_space_id ON chats(space_id);
+
+CREATE TABLE IF NOT EXISTS messages (
+  id UUID PRIMARY KEY,
+  chat_id UUID NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
+  sender_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  text VARCHAR(2000) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  read_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_messages_chat_created ON messages(chat_id, created_at ASC);
+CREATE INDEX IF NOT EXISTS idx_messages_unread ON messages(chat_id, read_at) WHERE read_at IS NULL;
