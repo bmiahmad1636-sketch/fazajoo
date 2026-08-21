@@ -105,6 +105,14 @@ const env = {
   JWT_EXPIRES_IN:
     process.env.JWT_EXPIRES_IN ||
     "7d",
+
+  STORAGE_ENDPOINT: process.env.STORAGE_ENDPOINT || "",
+  STORAGE_REGION: process.env.STORAGE_REGION || "us-east-1",
+  STORAGE_BUCKET: process.env.STORAGE_BUCKET || "",
+  STORAGE_ACCESS_KEY: process.env.STORAGE_ACCESS_KEY || "",
+  STORAGE_SECRET_KEY: process.env.STORAGE_SECRET_KEY || "",
+  STORAGE_PUBLIC_BASE_URL: process.env.STORAGE_PUBLIC_BASE_URL || "",
+  STORAGE_FORCE_PATH_STYLE: parseBoolean(process.env.STORAGE_FORCE_PATH_STYLE, false),
 };
 
 module.exports =

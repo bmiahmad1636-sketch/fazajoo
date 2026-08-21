@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { deleteAdImage, uploadAdImage } from "../services/uploadService";
 
 function ImageUploader({ imageUrl, onUploadComplete }) {
   const [uploading, setUploading] = useState(false);
@@ -7,19 +8,15 @@ function ImageUploader({ imageUrl, onUploadComplete }) {
   const uploadImage = async (event) => {
     const file = event.target.files?.[0];
 
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
-    if (!file.type.startsWith("image/")) {
-      setError("فقط فایل تصویری انتخاب کنید");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setError("فرمت عکس باید JPG، PNG یا WebP باشد");
       event.target.value = "";
       return;
     }
 
-    const maximumSize = 5 * 1024 * 1024;
-
-    if (file.size > maximumSize) {
+    if (file.size > 5 * 1024 * 1024) {
       setError("حجم عکس نباید بیشتر از ۵ مگابایت باشد");
       event.target.value = "";
       return;
@@ -29,93 +26,87 @@ function ImageUploader({ imageUrl, onUploadComplete }) {
     setError("");
 
     try {
-      const formData = new FormData();
+      const result = await uploadAdImage(file);
 
-      formData.append("file", file);
-      formData.append("upload_preset", "fazajoo_unsigned");
+      // تست موقت برای دیدن نتیجه آپلود
+      console.log("UPLOAD RESULT:", result);
 
-      const response = await fetch(
-        "https://api.cloudinary.com/v1_1/sclguyes/image/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      const result = await response.json();
-
-      if (!response.ok || !result.secure_url) {
-        throw new Error(
-          result.error?.message || "خطا در آپلود عکس"
-        );
+      if (imageUrl) {
+        await deleteAdImage(imageUrl).catch(() => undefined);
       }
 
-      onUploadComplete(result.secure_url);
+      onUploadComplete(result.url);
+
     } catch (uploadError) {
-      console.error(uploadError);
-      setError("آپلود عکس انجام نشد. دوباره تلاش کنید");
+      console.error("UPLOAD ERROR:", uploadError);
+      setError(
+        uploadError.message ||
+        "آپلود عکس انجام نشد. دوباره تلاش کنید"
+      );
     } finally {
       setUploading(false);
       event.target.value = "";
     }
   };
 
-  const removeImage = () => {
-    onUploadComplete("");
+
+  const removeImage = async () => {
+    setUploading(true);
     setError("");
+
+    try {
+      await deleteAdImage(imageUrl);
+      onUploadComplete("");
+
+    } catch (removeError) {
+      console.error("REMOVE ERROR:", removeError);
+      setError("حذف عکس انجام نشد. دوباره تلاش کنید");
+
+    } finally {
+      setUploading(false);
+    }
   };
 
+
   return (
-    <div
-      style={{
-        direction: "rtl",
-        marginBottom: "20px",
-      }}
-    >
+    <div style={{ direction: "rtl", marginBottom: "20px" }}>
+
       <label
         style={{
           display: "block",
           marginBottom: "8px",
-          fontWeight: "bold",
+          fontWeight: "bold"
         }}
       >
         تصویر آگهی
       </label>
 
+
       <input
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp"
         onChange={uploadImage}
         disabled={uploading}
       />
 
+
       {uploading && (
-        <p
-          style={{
-            marginTop: "10px",
-          }}
-        >
-          در حال آپلود عکس...
+        <p style={{ marginTop: "10px" }}>
+          در حال ارتباط با فضای ذخیره‌سازی فضاجو...
         </p>
       )}
 
+
       {error && (
-        <p
-          style={{
-            marginTop: "10px",
-            color: "red",
-          }}
-        >
+        <p style={{ marginTop: "10px", color: "red" }}>
           {error}
         </p>
       )}
 
+
       {imageUrl && (
-        <div
-          style={{
-            marginTop: "15px",
-          }}
-        >
+        <div style={{ marginTop: "15px" }}>
+
           <img
             src={imageUrl}
             alt="پیش‌نمایش تصویر آگهی"
@@ -126,9 +117,10 @@ function ImageUploader({ imageUrl, onUploadComplete }) {
               objectFit: "cover",
               borderRadius: "12px",
               display: "block",
-              marginBottom: "10px",
+              marginBottom: "10px"
             }}
           />
+
 
           <button
             type="button"
@@ -137,8 +129,10 @@ function ImageUploader({ imageUrl, onUploadComplete }) {
           >
             حذف عکس
           </button>
+
         </div>
       )}
+
     </div>
   );
 }
