@@ -19,10 +19,45 @@ const EMPTY_FORM = {
   city: "",
   area: "",
   price: "",
+  priceType: "monthly",
   phone: "",
   imageUrl: "",
   description: "",
 };
+
+const PRICE_TYPES = [
+  { value: "daily", label: "روزانه" },
+  { value: "monthly", label: "ماهانه" },
+  { value: "yearly", label: "سالانه" },
+  { value: "negotiable", label: "توافقی" },
+];
+
+function toEnglishDigits(value) {
+  return String(value)
+    .replace(/[۰-۹]/g, (digit) =>
+      String("۰۱۲۳۴۵۶۷۸۹".indexOf(digit))
+    )
+    .replace(/[٠-٩]/g, (digit) =>
+      String("٠١٢٣٤٥٦٧٨٩".indexOf(digit))
+    );
+}
+
+function formatPriceInput(value) {
+  const digits = toEnglishDigits(value)
+    .replace(/\D/g, "");
+
+  return digits
+    ? Number(digits).toLocaleString("en-US")
+    : "";
+}
+
+function getPriceTypeLabel(value) {
+  return (
+    PRICE_TYPES.find(
+      (item) => item.value === value
+    )?.label || "ماهانه"
+  );
+}
 
 function createFormFromParking(parking) {
   return {
@@ -32,7 +67,11 @@ function createFormFromParking(parking) {
       parking?.area === 0
         ? "0"
         : parking?.area || "",
-    price: parking?.price || "",
+    price: formatPriceInput(
+      parking?.price || ""
+    ),
+    priceType:
+      parking?.priceType || "monthly",
     phone: parking?.phone || "",
     imageUrl: parking?.imageUrl || "",
     description: parking?.description || "",
@@ -111,7 +150,10 @@ function EditParking({
 
     setForm((currentForm) => ({
       ...currentForm,
-      [name]: value,
+      [name]:
+        name === "price"
+          ? formatPriceInput(value)
+          : value,
     }));
 
     setErrors((currentErrors) => ({
@@ -164,7 +206,7 @@ function EditParking({
 
     if (!form.price.trim()) {
       nextErrors.price =
-        "قیمت یا عبارت توافقی را وارد کنید.";
+        "قیمت را به ریال وارد کنید.";
     }
 
     const normalizedPhone =
@@ -262,7 +304,10 @@ function EditParking({
         ? Number(form.area)
         : 0,
 
-      price: form.price.trim(),
+      price: form.price
+        .replace(/,/g, "")
+        .trim(),
+      priceType: form.priceType,
       phone: normalizedPhone,
       imageUrl: form.imageUrl,
 
@@ -285,7 +330,10 @@ function EditParking({
         ...form,
         title: form.title.trim(),
         city: form.city.trim(),
-        price: form.price.trim(),
+        price: formatPriceInput(
+          form.price
+        ),
+        priceType: form.priceType,
         phone: normalizedPhone,
         description:
           form.description.trim(),
@@ -721,11 +769,55 @@ function EditParking({
                           id="price"
                           name="price"
                           type="text"
+                          inputMode="numeric"
                           value={form.price}
                           onChange={handleChange}
-                          placeholder="مثلاً ماهانه ۳ میلیون تومان"
+                          placeholder="مثلاً 30000000"
+                          autoComplete="off"
                           disabled={loading}
                         />
+
+                        <span className="edit-parking-input__suffix">
+                          ریال
+                        </span>
+                      </div>
+
+                      <div
+                        className="edit-parking-input"
+                        style={{ marginTop: "12px" }}
+                      >
+                        <span className="edit-parking-input__icon">
+                          ◷
+                        </span>
+
+                        <select
+                          id="priceType"
+                          name="priceType"
+                          value={form.priceType}
+                          onChange={handleChange}
+                          disabled={loading}
+                          aria-label="نوع قیمت"
+                          style={{
+                            width: "100%",
+                            border: "none",
+                            outline: "none",
+                            background: "transparent",
+                            font: "inherit",
+                            color: "inherit",
+                            cursor: loading
+                              ? "not-allowed"
+                              : "pointer",
+                          }}
+                        >
+                          {PRICE_TYPES.map((item) => (
+                            <option
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       {errors.price && (
@@ -963,8 +1055,11 @@ function EditParking({
                     </span>
 
                     <strong>
-                      {form.price ||
-                        "قیمت ثبت نشده"}
+                      {form.price
+                        ? `${form.price} ریال - ${getPriceTypeLabel(
+                            form.priceType
+                          )}`
+                        : "قیمت ثبت نشده"}
                     </strong>
                   </div>
                 </div>

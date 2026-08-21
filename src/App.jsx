@@ -9,11 +9,6 @@ import {
   Routes,
 } from "react-router-dom";
 
-import {
-  doc,
-  onSnapshot as onDocumentSnapshot,
-} from "firebase/firestore";
-
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 
@@ -33,7 +28,6 @@ import AdminDashboard from "./pages/AdminDashboard";
 
 import { getSpaces } from "./services/spaceService";
 
-import { db } from "./firebase";
 
 import {
   initializeAuthSession,
@@ -77,25 +71,6 @@ function convertToNumber(value) {
   return Number(numbers.join(""));
 }
 
-function normalizeFirebaseParking(document) {
-  const data = document.data();
-
-  return {
-    id: document.id,
-    ...data,
-
-    imageUrl:
-      data.imageUrl ||
-      data.image ||
-      data.images?.[0] ||
-      "",
-
-    createdAt:
-      data.createdAt?.toDate?.() ||
-      data.createdAt ||
-      null,
-  };
-}
 
 function Home({
   parkings,
@@ -354,63 +329,56 @@ function App() {
     if (!user) {
       setUserProfile(null);
       setProfileLoading(false);
-      return undefined;
-    }
-
-    const fallbackProfile = {
-      id: user.backendId || user.id,
-      phone: user.phone || "",
-      displayName: user.displayName || user.fullName || "",
-      accountType: user.accountType || "user",
-      systemRole: user.systemRole || "user",
-      agencyStatus: user.agencyStatus || "none",
-      backendAuth: true,
-    };
-
-    // Firestore profile is still used temporarily for legacy features
-    // until users/agents/admin data is migrated to PostgreSQL.
-    if (!user.firebaseUid) {
-      setUserProfile(fallbackProfile);
-      setProfileLoading(false);
-      return undefined;
+      return;
     }
 
     setProfileLoading(true);
 
-    const userRef = doc(
-      db,
-      "users",
-      user.firebaseUid
-    );
+    const backendProfile = {
+      id:
+        user.backendId ||
+        user.id ||
+        user.uid ||
+        "",
+      phone:
+        user.phone || "",
+      displayName:
+        user.displayName ||
+        user.fullName ||
+        "",
+      fullName:
+        user.fullName ||
+        user.displayName ||
+        "",
+      accountType:
+        user.accountType ||
+        "user",
+      systemRole:
+        user.systemRole ||
+        "user",
+      agencyStatus:
+        user.agencyStatus ||
+        "none",
+      agencyName:
+        user.agencyName ||
+        "",
+      agentName:
+        user.agentName ||
+        "",
+      agencyCity:
+        user.agencyCity ||
+        "",
+      agencyAddress:
+        user.agencyAddress ||
+        "",
+      agencyLicenseNumber:
+        user.agencyLicenseNumber ||
+        "",
+      backendAuth: true,
+    };
 
-    const unsubscribe =
-      onDocumentSnapshot(
-        userRef,
-        (snapshot) => {
-          setUserProfile(
-            snapshot.exists()
-              ? {
-                  ...fallbackProfile,
-                  id: snapshot.id,
-                  ...snapshot.data(),
-                }
-              : fallbackProfile
-          );
-
-          setProfileLoading(false);
-        },
-        (error) => {
-          console.warn(
-            "Legacy Firestore profile unavailable; using backend profile:",
-            error
-          );
-
-          setUserProfile(fallbackProfile);
-          setProfileLoading(false);
-        }
-      );
-
-    return unsubscribe;
+    setUserProfile(backendProfile);
+    setProfileLoading(false);
   }, [user]);
 
   useEffect(() => {

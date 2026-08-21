@@ -5,27 +5,20 @@ import {
 } from "react";
 
 import {
-  collection,
-  onSnapshot,
-  serverTimestamp,
-  updateDoc,
-  doc,
-} from "firebase/firestore";
-
-import {
   Link,
 } from "react-router-dom";
 
 import {
-  auth,
-  db,
-} from "../firebase";
+  getAdminUsers,
+  approveAgent as approveAgentApi,
+  rejectAgent as rejectAgentApi,
+} from "../services/adminService";
 
 import "./AdminDashboard.css";
 
 
 const DOCUMENT_SERVER_URL =
-  "http://127.0.0.1:5050";
+  "http://127.0.0.1:6060";
 
 
 const DOCUMENT_LABELS = {
@@ -82,52 +75,22 @@ function AdminDashboard() {
 
 
   useEffect(() => {
-    setLoading(true);
-    setError("");
+    async function loadUsers() {
+      try {
+        setLoading(true);
+        setError("");
 
-    const usersRef =
-      collection(
-        db,
-        "users"
-      );
+        const loadedUsers = await getAdminUsers();
+        setUsers(loadedUsers);
+      } catch (loadError) {
+        console.error("Admin users load error:", loadError);
+        setError("دریافت اطلاعات کاربران انجام نشد.");
+      } finally {
+        setLoading(false);
+      }
+    }
 
-    const unsubscribe =
-      onSnapshot(
-        usersRef,
-
-        (snapshot) => {
-          const loadedUsers =
-            snapshot.docs.map(
-              (document) => ({
-                id:
-                  document.id,
-
-                ...document.data(),
-              })
-            );
-
-          setUsers(
-            loadedUsers
-          );
-
-          setLoading(false);
-        },
-
-        (snapshotError) => {
-          console.error(
-            "Admin users load error:",
-            snapshotError
-          );
-
-          setError(
-            "دریافت اطلاعات کاربران انجام نشد."
-          );
-
-          setLoading(false);
-        }
-      );
-
-    return unsubscribe;
+    loadUsers();
   }, []);
 
 
@@ -232,33 +195,7 @@ function AdminDashboard() {
           user.id
         );
 
-        const adminUser =
-          auth.currentUser;
-
-        await updateDoc(
-          doc(
-            db,
-            "users",
-            user.id
-          ),
-          {
-            accountType:
-              "agent",
-
-            agencyStatus:
-              "approved",
-
-            agencyApprovedAt:
-              serverTimestamp(),
-
-            agencyApprovedBy:
-              adminUser?.uid ||
-              "admin",
-
-            agencyReviewedAt:
-              serverTimestamp(),
-          }
-        );
+        await approveAgentApi(user.id);
 
         alert(
           "مشاور با موفقیت تأیید شد."
@@ -301,33 +238,7 @@ function AdminDashboard() {
           user.id
         );
 
-        const adminUser =
-          auth.currentUser;
-
-        await updateDoc(
-          doc(
-            db,
-            "users",
-            user.id
-          ),
-          {
-            accountType:
-              "user",
-
-            agencyStatus:
-              "rejected",
-
-            agencyRejectedAt:
-              serverTimestamp(),
-
-            agencyRejectedBy:
-              adminUser?.uid ||
-              "admin",
-
-            agencyReviewedAt:
-              serverTimestamp(),
-          }
-        );
+        await approveAgentApi(user.id);
 
         alert(
           "درخواست مشاور رد شد."

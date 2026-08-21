@@ -6,6 +6,8 @@ import {
 } from "react-router-dom";
 import { getCurrentSessionUser, subscribeToAuth } from "../services/authService";
 import { deleteSpace } from "../services/spaceService";
+import { formatRialPrice } from "../utils/priceFormatter";
+
 import "./ParkingDetails.css";
 
 
@@ -400,8 +402,11 @@ function ParkingDetails({
               </span>
 
               <strong>
-                {parking.price ||
-                  "توافقی"}
+                {formatRialPrice(parking.price, {
+                  priceType:
+                    parking.priceType || "monthly",
+                  fallback: "توافقی",
+                })}
               </strong>
 
               <small>
@@ -550,8 +555,11 @@ function ParkingDetails({
                       </span>
 
                       <strong>
-                        {parking.price ||
-                          "توافقی"}
+                        {formatRialPrice(parking.price, {
+                          priceType:
+                            parking.priceType || "monthly",
+                          fallback: "توافقی",
+                        })}
                       </strong>
                     </div>
                   </div>

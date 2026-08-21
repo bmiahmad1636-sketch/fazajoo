@@ -1,46 +1,23 @@
-const express =
-  require(
-    "express"
-  );
+const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
 
-const cors =
-  require(
-    "cors"
-  );
+const env = require("./config/env");
 
-const helmet =
-  require(
-    "helmet"
-  );
-
-const env =
-  require(
-    "./config/env"
-  );
-
-const healthRoutes =
-  require(
-    "./routes/health.routes"
-  );
-
-const authRoutes =
-  require(
-    "./routes/auth.routes"
-  );
-
+const healthRoutes = require("./routes/health.routes");
+const authRoutes = require("./routes/auth.routes");
 const spacesRoutes = require("./routes/spaces.routes");
 const favoritesRoutes = require("./routes/favorites.routes");
 const chatsRoutes = require("./routes/chats.routes");
 const uploadsRoutes = require("./routes/uploads.routes");
+const adminRoutes = require("./routes/admin.routes");
+const agencyRoutes = require("./routes/agency.routes");
 
 
-const app =
-  express();
+const app = express();
 
 
-app.disable(
-  "x-powered-by"
-);
+app.disable("x-powered-by");
 
 
 app.use(
@@ -50,35 +27,26 @@ app.use(
 
 app.use(
   cors({
-    origin(
-      origin,
-      callback
-    ) {
+    origin(origin, callback) {
+
       if (!origin) {
-        return callback(
-          null,
-          true
-        );
+        return callback(null, true);
       }
+
 
       if (
-        env.CORS_ORIGINS
-          .includes(
-            origin
-          )
+        env.CORS_ORIGINS.includes(origin)
       ) {
-        return callback(
-          null,
-          true
-        );
+        return callback(null, true);
       }
 
+
       return callback(
-        new Error(
-          "Origin not allowed by CORS"
-        )
+        new Error("Origin not allowed by CORS")
       );
+
     },
+
 
     methods: [
       "GET",
@@ -89,39 +57,37 @@ app.use(
       "OPTIONS",
     ],
 
+
     allowedHeaders: [
       "Content-Type",
       "Authorization",
     ],
+
   })
 );
 
 
 app.use(
   express.json({
-    limit:
-      "100kb",
+    limit: "100kb",
   })
 );
 
 
+
 app.get(
   "/",
-  (
-    request,
-    response
-  ) => {
+  (request, response) => {
+
     return response.json({
       ok: true,
-
-      service:
-        "Fazajoo API",
-
-      message:
-        "Backend مستقل فضاجو فعال است.",
+      service: "Fazajoo API",
+      message: "Backend مستقل فضاجو فعال است.",
     });
+
   }
 );
+
 
 
 app.use(
@@ -135,27 +101,57 @@ app.use(
   authRoutes
 );
 
-app.use("/api/spaces", spacesRoutes);
-app.use("/api/favorites", favoritesRoutes);
-app.use("/api/chats", chatsRoutes);
-app.use("/api/uploads", uploadsRoutes);
+
+app.use(
+  "/api/spaces",
+  spacesRoutes
+);
 
 
 app.use(
-  (
-    request,
-    response
-  ) => {
+  "/api/favorites",
+  favoritesRoutes
+);
+
+
+app.use(
+  "/api/chats",
+  chatsRoutes
+);
+
+
+app.use(
+  "/api/uploads",
+  uploadsRoutes
+);
+
+
+app.use(
+  "/api/admin",
+  adminRoutes
+);
+
+
+app.use(
+  "/api/agency",
+  agencyRoutes
+);
+
+
+
+app.use(
+  (request, response) => {
+
     return response
       .status(404)
       .json({
         ok: false,
-
-        message:
-          "مسیر API پیدا نشد.",
+        message: "مسیر API پیدا نشد.",
       });
+
   }
 );
+
 
 
 app.use(
@@ -165,36 +161,40 @@ app.use(
     response,
     next
   ) => {
+
     console.error(
       "API error:",
       error
     );
 
+
     if (
       error.message ===
       "Origin not allowed by CORS"
     ) {
+
       return response
         .status(403)
         .json({
           ok: false,
-
           message:
             "دسترسی این مبدأ مجاز نیست.",
         });
+
     }
+
 
     return response
       .status(500)
       .json({
         ok: false,
-
         message:
           "خطای داخلی سرور فضاجو.",
       });
+
   }
 );
 
 
-module.exports =
-  app;
+
+module.exports = app;

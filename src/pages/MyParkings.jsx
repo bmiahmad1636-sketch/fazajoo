@@ -11,6 +11,8 @@ import {
 import { getCurrentSessionUser, subscribeToAuth } from "../services/authService";
 import { getMySpaces, updateSpace } from "../services/spaceService";
 
+import { formatRialPrice } from "../utils/priceFormatter";
+
 import "./MyParkings.css";
 
 function MyParkings() {
@@ -651,8 +653,16 @@ function MyParkings() {
                               </small>
 
                               <strong>
-                                {parking.price ||
-                                  "توافقی"}
+                                {formatRialPrice(
+                                  parking.price,
+                                  {
+                                    priceType:
+                                      parking.priceType ||
+                                      "monthly",
+                                    fallback:
+                                      "توافقی",
+                                  }
+                                )}
                               </strong>
                             </div>
                           </div>

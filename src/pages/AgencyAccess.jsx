@@ -5,23 +5,19 @@ import {
 } from "react";
 
 import {
-  doc,
-  serverTimestamp,
-  setDoc,
-} from "firebase/firestore";
-
-import {
   Link,
   Navigate,
 } from "react-router-dom";
 
-import { db } from "../firebase";
-
 import "./AgencyAccess.css";
+import { getAuthToken } from "../services/authService";
 
 
 const DOCUMENT_SERVER_URL =
-  "http://127.0.0.1:5050";
+  "http://127.0.0.1:6060";
+
+const API_SERVER_URL =
+  "http://127.0.0.1:6060";
 
 
 const INITIAL_FORM = {
@@ -611,62 +607,6 @@ function AgencyAccess({
     };
 
 
-  const getDocumentSignature =
-    async (
-      documentType
-    ) => {
-      const response =
-        await fetch(
-          `${DOCUMENT_SERVER_URL}/api/cloudinary/agency-document-signature`,
-          {
-            method:
-              "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify({
-                userId:
-                  currentUser.uid,
-
-                documentType,
-              }),
-          }
-        );
-
-
-      let data =
-        null;
-
-
-      try {
-        data =
-          await response.json();
-      } catch {
-        throw new Error(
-          "پاسخ سرور مدارک قابل خواندن نیست."
-        );
-      }
-
-
-      if (
-        !response.ok ||
-        !data?.ok
-      ) {
-        throw new Error(
-          data?.message ||
-            "امضای امن آپلود دریافت نشد."
-        );
-      }
-
-
-      return data;
-    };
-
-
   const uploadSingleDocument =
     async (
       documentType,
@@ -675,180 +615,74 @@ function AgencyAccess({
       setUploadStatus(
         (current) => ({
           ...current,
-
           [documentType]:
             "uploading",
         })
       );
 
-
       try {
-        const signatureData =
-          await getDocumentSignature(
-            documentType
-          );
+        const token =
+          getAuthToken();
 
-
-        const uploadForm =
+        const formData =
           new FormData();
 
-
-        uploadForm.append(
+        formData.append(
           "file",
           file
         );
 
-
-        uploadForm.append(
-          "api_key",
-          signatureData.apiKey
+        formData.append(
+          "documentType",
+          documentType
         );
-
-
-        uploadForm.append(
-          "timestamp",
-          String(
-            signatureData.timestamp
-          )
-        );
-
-
-        uploadForm.append(
-          "signature",
-          signatureData.signature
-        );
-
-
-        uploadForm.append(
-          "upload_preset",
-          signatureData
-            .uploadPreset
-        );
-
-
-        uploadForm.append(
-          "folder",
-          signatureData.folder
-        );
-
-
-        uploadForm.append(
-          "public_id",
-          signatureData.publicId
-        );
-
-
-        uploadForm.append(
-          "type",
-          "authenticated"
-        );
-
-
-        const cloudinaryUrl =
-          `https://api.cloudinary.com/v1_1/${signatureData.cloudName}/image/upload`;
-
 
         const response =
           await fetch(
-            cloudinaryUrl,
+            `${API_SERVER_URL}/api/uploads/agency-document`,
             {
               method:
                 "POST",
-
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
               body:
-                uploadForm,
+                formData,
             }
           );
 
-
-        let data =
-          null;
-
-
-        try {
-          data =
-            await response.json();
-        } catch {
-          throw new Error(
-            "پاسخ Cloudinary قابل خواندن نیست."
-          );
-        }
-
+        const data =
+          await response.json();
 
         if (
           !response.ok ||
-          !data?.public_id
+          !data?.ok
         ) {
           throw new Error(
-            data
-              ?.error
-              ?.message ||
-            "آپلود مدرک انجام نشد."
+            data?.message ||
+              "آپلود مدرک انجام نشد."
           );
         }
 
-
-        const safeRecord = {
-          publicId:
-            data.public_id,
-
-          resourceType:
-            data
-              .resource_type ||
-            "image",
-
-          deliveryType:
-            data.type ||
-            "authenticated",
-
-          format:
-            data.format ||
-            "",
-
-          bytes:
-            Number(
-              data.bytes ||
-              0
-            ),
-
-          width:
-            Number(
-              data.width ||
-              0
-            ),
-
-          height:
-            Number(
-              data.height ||
-              0
-            ),
-
-          originalFilename:
-            file.name,
-
-          documentType,
-        };
-
+        const safeRecord =
+          data.document;
 
         setUploadedDocuments(
           (current) => ({
             ...current,
-
             [documentType]:
               safeRecord,
           })
         );
 
-
         setUploadStatus(
           (current) => ({
             ...current,
-
             [documentType]:
               "uploaded",
           })
         );
-
 
         return safeRecord;
 
@@ -858,21 +692,17 @@ function AgencyAccess({
           error
         );
 
-
         setUploadStatus(
           (current) => ({
             ...current,
-
             [documentType]:
               "error",
           })
         );
 
-
         throw error;
       }
     };
-
 
   const uploadAllDocuments =
     async () => {
@@ -919,7 +749,7 @@ function AgencyAccess({
 
 
       if (
-        !currentUser?.uid
+        !getAuthToken()
       ) {
         setMessage(
           "ابتدا وارد حساب کاربری شوید."
@@ -988,85 +818,40 @@ function AgencyAccess({
             .trim();
 
 
-        await setDoc(
-          doc(
-            db,
-            "users",
-            currentUser.uid
-          ),
-          {
-            accountType:
-              userProfile
-                ?.accountType ||
-              "user",
+        const token =
+          getAuthToken();
 
-            agencyStatus:
-              "pending",
+        const response =
+          await fetch(
+            `${API_SERVER_URL}/api/agency/request`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                agencyName: form.agencyName.trim(),
+                agentName: form.agentName.trim(),
+                city: form.city.trim(),
+                address: form.address.trim(),
+                phone,
+                nationalId,
+                licenseNumber: form.licenseNumber.trim(),
+                documents: uploaded,
+              }),
+            }
+          );
 
-            agencyName:
-              form
-                .agencyName
-                .trim(),
+        const result =
+          await response.json();
 
-            agentName:
-              form
-                .agentName
-                .trim(),
-
-            agencyCity:
-              form
-                .city
-                .trim(),
-
-            agencyAddress:
-              form
-                .address
-                .trim(),
-
-            agencyLicenseNumber:
-              form
-                .licenseNumber
-                .trim(),
-
-            phone,
-
-            agencyNationalId:
-              nationalId,
-
-            agencyVerificationRequired:
-              true,
-
-            agencyDocumentsStatus:
-              "uploaded",
-
-            agencyDocuments: {
-              nationalCardFront:
-                uploaded
-                  .national_card_front,
-
-              nationalCardBack:
-                uploaded
-                  .national_card_back,
-
-              businessLicense:
-                uploaded
-                  .business_license,
-            },
-
-            agencyRequestedAt:
-              serverTimestamp(),
-
-            agencyDocumentsUploadedAt:
-              serverTimestamp(),
-
-            updatedAt:
-              serverTimestamp(),
-          },
-          {
-            merge: true,
-          }
-        );
-
+        if (!response.ok || !result.ok) {
+          throw new Error(
+            result?.message ||
+              "ثبت درخواست انجام نشد."
+          );
+        }
 
         setMessage(
           "درخواست احراز و مدارک با موفقیت ثبت شد. درخواست شما اکنون در انتظار بررسی مدیریت فضاجو است."

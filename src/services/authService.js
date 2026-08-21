@@ -1,19 +1,3 @@
-import {
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut,
-} from "firebase/auth";
-
-import {
-  doc,
-  getDoc,
-  serverTimestamp,
-  setDoc,
-} from "firebase/firestore";
-
-import { auth, db } from "../firebase";
-
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   "http://127.0.0.1:6060/api";
@@ -80,13 +64,8 @@ function getStoredUser() {
 
 function saveSession(token, user) {
   try {
-    if (token) {
-      localStorage.setItem(TOKEN_STORAGE_KEY, token);
-    }
-
-    if (user) {
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
-    }
+    if (token) localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    if (user) localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
   } catch (error) {
     console.warn("Local auth storage warning:", error);
   }
@@ -129,34 +108,24 @@ export function getAuthToken() {
   return getStoredToken();
 }
 
-function makeSessionUser(backendUser, firebaseUser = null) {
-  if (!backendUser) {
-    return null;
-  }
-
-  const firebaseUid = firebaseUser?.uid || null;
+function makeSessionUser(backendUser) {
+  if (!backendUser) return null;
 
   return {
     ...backendUser,
-
     backendId: backendUser.id,
-
-    // Compatibility for pages that still expect Firebase's user.uid.
-    // When the Firebase bridge is unavailable, uid falls back to backend id.
-    uid: firebaseUid || backendUser.id,
-    firebaseUid,
-
+    uid: backendUser.id,
+    firebaseUid: null,
     displayName:
       backendUser.fullName ||
       backendUser.displayName ||
       "",
-
     phoneNormalized: backendUser.phone || "",
-
     email:
-      backendUser.phone
+      backendUser.email ||
+      (backendUser.phone
         ? `${backendUser.phone}@${AUTH_EMAIL_DOMAIN}`
-        : "",
+        : ""),
   };
 }
 
@@ -180,7 +149,7 @@ async function apiRequest(path, options = {}) {
         ...(options.headers || {}),
       },
     });
-  } catch (error) {
+  } catch {
     throw new Error(
       "اتصال به سرور فضاجو برقرار نشد. مطمئن شوید Backend روی پورت 6060 روشن است."
     );
@@ -208,142 +177,6 @@ async function apiRequest(path, options = {}) {
   return data;
 }
 
-function withTimeout(promise, timeoutMs = 3500) {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) => {
-      window.setTimeout(() => {
-        reject(new Error("Firebase compatibility timeout"));
-      }, timeoutMs);
-    }),
-  ]);
-}
-
-function waitForFirebaseUser(timeoutMs = 1200) {
-  return new Promise((resolve) => {
-    let finished = false;
-    let unsubscribe = null;
-
-    const finish = (user) => {
-      if (finished) return;
-      finished = true;
-
-      if (unsubscribe) {
-        unsubscribe();
-      }
-
-      resolve(user || null);
-    };
-
-    unsubscribe = onAuthStateChanged(
-      auth,
-      (user) => finish(user),
-      () => finish(null)
-    );
-
-    window.setTimeout(() => {
-      finish(auth.currentUser);
-    }, timeoutMs);
-  });
-}
-
-async function getLegacyProfile(firebaseUser) {
-  if (!firebaseUser?.uid) {
-    return null;
-  }
-
-  try {
-    const snapshot = await withTimeout(
-      getDoc(doc(db, "users", firebaseUser.uid)),
-      3000
-    );
-
-    return snapshot.exists() ? snapshot.data() : null;
-  } catch (error) {
-    console.warn("Legacy profile bridge unavailable:", error?.message || error);
-    return null;
-  }
-}
-
-async function tryFirebaseLoginBridge(phone, password) {
-  try {
-    const internalEmail = phoneToInternalEmail(phone);
-
-    const credential = await withTimeout(
-      signInWithEmailAndPassword(auth, internalEmail, password),
-      4000
-    );
-
-    return credential.user;
-  } catch (error) {
-    console.warn(
-      "Firebase login bridge unavailable; backend session remains active:",
-      error?.code || error?.message || error
-    );
-
-    return null;
-  }
-}
-
-async function tryFirebaseRegisterBridge({
-  phone,
-  password,
-  displayName = "",
-}) {
-  const internalEmail = phoneToInternalEmail(phone);
-
-  try {
-    const credential = await withTimeout(
-      createUserWithEmailAndPassword(auth, internalEmail, password),
-      4000
-    );
-
-    const firebaseUser = credential.user;
-
-    try {
-      await withTimeout(
-        setDoc(
-          doc(db, "users", firebaseUser.uid),
-          {
-            uid: firebaseUser.uid,
-            phone,
-            phoneNormalized: phone,
-            phoneVerified: false,
-            displayName: displayName.trim(),
-            authMethod: "password",
-            authProvider: "fazajoo-backend-primary",
-            authVersion: 2,
-            internalEmail,
-            accountStatus: "active",
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-          },
-          { merge: true }
-        ),
-        4000
-      );
-    } catch (profileError) {
-      console.warn(
-        "Legacy Firebase profile bridge warning:",
-        profileError?.message || profileError
-      );
-    }
-
-    return firebaseUser;
-  } catch (error) {
-    if (error?.code === "auth/email-already-in-use") {
-      return tryFirebaseLoginBridge(phone, password);
-    }
-
-    console.warn(
-      "Firebase register bridge unavailable; backend account is already valid:",
-      error?.code || error?.message || error
-    );
-
-    return null;
-  }
-}
-
 async function backendLogin(phone, password) {
   return apiRequest("/auth/login", {
     method: "POST",
@@ -362,43 +195,6 @@ async function backendRegister({ phone, password, displayName = "" }) {
   });
 }
 
-async function tryMigrateLegacyFirebaseUser({ phone, password }) {
-  const firebaseUser = await tryFirebaseLoginBridge(phone, password);
-
-  if (!firebaseUser) {
-    return null;
-  }
-
-  const legacyProfile = await getLegacyProfile(firebaseUser);
-
-  try {
-    const registration = await backendRegister({
-      phone,
-      password,
-      displayName:
-        legacyProfile?.displayName ||
-        legacyProfile?.agentName ||
-        "",
-    });
-
-    return {
-      data: registration,
-      firebaseUser,
-    };
-  } catch (error) {
-    if (error?.status === 409) {
-      const loginData = await backendLogin(phone, password);
-
-      return {
-        data: loginData,
-        firebaseUser,
-      };
-    }
-
-    throw error;
-  }
-}
-
 export async function initializeAuthSession() {
   const token = getStoredToken();
 
@@ -415,15 +211,18 @@ export async function initializeAuthSession() {
       },
     });
 
-    const firebaseUser = await waitForFirebaseUser();
-    const sessionUser = makeSessionUser(data.user, firebaseUser);
+    const sessionUser = makeSessionUser(data.user);
 
     saveSession(token, sessionUser);
     notifyAuthListeners(sessionUser);
 
     return sessionUser;
   } catch (error) {
-    console.warn("Stored backend session is invalid:", error?.message || error);
+    console.warn(
+      "Stored backend session is invalid:",
+      error?.message || error
+    );
+
     clearStoredSession();
     notifyAuthListeners(null);
     return null;
@@ -438,11 +237,15 @@ export const registerWithPhoneAndPassword = async ({
   const normalizedPhone = normalizePhoneNumber(phone);
 
   if (!isValidIranianPhoneNumber(normalizedPhone)) {
-    throw new Error("شماره موبایل را به شکل 09123456789 وارد کنید.");
+    throw new Error(
+      "شماره موبایل را به شکل 09123456789 وارد کنید."
+    );
   }
 
   if (new TextEncoder().encode(password).length < 8) {
-    throw new Error("رمز عبور باید حداقل ۸ کاراکتر باشد.");
+    throw new Error(
+      "رمز عبور باید حداقل ۸ کاراکتر باشد."
+    );
   }
 
   const data = await backendRegister({
@@ -451,16 +254,7 @@ export const registerWithPhoneAndPassword = async ({
     displayName,
   });
 
-  saveSession(data.token, data.user);
-
-  // Temporary compatibility bridge while Firestore sections are migrated.
-  const firebaseUser = await tryFirebaseRegisterBridge({
-    phone: normalizedPhone,
-    password,
-    displayName,
-  });
-
-  const sessionUser = makeSessionUser(data.user, firebaseUser);
+  const sessionUser = makeSessionUser(data.user);
 
   saveSession(data.token, sessionUser);
   notifyAuthListeners(sessionUser);
@@ -475,40 +269,17 @@ export const loginWithPhoneAndPassword = async ({
   const normalizedPhone = normalizePhoneNumber(phone);
 
   if (!isValidIranianPhoneNumber(normalizedPhone)) {
-    throw new Error("شماره موبایل را به شکل 09123456789 وارد کنید.");
-  }
-
-  let data;
-  let firebaseUser = null;
-
-  try {
-    data = await backendLogin(normalizedPhone, password);
-
-    // Best-effort bridge keeps existing Firestore features working during migration.
-    firebaseUser = await tryFirebaseLoginBridge(
-      normalizedPhone,
-      password
+    throw new Error(
+      "شماره موبایل را به شکل 09123456789 وارد کنید."
     );
-  } catch (error) {
-    if (error?.status !== 401 && error?.status !== 404) {
-      throw error;
-    }
-
-    // Existing Firebase users are lazily copied into PostgreSQL on first login.
-    const migrated = await tryMigrateLegacyFirebaseUser({
-      phone: normalizedPhone,
-      password,
-    });
-
-    if (!migrated) {
-      throw new Error("شماره موبایل یا رمز عبور اشتباه است.");
-    }
-
-    data = migrated.data;
-    firebaseUser = migrated.firebaseUser;
   }
 
-  const sessionUser = makeSessionUser(data.user, firebaseUser);
+  const data = await backendLogin(
+    normalizedPhone,
+    password
+  );
+
+  const sessionUser = makeSessionUser(data.user);
 
   saveSession(data.token, sessionUser);
   notifyAuthListeners(sessionUser);
@@ -519,10 +290,4 @@ export const loginWithPhoneAndPassword = async ({
 export const logoutUser = async () => {
   clearStoredSession();
   notifyAuthListeners(null);
-
-  try {
-    await withTimeout(signOut(auth), 2500);
-  } catch (error) {
-    console.warn("Firebase logout bridge warning:", error?.message || error);
-  }
 };

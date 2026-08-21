@@ -19,6 +19,8 @@ import {
   removeFavorite,
 } from "../services/favoriteService";
 
+import { formatRialPrice } from "../utils/priceFormatter";
+
 import "./ParkingCard.css";
 
 const CATEGORY_INFO = {
@@ -57,6 +59,7 @@ function ParkingCard({ parking }) {
     city,
     area,
     price,
+    priceType = "monthly",
     imageUrl,
     status = "active",
     listingType = "offer",
@@ -520,8 +523,10 @@ function ParkingCard({ parking }) {
             </span>
 
             <strong>
-              {price ||
-                "توافقی"}
+              {formatRialPrice(price, {
+                priceType,
+                fallback: "توافقی",
+              })}
             </strong>
           </div>
 
