@@ -1,7 +1,12 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCurrentSessionUser } from "../services/authService";
-import { createSpace } from "../services/spaceService";
+import {
+  addDoc,
+  collection,
+  serverTimestamp,
+} from "firebase/firestore";
+
+import { auth, db } from "../firebase";
 import ImageUploader from "../components/ImageUploader";
 
 import "./AddParking.css";
@@ -14,6 +19,7 @@ const INITIAL_FORM = {
   city: "",
   area: "",
   price: "",
+  priceType: "monthly",
   phone: "",
   imageUrl: "",
   description: "",
@@ -70,41 +76,20 @@ const SPACE_CATEGORIES = [
   },
 ];
 
-function normalizePriceDigits(value = "") {
-  const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
-  const arabicDigits = "٠١٢٣٤٥٦٧٨٩";
+const PRICE_TYPES = [
+  { value: "daily", label: "روزانه" },
+  { value: "monthly", label: "ماهانه" },
+  { value: "yearly", label: "سالانه" },
+  { value: "negotiable", label: "توافقی" },
+];
 
-  return String(value)
-    .replace(/[۰-۹]/g, (digit) =>
-      persianDigits.indexOf(digit)
-    )
-    .replace(/[٠-٩]/g, (digit) =>
-      arabicDigits.indexOf(digit)
-    );
+function formatPriceInput(value) {
+  const digits = String(value).replace(/\D/g, "");
+  return digits ? Number(digits).toLocaleString("en-US") : "";
 }
 
-function formatPriceInput(value = "") {
-  const normalizedValue =
-    normalizePriceDigits(value);
-
-  const compactValue =
-    normalizedValue
-      .replace(/,/g, "")
-      .replace(/٬/g, "")
-      .replace(/\s/g, "");
-
-  if (/^\d*$/.test(compactValue)) {
-    if (!compactValue) {
-      return "";
-    }
-
-    return compactValue.replace(
-      /\B(?=(\d{3})+(?!\d))/g,
-      ","
-    );
-  }
-
-  return value;
+function getPriceTypeLabel(value) {
+  return PRICE_TYPES.find((item) => item.value === value)?.label || "";
 }
 
 function AddParking() {
@@ -142,14 +127,9 @@ function AddParking() {
   const handleChange = (event) => {
     const { name, value } = event.target;
 
-    const nextValue =
-      name === "price"
-        ? formatPriceInput(value)
-        : value;
-
     setForm((currentForm) => ({
       ...currentForm,
-      [name]: nextValue,
+      [name]: name === "price" ? formatPriceInput(value) : value,
     }));
 
     setErrors((currentErrors) => ({
@@ -214,7 +194,7 @@ function AddParking() {
     if (step === 3) {
       if (!form.price.trim()) {
         newErrors.price =
-          "قیمت یا عبارت توافقی را وارد کنید.";
+          "قیمت را وارد کنید.";
       }
 
       if (!form.phone.trim()) {
@@ -294,7 +274,7 @@ function AddParking() {
       return;
     }
 
-    const currentUser = getCurrentSessionUser();
+    const currentUser = auth.currentUser;
 
     if (!currentUser) {
       alert(
@@ -308,20 +288,52 @@ function AddParking() {
     setLoading(true);
 
     try {
-      await createSpace({
-        listingType: form.listingType,
-        category: form.category,
-        customCategory: form.category === "other" ? form.customCategory.trim() : "",
-        categoryLabel: spaceLabel,
-        status: "active",
-        title: form.title.trim(),
-        city: form.city.trim(),
-        area: form.area ? Number(form.area) : 0,
-        price: form.price.trim(),
-        phone: form.phone.replace(/\s/g, "").trim(),
-        imageUrl: form.imageUrl,
-        description: form.description.trim(),
-      });
+      await addDoc(
+        collection(db, "spaces"),
+        {
+          listingType:
+            form.listingType,
+
+          category:
+            form.category,
+
+          customCategory:
+            form.category === "other"
+              ? form.customCategory.trim()
+              : "",
+
+          categoryLabel:
+            spaceLabel,
+
+          status: "active",
+
+          title: form.title.trim(),
+          city: form.city.trim(),
+
+          area: form.area
+            ? Number(form.area)
+            : 0,
+
+          price: form.price.replace(/,/g, "").trim(),
+
+          priceType: form.priceType,
+          phone: form.phone
+            .replace(/\s/g, "")
+            .trim(),
+
+          imageUrl: form.imageUrl,
+
+          description:
+            form.description.trim(),
+
+          ownerId: currentUser.uid,
+
+          ownerEmail:
+            currentUser.email || "",
+
+          createdAt: serverTimestamp(),
+        }
+      );
 
       alert(
         "آگهی با موفقیت ثبت شد."
@@ -1033,8 +1045,8 @@ function AddParking() {
                             type="text"
                             placeholder={
                               isWantedAd
-                                ? "مثلاً 3,000,000"
-                                : "مثلاً 3,000,000"
+                                ? "مثلاً تا ماهانه ۳ میلیون"
+                                : "مثلاً ماهانه ۳ میلیون"
                             }
                             value={form.price}
                             onChange={
@@ -1042,10 +1054,30 @@ function AddParking() {
                             }
                             disabled={loading}
                           />
+                        </div>
 
-                          <span className="add-parking-input__suffix">
-                            تومان
-                          </span>
+                        <div className="add-parking-field" style={{ marginTop: "12px" }}>
+                          <label>
+                            نوع قیمت
+                            <span>*</span>
+                          </label>
+
+                          <select
+                            value={form.priceType}
+                            onChange={(event) =>
+                              setForm((currentForm) => ({
+                                ...currentForm,
+                                priceType: event.target.value,
+                              }))
+                            }
+                            disabled={loading}
+                          >
+                            {PRICE_TYPES.map((item) => (
+                              <option key={item.value} value={item.value}>
+                                {item.label}
+                              </option>
+                            ))}
+                          </select>
                         </div>
 
                         {errors.price && (
