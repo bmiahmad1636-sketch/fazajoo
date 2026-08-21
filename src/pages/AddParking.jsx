@@ -1,12 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  addDoc,
-  collection,
-  serverTimestamp,
-} from "firebase/firestore";
-
-import { auth, db } from "../firebase";
+import { createSpace } from "../services/spaceService";
+import { getAuthToken } from "../services/authService";
 import ImageUploader from "../components/ImageUploader";
 
 import "./AddParking.css";
@@ -274,11 +269,11 @@ function AddParking() {
       return;
     }
 
-    const currentUser = auth.currentUser;
+    const token = getAuthToken();
 
-    if (!currentUser) {
+    if (!token) {
       alert(
-        "برای ثبت آگهی ابتدا وارد حساب شوید."
+        "نشست حساب کاربری پیدا نشد. لطفاً یک‌بار دوباره وارد حساب شوید."
       );
 
       navigate("/login");
@@ -288,9 +283,7 @@ function AddParking() {
     setLoading(true);
 
     try {
-      await addDoc(
-        collection(db, "spaces"),
-        {
+      await createSpace({
           listingType:
             form.listingType,
 
@@ -326,14 +319,7 @@ function AddParking() {
           description:
             form.description.trim(),
 
-          ownerId: currentUser.uid,
-
-          ownerEmail:
-            currentUser.email || "",
-
-          createdAt: serverTimestamp(),
-        }
-      );
+        });
 
       alert(
         "آگهی با موفقیت ثبت شد."
