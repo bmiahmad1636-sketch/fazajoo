@@ -10,6 +10,26 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024, files: 1 },
 });
 
+// Public ad image delivery. Only files inside the dedicated ad-images folder
+// can be fetched through this route. Agency documents are never exposed here.
+router.get(
+  "/ad-image/:userId/:filename",
+  controller.getAdImage
+);
+
+router.post(
+  "/ad-image",
+  requireAuth,
+  upload.single("file"),
+  controller.uploadAdImage
+);
+
+router.delete(
+  "/ad-image",
+  requireAuth,
+  controller.deleteAdImage
+);
+
 router.post(
   "/agency-document",
   requireAuth,

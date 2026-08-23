@@ -1,8 +1,8 @@
 const {
   S3Client,
   PutObjectCommand,
-  DeleteObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
 } = require("@aws-sdk/client-s3");
 const crypto = require("crypto");
 const path = require("path");
@@ -14,6 +14,7 @@ function assertConfigured() {
     ["STORAGE_BUCKET", env.STORAGE_BUCKET],
     ["STORAGE_ACCESS_KEY", env.STORAGE_ACCESS_KEY],
     ["STORAGE_SECRET_KEY", env.STORAGE_SECRET_KEY],
+    ["STORAGE_PUBLIC_BASE_URL", env.STORAGE_PUBLIC_BASE_URL],
   ]
     .filter(([, value]) => !value)
     .map(([name]) => name);
@@ -25,7 +26,6 @@ function assertConfigured() {
 
 function client() {
   assertConfigured();
-
   return new S3Client({
     region: env.STORAGE_REGION || "us-east-1",
     endpoint: env.STORAGE_ENDPOINT,
@@ -50,54 +50,124 @@ function safeExtension(originalName, mimeType) {
 }
 
 function publicUrl(key) {
-  const base = String(env.STORAGE_PUBLIC_BASE_URL || "").replace(/\/$/, "");
-  return base ? `${base}/${key}` : "";
+  return `${env.STORAGE_PUBLIC_BASE_URL.replace(/\/$/, "")}/${key}`;
 }
 
-function keyFromStoredDocument(documentRecord) {
-  if (!documentRecord) return "";
-
-  if (typeof documentRecord === "object" && documentRecord.key) {
-    return String(documentRecord.key).replace(/^\/+/, "");
+function keyFromPublicUrl(url) {
+  if (!url || typeof url !== "string" || !env.STORAGE_PUBLIC_BASE_URL) {
+    return null;
   }
 
-  const rawUrl =
-    typeof documentRecord === "string"
-      ? documentRecord
-      : documentRecord.url || "";
+  const base = env.STORAGE_PUBLIC_BASE_URL.replace(/\/$/, "");
+  const prefix = `${base}/`;
 
-  if (!rawUrl) return "";
-
-  const publicBase = String(env.STORAGE_PUBLIC_BASE_URL || "").replace(/\/$/, "");
-  if (publicBase && rawUrl.startsWith(`${publicBase}/`)) {
-    return decodeURIComponent(rawUrl.slice(publicBase.length + 1)).replace(/^\/+/, "");
-  }
+  if (!url.startsWith(prefix)) return null;
 
   try {
-    const pathname = decodeURIComponent(new URL(rawUrl).pathname).replace(/^\/+/, "");
-    const marker = "agency-documents/";
-    const markerIndex = pathname.indexOf(marker);
-
-    if (markerIndex >= 0) {
-      return pathname.slice(markerIndex);
-    }
+    return decodeURIComponent(url.slice(prefix.length));
   } catch {
-    // A legacy database value can also contain a raw object key.
+    return url.slice(prefix.length);
   }
-
-  if (String(rawUrl).startsWith("agency-documents/")) {
-    return String(rawUrl);
-  }
-
-  return "";
 }
 
-function assertAgencyDocumentKey(key, userId) {
-  const expectedPrefix = `agency-documents/${userId}/`;
+function keyFromAdImageApiUrl(url) {
+  if (!url || typeof url !== "string") return null;
 
-  if (!key || !key.startsWith(expectedPrefix)) {
-    throw new Error("Invalid agency document key.");
+  try {
+    const parsed = new URL(url, "http://fazajoo.local");
+    const marker = "/api/uploads/ad-image/";
+    const index = parsed.pathname.indexOf(marker);
+
+    if (index === -1) return null;
+
+    const tail = parsed.pathname.slice(index + marker.length);
+    const parts = tail.split("/").filter(Boolean).map(decodeURIComponent);
+
+    if (parts.length !== 2) return null;
+
+    const [userId, filename] = parts;
+    if (!userId || !filename || filename.includes("..")) return null;
+
+    return `ad-images/${userId}/${filename}`;
+  } catch {
+    return null;
   }
+}
+
+async function uploadAdImage({ buffer, mimeType, originalName, userId }) {
+  const key = `ad-images/${userId}/${crypto.randomUUID()}${safeExtension(
+    originalName,
+    mimeType
+  )}`;
+
+  await client().send(
+    new PutObjectCommand({
+      Bucket: env.STORAGE_BUCKET,
+      Key: key,
+      Body: buffer,
+      ContentType: mimeType,
+      CacheControl: "public, max-age=31536000, immutable",
+    })
+  );
+
+  return { key };
+}
+
+async function getAdImage({ userId, filename }) {
+  if (!userId || !filename || filename.includes("..") || filename.includes("/")) {
+    const error = new Error("تصویر نامعتبر است.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const key = `ad-images/${userId}/${filename}`;
+
+  try {
+    return await client().send(
+      new GetObjectCommand({
+        Bucket: env.STORAGE_BUCKET,
+        Key: key,
+      })
+    );
+  } catch (error) {
+    if (error?.name === "NoSuchKey" || error?.$metadata?.httpStatusCode === 404) {
+      const notFound = new Error("تصویر پیدا نشد.");
+      notFound.statusCode = 404;
+      throw notFound;
+    }
+    throw error;
+  }
+}
+
+async function deleteAdImage({ url, userId }) {
+  const key = keyFromAdImageApiUrl(url) || keyFromPublicUrl(url);
+
+  // Images from the old provider (for example Cloudinary) are left untouched.
+  if (!key) {
+    return {
+      deleted: false,
+      external: true,
+    };
+  }
+
+  const allowedPrefix = `ad-images/${userId}/`;
+
+  if (!key.startsWith(allowedPrefix)) {
+    const error = new Error("اجازه حذف این تصویر را ندارید.");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  await client().send(
+    new DeleteObjectCommand({
+      Bucket: env.STORAGE_BUCKET,
+      Key: key,
+    })
+  );
+
+  return {
+    deleted: true,
+  };
 }
 
 async function uploadAgencyDocument({
@@ -107,7 +177,9 @@ async function uploadAgencyDocument({
   userId,
   documentType,
 }) {
-  const key = `agency-documents/${userId}/${documentType || "document"}/${crypto.randomUUID()}${safeExtension(originalName, mimeType)}`;
+  const key = `agency-documents/${userId}/${
+    documentType || "document"
+  }/${crypto.randomUUID()}${safeExtension(originalName, mimeType)}`;
 
   await client().send(
     new PutObjectCommand({
@@ -115,41 +187,22 @@ async function uploadAgencyDocument({
       Key: key,
       Body: buffer,
       ContentType: mimeType,
-      CacheControl: "private, no-store",
+      CacheControl: "private, max-age=31536000",
     })
   );
 
   return {
     key,
     url: publicUrl(key),
-    originalFilename: originalName || "document",
-    mimeType: mimeType || "application/octet-stream",
-  };
-}
-
-async function getAgencyDocument({ documentRecord, userId }) {
-  const key = keyFromStoredDocument(documentRecord);
-  assertAgencyDocumentKey(key, userId);
-
-  const object = await client().send(
-    new GetObjectCommand({
-      Bucket: env.STORAGE_BUCKET,
-      Key: key,
-    })
-  );
-
-  return {
-    key,
-    body: object.Body,
-    contentType: object.ContentType || "application/octet-stream",
-    contentLength: object.ContentLength,
-    etag: object.ETag,
   };
 }
 
 async function deleteByPublicUrl(url) {
-  const key = keyFromStoredDocument(url);
-  if (!key) return { deleted: false, url };
+  const key = keyFromPublicUrl(url);
+
+  if (!key) {
+    return { deleted: false, url };
+  }
 
   await client().send(
     new DeleteObjectCommand({
@@ -162,8 +215,9 @@ async function deleteByPublicUrl(url) {
 }
 
 module.exports = {
+  uploadAdImage,
+  getAdImage,
+  deleteAdImage,
   uploadAgencyDocument,
-  getAgencyDocument,
-  keyFromStoredDocument,
   deleteByPublicUrl,
 };

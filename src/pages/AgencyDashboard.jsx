@@ -370,7 +370,7 @@ function AgencyDashboard({
               </div>
 
               <div className="agency-dashboard__tool-list">
-                <Link to="/parking">
+                <Link to="/agency/applicants">
                   <span>🔍</span>
                   <div>
                     <strong>

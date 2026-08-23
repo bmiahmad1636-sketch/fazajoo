@@ -8,7 +8,7 @@ import {
 import ParkingCard from "../components/ParkingCard";
 import "./Parking.css";
 
-function Parking({ parkings = [] }) {
+function Parking({ parkings = [], initialListingType = "" }) {
   const [searchParams] =
     useSearchParams();
 
@@ -24,7 +24,7 @@ function Parking({ parkings = [] }) {
   const [
     selectedListingType,
     setSelectedListingType,
-  ] = useState("");
+  ] = useState(initialListingType);
 
   const [
     selectedCategory,

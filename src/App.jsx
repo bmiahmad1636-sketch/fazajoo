@@ -625,6 +625,24 @@ function App() {
 
 
         <Route
+          path="/agency/applicants"
+          element={
+            <AgentRoute
+              user={user}
+              authLoading={authLoading}
+              userProfile={userProfile}
+              profileLoading={profileLoading}
+            >
+              <Parking
+                parkings={parkings}
+                initialListingType="wanted"
+              />
+            </AgentRoute>
+          }
+        />
+
+
+        <Route
           path="/admin"
           element={
             <AdminRoute

@@ -7,8 +7,8 @@
   background:
     linear-gradient(
       180deg,
-      #f8fafc 0%,
-      #f1f5f9 100%
+      #fffaf5 0%,
+      #f8efe6 100%
     );
 }
 
@@ -33,7 +33,7 @@
   right: -210px;
 
   background:
-    rgba(124, 58, 237, 0.14);
+    rgba(249, 115, 22, 0.14);
 }
 
 .edit-parking-orb--two {
@@ -43,7 +43,7 @@
   left: -250px;
 
   background:
-    rgba(6, 182, 212, 0.13);
+    rgba(194, 65, 12, 0.10);
 }
 
 .edit-parking-orb--three {
@@ -53,7 +53,7 @@
   right: 35%;
 
   background:
-    rgba(37, 99, 235, 0.09);
+    rgba(234, 88, 12, 0.09);
 }
 
 .edit-parking-hero {
@@ -64,19 +64,19 @@
   background:
     radial-gradient(
       circle at 15% 20%,
-      rgba(124, 58, 237, 0.36),
+      rgba(249, 115, 22, 0.28),
       transparent 30%
     ),
     radial-gradient(
       circle at 88% 80%,
-      rgba(6, 182, 212, 0.3),
+      rgba(194, 65, 12, 0.20),
       transparent 30%
     ),
     linear-gradient(
       135deg,
-      #0f172a 0%,
-      #172554 48%,
-      #164e63 100%
+      #24170f 0%,
+      #3a2418 48%,
+      #4b2b18 100%
     );
 
   color: white;
@@ -224,13 +224,13 @@
   padding: 7px 12px;
 
   border: 1px solid
-    rgba(196, 181, 253, 0.2);
+    rgba(253, 186, 116, 0.24);
   border-radius: 999px;
 
   background:
-    rgba(124, 58, 237, 0.13);
+    rgba(249, 115, 22, 0.14);
 
-  color: #ddd6fe;
+  color: #ffedd5;
   font-size: 0.72rem;
   font-weight: 900;
 }
@@ -294,8 +294,8 @@
   background:
     linear-gradient(
       135deg,
-      #7c3aed,
-      #2563eb
+      #fb923c,
+      #ea580c
     );
 
   color: white;
@@ -303,7 +303,7 @@
 
   box-shadow:
     0 12px 26px
-      rgba(124, 58, 237, 0.24);
+      rgba(234, 88, 12, 0.24);
 }
 
 .edit-parking-hero__meta div {
@@ -455,7 +455,7 @@
     linear-gradient(
       135deg,
       rgba(248, 250, 252, 0.95),
-      rgba(245, 243, 255, 0.65)
+      rgba(255, 247, 237, 0.78)
     );
 }
 
@@ -474,8 +474,8 @@
   background:
     linear-gradient(
       135deg,
-      #7c3aed,
-      #2563eb
+      #fb923c,
+      #ea580c
     );
 
   color: white;
@@ -484,20 +484,20 @@
 
   box-shadow:
     0 10px 24px
-      rgba(124, 58, 237, 0.2);
+      rgba(234, 88, 12, 0.20);
 }
 
 .edit-parking-card__icon--cyan {
   background:
     linear-gradient(
       135deg,
-      #0891b2,
-      #06b6d4
+      #f59e0b,
+      #ea580c
     );
 
   box-shadow:
     0 10px 24px
-      rgba(6, 182, 212, 0.2);
+      rgba(234, 88, 12, 0.18);
 }
 
 .edit-parking-card__icon--green {
@@ -519,7 +519,7 @@
 }
 
 .edit-parking-card__header span {
-  color: #7c3aed;
+  color: #ea580c;
   font-size: 0.64rem;
   font-weight: 900;
 }
@@ -594,13 +594,13 @@
 .edit-parking-input:focus-within,
 .edit-parking-textarea:focus-within {
   border-color:
-    rgba(37, 99, 235, 0.55);
+    rgba(234, 88, 12, 0.55);
 
   background: white;
 
   box-shadow:
     0 0 0 4px
-      rgba(37, 99, 235, 0.08);
+      rgba(234, 88, 12, 0.09);
 }
 
 .edit-parking-input--error {
@@ -627,7 +627,7 @@
   align-items: center;
   justify-content: center;
 
-  color: #7c3aed;
+  color: #ea580c;
   font-size: 0.95rem;
 }
 
@@ -741,7 +741,7 @@
 
 .edit-parking-uploader:hover {
   border-color:
-    rgba(37, 99, 235, 0.42);
+    rgba(234, 88, 12, 0.42);
 }
 
 .edit-parking-uploader--complete {
@@ -888,15 +888,15 @@
   background:
     linear-gradient(
       135deg,
-      #7c3aed,
-      #2563eb
+      #fb923c,
+      #ea580c
     );
 
   color: white;
 
   box-shadow:
     0 12px 28px
-      rgba(37, 99, 235, 0.22);
+      rgba(234, 88, 12, 0.24);
 }
 
 .edit-parking-spinner {
@@ -993,8 +993,8 @@
   background:
     linear-gradient(
       135deg,
-      #ede9fe,
-      #cffafe
+      #ffedd5,
+      #fed7aa
     );
 }
 
@@ -1066,7 +1066,7 @@
   align-items: center;
   gap: 5px;
 
-  color: #7c3aed;
+  color: #ea580c;
   font-size: 0.68rem;
   font-weight: 900;
 }
@@ -1123,7 +1123,7 @@
 }
 
 .edit-parking-preview__features i {
-  color: #7c3aed;
+  color: #ea580c;
   font-style: normal;
 }
 
@@ -1181,7 +1181,7 @@
   border-radius: 999px;
   background: #f5f3ff;
 
-  color: #7c3aed;
+  color: #ea580c;
   font-size: 0.62rem;
   font-weight: 900;
 }
@@ -1205,9 +1205,9 @@
   background:
     linear-gradient(
       90deg,
-      #7c3aed,
-      #2563eb,
-      #06b6d4
+      #fb923c,
+      #ea580c,
+      #f59e0b
     );
 
   transition: width 0.35s ease;
@@ -1282,8 +1282,8 @@
     linear-gradient(
       135deg,
       #0f172a,
-      #172554,
-      #164e63
+      #3a2418,
+      #4b2b18
     );
 }
 
@@ -1351,8 +1351,8 @@
   background:
     linear-gradient(
       135deg,
-      #7c3aed,
-      #06b6d4
+      #ea580c,
+      #f59e0b
     );
 
   font-size: 1.7rem;
@@ -1360,7 +1360,7 @@
 }
 
 .edit-parking-not-found__eyebrow {
-  color: #a5f3fc;
+  color: #fed7aa;
   font-size: 0.7rem;
   font-weight: 900;
 }
@@ -1397,7 +1397,7 @@
   border-radius: 14px;
 
   background: white;
-  color: #172554;
+  color: #3a2418;
 
   cursor: pointer;
   font-family: inherit;
