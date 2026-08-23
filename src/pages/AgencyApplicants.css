@@ -1,0 +1,450 @@
+.agency-applicants {
+  min-height: 100vh;
+  direction: rtl;
+  background: #fffaf6;
+  color: #312b27;
+}
+
+.agency-applicants__container {
+  width: min(1180px, calc(100% - 36px));
+  margin: 0 auto;
+}
+
+.agency-applicants__hero {
+  padding: 54px 0 86px;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(244, 122, 31, 0.18), transparent 28%),
+    radial-gradient(circle at 85% 75%, rgba(255, 176, 103, 0.12), transparent 30%),
+    linear-gradient(135deg, #241a14, #3b281d 56%, #4d2c18);
+  color: white;
+}
+
+.agency-applicants__hero-inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+.agency-applicants__eyebrow {
+  display: inline-flex;
+  margin-bottom: 12px;
+  padding: 7px 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  background: rgba(255,255,255,.07);
+  color: #ffd2ad;
+  font-size: .76rem;
+  font-weight: 900;
+}
+
+.agency-applicants__hero h1 {
+  max-width: 760px;
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.35rem);
+  line-height: 1.45;
+  font-weight: 950;
+}
+
+.agency-applicants__hero h1 span {
+  color: #ff9138;
+}
+
+.agency-applicants__hero p {
+  max-width: 700px;
+  margin: 14px 0 0;
+  color: rgba(255,244,235,.72);
+  line-height: 2;
+  font-size: .9rem;
+}
+
+.agency-applicants__back {
+  flex: 0 0 auto;
+  padding: 12px 16px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 14px;
+  background: rgba(255,255,255,.08);
+  color: white;
+  font-weight: 900;
+}
+
+.agency-applicants__content {
+  margin-top: -42px;
+  padding-bottom: 80px;
+}
+
+.agency-applicants__stats {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.agency-applicants__stats article,
+.agency-applicants__filters,
+.agency-applicants__card,
+.agency-applicants__empty {
+  border: 1px solid #eee1d8;
+  background: rgba(255,255,255,.98);
+  box-shadow: 0 18px 45px rgba(71,46,29,.07);
+}
+
+.agency-applicants__stats article {
+  padding: 20px;
+  border-radius: 20px;
+}
+
+.agency-applicants__stats span,
+.agency-applicants__filters > div > span,
+.agency-applicants__heading > div > span {
+  color: #e66f15;
+  font-size: .7rem;
+  font-weight: 900;
+}
+
+.agency-applicants__stats strong {
+  display: block;
+  margin: 6px 0 2px;
+  color: #2e2723;
+  font-size: 1.75rem;
+  font-weight: 950;
+}
+
+.agency-applicants__stats small {
+  color: #9a8c83;
+  font-size: .67rem;
+}
+
+.agency-applicants__filters {
+  display: grid;
+  grid-template-columns: 1.5fr repeat(3, minmax(150px, .8fr)) auto;
+  align-items: end;
+  gap: 13px;
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 22px;
+}
+
+.agency-applicants__filters h2 {
+  margin: 4px 0 0;
+  font-size: 1.05rem;
+}
+
+.agency-applicants__filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.agency-applicants__filters label > span {
+  color: #665950;
+  font-size: .7rem;
+  font-weight: 900;
+}
+
+.agency-applicants__filters select {
+  min-height: 44px;
+  padding: 8px 11px;
+  border: 1px solid #eaded5;
+  border-radius: 13px;
+  outline: none;
+  background: #fffaf6;
+  font-family: inherit;
+  font-weight: 700;
+}
+
+.agency-applicants__filters select:focus {
+  border-color: #f47a1f;
+  box-shadow: 0 0 0 4px rgba(244,122,31,.09);
+}
+
+.agency-applicants__filters button,
+.agency-applicants__empty button {
+  min-height: 44px;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 13px;
+  background: #342b26;
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 900;
+}
+
+.agency-applicants__heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin: 30px 0 15px;
+}
+
+.agency-applicants__heading h2 {
+  margin: 3px 0 0;
+  font-size: 1.45rem;
+}
+
+.agency-applicants__heading > strong {
+  padding: 8px 13px;
+  border: 1px solid #f2d4bd;
+  border-radius: 999px;
+  background: #fff3e8;
+  color: #d7600d;
+  font-size: .76rem;
+}
+
+.agency-applicants__list {
+  display: grid;
+  gap: 16px;
+}
+
+.agency-applicants__card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.agency-applicants__request,
+.agency-applicants__match {
+  padding: 22px;
+}
+
+.agency-applicants__request {
+  border-left: 1px solid #eee2d9;
+}
+
+.agency-applicants__request-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.agency-applicants__request-badge,
+.agency-applicants__category {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: .67rem;
+  font-weight: 900;
+}
+
+.agency-applicants__request-badge {
+  background: #fff0e3;
+  color: #dc650f;
+}
+
+.agency-applicants__category {
+  background: #f7f3f0;
+  color: #6f625a;
+}
+
+.agency-applicants__request h3 {
+  margin: 14px 0 10px;
+  font-size: 1.2rem;
+}
+
+.agency-applicants__request-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.agency-applicants__request-info span {
+  padding: 7px 9px;
+  border: 1px solid #efe4dc;
+  border-radius: 10px;
+  background: #fffaf6;
+  color: #675a52;
+  font-size: .7rem;
+  font-weight: 800;
+}
+
+.agency-applicants__request p {
+  margin: 14px 0;
+  color: #8a7c73;
+  font-size: .76rem;
+  line-height: 1.9;
+}
+
+.agency-applicants__request-link,
+.agency-applicants__offer-link,
+.agency-applicants__no-offer a {
+  display: inline-flex;
+  padding: 9px 13px;
+  border-radius: 11px;
+  font-size: .72rem;
+  font-weight: 900;
+}
+
+.agency-applicants__request-link {
+  border: 1px solid #eaded5;
+  color: #554a44;
+}
+
+.agency-applicants__match {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  background: linear-gradient(135deg, #fffaf6, #fff);
+}
+
+.agency-applicants__match--good {
+  background: linear-gradient(135deg, #fff5eb, #fffdfb);
+}
+
+.agency-applicants__score {
+  flex: 0 0 92px;
+  min-height: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #f47a1f, #d95f0b);
+  color: white;
+  box-shadow: 0 13px 28px rgba(244,122,31,.21);
+}
+
+.agency-applicants__match--weak .agency-applicants__score {
+  background: linear-gradient(135deg, #74675f, #4b423d);
+  box-shadow: none;
+}
+
+.agency-applicants__score strong {
+  font-size: 1.5rem;
+  font-weight: 950;
+}
+
+.agency-applicants__score span {
+  margin-top: 2px;
+  font-size: .65rem;
+}
+
+.agency-applicants__match-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.agency-applicants__match-main > span {
+  color: #e66f15;
+  font-size: .67rem;
+  font-weight: 900;
+}
+
+.agency-applicants__match-main h4 {
+  margin: 5px 0 4px;
+  font-size: 1.02rem;
+}
+
+.agency-applicants__match-main p {
+  margin: 0 0 10px;
+  color: #8e8178;
+  font-size: .71rem;
+}
+
+.agency-applicants__reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 13px;
+}
+
+.agency-applicants__reasons span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #fff0e3;
+  color: #b95710;
+  font-size: .62rem;
+  font-weight: 850;
+}
+
+.agency-applicants__match-main small {
+  display: block;
+  margin-bottom: 12px;
+  color: #91847b;
+  line-height: 1.7;
+}
+
+.agency-applicants__offer-link,
+.agency-applicants__no-offer a {
+  background: #f47a1f;
+  color: white;
+}
+
+.agency-applicants__no-offer {
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+}
+
+.agency-applicants__no-offer > span,
+.agency-applicants__empty > span {
+  font-size: 2rem;
+}
+
+.agency-applicants__no-offer strong {
+  display: block;
+  margin-top: 8px;
+}
+
+.agency-applicants__no-offer p {
+  color: #908279;
+  font-size: .73rem;
+}
+
+.agency-applicants__empty {
+  padding: 55px 20px;
+  border-radius: 24px;
+  text-align: center;
+}
+
+.agency-applicants__empty h3 {
+  margin: 10px 0 5px;
+}
+
+.agency-applicants__empty p {
+  color: #8d8077;
+}
+
+@media (max-width: 950px) {
+  .agency-applicants__filters {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .agency-applicants__filters > div {
+    grid-column: 1 / -1;
+  }
+
+  .agency-applicants__card {
+    grid-template-columns: 1fr;
+  }
+
+  .agency-applicants__request {
+    border-left: none;
+    border-bottom: 1px solid #eee2d9;
+  }
+}
+
+@media (max-width: 680px) {
+  .agency-applicants__container {
+    width: min(100% - 22px, 1180px);
+  }
+
+  .agency-applicants__hero-inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .agency-applicants__stats,
+  .agency-applicants__filters {
+    grid-template-columns: 1fr;
+  }
+
+  .agency-applicants__filters > div {
+    grid-column: auto;
+  }
+
+  .agency-applicants__match {
+    flex-direction: column;
+  }
+}

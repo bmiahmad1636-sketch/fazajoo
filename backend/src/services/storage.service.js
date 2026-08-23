@@ -142,7 +142,6 @@ async function getAdImage({ userId, filename }) {
 async function deleteAdImage({ url, userId }) {
   const key = keyFromAdImageApiUrl(url) || keyFromPublicUrl(url);
 
-  // Images from the old provider (for example Cloudinary) are left untouched.
   if (!key) {
     return {
       deleted: false,

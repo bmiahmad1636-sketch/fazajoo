@@ -23,6 +23,7 @@ import Favorites from "./pages/Favorites";
 import Chat from "./pages/Chat";
 import Inbox from "./pages/Inbox";
 import AgencyDashboard from "./pages/AgencyDashboard";
+import AgencyApplicants from "./pages/AgencyApplicants";
 import AgencyAccess from "./pages/AgencyAccess";
 import AdminDashboard from "./pages/AdminDashboard";
 
@@ -633,9 +634,9 @@ function App() {
               userProfile={userProfile}
               profileLoading={profileLoading}
             >
-              <Parking
+              <AgencyApplicants
                 parkings={parkings}
-                initialListingType="wanted"
+                currentUser={user}
               />
             </AgentRoute>
           }
