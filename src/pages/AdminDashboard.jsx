@@ -12,13 +12,12 @@ import {
   getAdminUsers,
   approveAgent as approveAgentApi,
   rejectAgent as rejectAgentApi,
+  getAdminDocumentBlob,
 } from "../services/adminService";
 
 import "./AdminDashboard.css";
 
 
-const DOCUMENT_SERVER_URL =
-  "http://127.0.0.1:6060";
 
 
 const DOCUMENT_LABELS = {
@@ -96,9 +95,15 @@ function AdminDashboard() {
 
   const agencyUsers =
     useMemo(() => {
+      const requestStatuses = [
+        "pending",
+        "approved",
+        "rejected",
+      ];
+
       return users.filter(
         (user) =>
-          Boolean(
+          requestStatuses.includes(
             user.agencyStatus
           )
       );
@@ -195,7 +200,18 @@ function AdminDashboard() {
           user.id
         );
 
-        await approveAgentApi(user.id);
+        const result =
+          await approveAgentApi(user.id);
+
+        if (result?.user) {
+          setUsers((currentUsers) =>
+            currentUsers.map((currentUser) =>
+              currentUser.id === user.id
+                ? result.user
+                : currentUser
+            )
+          );
+        }
 
         alert(
           "مشاور با موفقیت تأیید شد."
@@ -238,7 +254,18 @@ function AdminDashboard() {
           user.id
         );
 
-        await approveAgentApi(user.id);
+        const result =
+          await rejectAgentApi(user.id);
+
+        if (result?.user) {
+          setUsers((currentUsers) =>
+            currentUsers.map((currentUser) =>
+              currentUser.id === user.id
+                ? result.user
+                : currentUser
+            )
+          );
+        }
 
         alert(
           "درخواست مشاور رد شد."
@@ -260,170 +287,68 @@ function AdminDashboard() {
     };
 
 
-  const getSecureDocumentUrl =
-    async (
-      documentRecord
-    ) => {
-      if (
-        !documentRecord?.publicId
-      ) {
-        throw new Error(
-          "شناسه مدرک موجود نیست."
-        );
-      }
-
-
-      const response =
-        await fetch(
-          `${DOCUMENT_SERVER_URL}/api/cloudinary/agency-document-view`,
-          {
-            method:
-              "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify({
-                publicId:
-                  documentRecord.publicId,
-
-                format:
-                  documentRecord.format ||
-                  "",
-              }),
+  const revokeDocumentLinks =
+    (links) => {
+      Object.values(
+        links || {}
+      ).forEach(
+        (item) => {
+          if (item?.url) {
+            URL.revokeObjectURL(
+              item.url
+            );
           }
-        );
-
-
-      let data =
-        null;
-
-
-      try {
-        data =
-          await response.json();
-      } catch {
-        throw new Error(
-          "پاسخ سرور مدارک قابل خواندن نیست."
-        );
-      }
-
-
-      if (
-        !response.ok ||
-        !data?.ok ||
-        !data?.url
-      ) {
-        throw new Error(
-          data?.message ||
-            "لینک امن مدرک ساخته نشد."
-        );
-      }
-
-
-      return {
-        url:
-          data.url,
-
-        expiresAt:
-          data.expiresAt ||
-          null,
-      };
+        }
+      );
     };
 
 
   const downloadDocument =
     async (
+      userId,
+      documentType,
       documentRecord,
       title = "مدرک"
     ) => {
       try {
-        if (
-          !documentRecord?.publicId
-        ) {
-          throw new Error(
-            "شناسه مدرک موجود نیست."
-          );
-        }
-
-
-        const response =
-          await fetch(
-            `${DOCUMENT_SERVER_URL}/api/cloudinary/agency-document-download`,
-            {
-              method:
-                "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-
-              body:
-                JSON.stringify({
-                  publicId:
-                    documentRecord.publicId,
-
-                  format:
-                    documentRecord.format ||
-                    "",
-
-                  filename:
-                    documentRecord.originalFilename ||
-                    title ||
-                    "document",
-                }),
-            }
+        const { blob } =
+          await getAdminDocumentBlob(
+            userId,
+            documentType,
+            true
           );
 
-
-        let data =
-          null;
-
-
-        try {
-          data =
-            await response.json();
-        } catch {
-          throw new Error(
-            "پاسخ سرور دانلود قابل خواندن نیست."
+        const objectUrl =
+          URL.createObjectURL(
+            blob
           );
-        }
-
-
-        if (
-          !response.ok ||
-          !data?.ok ||
-          !data?.url
-        ) {
-          throw new Error(
-            data?.message ||
-              "لینک دانلود مدرک ساخته نشد."
-          );
-        }
-
 
         const anchor =
           document.createElement(
             "a"
           );
 
-        anchor.href =
-          data.url;
-
-        anchor.rel =
-          "noreferrer";
+        anchor.href = objectUrl;
+        anchor.download =
+          documentRecord
+            ?.originalFilename ||
+          title ||
+          "document";
 
         document.body.appendChild(
           anchor
         );
 
         anchor.click();
-
         anchor.remove();
+
+        setTimeout(
+          () =>
+            URL.revokeObjectURL(
+              objectUrl
+            ),
+          0
+        );
 
       } catch (downloadError) {
         console.error(
@@ -441,6 +366,10 @@ function AdminDashboard() {
 
   const closeDocuments =
     () => {
+      revokeDocumentLinks(
+        documentLinks
+      );
+
       setDocumentsUserId("");
 
       setDocumentLinks({});
@@ -459,41 +388,34 @@ function AdminDashboard() {
         return;
       }
 
-
       setDocumentsUserId(
         user.id
       );
 
-      setDocumentLinks({});
-
-      setDocumentsError("");
-
-      setDocumentsLoading(
-        true
+      revokeDocumentLinks(
+        documentLinks
       );
 
+      setDocumentLinks({});
+      setDocumentsError("");
+      setDocumentsLoading(true);
 
       try {
         const records =
           user.agencyDocuments ||
           {};
 
-
         const documentEntries =
           Object.entries({
             nationalCardFront:
-              records
-                .nationalCardFront,
+              records.nationalCardFront,
 
             nationalCardBack:
-              records
-                .nationalCardBack,
+              records.nationalCardBack,
 
             businessLicense:
-              records
-                .businessLicense,
+              records.businessLicense,
           });
-
 
         const availableEntries =
           documentEntries.filter(
@@ -502,10 +424,10 @@ function AdminDashboard() {
               record,
             ]) =>
               Boolean(
-                record?.publicId
+                record?.key ||
+                record?.url
               )
           );
-
 
         if (
           availableEntries.length ===
@@ -516,7 +438,6 @@ function AdminDashboard() {
           );
         }
 
-
         const results =
           await Promise.all(
             availableEntries.map(
@@ -524,23 +445,25 @@ function AdminDashboard() {
                 key,
                 record,
               ]) => {
-                const secureData =
-                  await getSecureDocumentUrl(
-                    record
+                const { blob } =
+                  await getAdminDocumentBlob(
+                    user.id,
+                    key
                   );
 
                 return [
                   key,
                   {
-                    ...secureData,
-
+                    url:
+                      URL.createObjectURL(
+                        blob
+                      ),
                     record,
                   },
                 ];
               }
             )
           );
-
 
         setDocumentLinks(
           Object.fromEntries(
@@ -995,7 +918,7 @@ function AdminDashboard() {
 
 
                               <small>
-                                لینک‌ها موقت هستند
+                                دسترسی فقط برای مدیر
                               </small>
 
                             </div>
@@ -1112,6 +1035,8 @@ function AdminDashboard() {
                                                 event.preventDefault();
 
                                                 downloadDocument(
+                                                  user.id,
+                                                  key,
                                                   document.record,
                                                   title
                                                 );

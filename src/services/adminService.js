@@ -4,7 +4,6 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   "http://127.0.0.1:6060/api";
 
-
 async function request(path, options = {}) {
   const token = getAuthToken();
 
@@ -24,11 +23,9 @@ async function request(path, options = {}) {
     }
   );
 
-
   const data = await response
     .json()
     .catch(() => null);
-
 
   if (!response.ok || data?.ok === false) {
     throw new Error(
@@ -37,10 +34,8 @@ async function request(path, options = {}) {
     );
   }
 
-
   return data;
 }
-
 
 // دریافت همه کاربران برای پنل مدیریت
 export async function getAdminUsers() {
@@ -51,24 +46,52 @@ export async function getAdminUsers() {
   return data.users || [];
 }
 
-
-// تایید مشاور
+// تأیید مشاور
 export async function approveAgent(userId) {
-  return await request(
-    `/admin/users/${userId}/approve`,
+  return request(
+    `/admin/users/${userId}/approve-agent`,
     {
       method: "PATCH",
     }
   );
 }
 
-
 // رد درخواست مشاور
 export async function rejectAgent(userId) {
-  return await request(
-    `/admin/users/${userId}/reject`,
+  return request(
+    `/admin/users/${userId}/reject-agent`,
     {
       method: "PATCH",
     }
   );
+}
+
+export async function getAdminDocumentBlob(userId, documentType, download = false) {
+  const token = getAuthToken();
+
+  const response = await fetch(
+    `${API_BASE_URL}/admin/users/${encodeURIComponent(userId)}/documents/${encodeURIComponent(documentType)}${download ? "?download=1" : ""}`,
+    {
+      headers: {
+        ...(token
+          ? {
+              Authorization: `Bearer ${token}`,
+            }
+          : {}),
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new Error(
+      data?.message ||
+        "دریافت مدرک از سرور مدیریت فضاجو انجام نشد."
+    );
+  }
+
+  return {
+    blob: await response.blob(),
+    contentDisposition: response.headers.get("Content-Disposition") || "",
+  };
 }

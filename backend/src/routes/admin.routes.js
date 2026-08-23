@@ -3,6 +3,7 @@ const express =
 
 const {
   listUsers,
+  getAgencyDocument,
   approveAgent,
   rejectAgent,
 } = require(
@@ -27,6 +28,11 @@ router.use(
 router.get(
   "/users",
   listUsers
+);
+
+router.get(
+  "/users/:id/documents/:documentType",
+  getAgencyDocument
 );
 
 router.patch(
