@@ -405,8 +405,18 @@
   gap: 13px;
 }
 
+.parking-card__heading {
+  min-width: 0;
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .parking-card__type-caption {
-  display: inline-flex;
+  display: flex;
+  width: 100%;
 
   margin-bottom: 5px;
 
@@ -422,7 +432,8 @@
 }
 
 .parking-card__title-link {
-  display: inline-block;
+  display: block;
+  width: 100%;
 }
 
 .parking-card__title {

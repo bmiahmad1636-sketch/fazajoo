@@ -11,6 +11,8 @@ import {
 
 import { updateSpace } from "../services/spaceService";
 import ImageUploader from "../components/ImageUploader";
+import ResidentialFields, { emptyResidentialDetails } from "../components/ResidentialFields";
+import "../components/ResidentialFields.css";
 
 import "./EditParking.css";
 
@@ -22,7 +24,9 @@ const EMPTY_FORM = {
   priceType: "monthly",
   phone: "",
   imageUrl: "",
+  imageUrls: [],
   description: "",
+  residentialDetails: { ...emptyResidentialDetails },
 };
 
 const PRICE_TYPES = [
@@ -73,7 +77,14 @@ function createFormFromParking(parking) {
     priceType:
       parking?.priceType || "monthly",
     phone: parking?.phone || "",
-    imageUrl: parking?.imageUrl || "",
+    imageUrl: parking?.imageUrls?.[0] || parking?.imageUrl || "",
+    imageUrls:
+      Array.isArray(parking?.imageUrls) && parking.imageUrls.length
+        ? parking.imageUrls
+        : parking?.imageUrl
+          ? [parking.imageUrl]
+          : [],
+    residentialDetails: { ...emptyResidentialDetails, ...(parking?.residentialDetails || {}) },
     description: parking?.description || "",
   };
 }
@@ -91,6 +102,9 @@ function EditParking({
         String(item.id) === String(id)
     );
   }, [parkings, id]);
+
+  const isWanted =
+    (parking?.listingType || "offer") === "wanted";
 
   const [form, setForm] =
     useState(EMPTY_FORM);
@@ -164,10 +178,12 @@ function EditParking({
     setShowSuccess(false);
   };
 
-  const handleImageUpload = (imageUrl) => {
+  const handleImageUpload = (imageUrls) => {
+    const nextImages = Array.isArray(imageUrls) ? imageUrls : [];
     setForm((currentForm) => ({
       ...currentForm,
-      imageUrl,
+      imageUrls: nextImages,
+      imageUrl: nextImages[0] || "",
     }));
 
     setErrors((currentErrors) => ({
@@ -204,9 +220,13 @@ function EditParking({
         "متراژ باید بیشتر از صفر باشد.";
     }
 
-    if (!form.price.trim()) {
-      nextErrors.price =
-        "قیمت را به ریال وارد کنید.";
+    if (parking?.category === "residential") {
+      if (!String(form.residentialDetails?.deposit || "").trim() &&
+          !String(form.residentialDetails?.monthlyRent || "").trim()) {
+        nextErrors.price = "حداقل مبلغ رهن یا اجاره را وارد کنید.";
+      }
+    } else if (!form.price.trim()) {
+      nextErrors.price = "قیمت را وارد کنید.";
     }
 
     const normalizedPhone =
@@ -222,9 +242,9 @@ function EditParking({
         "شماره موبایل معتبر وارد کنید.";
     }
 
-    if (!form.imageUrl) {
+    if (!isWanted && !form.imageUrl) {
       nextErrors.imageUrl =
-        "یک تصویر برای آگهی انتخاب کنید.";
+        "یک تصویر برای آگهی فضای قابل اجاره انتخاب کنید.";
     }
 
     if (
@@ -304,12 +324,25 @@ function EditParking({
         ? Number(form.area)
         : 0,
 
-      price: form.price
-        .replace(/,/g, "")
-        .trim(),
-      priceType: form.priceType,
+      price:
+        parking?.category === "residential"
+          ? String(
+              form.residentialDetails?.monthlyRent ||
+              form.residentialDetails?.deposit ||
+              ""
+            )
+          : form.price.replace(/,/g, "").trim(),
+      priceType:
+        parking?.category === "residential"
+          ? "monthly"
+          : form.priceType,
+      residentialDetails:
+        parking?.category === "residential"
+          ? form.residentialDetails
+          : {},
       phone: normalizedPhone,
       imageUrl: form.imageUrl,
+      imageUrls: form.imageUrls,
 
       description:
         form.description.trim(),
@@ -491,6 +524,21 @@ function EditParking({
               onSubmit={saveEdit}
               noValidate
             >
+
+        {parking?.category === "residential" && (
+          <ResidentialFields
+            value={form.residentialDetails}
+            disabled={loading}
+            onChange={(residentialDetails) =>
+              setForm((currentForm) => ({
+                ...currentForm,
+                residentialDetails,
+                price: String(residentialDetails.monthlyRent || residentialDetails.deposit || ""),
+              }))
+            }
+          />
+        )}
+
               <section className="edit-parking-card">
                 <div className="edit-parking-card__header">
                   <div className="edit-parking-card__icon">
@@ -661,13 +709,11 @@ function EditParking({
                     </span>
 
                     <h2>
-                      تصویر اصلی پارکینگ
+                      عکس‌های آگهی
                     </h2>
 
                     <p>
-                      تصویر فعلی را نگه دار
-                      یا تصویر واضح‌تری
-                      جایگزین کن.
+                      تا ۸ عکس نگه دار، عکس جدید اضافه کن یا عکس اصلی کارت را تغییر بده.
                     </p>
                   </div>
                 </div>
@@ -687,10 +733,9 @@ function EditParking({
                       .join(" ")}
                   >
                     <ImageUploader
-                      imageUrl={form.imageUrl}
-                      onUploadComplete={
-                        handleImageUpload
-                      }
+                      imageUrls={form.imageUrls}
+                      maxImages={8}
+                      onUploadComplete={handleImageUpload}
                     />
                   </div>
 
@@ -706,13 +751,11 @@ function EditParking({
 
                       <div>
                         <strong>
-                          تصویر آگهی آماده است
+                          {form.imageUrls.length.toLocaleString("fa-IR")} عکس آگهی آماده است
                         </strong>
 
                         <p>
-                          این تصویر در کارت و
-                          صفحه جزئیات نمایش
-                          داده می‌شود.
+                          اولین عکس روی کارت و همه عکس‌ها در گالری صفحه جزئیات نمایش داده می‌شوند.
                         </p>
                       </div>
                     </div>
@@ -745,7 +788,8 @@ function EditParking({
 
                 <div className="edit-parking-card__body">
                   <div className="edit-parking-grid">
-                    <div className="edit-parking-field">
+                    {parking?.category !== "residential" && (
+<div className="edit-parking-field">
                       <label htmlFor="price">
                         قیمت
                         <span>*</span>
@@ -826,6 +870,7 @@ function EditParking({
                         </span>
                       )}
                     </div>
+              )}
 
                     <div className="edit-parking-field">
                       <label htmlFor="phone">

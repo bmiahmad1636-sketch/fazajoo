@@ -5,7 +5,12 @@ const controller = require("../controllers/uploads.controller");
 
 const router = express.Router();
 
-const upload = multer({
+const adImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024, files: 1 },
+});
+
+const agencyDocumentUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024, files: 1 },
 });
@@ -20,7 +25,7 @@ router.get(
 router.post(
   "/ad-image",
   requireAuth,
-  upload.single("file"),
+  adImageUpload.single("file"),
   controller.uploadAdImage
 );
 
@@ -33,7 +38,7 @@ router.delete(
 router.post(
   "/agency-document",
   requireAuth,
-  upload.single("file"),
+  agencyDocumentUpload.single("file"),
   controller.uploadAgencyDocument
 );
 

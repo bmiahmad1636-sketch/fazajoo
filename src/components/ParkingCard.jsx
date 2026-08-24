@@ -28,6 +28,10 @@ const CATEGORY_INFO = {
     label: "پارکینگ",
     icon: "🚘",
   },
+  residential: {
+    label: "مسکونی",
+    icon: "🏠",
+  },
   storage: {
     label: "انبار",
     icon: "📦",
@@ -66,6 +70,7 @@ function ParkingCard({ parking }) {
     category = "parking",
     categoryLabel,
     customCategory,
+    residentialDetails = {},
   } = parking;
 
   const [user, setUser] =
@@ -98,6 +103,18 @@ function ParkingCard({ parking }) {
         "سایر فضاها"
       : categoryLabel?.trim() ||
         categoryInfo.label;
+
+  const residentialPrice =
+    category === "residential"
+      ? [
+          Number(residentialDetails.deposit) > 0
+            ? `رهن ${Number(residentialDetails.deposit).toLocaleString("fa-IR")} ریال`
+            : "",
+          Number(residentialDetails.monthlyRent) > 0
+            ? `اجاره ${Number(residentialDetails.monthlyRent).toLocaleString("fa-IR")} ریال`
+            : "",
+        ].filter(Boolean).join(" • ")
+      : "";
 
   const typeInfo = isWanted
     ? {
@@ -408,7 +425,7 @@ function ParkingCard({ parking }) {
 
       <div className="parking-card__content">
         <div className="parking-card__top">
-          <div>
+          <div className="parking-card__heading">
             <div className="parking-card__type-caption">
               {typeInfo.detail}
             </div>
@@ -523,10 +540,11 @@ function ParkingCard({ parking }) {
             </span>
 
             <strong>
-              {formatRialPrice(price, {
-                priceType,
-                fallback: "توافقی",
-              })}
+              {residentialPrice ||
+                formatRialPrice(price, {
+                  priceType,
+                  fallback: "توافقی",
+                })}
             </strong>
           </div>
 

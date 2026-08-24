@@ -16,6 +16,10 @@ const CATEGORY_INFO = {
     label: "پارکینگ",
     icon: "🚘",
   },
+  residential: {
+    label: "مسکونی",
+    icon: "🏠",
+  },
   storage: {
     label: "انبار",
     icon: "📦",
@@ -57,6 +61,9 @@ function ParkingDetails({
   const [deleting, setDeleting] =
     useState(false);
 
+  const [activeImageIndex, setActiveImageIndex] =
+    useState(0);
+
   useEffect(() => {
     setUser(getCurrentSessionUser());
     setAuthLoading(false);
@@ -73,6 +80,23 @@ function ParkingDetails({
         String(item.id) === String(id)
     );
   }, [parkings, id]);
+
+  const galleryImages = useMemo(() => {
+    const images = Array.isArray(parking?.imageUrls)
+      ? parking.imageUrls.filter(Boolean)
+      : [];
+    if (!images.length && parking?.imageUrl) {
+      return [parking.imageUrl];
+    }
+    return images;
+  }, [parking]);
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [parking?.id]);
+
+  const activeImage =
+    galleryImages[activeImageIndex] || galleryImages[0] || "";
 
   const isOwner =
     Boolean(user) &&
@@ -167,6 +191,12 @@ function ParkingDetails({
       ? "متقاضی فضاجو"
       : "آگهی‌دهنده فضاجو";
   })();
+
+  const residential = parking?.residentialDetails || {};
+  const residentialTypeLabels = {
+    apartment: "آپارتمان", house: "خانه / ویلایی", villa: "ویلا",
+    suite: "سوئیت", penthouse: "پنت‌هاوس", other: "سایر مسکونی",
+  };
 
   const handleDelete = async () => {
     if (!user) {
@@ -426,7 +456,7 @@ function ParkingDetails({
               <article
                 className={[
                   "parking-details-gallery",
-                  !parking.imageUrl
+                  !activeImage
                     ? "parking-details-gallery--empty"
                     : "",
                   isWanted
@@ -436,28 +466,27 @@ function ParkingDetails({
                   .filter(Boolean)
                   .join(" ")}
               >
-                {parking.imageUrl ? (
-                  <img
-                    src={
-                      parking.imageUrl
-                    }
-                    alt={
-                      parking.title ||
-                      `تصویر ${visibleCategory}`
-                    }
-                  />
+                {activeImage ? (
+                  <>
+                    <img
+                      src={activeImage}
+                      alt={parking.title || `تصویر ${visibleCategory}`}
+                    />
+
+                    {galleryImages.length > 1 && (
+                      <div className="parking-details-gallery__counter">
+                        {(activeImageIndex + 1).toLocaleString("fa-IR")} / {galleryImages.length.toLocaleString("fa-IR")}
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="parking-details-gallery__placeholder">
-                    <span>
-                      {isWanted ? "🔎" : categoryIcon}
-                    </span>
-
+                    <span>{isWanted ? "🔎" : categoryIcon}</span>
                     <strong>
                       {isWanted
                         ? `درخواست ${visibleCategory}`
                         : `تصویر ${visibleCategory}`}
                     </strong>
-
                     <p>
                       {isWanted
                         ? "برای این درخواست تصویری ثبت نشده است."
@@ -468,10 +497,32 @@ function ParkingDetails({
 
                 <div className="parking-details-gallery__overlay">
                   <span>
-                    تصویر آگهی
+                    {galleryImages.length > 1
+                      ? `${galleryImages.length.toLocaleString("fa-IR")} عکس آگهی`
+                      : "تصویر آگهی"}
                   </span>
                 </div>
               </article>
+
+              {galleryImages.length > 1 && (
+                <div className="parking-details-thumbnails" aria-label="گالری تصاویر آگهی">
+                  {galleryImages.map((url, index) => (
+                    <button
+                      type="button"
+                      key={`${url}-${index}`}
+                      className={
+                        index === activeImageIndex
+                          ? "parking-details-thumbnail parking-details-thumbnail--active"
+                          : "parking-details-thumbnail"
+                      }
+                      onClick={() => setActiveImageIndex(index)}
+                      aria-label={`نمایش عکس ${(index + 1).toLocaleString("fa-IR")}`}
+                    >
+                      <img src={url} alt="" />
+                    </button>
+                  ))}
+                </div>
+              )}
 
               <article className="parking-details-section">
                 <div className="parking-details-section__heading">
@@ -577,13 +628,35 @@ function ParkingDetails({
                       درباره آگهی
                     </span>
 
-                    <h2>
+                    
+
+            <h2>
                       {isWanted
                         ? `توضیحات نیاز به ${visibleCategory}`
                         : `توضیحات ${visibleCategory}`}
                     </h2>
                   </div>
                 </div>
+
+              {category === "residential" && (
+                <div className="parking-details-residential">
+                  <h3>🏠 مشخصات ملک مسکونی</h3>
+                  <div className="parking-details-residential__grid">
+                    <span><small>نوع ملک</small><strong>{residentialTypeLabels[residential.propertyType] || "مسکونی"}</strong></span>
+                    <span><small>رهن</small><strong>{Number(residential.deposit || 0).toLocaleString("fa-IR")} ریال</strong></span>
+                    <span><small>اجاره ماهانه</small><strong>{Number(residential.monthlyRent || 0).toLocaleString("fa-IR")} ریال</strong></span>
+                    <span><small>اتاق</small><strong>{Number(residential.bedrooms || 0).toLocaleString("fa-IR")}</strong></span>
+                    {residential.floor && <span><small>طبقه</small><strong>{residential.floor}</strong></span>}
+                    {residential.buildYear > 0 && <span><small>سال ساخت</small><strong>{Number(residential.buildYear).toLocaleString("fa-IR")}</strong></span>}
+                  </div>
+                  <div className="parking-details-residential__amenities">
+                    {residential.elevator && <b>✓ آسانسور</b>}
+                    {residential.parking && <b>✓ پارکینگ</b>}
+                    {residential.storage && <b>✓ انباری</b>}
+                    {residential.furnished && <b>✓ مبله</b>}
+                  </div>
+                </div>
+              )}
 
                 <p className="parking-details-description">
                   {parking.description ||

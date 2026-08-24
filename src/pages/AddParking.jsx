@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { createSpace } from "../services/spaceService";
 import { getAuthToken } from "../services/authService";
 import ImageUploader from "../components/ImageUploader";
+import ResidentialFields, { emptyResidentialDetails } from "../components/ResidentialFields";
+import "../components/ResidentialFields.css";
 
 import "./AddParking.css";
 
@@ -17,7 +19,9 @@ const INITIAL_FORM = {
   priceType: "monthly",
   phone: "",
   imageUrl: "",
+  imageUrls: [],
   description: "",
+  residentialDetails: { ...emptyResidentialDetails },
 };
 
 const STEPS = [
@@ -43,6 +47,11 @@ const SPACE_CATEGORIES = [
     value: "parking",
     label: "پارکینگ",
     icon: "🚘",
+  },
+  {
+    value: "residential",
+    label: "مسکونی",
+    icon: "🏠",
   },
   {
     value: "storage",
@@ -133,10 +142,12 @@ function AddParking() {
     }));
   };
 
-  const handleImageUpload = (imageUrl) => {
+  const handleImageUpload = (imageUrls) => {
+    const nextImages = Array.isArray(imageUrls) ? imageUrls : [];
     setForm((currentForm) => ({
       ...currentForm,
-      imageUrl,
+      imageUrls: nextImages,
+      imageUrl: nextImages[0] || "",
     }));
 
     setErrors((currentErrors) => ({
@@ -187,9 +198,13 @@ function AddParking() {
     }
 
     if (step === 3) {
-      if (!form.price.trim()) {
-        newErrors.price =
-          "قیمت را وارد کنید.";
+      if (form.category === "residential") {
+        if (!String(form.residentialDetails?.deposit || "").trim() &&
+            !String(form.residentialDetails?.monthlyRent || "").trim()) {
+          newErrors.price = "حداقل مبلغ رهن یا اجاره را وارد کنید.";
+        }
+      } else if (!form.price.trim()) {
+        newErrors.price = "قیمت را وارد کنید.";
       }
 
       if (!form.phone.trim()) {
@@ -307,14 +322,29 @@ function AddParking() {
             ? Number(form.area)
             : 0,
 
-          price: form.price.replace(/,/g, "").trim(),
+          price:
+            form.category === "residential"
+              ? String(
+                  form.residentialDetails?.monthlyRent ||
+                  form.residentialDetails?.deposit ||
+                  ""
+                )
+              : form.price.replace(/,/g, "").trim(),
 
-          priceType: form.priceType,
+          priceType:
+            form.category === "residential"
+              ? "monthly"
+              : form.priceType,
+          residentialDetails:
+            form.category === "residential"
+              ? form.residentialDetails
+              : {},
           phone: form.phone
             .replace(/\s/g, "")
             .trim(),
 
           imageUrl: form.imageUrl,
+          imageUrls: form.imageUrls,
 
           description:
             form.description.trim(),
@@ -689,6 +719,21 @@ function AddParking() {
                       </div>
                     </div>
 
+                    {form.category === "residential" && (
+                      <ResidentialFields
+                        value={form.residentialDetails}
+                        disabled={loading}
+                        onChange={(residentialDetails) =>
+                          setForm((currentForm) => ({
+                            ...currentForm,
+                            residentialDetails,
+                            price:
+                              String(residentialDetails.monthlyRent || residentialDetails.deposit || ""),
+                          }))
+                        }
+                      />
+                    )}
+
                     {form.category === "other" && (
                       <div className="add-parking-field">
                         <label htmlFor="customCategory">
@@ -882,14 +927,14 @@ function AddParking() {
                       <div>
                         <strong>
                           {isWantedAd
-                            ? "تصویر آگهی (اختیاری)"
-                            : "تصویر اصلی فضا"}
+                            ? "عکس‌های آگهی (اختیاری)"
+                            : "عکس‌های فضا"}
                         </strong>
 
                         <p>
                           {isWantedAd
                             ? "اگر تصویر یا نمونه‌ای از فضای مدنظرت داری می‌توانی اضافه کنی؛ برای آگهی درخواست، تصویر اجباری نیست."
-                            : `یک تصویر روشن، واضح و واقعی از ${spaceLabel} انتخاب کن.`}
+                            : `تا ۸ عکس روشن، واضح و واقعی از ${spaceLabel} انتخاب کن.`}
                         </p>
                       </div>
                     </div>
@@ -908,12 +953,9 @@ function AddParking() {
                         .join(" ")}
                     >
                       <ImageUploader
-                        imageUrl={
-                          form.imageUrl
-                        }
-                        onUploadComplete={
-                          handleImageUpload
-                        }
+                        imageUrls={form.imageUrls}
+                        maxImages={8}
+                        onUploadComplete={handleImageUpload}
                       />
                     </div>
 
@@ -929,13 +971,11 @@ function AddParking() {
 
                         <div>
                           <strong>
-                            تصویر آماده است
+                            {form.imageUrls.length.toLocaleString("fa-IR")} عکس آماده است
                           </strong>
 
                           <p>
-                            این تصویر به‌عنوان
-                            تصویر اصلی آگهی
-                            نمایش داده می‌شود.
+                            اولین عکس، تصویر اصلی کارت آگهی است و همه عکس‌ها در صفحه جزئیات نمایش داده می‌شوند.
                           </p>
                         </div>
                       </div>
@@ -995,14 +1035,16 @@ function AddParking() {
                         </strong>
 
                         <p>
-                          قیمت، شماره تماس و
-                          جزئیات آگهی را کامل
-                          کن.
+                          {form.category === "residential"
+                            ? "شماره تماس و توضیحات نهایی ملک را کامل کن."
+                            : "قیمت، شماره تماس و جزئیات آگهی را کامل کن."}
                         </p>
                       </div>
                     </div>
 
                     <div className="add-parking-fields-grid">
+                      {form.category !== "residential" && (
+                        <>
                       <div className="add-parking-field">
                         <label htmlFor="price">
                           {isWantedAd
@@ -1072,6 +1114,9 @@ function AddParking() {
                           </span>
                         )}
                       </div>
+
+                        </>
+                      )}
 
                       <div className="add-parking-field">
                         <label htmlFor="phone">

@@ -385,22 +385,31 @@
   overflow: hidden;
 
   height: 520px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(135deg, #f7f2ed, #eee7e1);
 }
 
-.parking-details-gallery img {
-  width: 100%;
-  height: 100%;
+.parking-details-gallery > img {
+  display: block;
 
-  object-fit: cover;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+
+  object-fit: contain;
 
   transition:
-    transform 0.7s ease,
-    filter 0.7s ease;
+    filter 0.35s ease;
 }
 
-.parking-details-gallery:hover img {
-  transform: scale(1.025);
-  filter: saturate(1.06);
+.parking-details-gallery:hover > img {
+  filter: saturate(1.04);
 }
 
 .parking-details-gallery::after {
@@ -1915,3 +1924,17 @@
     padding: 11px 14px !important;
   }
 }
+
+/* Multi-image gallery */
+.parking-details-gallery__counter{position:absolute;left:18px;bottom:18px;z-index:3;padding:7px 11px;border-radius:999px;background:rgba(35,28,24,.78);color:#fff;font-size:.7rem;font-weight:900;backdrop-filter:blur(8px)}
+.parking-details-thumbnails{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:9px;margin:-4px 0 22px;direction:rtl}
+.parking-details-thumbnail{overflow:hidden;height:78px;padding:0;border:2px solid transparent;border-radius:13px;background:#fff;cursor:pointer;box-shadow:0 6px 18px rgba(61,43,31,.08);opacity:.76;transition:transform .18s ease,border-color .18s ease,opacity .18s ease}
+.parking-details-thumbnail:hover{transform:translateY(-2px);opacity:1}.parking-details-thumbnail--active{border-color:#f47a1f;opacity:1;box-shadow:0 7px 20px rgba(244,122,31,.18)}
+.parking-details-thumbnail img{display:block;width:100%;height:100%;object-fit:cover}
+@media(max-width:760px){.parking-details-thumbnails{grid-template-columns:repeat(4,minmax(0,1fr))}.parking-details-thumbnail{height:68px}}
+
+.parking-details-residential{margin:20px 0;padding:20px;border:1px solid #eadfd5;border-radius:20px;background:#fffaf6}
+.parking-details-residential h3{margin:0 0 16px}
+.parking-details-residential__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px}
+.parking-details-residential__grid span{display:flex;flex-direction:column;gap:5px;padding:12px;background:#fff;border-radius:12px;border:1px solid #eee}
+.parking-details-residential__grid small{color:#777}.parking-details-residential__amenities{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.parking-details-residential__amenities b{padding:8px 11px;border-radius:999px;background:#fff1e6;font-size:.9rem}

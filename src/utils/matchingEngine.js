@@ -1,5 +1,6 @@
 const CATEGORY_LABELS = {
   parking: "پارکینگ",
+  residential: "مسکونی",
   storage: "انبار",
   warehouse: "سوله",
   shop: "مغازه",
@@ -41,6 +42,9 @@ const SPACE_SYNONYMS = [
     "پارکینگ",
     "جای پارک",
     "پارک خودرو",
+  ],
+  [
+    "مسکونی","آپارتمان","خانه","منزل","ویلا","ویلایی","سوئیت","پنت هاوس","پنت‌هاوس"
   ],
   [
     "انبار",
@@ -506,6 +510,31 @@ function getLocationScore(
   };
 }
 
+function getResidentialScore(request, offer) {
+  if (request.category !== "residential" || offer.category !== "residential") {
+    return { score: 0, reasons: [], hardReject: false };
+  }
+  const r=request.residentialDetails || {};
+  const o=offer.residentialDetails || {};
+  let score=0; const reasons=[];
+  if (r.propertyType && o.propertyType) {
+    if (r.propertyType !== o.propertyType) return {score:0,reasons:[],hardReject:true};
+    score += 8; reasons.push("نوع ملک یکسان");
+  }
+  if (Number(r.bedrooms)>0 && Number(o.bedrooms)>0) {
+    if (Number(o.bedrooms) >= Number(r.bedrooms)) { score += 5; reasons.push("تعداد اتاق مناسب"); }
+  }
+  const rd=Number(r.deposit)||0, od=Number(o.deposit)||0;
+  const rr=Number(r.monthlyRent)||0, orr=Number(o.monthlyRent)||0;
+  if (rd && od && od <= rd*1.1) { score += 5; reasons.push("رهن نزدیک به بودجه"); }
+  if (rr && orr && orr <= rr*1.1) { score += 5; reasons.push("اجاره نزدیک به بودجه"); }
+  for (const [k,label] of [["elevator","آسانسور"],["parking","پارکینگ"],["storage","انباری"],["furnished","مبله"]]) {
+    if (r[k] && !o[k]) return {score:0,reasons:[],hardReject:true};
+    if (r[k] && o[k]) { score += 2; reasons.push(label); }
+  }
+  return {score:Math.min(score,15),reasons,hardReject:false};
+}
+
 function getRecencyScore(
   item
 ) {
@@ -649,13 +678,20 @@ export function scoreMatch(
     };
   }
 
+  const residentialResult = getResidentialScore(request, offer);
+  if (residentialResult.hardReject) {
+    return { score: 0, reasons: [], eligible: false };
+  }
+
   let score =
     categoryResult.score +
-    locationResult.score;
+    locationResult.score +
+    residentialResult.score;
 
   const reasons = [
     ...categoryResult.reasons,
     ...locationResult.reasons,
+    ...residentialResult.reasons,
   ];
 
   const areaResult =

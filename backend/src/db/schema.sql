@@ -84,12 +84,12 @@ ON users (
 CREATE TABLE IF NOT EXISTS spaces (
   id UUID PRIMARY KEY,
   listing_type VARCHAR(20) NOT NULL DEFAULT 'offer' CHECK (listing_type IN ('offer','wanted')),
-  category VARCHAR(30) NOT NULL DEFAULT 'parking' CHECK (category IN ('parking','storage','warehouse','shop','land','other')),
+  category VARCHAR(30) NOT NULL DEFAULT 'parking' CHECK (category IN ('parking','residential','storage','warehouse','shop','land','other')),
   custom_category VARCHAR(80), category_label VARCHAR(80),
   status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active','inactive','rented')),
   title VARCHAR(160) NOT NULL, city VARCHAR(100) NOT NULL,
   area NUMERIC(12,2) NOT NULL DEFAULT 0, price VARCHAR(100) NOT NULL,
-  phone VARCHAR(20) NOT NULL, image_url TEXT, description TEXT,
+  phone VARCHAR(20) NOT NULL, image_url TEXT, image_urls JSONB NOT NULL DEFAULT '[]'::jsonb, residential_details JSONB NOT NULL DEFAULT '{}'::jsonb, description TEXT,
   owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

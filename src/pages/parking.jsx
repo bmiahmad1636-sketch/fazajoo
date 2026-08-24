@@ -31,6 +31,9 @@ function Parking({ parkings = [], initialListingType = "" }) {
     setSelectedCategory,
   ] = useState("");
 
+  const [selectedPropertyType, setSelectedPropertyType] = useState("");
+  const [minimumBedrooms, setMinimumBedrooms] = useState("");
+
   const [
     minimumPrice,
     setMinimumPrice,
@@ -145,6 +148,7 @@ function Parking({ parkings = [], initialListingType = "" }) {
 
   const categories = [
     { value: "parking", label: "پارکینگ", icon: "🚘" },
+    { value: "residential", label: "مسکونی", icon: "🏠" },
     { value: "storage", label: "انبار", icon: "📦" },
     { value: "warehouse", label: "سوله", icon: "🏭" },
     { value: "shop", label: "مغازه", icon: "🏪" },
@@ -276,6 +280,16 @@ function Parking({ parkings = [], initialListingType = "" }) {
               category ===
                 selectedCategory;
 
+            const residential = item.residentialDetails || {};
+            const matchesPropertyType =
+              selectedCategory !== "residential" ||
+              selectedPropertyType === "" ||
+              residential.propertyType === selectedPropertyType;
+            const matchesBedrooms =
+              selectedCategory !== "residential" ||
+              minimumBedrooms === "" ||
+              Number(residential.bedrooms || 0) >= Number(minimumBedrooms);
+
             const matchesMinimum =
               minimum === null ||
               itemPrice >=
@@ -291,6 +305,8 @@ function Parking({ parkings = [], initialListingType = "" }) {
               matchesCity &&
               matchesListingType &&
               matchesCategory &&
+              matchesPropertyType &&
+              matchesBedrooms &&
               matchesMinimum &&
               matchesMaximum
             );
@@ -344,6 +360,8 @@ function Parking({ parkings = [], initialListingType = "" }) {
       selectedCity,
       selectedListingType,
       selectedCategory,
+      selectedPropertyType,
+      minimumBedrooms,
       minimumPrice,
       maximumPrice,
       sortType,
@@ -353,6 +371,8 @@ function Parking({ parkings = [], initialListingType = "" }) {
     setSelectedCity("");
     setSelectedListingType("");
     setSelectedCategory("");
+    setSelectedPropertyType("");
+    setMinimumBedrooms("");
     setMinimumPrice("");
     setMaximumPrice("");
     setSortType("");
@@ -510,6 +530,31 @@ function Parking({ parkings = [], initialListingType = "" }) {
                   )}
                 </select>
               </label>
+
+              {selectedCategory === "residential" && (
+                <>
+                  <label className="parking-filter__field">
+                    <span>🏠 نوع ملک</span>
+                    <select value={selectedPropertyType} onChange={(e)=>setSelectedPropertyType(e.target.value)}>
+                      <option value="">همه انواع مسکونی</option>
+                      <option value="apartment">آپارتمان</option>
+                      <option value="house">خانه / ویلایی</option>
+                      <option value="villa">ویلا</option>
+                      <option value="suite">سوئیت</option>
+                      <option value="penthouse">پنت‌هاوس</option>
+                      <option value="other">سایر مسکونی</option>
+                    </select>
+                  </label>
+                  <label className="parking-filter__field">
+                    <span>🛏 حداقل اتاق</span>
+                    <select value={minimumBedrooms} onChange={(e)=>setMinimumBedrooms(e.target.value)}>
+                      <option value="">مهم نیست</option>
+                      <option value="1">۱ اتاق</option><option value="2">۲ اتاق</option>
+                      <option value="3">۳ اتاق</option><option value="4">۴ اتاق و بیشتر</option>
+                    </select>
+                  </label>
+                </>
+              )}
 
               <label className="parking-filter__field">
                 <span>
