@@ -9,6 +9,10 @@ function Chat({ parkings = [] }) {
   const { parkingId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedConversationId = searchParams.get("conversationId") || "";
+  const requestedChatType =
+    searchParams.get("chatType") === "agency"
+      ? "agency"
+      : "personal";
   const [user, setUser] = useState(() => getCurrentSessionUser());
   const [chat, setChat] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -34,8 +38,14 @@ function Chat({ parkings = [] }) {
         else {
           if (!parking) throw new Error("آگهی پیدا نشد.");
           if (isOwner) throw new Error("برای پاسخ به متقاضی، گفتگو را از بخش «گفتگوهای من» باز کنید.");
-          nextChat = await createOrGetChat(parkingId);
-          setSearchParams({ conversationId: nextChat.id }, { replace: true });
+          nextChat = await createOrGetChat(parkingId, requestedChatType);
+          setSearchParams(
+            {
+              conversationId: nextChat.id,
+              ...(requestedChatType === "agency" ? { chatType: "agency" } : {}),
+            },
+            { replace: true }
+          );
         }
         if (!active) return;
         setChat(nextChat);
@@ -48,7 +58,7 @@ function Chat({ parkings = [] }) {
     };
     prepare();
     return () => { active = false; };
-  }, [userId, parkingId, requestedConversationId, parking, isOwner, setSearchParams]);
+  }, [userId, parkingId, requestedConversationId, requestedChatType, parking, isOwner, setSearchParams]);
 
   useEffect(() => {
     if (!chat?.id) return undefined;

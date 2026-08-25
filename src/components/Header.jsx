@@ -220,6 +220,9 @@ function Header({
                 onNavigate={
                   closeMenu
                 }
+                isApprovedAgent={
+                  isApprovedAgent
+                }
               />
 
 

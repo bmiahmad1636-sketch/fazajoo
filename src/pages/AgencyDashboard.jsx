@@ -394,14 +394,14 @@ function AgencyDashboard({
                   </div>
                 </Link>
 
-                <Link to="/inbox">
+                <Link to="/agency/inbox">
                   <span>💬</span>
                   <div>
                     <strong>
                       گفتگوهای کاری
                     </strong>
                     <small>
-                      پیام‌های مربوط به فایل‌ها را ببین
+                      همه گفتگوهای واقعی حساب مشاورت را یکجا ببین
                     </small>
                   </div>
                 </Link>

@@ -132,10 +132,11 @@ CREATE TABLE IF NOT EXISTS chats (
   space_id UUID NOT NULL REFERENCES spaces(id) ON DELETE CASCADE,
   owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   requester_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  chat_type VARCHAR(20) NOT NULL DEFAULT 'personal' CHECK (chat_type IN ('personal','agency')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CONSTRAINT chats_different_users CHECK (owner_id <> requester_id),
-  CONSTRAINT chats_space_requester_unique UNIQUE (space_id, requester_id)
+  CONSTRAINT chats_space_requester_type_unique UNIQUE (space_id, requester_id, chat_type)
 );
 
 CREATE INDEX IF NOT EXISTS idx_chats_owner_updated ON chats(owner_id, updated_at DESC);

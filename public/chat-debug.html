@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>عیب‌یابی گفتگوهای فضاجو</title>
+<style>
+body{font-family:Tahoma,Arial;background:#fff8f3;margin:0;padding:24px;color:#2d241f}
+.box{max-width:1100px;margin:auto}
+.head,.card{background:#fff;border:1px solid #eadfd5;border-radius:18px;padding:18px;margin-bottom:14px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.id{direction:ltr;font-family:monospace;font-size:12px;color:#666;word-break:break-all}
+strong{color:#d86613}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="head">
+    <h2>عیب‌یابی گفتگوهای حساب فعلی</h2>
+    <div id="me">در حال دریافت...</div>
+  </div>
+  <div id="list"></div>
+</div>
+
+<script>
+(async()=>{
+ const token=localStorage.getItem("fazajoo_auth_token")||"";
+ const me=document.getElementById("me");
+ const list=document.getElementById("list");
+
+ if(!token){
+   me.textContent="توکن ورود پیدا نشد.";
+   return;
+ }
+
+ try{
+  const r=await fetch("http://127.0.0.1:6060/api/chats/debug/mine",{
+    headers:{Authorization:`Bearer ${token}`}
+  });
+  const d=await r.json();
+
+  if(!r.ok||!d.ok) throw new Error(d.message||"خطا");
+
+  me.innerHTML=`کاربر فعلی: <strong>${d.currentUser.fullName||"-"}</strong> — ${d.currentUser.phone||"-"}
+  <div class="id">${d.currentUser.id}</div>`;
+
+  if(!d.chats.length){
+    list.innerHTML='<div class="card">هیچ گفتگویی برای این شناسه ثبت نشده است.</div>';
+    return;
+  }
+
+  list.innerHTML=d.chats.map((c,i)=>`
+    <div class="card">
+      <h3>${i+1}. ${c.space_title||"آگهی"} — ${c.space_city||""}</h3>
+      <div class="row">
+        <div>
+          <b>مالک چت:</b> ${c.owner_name||"-"} — ${c.owner_phone||"-"}
+          <div class="id">${c.owner_id}</div>
+        </div>
+        <div>
+          <b>درخواست‌کننده:</b> ${c.requester_name||"-"} — ${c.requester_phone||"-"}
+          <div class="id">${c.requester_id}</div>
+        </div>
+      </div>
+    </div>
+  `).join("");
+
+ }catch(e){
+   me.textContent="خطا: "+e.message;
+ }
+})();
+</script>
+</body>
+</html>

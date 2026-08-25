@@ -583,7 +583,15 @@ function App() {
                 authLoading
               }
             >
-              <Inbox />
+              {userProfile?.accountType === "agent" &&
+              userProfile?.agencyStatus === "approved" ? (
+                <Navigate
+                  to="/agency/inbox"
+                  replace
+                />
+              ) : (
+                <Inbox />
+              )}
             </ProtectedRoute>
           }
         />
@@ -624,6 +632,22 @@ function App() {
           }
         />
 
+
+
+
+        <Route
+          path="/agency/inbox"
+          element={
+            <AgentRoute
+              user={user}
+              authLoading={authLoading}
+              userProfile={userProfile}
+              profileLoading={profileLoading}
+            >
+              <Inbox mode="agency" />
+            </AgentRoute>
+          }
+        />
 
         <Route
           path="/agency/applicants"

@@ -33,13 +33,29 @@ function getSocket() {
   return socket;
 }
 
-export async function getChats() { return (await request("/chats")).chats || []; }
+export async function getChats(chatType = "personal") {
+  const type = chatType === "agency" ? "agency" : "personal";
+  return (await request(`/chats?type=${encodeURIComponent(type)}`)).chats || [];
+}
 export async function getChat(id) { return (await request(`/chats/${id}`)).chat; }
-export async function createOrGetChat(spaceId) { return (await request("/chats", { method: "POST", body: JSON.stringify({ spaceId }) })).chat; }
+export async function createOrGetChat(spaceId, chatType = "personal") {
+  const type = chatType === "agency" ? "agency" : "personal";
+  return (
+    await request("/chats", {
+      method: "POST",
+      body: JSON.stringify({ spaceId, chatType: type }),
+    })
+  ).chat;
+}
 export async function getMessages(chatId) { return (await request(`/chats/${chatId}/messages`)).messages || []; }
 export async function sendMessage(chatId, text) { return (await request(`/chats/${chatId}/messages`, { method: "POST", body: JSON.stringify({ text }) })).message; }
 export async function markChatRead(chatId) { return request(`/chats/${chatId}/read`, { method: "POST", body: "{}" }); }
-export async function getUnreadCount() { return Number((await request("/chats/unread-count")).unreadCount || 0); }
+export async function getUnreadCount(chatType = "personal") {
+  const type = chatType === "agency" ? "agency" : "personal";
+  return Number(
+    (await request(`/chats/unread-count?type=${encodeURIComponent(type)}`)).unreadCount || 0
+  );
+}
 
 export function subscribeInboxChanged(handler) {
   const s = getSocket();

@@ -111,6 +111,7 @@ function AgencyApplicants({
   ).length;
 
   const categories = [
+    { value: "residential", label: "مسکونی" },
     { value: "parking", label: "پارکینگ" },
     { value: "storage", label: "انبار" },
     { value: "warehouse", label: "سوله" },
@@ -323,12 +324,21 @@ function AgencyApplicants({
                           "توضیحی برای این درخواست ثبت نشده است."}
                       </p>
 
-                      <Link
-                        to={`/parking/${request.id}`}
-                        className="agency-applicants__request-link"
-                      >
-                        مشاهده جزئیات درخواست
-                      </Link>
+                      <div className="agency-applicants__request-actions">
+                        <Link
+                          to={`/parking/${request.id}`}
+                          className="agency-applicants__request-link"
+                        >
+                          مشاهده جزئیات درخواست
+                        </Link>
+
+                        <Link
+                          to={`/chat/${request.id}?chatType=agency`}
+                          className="agency-applicants__request-link agency-applicants__request-link--work"
+                        >
+                          💬 شروع گفتگوی کاری
+                        </Link>
+                      </div>
                     </div>
 
                     <div

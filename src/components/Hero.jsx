@@ -6,6 +6,18 @@ import "./Hero.css";
 
 const categories = [
   {
+    title: "مسکونی",
+    search: "مسکونی",
+  },
+  {
+    title: "مغازه",
+    search: "مغازه",
+  },
+  {
+    title: "زمین",
+    search: "زمین",
+  },
+  {
     title: "پارکینگ",
     search: "پارکینگ",
   },
@@ -16,14 +28,6 @@ const categories = [
   {
     title: "سوله",
     search: "سوله",
-  },
-  {
-    title: "مغازه",
-    search: "مغازه",
-  },
-  {
-    title: "زمین",
-    search: "زمین",
   },
   {
     title: "سایر فضاها",
@@ -82,9 +86,9 @@ function Hero() {
           </h1>
 
           <p className="home-hero__description">
-            پارکینگ، انبار، سوله، مغازه،
-            زمین و سایر فضاها؛ مستقیم از
-            مالک و بدون واسطه.
+            مسکونی، پارکینگ، انبار، سوله،
+            مغازه، زمین و سایر فضاها؛ مستقیم
+            از مالک و بدون واسطه.
           </p>
 
           <form

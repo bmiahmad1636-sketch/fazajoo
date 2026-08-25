@@ -1,6 +1,49 @@
 const crypto = require("crypto");
 const { query } = require("../db/pool");
 
+let chatSchemaPromise = null;
+
+function ensureChatSchema() {
+  if (!chatSchemaPromise) {
+    chatSchemaPromise = (async () => {
+      await query(`
+        ALTER TABLE chats
+        ADD COLUMN IF NOT EXISTS chat_type VARCHAR(20) NOT NULL DEFAULT 'personal'
+      `);
+
+      await query(`
+        ALTER TABLE chats
+        DROP CONSTRAINT IF EXISTS chats_space_requester_unique
+      `);
+
+      await query(`
+        DO $$
+        BEGIN
+          IF NOT EXISTS (
+            SELECT 1
+            FROM pg_constraint
+            WHERE conname = 'chats_space_requester_type_unique'
+          ) THEN
+            ALTER TABLE chats
+            ADD CONSTRAINT chats_space_requester_type_unique
+            UNIQUE (space_id, requester_id, chat_type);
+          END IF;
+        END
+        $$;
+      `);
+    })().catch((error) => {
+      chatSchemaPromise = null;
+      throw error;
+    });
+  }
+
+  return chatSchemaPromise;
+}
+
+function normalizeChatType(value) {
+  return value === "agency" ? "agency" : "personal";
+}
+
 function userLabel(row, prefix) {
   return row[`${prefix}_name`] || row[`${prefix}_phone`] || "کاربر فضاجو";
 }
@@ -15,9 +58,19 @@ function mapChat(row, currentUserId) {
     parkingImageUrl: row.space_image_url || "",
     ownerId: row.owner_id,
     requesterId: row.requester_id,
+    chatType: row.chat_type || "personal",
     otherUserId: isOwner ? row.requester_id : row.owner_id,
     otherUserName: isOwner ? userLabel(row, "requester") : userLabel(row, "owner"),
-    otherUserRole: isOwner ? "متقاضی آگهی" : "آگهی‌دهنده",
+    otherUserRole:
+      (row.chat_type || "personal") === "agency"
+        ? isOwner
+          ? "مشاور املاک"
+          : row.space_listing_type === "wanted"
+            ? "متقاضی فضا"
+            : "آگهی‌دهنده"
+        : isOwner
+          ? "متقاضی آگهی"
+          : "آگهی‌دهنده",
     lastMessage: row.last_message || "",
     lastMessageSenderId: row.last_message_sender_id || "",
     unreadCount: Number(row.unread_count || 0),
@@ -28,8 +81,9 @@ function mapChat(row, currentUserId) {
 
 const CHAT_SELECT = `
   SELECT
-    c.id, c.space_id, c.owner_id, c.requester_id, c.created_at, c.updated_at,
+    c.id, c.space_id, c.owner_id, c.requester_id, c.chat_type, c.created_at, c.updated_at,
     s.title AS space_title, s.city AS space_city, s.image_url AS space_image_url,
+    s.listing_type AS space_listing_type,
     ou.full_name AS owner_name, ou.phone AS owner_phone,
     ru.full_name AS requester_name, ru.phone AS requester_phone,
     lm.text AS last_message,
@@ -57,6 +111,8 @@ const CHAT_SELECT = `
 `;
 
 async function getChatRow(chatId, userId) {
+  await ensureChatSchema();
+
   const result = await query(
     `${CHAT_SELECT}
      WHERE c.id = $2
@@ -69,16 +125,72 @@ async function getChatRow(chatId, userId) {
 
 async function list(req, res) {
   try {
+    await ensureChatSchema();
+
+    const chatType = normalizeChatType(req.query?.type);
+    const currentUserId = String(req.user.id);
+
+    const isApprovedAgent =
+      req.user.account_type === "agent" &&
+      req.user.agency_status === "approved";
+
+    let typeCondition;
+
+    if (chatType === "agency") {
+      if (!isApprovedAgent) {
+        return res.status(403).json({
+          ok: false,
+          message: "دسترسی مشاور تأییدشده لازم است.",
+        });
+      }
+
+      // برای مشاور تأییدشده فقط یک صندوق پیام وجود دارد:
+      // همه گفتگوهای واقعی او، چه قدیمی چه جدید، گفتگوی کاری محسوب می‌شوند.
+      typeCondition = `c.chat_type IN ('personal', 'agency')`;
+    } else {
+      // صندوق شخصی فقط متعلق به کاربران عادی است.
+      if (isApprovedAgent) {
+        return res.json({
+          ok: true,
+          chatType: "personal",
+          chats: [],
+        });
+      }
+
+      typeCondition = `c.chat_type = 'personal'`;
+    }
+
     const result = await query(
       `${CHAT_SELECT}
-       WHERE c.owner_id = $1 OR c.requester_id = $1
+       WHERE (c.owner_id = $1 OR c.requester_id = $1)
+         AND ${typeCondition}
+         AND EXISTS (
+           SELECT 1
+           FROM messages visible_message
+           WHERE visible_message.chat_id = c.id
+         )
        ORDER BY COALESCE(lm.created_at, c.updated_at, c.created_at) DESC`,
-      [req.user.id]
+      [currentUserId]
     );
-    return res.json({ ok: true, chats: result.rows.map((row) => mapChat(row, req.user.id)) });
+
+    const safeRows = result.rows.filter((row) => {
+      return (
+        String(row.owner_id || "") === currentUserId ||
+        String(row.requester_id || "") === currentUserId
+      );
+    });
+
+    return res.json({
+      ok: true,
+      chatType,
+      chats: safeRows.map((row) => mapChat(row, currentUserId)),
+    });
   } catch (error) {
     console.error("Inbox load error:", error);
-    return res.status(500).json({ ok: false, message: "دریافت گفتگوها انجام نشد." });
+    return res.status(500).json({
+      ok: false,
+      message: "دریافت گفتگوها انجام نشد.",
+    });
   }
 }
 
@@ -95,31 +207,63 @@ async function getOne(req, res) {
 
 async function createOrGet(req, res) {
   try {
+    await ensureChatSchema();
+
     const spaceId = String(req.body?.spaceId || "").trim();
-    if (!spaceId) return res.status(400).json({ ok: false, message: "شناسه آگهی لازم است." });
+    const chatType = normalizeChatType(req.body?.chatType);
+
+    if (!spaceId) {
+      return res.status(400).json({ ok: false, message: "شناسه آگهی لازم است." });
+    }
+
+    if (
+      chatType === "agency" &&
+      !(
+        req.user.account_type === "agent" &&
+        req.user.agency_status === "approved"
+      )
+    ) {
+      return res.status(403).json({
+        ok: false,
+        message: "فقط مشاور تأییدشده می‌تواند گفتگوی کاری ایجاد کند.",
+      });
+    }
 
     const spaceResult = await query(
       `SELECT id, owner_id FROM spaces WHERE id = $1 AND status <> 'inactive' LIMIT 1`,
       [spaceId]
     );
+
     const space = spaceResult.rows[0];
-    if (!space) return res.status(404).json({ ok: false, message: "آگهی پیدا نشد." });
+
+    if (!space) {
+      return res.status(404).json({ ok: false, message: "آگهی پیدا نشد." });
+    }
+
     if (space.owner_id === req.user.id) {
-      return res.status(400).json({ ok: false, message: "برای پاسخ به متقاضی، گفتگو را از «گفتگوهای من» باز کنید." });
+      return res.status(400).json({
+        ok: false,
+        message: "نمی‌توانید با آگهی خودتان گفتگو ایجاد کنید.",
+      });
     }
 
     const id = crypto.randomUUID();
+
     const result = await query(
-      `INSERT INTO chats (id, space_id, owner_id, requester_id)
-       VALUES ($1, $2, $3, $4)
-       ON CONFLICT (space_id, requester_id)
+      `INSERT INTO chats (id, space_id, owner_id, requester_id, chat_type)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (space_id, requester_id, chat_type)
        DO UPDATE SET updated_at = chats.updated_at
        RETURNING id`,
-      [id, space.id, space.owner_id, req.user.id]
+      [id, space.id, space.owner_id, req.user.id, chatType]
     );
 
     const row = await getChatRow(result.rows[0].id, req.user.id);
-    return res.status(201).json({ ok: true, chat: mapChat(row, req.user.id) });
+
+    return res.status(201).json({
+      ok: true,
+      chat: mapChat(row, req.user.id),
+    });
   } catch (error) {
     console.error("Prepare chat error:", error);
     return res.status(500).json({ ok: false, message: "آماده‌سازی گفتگو انجام نشد." });
@@ -233,18 +377,57 @@ async function markRead(req, res) {
 
 async function unreadCount(req, res) {
   try {
+    await ensureChatSchema();
+
+    const chatType = normalizeChatType(req.query?.type);
+    const isApprovedAgent =
+      req.user.account_type === "agent" &&
+      req.user.agency_status === "approved";
+
+    let typeCondition;
+
+    if (chatType === "agency") {
+      if (!isApprovedAgent) {
+        return res.status(403).json({
+          ok: false,
+          message: "دسترسی مشاور تأییدشده لازم است.",
+        });
+      }
+
+      typeCondition = `c.chat_type IN ('personal', 'agency')`;
+    } else {
+      if (isApprovedAgent) {
+        return res.json({
+          ok: true,
+          chatType: "personal",
+          unreadCount: 0,
+        });
+      }
+
+      typeCondition = `c.chat_type = 'personal'`;
+    }
+
     const result = await query(
       `SELECT COUNT(*)::int AS count
        FROM messages m
        JOIN chats c ON c.id = m.chat_id
        WHERE (c.owner_id = $1 OR c.requester_id = $1)
+         AND ${typeCondition}
          AND m.sender_id <> $1
          AND m.read_at IS NULL`,
       [req.user.id]
     );
-    return res.json({ ok: true, unreadCount: Number(result.rows[0]?.count || 0) });
+
+    return res.json({
+      ok: true,
+      chatType,
+      unreadCount: Number(result.rows[0]?.count || 0),
+    });
   } catch (error) {
-    return res.status(500).json({ ok: false, message: "دریافت تعداد پیام‌های خوانده‌نشده انجام نشد." });
+    return res.status(500).json({
+      ok: false,
+      message: "دریافت تعداد پیام‌های خوانده‌نشده انجام نشد.",
+    });
   }
 }
 

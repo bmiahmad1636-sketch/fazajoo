@@ -448,3 +448,22 @@
     flex-direction: column;
   }
 }
+
+
+.agency-applicants__request-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.agency-applicants__request-link--work {
+  background: #f97316;
+  border-color: #f97316;
+  color: #fff;
+}
+
+.agency-applicants__request-link--work:hover {
+  background: #ea580c;
+  border-color: #ea580c;
+}
