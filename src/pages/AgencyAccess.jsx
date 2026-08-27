@@ -10,7 +10,10 @@ import {
 } from "react-router-dom";
 
 import "./AgencyAccess.css";
-import { getAuthToken } from "../services/authService";
+import {
+  getAuthToken,
+  initializeAuthSession,
+} from "../services/authService";
 
 
 const DOCUMENT_SERVER_URL =
@@ -199,6 +202,71 @@ function AgencyAccess({
   ] =
     useState("");
 
+  const [
+    liveAgencyStatus,
+    setLiveAgencyStatus,
+  ] = useState("");
+
+  const [
+    statusLoading,
+    setStatusLoading,
+  ] = useState(true);
+
+
+  useEffect(() => {
+    let active = true;
+
+    const loadAgencyStatus = async () => {
+      const token = getAuthToken();
+
+      if (!token) {
+        if (active) setStatusLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${API_SERVER_URL}/api/agency/status`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data?.ok) {
+          throw new Error(
+            data?.message || "دریافت وضعیت درخواست مشاور انجام نشد."
+          );
+        }
+
+        if (active) {
+          const nextStatus = data.agencyStatus || "none";
+          setLiveAgencyStatus(nextStatus);
+
+          if (nextStatus !== (userProfile?.agencyStatus || "none")) {
+            await initializeAuthSession().catch(() => {});
+          }
+        }
+      } catch (error) {
+        console.error("Agency status load error:", error);
+
+        if (active) {
+          setLiveAgencyStatus(userProfile?.agencyStatus || "none");
+        }
+      } finally {
+        if (active) setStatusLoading(false);
+      }
+    };
+
+    loadAgencyStatus();
+
+    return () => {
+      active = false;
+    };
+  }, [userProfile?.agencyStatus]);
 
   useEffect(() => {
     if (!userProfile) {
@@ -242,35 +310,29 @@ function AgencyAccess({
   }, [userProfile]);
 
 
-  const isApprovedAgent =
-    useMemo(
-      () =>
-        userProfile
-          ?.accountType ===
-          "agent" &&
-        userProfile
-          ?.agencyStatus ===
-          "approved",
+  const effectiveAgencyStatus =
+    liveAgencyStatus ||
+    userProfile?.agencyStatus ||
+    "none";
 
-      [userProfile]
-    );
+
+  const isApprovedAgent =
+    effectiveAgencyStatus ===
+    "approved";
 
 
   const isPending =
-    userProfile
-      ?.agencyStatus ===
+    effectiveAgencyStatus ===
     "pending";
 
 
   const needsRevision =
-    userProfile
-      ?.agencyStatus ===
+    effectiveAgencyStatus ===
     "needs_revision";
 
 
   const isRejected =
-    userProfile
-      ?.agencyStatus ===
+    effectiveAgencyStatus ===
     "rejected";
 
 
@@ -285,7 +347,7 @@ function AgencyAccess({
     );
 
 
-  if (profileLoading) {
+  if (profileLoading || statusLoading) {
     return (
       <main className="agency-access">
 
@@ -860,6 +922,12 @@ function AgencyAccess({
         setMessageType(
           "success"
         );
+
+        setLiveAgencyStatus(
+          "pending"
+        );
+
+        await initializeAuthSession().catch(() => {});
 
       } catch (error) {
         console.error(

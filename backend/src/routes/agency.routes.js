@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 
 const { pool } = require("../db/pool");
+const { requireAuth } = require("../middleware/auth.middleware");
+
+router.use(requireAuth);
 
 function clean(value) {
   return typeof value === "string" ? value.trim() : "";
@@ -48,6 +51,53 @@ function pickDocument(documents, keys) {
   return null;
 }
 
+// وضعیت احراز مشاور برای حساب لاگین‌شده
+router.get("/status", async (req, res) => {
+  try {
+    const userResult = await pool.query(
+      `SELECT id, phone, account_type, system_role, agency_status
+       FROM users
+       WHERE id = $1
+       LIMIT 1`,
+      [req.user.id]
+    );
+
+    const user = userResult.rows[0];
+
+    if (!user) {
+      return res.status(404).json({
+        ok: false,
+        message: "حساب کاربری پیدا نشد.",
+      });
+    }
+
+    const requestResult = await pool.query(
+      `SELECT id, agency_name, responsible_name, city, address,
+              phone, license_number, status, rejection_reason,
+              created_at, updated_at
+       FROM agency_verification_requests
+       WHERE user_id = $1
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [user.id]
+    );
+
+    return res.json({
+      ok: true,
+      agencyStatus: user.agency_status || "none",
+      accountType: user.account_type || "user",
+      systemRole: user.system_role || "user",
+      request: requestResult.rows[0] || null,
+    });
+  } catch (error) {
+    console.error("agency status error:", error);
+    return res.status(500).json({
+      ok: false,
+      message: "دریافت وضعیت درخواست مشاور انجام نشد.",
+    });
+  }
+});
+
 // ثبت درخواست احراز مشاور املاک در PostgreSQL
 router.post("/request", async (req, res) => {
   const client = await pool.connect();
@@ -74,7 +124,7 @@ router.post("/request", async (req, res) => {
       responsibleName: clean(responsibleName || agentName),
       city: clean(city),
       address: clean(address),
-      phone: clean(phone),
+      phone: clean(req.user?.phone || phone),
       nationalCode: clean(nationalCode || nationalId),
       licenseNumber: clean(licenseNumber),
     };
@@ -123,24 +173,35 @@ router.post("/request", async (req, res) => {
 
     await client.query("BEGIN");
 
-    // کاربر را از روی شماره موبایل حساب کاربری پیدا می‌کنیم.
+    // درخواست فقط برای همان حساب لاگین‌شده ثبت می‌شود.
     const userResult = await client.query(
-      `SELECT id, phone, agency_status
+      `SELECT id, phone, account_type, system_role, agency_status
        FROM users
-       WHERE phone = $1
+       WHERE id = $1
        LIMIT 1`,
-      [normalized.phone]
+      [req.user.id]
     );
 
     if (userResult.rowCount === 0) {
       await client.query("ROLLBACK");
       return res.status(404).json({
         ok: false,
-        message: "حساب کاربری با این شماره موبایل پیدا نشد. ابتدا وارد حساب خود شوید.",
+        message: "حساب کاربری پیدا نشد.",
       });
     }
 
     const user = userResult.rows[0];
+
+    if (user.system_role === "admin") {
+      await client.query("ROLLBACK");
+      return res.status(403).json({
+        ok: false,
+        message: "حساب مدیر نمی‌تواند برای خودش درخواست مشاور املاک ثبت کند.",
+      });
+    }
+
+    // شماره تماس درخواست از حساب احراز‌شده گرفته می‌شود، نه از ورودی قابل تغییر فرم.
+    normalized.phone = user.phone;
 
     // اگر قبلاً درخواست ثبت شده، همان درخواست را به‌روز می‌کنیم تا رکورد تکراری نسازیم.
     const existingResult = await client.query(

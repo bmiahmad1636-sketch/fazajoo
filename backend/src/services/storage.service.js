@@ -196,6 +196,58 @@ async function uploadAgencyDocument({
   };
 }
 
+async function getAgencyDocument({ documentRecord, userId }) {
+  if (!documentRecord || !userId) {
+    const error = new Error("مدرک نامعتبر است.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const key =
+    (typeof documentRecord === "object" && documentRecord.key) ||
+    keyFromPublicUrl(
+      typeof documentRecord === "string"
+        ? documentRecord
+        : documentRecord.url
+    );
+
+  if (!key) {
+    const error = new Error("مسیر فایل مدرک معتبر نیست.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const allowedPrefix = `agency-documents/${userId}/`;
+  if (!key.startsWith(allowedPrefix) || key.includes("..")) {
+    const error = new Error("اجازه دسترسی به این مدرک را ندارید.");
+    error.statusCode = 403;
+    throw error;
+  }
+
+  try {
+    const result = await client().send(
+      new GetObjectCommand({
+        Bucket: env.STORAGE_BUCKET,
+        Key: key,
+      })
+    );
+
+    return {
+      key,
+      body: result.Body,
+      contentType: result.ContentType || "application/octet-stream",
+      contentLength: result.ContentLength,
+    };
+  } catch (error) {
+    if (error?.name === "NoSuchKey" || error?.$metadata?.httpStatusCode === 404) {
+      const notFound = new Error("فایل مدرک پیدا نشد.");
+      notFound.statusCode = 404;
+      throw notFound;
+    }
+    throw error;
+  }
+}
+
 async function deleteByPublicUrl(url) {
   const key = keyFromPublicUrl(url);
 
@@ -218,5 +270,6 @@ module.exports = {
   getAdImage,
   deleteAdImage,
   uploadAgencyDocument,
+  getAgencyDocument,
   deleteByPublicUrl,
 };
