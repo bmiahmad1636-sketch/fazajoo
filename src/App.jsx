@@ -36,6 +36,9 @@ import {
   subscribeToAuth,
 } from "./services/authService";
 
+import "./compact.css";
+import "./typography.css";
+
 function convertToNumber(value) {
   if (
     value === null ||

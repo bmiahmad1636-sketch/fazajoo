@@ -1,0 +1,122 @@
+/*
+  Fazajoo — Local Estedad Typography
+  فونت‌ها از داخل خود پروژه لود می‌شوند و به اینترنت وابسته نیستند.
+*/
+
+@font-face {
+  font-family: "Estedad";
+  src: url("/fonts/estedad/Estedad-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Estedad";
+  src: url("/fonts/estedad/Estedad-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Estedad";
+  src: url("/fonts/estedad/Estedad-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Estedad";
+  src: url("/fonts/estedad/Estedad-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Estedad";
+  src: url("/fonts/estedad/Estedad-ExtraBold.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --fazajoo-font: "Estedad", Tahoma, Arial, sans-serif;
+}
+
+html,
+body,
+#root,
+button,
+input,
+select,
+textarea,
+option {
+  font-family: var(--fazajoo-font) !important;
+}
+
+body {
+  font-weight: 400;
+}
+
+p,
+span,
+small,
+li,
+label,
+input,
+select,
+textarea {
+  font-weight: 400;
+}
+
+a,
+button {
+  font-weight: 500;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+strong,
+b {
+  font-weight: 700;
+}
+
+/* تیترهای اصلی: واضح ولی نه خیلی سنگین */
+.home-hero__title,
+.parking-details-hero h1,
+.agency-dashboard__hero h1,
+.parking-page__hero h1,
+.my-parkings-hero h1,
+.favorites-hero h1,
+.inbox-hero h1 {
+  font-weight: 700 !important;
+  letter-spacing: -0.025em;
+}
+
+/* دکمه‌ها و کنترل‌ها */
+button,
+.fazajoo-header__publish-button,
+.parking-details-toolbar__back,
+.parking-details-toolbar__actions button {
+  font-weight: 600 !important;
+}
+
+/* قیمت‌ها و اعداد */
+.parking-details-hero__price strong,
+.parking-card__price,
+.my-parking-card__price,
+.agency-dashboard__score,
+.agency-dashboard__property-match-badge b,
+.agency-dashboard__applicant-match-badge b,
+.agency-dashboard__network-match-score b {
+  font-weight: 700 !important;
+  font-variant-numeric: tabular-nums;
+}

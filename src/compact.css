@@ -1,0 +1,409 @@
+
+/*
+  Fazajoo Compact UI Pass
+  هدف: کاهش ارتفاع و اسکرول اضافه بدون ریز یا شلوغ کردن رابط.
+  این فایل عمداً بعد از CSS صفحه‌ها بارگذاری می‌شود.
+*/
+
+@media (min-width: 769px) {
+  /* Header */
+  .fazajoo-header { min-height: 66px !important; }
+  .fazajoo-header__logo { height: 56px !important; }
+  .fazajoo-header__brand { height: 56px !important; }
+  .fazajoo-header__nav-link { min-height: 34px !important; padding-block: 5px !important; }
+  .fazajoo-header__publish-button,
+  .fazajoo-header__login-button,
+  .fazajoo-header__logout-button { min-height: 38px !important; }
+
+  /* Home hero */
+  .home-hero { padding: 22px 0 26px !important; min-height: 0 !important; }
+  .home-hero__container { gap: 28px !important; }
+  .home-hero__badge { margin-bottom: 6px !important; }
+  .home-hero__title { margin-bottom: 9px !important; line-height: 1.12 !important; }
+  .home-hero__description { margin-bottom: 12px !important; line-height: 1.65 !important; }
+  .home-hero__categories { margin-top: 9px !important; }
+  .home-hero__benefits { margin-top: 10px !important; }
+
+  /* Listing / search */
+  .parking-page__hero { padding: 25px 0 38px !important; }
+  .parking-page__hero-content { gap: 20px !important; }
+  .parking-page__content { padding-top: 20px !important; padding-bottom: 38px !important; }
+  .parking-filter { padding: 11px 13px !important; }
+  .parking-filter__grid { gap: 8px !important; }
+  .parking-results__header { margin-bottom: 12px !important; }
+
+  /* Listing cards */
+  .parking-card__image-wrapper,
+  .parking-card__image { height: 180px !important; }
+  .parking-card__content { padding-top: 11px !important; padding-bottom: 11px !important; }
+  .parking-card__features,
+  .parking-card__footer { gap: 6px !important; }
+
+  /* Details — biggest vertical saving */
+  .parking-details-hero { padding: 18px 0 54px !important; }
+  .parking-details-toolbar { margin-bottom: 20px !important; }
+  .parking-details-toolbar__back,
+  .parking-details-toolbar__actions button {
+    min-height: 36px !important;
+    padding: 6px 11px !important;
+  }
+  .parking-details-hero__content { gap: 24px !important; }
+  .parking-details-hero__badges { margin-bottom: 9px !important; gap: 6px !important; }
+  .parking-details-badge { min-height: 29px !important; padding: 5px 10px !important; }
+  .parking-details-content { padding-top: 18px !important; padding-bottom: 42px !important; }
+  .parking-details-layout { gap: 16px !important; }
+  .parking-details-card,
+  .parking-details-gallery,
+  .parking-details-owner-card,
+  .parking-details-contact-card { padding-top: 16px !important; padding-bottom: 16px !important; }
+  .parking-details-gallery__main,
+  .parking-details-gallery__main-image { height: 270px !important; }
+  .parking-details-section { margin-top: 14px !important; }
+  .parking-details-section + .parking-details-section { margin-top: 12px !important; }
+
+  /* My listings */
+  .my-parkings-hero { padding: 28px 0 48px !important; }
+  .my-parkings-content { padding-bottom: 44px !important; }
+  .my-parkings-summary { gap: 9px !important; }
+  .my-parkings-summary-card { min-height: 74px !important; padding: 12px !important; }
+  .my-parkings-toolbar { margin-top: 16px !important; margin-bottom: 12px !important; }
+  .my-parking-card__media { height: 180px !important; }
+
+  /* Favorites / Inbox */
+  .favorites-hero,
+  .inbox-hero { padding: 34px 0 54px !important; }
+  .favorites-content,
+  .inbox-content { padding-bottom: 44px !important; }
+  .favorites-heading,
+  .inbox-heading { margin-bottom: 12px !important; }
+  .inbox-toolbar { margin-bottom: 10px !important; }
+  .inbox-list { gap: 8px !important; }
+
+  /* Chat */
+  .chat-hero { padding: 20px 0 48px !important; }
+  .chat-hero__back { margin-bottom: 16px !important; }
+  .chat-content { padding-bottom: 40px !important; }
+  .chat-layout { gap: 14px !important; }
+  .chat-ad-card__image { height: 175px !important; }
+  .chat-box__messages { min-height: 300px !important; }
+
+  /* Agent dashboard */
+  .agency-dashboard__hero { padding: 15px 0 !important; }
+  .agency-dashboard__hero p { margin-top: 4px !important; line-height: 1.55 !important; }
+  .agency-dashboard__content { padding: 16px 0 38px !important; }
+  .agency-dashboard__section-tabs { gap: 8px !important; margin-bottom: 10px !important; }
+  .agency-dashboard__section-tab { min-height: 68px !important; padding: 10px 12px !important; }
+  .agency-dashboard__workspace { gap: 11px !important; }
+  .agency-dashboard__results-heading { padding: 12px 15px !important; }
+  .agency-dashboard__match-list { padding: 10px !important; gap: 8px !important; }
+  .agency-dashboard__match-row { padding: 8px !important; gap: 8px !important; }
+  .agency-dashboard__side-card { padding: 10px !important; }
+  .agency-dashboard__tools { padding: 12px !important; }
+  .agency-dashboard__tool-list { gap: 6px !important; }
+  .agency-dashboard__tool-list a { padding: 8px !important; }
+
+  /* Agent applicants/access/admin */
+  .agency-applicants__hero { padding: 28px 0 48px !important; }
+  .agency-applicants__content,
+  .agency-access__content,
+  .admin-dashboard__content { padding-top: 18px !important; padding-bottom: 42px !important; }
+  .agency-applicants__stats { gap: 8px !important; }
+  .agency-applicants__card { padding-top: 14px !important; padding-bottom: 14px !important; }
+  .agency-access__hero,
+  .admin-dashboard__hero { padding-top: 20px !important; padding-bottom: 24px !important; }
+  .admin-dashboard__stats { gap: 8px !important; }
+  .admin-dashboard__request-card { padding-top: 13px !important; padding-bottom: 13px !important; }
+
+  /* Add / Edit forms: preserve usability but remove decorative empty height */
+  .add-parking-hero,
+  .edit-parking-hero { padding-top: 20px !important; padding-bottom: 26px !important; }
+  .add-parking-content,
+  .edit-parking-content { padding-top: 18px !important; padding-bottom: 44px !important; }
+  .add-parking-layout,
+  .edit-parking-layout { gap: 14px !important; }
+  .add-parking-form-card,
+  .edit-parking-card { padding-top: 16px !important; padding-bottom: 16px !important; }
+
+  /* General rhythm */
+  .section { padding-block: 38px !important; }
+}
+
+/* Mobile: compact gently; don't crush tap targets */
+@media (max-width: 768px) {
+  .home-hero { padding-top: 18px !important; padding-bottom: 22px !important; }
+  .parking-page__hero,
+  .my-parkings-hero,
+  .favorites-hero,
+  .inbox-hero,
+  .agency-applicants__hero { padding-top: 24px !important; padding-bottom: 38px !important; }
+
+  .parking-details-hero { padding-top: 14px !important; padding-bottom: 38px !important; }
+  .parking-details-toolbar { margin-bottom: 16px !important; }
+  .parking-details-gallery__main,
+  .parking-details-gallery__main-image { height: 235px !important; }
+
+  .agency-dashboard__hero { padding: 14px 0 !important; }
+  .agency-dashboard__content { padding-top: 12px !important; padding-bottom: 30px !important; }
+  .agency-dashboard__section-tabs { gap: 7px !important; margin-bottom: 9px !important; }
+
+  .chat-hero { padding-top: 18px !important; padding-bottom: 36px !important; }
+}
+
+
+/* =========================================================
+   V2 — کاهش واقعی و محسوس ارتفاع صفحه جزئیات آگهی
+   این بخش با selectorهای واقعی ParkingDetails.css نوشته شده.
+   ========================================================= */
+@media (min-width: 769px) {
+  .parking-details-hero {
+    padding: 14px 0 42px !important;
+  }
+
+  .parking-details-toolbar {
+    margin-bottom: 16px !important;
+    gap: 10px !important;
+  }
+
+  .parking-details-toolbar__back,
+  .parking-details-toolbar__actions button {
+    min-height: 34px !important;
+    padding: 5px 10px !important;
+    border-radius: 10px !important;
+  }
+
+  .parking-details-hero__content {
+    align-items: center !important;
+    gap: 18px !important;
+  }
+
+  .parking-details-hero__badges {
+    margin-bottom: 7px !important;
+    gap: 5px !important;
+  }
+
+  .parking-details-badge {
+    min-height: 27px !important;
+    padding: 4px 9px !important;
+  }
+
+  .parking-details-hero h1 {
+    max-width: 720px !important;
+    margin-bottom: 5px !important;
+    font-size: clamp(1.8rem, 3.5vw, 3.1rem) !important;
+    line-height: 1.18 !important;
+  }
+
+  .parking-details-hero__content > div:first-child > p {
+    font-size: .88rem !important;
+  }
+
+  .parking-details-hero__price {
+    min-width: 220px !important;
+    padding: 13px 16px !important;
+    border-radius: 17px !important;
+  }
+
+  .parking-details-hero__price strong {
+    margin: 2px 0 !important;
+    font-size: 1.24rem !important;
+  }
+
+  .parking-details-content {
+    margin-top: -26px !important;
+    padding-bottom: 42px !important;
+  }
+
+  .parking-details-layout {
+    grid-template-columns: minmax(0, 1fr) 330px !important;
+    gap: 16px !important;
+  }
+
+  .parking-details-main {
+    gap: 13px !important;
+  }
+
+  /* مهم: خود گالری در فایل اصلی height:520px داشت */
+  .parking-details-gallery {
+    height: 320px !important;
+    border-radius: 20px !important;
+  }
+
+  .parking-details-gallery__overlay {
+    right: 13px !important;
+    bottom: 12px !important;
+    padding: 5px 10px !important;
+  }
+
+  .parking-details-thumbnails {
+    margin-top: 8px !important;
+    gap: 7px !important;
+  }
+
+  .parking-details-thumbnail {
+    height: 64px !important;
+    border-radius: 11px !important;
+  }
+
+  .parking-details-section {
+    padding: 16px 18px !important;
+    border-radius: 20px !important;
+  }
+
+  .parking-details-section__heading {
+    gap: 9px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .parking-details-section__icon {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 12px !important;
+  }
+
+  .parking-details-section__heading h2 {
+    font-size: 1.08rem !important;
+  }
+
+  .parking-details-features {
+    gap: 8px !important;
+  }
+
+  .parking-details-feature {
+    gap: 9px !important;
+    padding: 10px 12px !important;
+    border-radius: 13px !important;
+  }
+
+  .parking-details-feature__icon {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+  }
+
+  .parking-details-description {
+    font-size: .91rem !important;
+    line-height: 1.75 !important;
+  }
+
+  .parking-details-residential {
+    margin-top: 12px !important;
+  }
+
+  .parking-details-residential__grid {
+    gap: 8px !important;
+  }
+
+  .parking-details-residential__item {
+    min-height: 76px !important;
+    padding: 10px 12px !important;
+  }
+
+  .parking-details-residential__amenities {
+    margin-top: 10px !important;
+    gap: 7px !important;
+  }
+
+  .parking-details-location {
+    grid-template-columns: 1fr 120px !important;
+    gap: 12px !important;
+    min-height: 145px !important;
+    padding: 16px 18px !important;
+    border-radius: 20px !important;
+  }
+
+  .parking-details-location h2 {
+    margin: 2px 0 5px !important;
+    font-size: 1.18rem !important;
+  }
+
+  .parking-details-location p {
+    line-height: 1.6 !important;
+  }
+
+  .parking-details-location__visual {
+    width: 88px !important;
+    height: 88px !important;
+    font-size: 1.9rem !important;
+  }
+
+  .parking-details-location__ring--one {
+    width: 112px !important;
+    height: 112px !important;
+  }
+
+  .parking-details-location__ring--two {
+    width: 136px !important;
+    height: 136px !important;
+  }
+
+  .parking-details-sidebar {
+    top: 78px !important;
+    gap: 10px !important;
+  }
+
+  .parking-contact-card,
+  .parking-owner-card,
+  .parking-owner-note {
+    padding: 15px !important;
+    border-radius: 20px !important;
+  }
+
+  .parking-contact-card::before {
+    margin: -15px -15px 13px !important;
+  }
+
+  .parking-contact-card h3,
+  .parking-owner-card h3 {
+    margin-top: 5px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .parking-contact-card p,
+  .parking-owner-card p {
+    margin-top: 5px !important;
+    margin-bottom: 9px !important;
+    line-height: 1.65 !important;
+  }
+
+  .parking-contact-card button,
+  .parking-owner-card button,
+  .parking-owner-card a {
+    min-height: 40px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .parking-details-hero {
+    padding: 12px 0 34px !important;
+  }
+
+  .parking-details-toolbar {
+    margin-bottom: 12px !important;
+  }
+
+  .parking-details-hero h1 {
+    font-size: 1.85rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .parking-details-content {
+    margin-top: -18px !important;
+  }
+
+  .parking-details-gallery {
+    height: 270px !important;
+  }
+
+  .parking-details-main {
+    gap: 11px !important;
+  }
+
+  .parking-details-section {
+    padding: 14px !important;
+  }
+
+  .parking-details-location {
+    min-height: 150px !important;
+    padding: 15px !important;
+  }
+}

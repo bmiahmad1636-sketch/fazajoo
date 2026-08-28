@@ -1,94 +1,47 @@
 .agency-dashboard {
   min-height: 100vh;
   direction: rtl;
+  background: #fffaf6;
+  color: #302a26;
+}
 
-  background:
-    radial-gradient(
-      circle at 100% 0%,
-      rgba(244, 122, 31, 0.08),
-      transparent 28%
-    ),
-    linear-gradient(
-      180deg,
-      #fffaf6 0%,
-      #fffdfb 100%
-    );
+.agency-dashboard * {
+  box-sizing: border-box;
 }
 
 .agency-dashboard__container {
-  width: min(
-    calc(100% - 32px),
-    1180px
-  );
-
+  width: min(calc(100% - 32px), 1180px);
   margin-inline: auto;
 }
 
 .agency-dashboard__hero {
-  padding: 34px 0 54px;
-
-  color: white;
-
+  padding: 22px 0;
+  color: #fff;
   background:
-    radial-gradient(
-      circle at 14% 18%,
-      rgba(244, 122, 31, 0.18),
-      transparent 28%
-    ),
-    radial-gradient(
-      circle at 88% 80%,
-      rgba(255, 182, 115, 0.09),
-      transparent 30%
-    ),
-    linear-gradient(
-      135deg,
-      #201b18 0%,
-      #30241d 48%,
-      #4b2e1c 100%
-    );
+    radial-gradient(circle at 8% 20%, rgba(244, 122, 31, 0.2), transparent 28%),
+    linear-gradient(135deg, #211c19 0%, #33261f 58%, #4b2e1c 100%);
 }
 
-.agency-dashboard__hero
-.agency-dashboard__container {
-  display: grid;
-  grid-template-columns:
-    minmax(0, 1.3fr)
-    minmax(280px, 0.7fr);
+.agency-dashboard__hero-inner {
+  display: flex;
   align-items: center;
-  gap: 36px;
-}
-
-.agency-dashboard__hero-copy {
-  max-width: 720px;
+  justify-content: space-between;
+  gap: 28px;
 }
 
 .agency-dashboard__eyebrow {
-  display: inline-flex;
-
-  margin-bottom: 10px;
-  padding: 6px 11px;
-
-  border: 1px solid
-    rgba(255, 255, 255, 0.14);
-  border-radius: 999px;
-
-  background:
-    rgba(255, 255, 255, 0.07);
-
-  color: #ffe5cf;
-
-  font-size: 0.72rem;
+  display: inline-block;
+  margin-bottom: 6px;
+  color: #ffc08d;
+  font-size: .72rem;
   font-weight: 900;
 }
 
 .agency-dashboard__hero h1 {
-  margin: 0 0 10px;
-
-  font-size:
-    clamp(2rem, 4.3vw, 3.8rem);
-
+  margin: 0;
+  font-size: clamp(1.55rem, 3vw, 2.55rem);
+  line-height: 1.35;
   font-weight: 950;
-  line-height: 1.25;
 }
 
 .agency-dashboard__hero h1 span {
@@ -96,496 +49,520 @@
 }
 
 .agency-dashboard__hero p {
-  max-width: 650px;
-
-  margin: 0;
-
-  color:
-    rgba(255, 244, 235, 0.76);
-
-  font-size: 0.94rem;
-  line-height: 1.9;
+  max-width: 690px;
+  margin: 8px 0 0;
+  color: rgba(255,255,255,.73);
+  font-size: .84rem;
+  line-height: 1.8;
 }
 
 .agency-dashboard__hero-actions {
+  flex: 0 0 auto;
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-
-  margin-top: 20px;
+  gap: 9px;
 }
 
 .agency-dashboard__primary-action,
 .agency-dashboard__secondary-action {
-  min-height: 44px;
-
+  min-height: 42px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  padding: 9px 16px;
-
-  border-radius: 13px;
-
-  font-size: 0.78rem;
+  padding: 9px 14px;
+  border-radius: 12px;
+  font-size: .74rem;
   font-weight: 900;
+  text-decoration: none;
 }
 
 .agency-dashboard__primary-action {
-  background:
-    linear-gradient(
-      135deg,
-      #f47a1f,
-      #d95f0b
-    );
-
-  color: white;
-
-  box-shadow:
-    0 12px 26px
-      rgba(244, 122, 31, 0.24);
+  color: #fff;
+  background: linear-gradient(135deg, #f47a1f, #d95f0b);
+  box-shadow: 0 10px 25px rgba(244,122,31,.2);
 }
 
 .agency-dashboard__secondary-action {
-  border: 1px solid
-    rgba(255, 255, 255, 0.16);
-
-  background:
-    rgba(255, 255, 255, 0.08);
-
-  color: white;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.08);
 }
 
-.agency-dashboard__hero-card {
-  min-height: 220px;
+.agency-dashboard__content {
+  padding: 24px 0 60px;
+}
 
+.agency-dashboard__section-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.agency-dashboard__section-tab {
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 16px;
+  text-align: right;
+  border: 1px solid #eadfd7;
+  border-radius: 18px;
+  background: #fff;
+  color: #4a403a;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 9px 24px rgba(70,45,28,.05);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.agency-dashboard__section-tab:hover {
+  transform: translateY(-2px);
+  border-color: rgba(244,122,31,.35);
+}
+
+.agency-dashboard__section-tab--active {
+  border-color: rgba(244,122,31,.55);
+  background: linear-gradient(145deg, #fff2e6, #fffaf6);
+  box-shadow: 0 12px 28px rgba(217,95,11,.11), inset 0 -3px 0 #f47a1f;
+}
+
+.agency-dashboard__section-tab-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.agency-dashboard__section-tab-copy small {
+  margin-bottom: 4px;
+  color: #a48e80;
+  font-size: .62rem;
+  font-weight: 850;
+}
+
+.agency-dashboard__section-tab-copy strong {
+  color: #352e2a;
+  font-size: .82rem;
+  line-height: 1.6;
+  font-weight: 950;
+}
+
+.agency-dashboard__section-tab--active .agency-dashboard__section-tab-copy small,
+.agency-dashboard__section-tab--active .agency-dashboard__section-tab-copy strong {
+  color: #c95709;
+}
+
+.agency-dashboard__section-tab-count {
+  flex: 0 0 auto;
+  min-width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: #f7f1ed;
+  color: #6d5f56;
+  font-size: .72rem;
+  font-weight: 950;
+}
+
+.agency-dashboard__section-tab--active .agency-dashboard__section-tab-count {
+  background: #f47a1f;
+  color: #fff;
+}
+
+.agency-dashboard__workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 16px;
+  align-items: start;
+}
+
+.agency-dashboard__results,
+.agency-dashboard__tools {
+  border: 1px solid #eadfd7;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 15px 38px rgba(70,45,28,.06);
+}
+
+.agency-dashboard__results {
+  overflow: hidden;
+}
+
+.agency-dashboard__results-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border-bottom: 1px solid #f0e7e1;
+  background: linear-gradient(135deg, #fffaf6, #fff);
+}
+
+.agency-dashboard__results-heading span,
+.agency-dashboard__tools-heading span {
+  color: #dc6710;
+  font-size: .65rem;
+  font-weight: 900;
+}
+
+.agency-dashboard__results-heading h2,
+.agency-dashboard__tools-heading h2 {
+  margin: 3px 0 0;
+  color: #312a26;
+  font-size: 1.03rem;
+  font-weight: 950;
+}
+
+.agency-dashboard__results-heading p {
+  margin: 5px 0 0;
+  color: #8a7b72;
+  font-size: .68rem;
+  line-height: 1.7;
+}
+
+.agency-dashboard__results-heading > strong {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border-radius: 10px;
+  background: #fff0e3;
+  color: #cf5d0c;
+  font-size: .68rem;
+  font-weight: 900;
+}
+
+.agency-dashboard__match-list {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.agency-dashboard__match-row {
+  display: grid;
+  grid-template-columns: minmax(190px, .8fr) 72px minmax(0, 1.2fr);
+  gap: 10px;
+  align-items: stretch;
+  padding: 10px;
+  border: 1px solid #eee4dd;
+  border-radius: 18px;
+  background: #fffcfa;
+}
+
+.agency-dashboard__side-card {
+  min-width: 0;
+  padding: 13px;
+  border-radius: 14px;
+}
+
+.agency-dashboard__side-card--request {
+  border: 1px solid #eadfd7;
+  background: #fff;
+}
+
+.agency-dashboard__side-card--offer {
+  border: 1px solid rgba(244,122,31,.18);
+  background: linear-gradient(145deg, #fff4ea, #fffaf6);
+}
+
+.agency-dashboard__card-label {
+  display: inline-flex;
+  color: #9a8273;
+  font-size: .59rem;
+  font-weight: 900;
+}
+
+.agency-dashboard__side-card h3 {
+  margin: 7px 0 3px;
+  color: #352e2a;
+  font-size: .82rem;
+  font-weight: 950;
+  line-height: 1.6;
+}
+
+.agency-dashboard__side-card p {
+  margin: 0;
+  color: #897a70;
+  font-size: .64rem;
+  line-height: 1.7;
+}
+
+.agency-dashboard__side-card a {
+  display: inline-flex;
+  margin-top: 10px;
+  color: #d95f0b;
+  font-size: .64rem;
+  font-weight: 900;
+}
+
+.agency-dashboard__match-connector {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  padding: 24px;
-
-  text-align: center;
-
-  border: 1px solid
-    rgba(255, 255, 255, 0.14);
-  border-radius: 28px;
-
-  background:
-    rgba(255, 255, 255, 0.07);
-
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-}
-
-.agency-dashboard__hero-card-icon {
-  width: 58px;
-  height: 58px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  margin-bottom: 10px;
-
-  border-radius: 18px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #ff9a3c,
-      #e9660b
-    );
-
-  font-size: 1.7rem;
-}
-
-.agency-dashboard__hero-card strong {
-  font-size: 1.1rem;
-  font-weight: 950;
-}
-
-.agency-dashboard__hero-card p {
-  margin-top: 8px;
-
-  font-size: 0.76rem;
-  line-height: 1.8;
-}
-
-.agency-dashboard__content {
-  padding: 28px 0 64px;
-}
-
-.agency-dashboard__stats {
-  display: grid;
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
-  gap: 14px;
-
-  margin-bottom: 18px;
-}
-
-.agency-dashboard__stats article {
-  padding: 18px;
-
-  border: 1px solid #eadfd7;
-  border-radius: 20px;
-
-  background:
-    rgba(255, 255, 255, 0.96);
-
-  box-shadow:
-    0 14px 35px
-      rgba(70, 45, 28, 0.07);
-}
-
-.agency-dashboard__stats span,
-.agency-dashboard__stats small {
-  display: block;
-
-  color: #8c7d73;
-}
-
-.agency-dashboard__stats span {
-  font-size: 0.72rem;
-  font-weight: 850;
-}
-
-.agency-dashboard__stats strong {
-  display: block;
-
-  margin: 4px 0;
-
   color: #d95f0b;
+}
 
-  font-size: 1.65rem;
+.agency-dashboard__match-connector span {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(244,122,31,.22);
+  border-radius: 50%;
+  background: #fff0e3;
+  font-size: 1rem;
   font-weight: 950;
 }
 
-.agency-dashboard__stats small {
-  font-size: 0.65rem;
+.agency-dashboard__match-connector small {
+  margin-top: 5px;
+  color: #a58b79;
+  font-size: .53rem;
+  font-weight: 800;
 }
 
-.agency-dashboard__grid {
+.agency-dashboard__candidate-stack {
   display: grid;
-  grid-template-columns:
-    minmax(0, 1.45fr)
-    minmax(270px, 0.55fr);
-  gap: 18px;
+  gap: 7px;
 }
 
-.agency-dashboard__panel,
-.agency-dashboard__tools,
-.agency-dashboard__roadmap {
-  border: 1px solid #eadfd7;
-  border-radius: 24px;
-
-  background:
-    rgba(255, 255, 255, 0.97);
-
-  box-shadow:
-    0 18px 45px
-      rgba(70, 45, 28, 0.08);
-}
-
-.agency-dashboard__panel,
-.agency-dashboard__tools {
-  padding: 20px;
-}
-
-.agency-dashboard__panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-
-  margin-bottom: 14px;
-}
-
-.agency-dashboard__panel-heading span {
-  color: #e66f15;
-
-  font-size: 0.7rem;
-  font-weight: 900;
-}
-
-.agency-dashboard__panel-heading h2 {
-  margin: 3px 0 0;
-
-  color: #2f2925;
-
-  font-size: 1.15rem;
-  font-weight: 950;
-}
-
-.agency-dashboard__panel-heading > a {
-  color: #d95f0b;
-
-  font-size: 0.72rem;
-  font-weight: 850;
-}
-
-.agency-dashboard__matches {
-  display: grid;
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.agency-dashboard__match-card {
-  padding: 15px;
-
-  border: 1px solid #efe4dc;
-  border-radius: 17px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #fffaf6,
-      #ffffff
-    );
-}
-
-.agency-dashboard__match-top {
+.agency-dashboard__offer-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 
-.agency-dashboard__match-top span {
-  color: #7c6f66;
-
-  font-size: 0.68rem;
-  font-weight: 800;
-}
-
-.agency-dashboard__match-top strong {
-  color: #15803d;
-
-  font-size: 0.68rem;
-  font-weight: 900;
-}
-
-.agency-dashboard__match-card h3 {
-  margin: 10px 0 5px;
-
-  color: #312b27;
-
-  font-size: 0.96rem;
+.agency-dashboard__score {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  border-radius: 8px;
+  background: #f47a1f;
+  color: #fff;
+  font-size: .64rem;
   font-weight: 950;
 }
 
-.agency-dashboard__match-card p,
-.agency-dashboard__match-card small {
-  display: block;
-
-  margin: 0;
-
-  color: #8b7d73;
-
-  font-size: 0.68rem;
-  line-height: 1.7;
+.agency-dashboard__reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
 }
 
-.agency-dashboard__match-card small {
-  margin-top: 5px;
-}
-
-.agency-dashboard__match-card > a {
-  display: inline-flex;
-
-  margin-top: 10px;
-
-  color: #d95f0b;
-
-  font-size: 0.72rem;
-  font-weight: 900;
+.agency-dashboard__reasons span {
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.75);
+  color: #75665c;
+  font-size: .54rem;
+  font-weight: 800;
 }
 
 .agency-dashboard__empty {
-  min-height: 220px;
-
+  min-height: 280px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
+  padding: 30px;
   text-align: center;
-
-  color: #81736a;
 }
 
-.agency-dashboard__empty span {
-  font-size: 1.8rem;
+.agency-dashboard__empty-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: #fff0e3;
+  color: #d95f0b;
+  font-size: 1.3rem;
 }
 
 .agency-dashboard__empty h3 {
-  margin: 7px 0 4px;
-
-  color: #312b27;
-
-  font-size: 1rem;
+  margin: 10px 0 5px;
+  color: #382f2a;
+  font-size: .9rem;
 }
 
 .agency-dashboard__empty p {
-  max-width: 400px;
-
+  max-width: 430px;
   margin: 0;
-
-  font-size: 0.75rem;
+  color: #8b7d73;
+  font-size: .68rem;
   line-height: 1.8;
 }
 
+.agency-dashboard__tools {
+  padding: 17px;
+}
+
+.agency-dashboard__tools-heading {
+  margin-bottom: 12px;
+}
+
 .agency-dashboard__tool-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  gap: 8px;
 }
 
 .agency-dashboard__tool-list a {
   display: flex;
   align-items: center;
-  gap: 10px;
-
-  padding: 12px;
-
-  border: 1px solid #efe4dc;
-  border-radius: 15px;
-
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid #eee4dd;
+  border-radius: 13px;
   background: #fffaf6;
-
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease;
+  text-decoration: none;
+  transition: transform .18s ease, border-color .18s ease;
 }
 
 .agency-dashboard__tool-list a:hover {
-  transform: translateY(-2px);
-
-  border-color:
-    rgba(244, 122, 31, 0.3);
+  transform: translateY(-1px);
+  border-color: rgba(244,122,31,.32);
 }
 
 .agency-dashboard__tool-list > a > span {
   flex: 0 0 auto;
-
-  width: 38px;
-  height: 38px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 12px;
-
+  width: 35px;
+  height: 35px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
   background: #fff0e3;
-
-  font-size: 1rem;
+  color: #d95f0b;
+  font-size: .9rem;
+  font-weight: 950;
 }
 
 .agency-dashboard__tool-list div {
+  min-width: 0;
   display: flex;
   flex-direction: column;
 }
 
 .agency-dashboard__tool-list strong {
-  color: #3a312c;
-
-  font-size: 0.78rem;
+  color: #3b332e;
+  font-size: .72rem;
   font-weight: 900;
 }
 
 .agency-dashboard__tool-list small {
   margin-top: 2px;
-
-  color: #93867d;
-
-  font-size: 0.63rem;
+  color: #94857b;
+  font-size: .57rem;
+  line-height: 1.6;
 }
 
-.agency-dashboard__roadmap {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 22px;
-
-  margin-top: 18px;
-  padding: 18px 20px;
+.agency-dashboard__summary {
+  margin-top: 13px;
+  padding: 12px;
+  border-radius: 14px;
+  background: #2f2925;
+  color: #fff;
 }
 
-.agency-dashboard__roadmap > div:first-child span {
-  color: #e66f15;
-
-  font-size: 0.68rem;
+.agency-dashboard__summary > span {
+  color: #ffad6c;
+  font-size: .61rem;
   font-weight: 900;
 }
 
-.agency-dashboard__roadmap h2 {
-  margin: 3px 0 0;
+.agency-dashboard__summary div {
+  margin-top: 6px;
+}
 
-  color: #312b27;
+.agency-dashboard__summary p {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 5px 0 0;
+  color: rgba(255,255,255,.72);
+  font-size: .62rem;
+}
 
-  font-size: 1.05rem;
+.agency-dashboard__summary strong {
+  color: #fff;
+}
+
+.agency-dashboard__network-note {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+  padding: 14px 17px;
+  border: 1px dashed rgba(244,122,31,.36);
+  border-radius: 16px;
+  background: #fff3e8;
+}
+
+.agency-dashboard__network-note strong {
+  flex: 0 0 auto;
+  color: #c95709;
+  font-size: .72rem;
   font-weight: 950;
 }
 
-.agency-dashboard__roadmap-items {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
+.agency-dashboard__network-note p {
+  margin: 0;
+  color: #78675c;
+  font-size: .63rem;
+  line-height: 1.75;
 }
 
-.agency-dashboard__roadmap-items span {
-  padding: 7px 10px;
-
-  border-radius: 999px;
-
-  background: #fff3e8;
-  color: #7a5b47;
-
-  font-size: 0.64rem;
-  font-weight: 800;
-}
-
-@media (max-width: 950px) {
-  .agency-dashboard__hero
-  .agency-dashboard__container,
-  .agency-dashboard__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .agency-dashboard__hero-card {
-    max-width: 560px;
-    min-height: 180px;
-  }
-
-  .agency-dashboard__roadmap {
+@media (max-width: 960px) {
+  .agency-dashboard__hero-inner {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .agency-dashboard__roadmap-items {
-    justify-content: flex-start;
+  .agency-dashboard__workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .agency-dashboard__tools {
+    order: 2;
   }
 }
 
-@media (max-width: 680px) {
-  .agency-dashboard__hero {
-    padding: 26px 0 44px;
-  }
-
-  .agency-dashboard__stats {
+@media (max-width: 760px) {
+  .agency-dashboard__section-tabs {
     grid-template-columns: 1fr;
   }
 
-  .agency-dashboard__matches {
+  .agency-dashboard__section-tab {
+    min-height: 70px;
+  }
+
+  .agency-dashboard__match-row {
     grid-template-columns: 1fr;
+  }
+
+  .agency-dashboard__match-connector {
+    flex-direction: row;
+    gap: 6px;
+    min-height: 36px;
+  }
+
+  .agency-dashboard__match-connector span {
+    width: 34px;
+    height: 34px;
+  }
+
+  .agency-dashboard__match-connector small {
+    margin: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .agency-dashboard__container {
+    width: min(calc(100% - 20px), 1180px);
   }
 
   .agency-dashboard__hero-actions {
+    width: 100%;
     flex-direction: column;
   }
 
@@ -593,361 +570,217 @@
   .agency-dashboard__secondary-action {
     width: 100%;
   }
+
+  .agency-dashboard__results-heading {
+    flex-direction: column;
+  }
+
+  .agency-dashboard__network-note {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 
-/* =========================================================
-   SMART MATCHING - پنل مشاور املاک
-   ========================================================= */
-
-.agency-dashboard__stats {
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+/* نقش‌ها در تطبیق: فایل مشاور در سمت اصلی، متقاضی روبه‌روی آن */
+.agency-dashboard__side-card--my-file {
+  border: 1px solid rgba(244, 122, 31, .34);
+  background: linear-gradient(145deg, #fff7f0, #fffaf6);
+  box-shadow: inset -3px 0 0 rgba(244, 122, 31, .72);
 }
 
-.agency-dashboard__smart-matches {
-  display: grid;
-  gap: 14px;
+.agency-dashboard__side-card--matched-applicant {
+  border: 1px solid #ddd8d4;
+  background: #f3f2f1;
+  box-shadow: none;
 }
 
-.agency-dashboard__smart-card {
-  overflow: hidden;
-
-  border: 1px solid #efe4dc;
-  border-radius: 18px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #fffaf6,
-      #ffffff
-    );
+.agency-dashboard__side-card--matched-applicant .agency-dashboard__card-label {
+  color: #837c77;
 }
 
-.agency-dashboard__smart-request {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-
-  padding: 14px 15px;
-
-  border-bottom:
-    1px solid #f0e5dd;
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(244, 122, 31, 0.07),
-      rgba(255, 255, 255, 0.88)
-    );
+.agency-dashboard__file-title {
+  color: #2d2723 !important;
+  font-weight: 950 !important;
+  font-size: .88rem !important;
 }
 
-.agency-dashboard__request-badge {
-  display: inline-flex;
-
-  padding: 5px 9px;
-
-  border-radius: 999px;
-
-  background: #fff0e3;
-  color: #d95f0b;
-
-  font-size: 0.66rem;
-  font-weight: 900;
+.agency-dashboard__applicant-title {
+  color: #554f4b !important;
+  font-weight: 750 !important;
+  font-size: .82rem !important;
 }
 
-.agency-dashboard__smart-request h3 {
-  margin: 6px 0 3px;
+.agency-dashboard__side-card--matched-applicant p {
+  color: #8a8480;
+}
 
-  color: #312b27;
+.agency-dashboard__side-card--matched-applicant a {
+  color: #625b56;
+}
 
-  font-size: 0.98rem;
+.agency-dashboard__welcome-title > strong {
+  color: #fff;
   font-weight: 950;
 }
 
-.agency-dashboard__smart-request p {
-  margin: 0;
-
-  color: #8b7d73;
-
-  font-size: 0.68rem;
+.agency-dashboard__welcome-title > span {
+  color: #ff9a4e;
+  font-weight: 950;
 }
 
-.agency-dashboard__smart-request > a {
-  flex: 0 0 auto;
 
-  color: #d95f0b;
-
-  font-size: 0.7rem;
-  font-weight: 900;
+/* Final visual distinction: agent file vs matched applicant */
+.agency-dashboard__side-card--my-file {
+  border: 2px solid #f47a1f !important;
+  background: linear-gradient(145deg, #fff0e2 0%, #fff7ef 100%) !important;
+  box-shadow: 0 7px 18px rgba(217, 95, 11, .08), inset -4px 0 0 #e8640d !important;
 }
 
-.agency-dashboard__candidate-list {
-  display: grid;
+.agency-dashboard__side-card--matched-applicant {
+  border: 2px solid #8f8984 !important;
+  background: #e7e5e3 !important;
+  box-shadow: 0 7px 18px rgba(55, 49, 45, .07) !important;
 }
 
-.agency-dashboard__candidate {
-  display: grid;
-  grid-template-columns:
-    64px minmax(0, 1fr) auto;
-  align-items: center;
+.agency-dashboard__role-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
   gap: 12px;
-
-  padding: 12px 15px;
-
-  border-bottom:
-    1px solid #f3ebe5;
+  margin-bottom: 7px;
 }
 
-.agency-dashboard__candidate:last-child {
-  border-bottom: 0;
-}
-
-.agency-dashboard__candidate-score {
-  width: 58px;
-  height: 58px;
-
+.agency-dashboard__property-match-badge,
+.agency-dashboard__applicant-match-badge {
+  flex: 0 0 auto;
+  width: 66px;
+  height: 66px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  border-radius: 17px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #fff0e3,
-      #fff8f2
-    );
-
-  border:
-    1px solid
-      rgba(244, 122, 31, 0.15);
+  border-radius: 50%;
+  line-height: 1.05;
 }
 
-.agency-dashboard__candidate-score strong {
-  color: #d95f0b;
+.agency-dashboard__property-match-badge {
+  border: 5px solid #f47a1f;
+  background: #fff8f1;
+  color: #c95408;
+  box-shadow: 0 0 0 4px rgba(244, 122, 31, .12);
+}
 
-  font-size: 0.9rem;
+.agency-dashboard__applicant-match-badge {
+  border: 5px solid #6f6965;
+  background: #f5f4f3;
+  color: #3f3a37;
+  box-shadow: 0 0 0 4px rgba(75, 69, 65, .10);
+}
+
+.agency-dashboard__property-match-badge b,
+.agency-dashboard__applicant-match-badge b {
+  font-size: 1rem;
   font-weight: 950;
 }
 
-.agency-dashboard__candidate-score span {
-  margin-top: 1px;
-
-  color: #a38571;
-
-  font-size: 0.58rem;
+.agency-dashboard__property-match-badge small,
+.agency-dashboard__applicant-match-badge small {
+  margin-top: 4px;
+  font-size: .48rem;
+  font-weight: 900;
+  white-space: nowrap;
 }
 
-.agency-dashboard__candidate-main {
-  min-width: 0;
+.agency-dashboard__side-card--my-file .agency-dashboard__card-label {
+  color: #d75f0b;
+  font-weight: 950;
+}
 
+.agency-dashboard__side-card--matched-applicant .agency-dashboard__card-label {
+  color: #55504c;
+  font-weight: 900;
+}
+
+@media (max-width: 560px) {
+  .agency-dashboard__property-match-badge,
+  .agency-dashboard__applicant-match-badge {
+    width: 58px;
+    height: 58px;
+  }
+}
+
+
+/* درصد تطبیق فقط روی مورد متعلق به مشاور */
+.agency-dashboard__side-card--my-applicant {
+  border: 2px solid #8f8984;
+  background: #e7e5e3;
+}
+
+.agency-dashboard__side-card--my-applicant .agency-dashboard__card-label {
+  color: #4f4945;
+  font-weight: 950;
+}
+
+.agency-dashboard__match-connector small {
+  display: none;
+}
+
+
+/* فرصت شبکه: هیچ‌کدام متعلق به مشاور نیست، پس درصد وسط دو کارت قرار می‌گیرد */
+.agency-dashboard__side-card--network-request {
+  border: 2px solid #8f8984;
+  background: #e7e5e3;
+  box-shadow: 0 7px 18px rgba(55, 49, 45, .07);
+}
+
+.agency-dashboard__side-card--network-offer {
+  border: 2px solid #f47a1f;
+  background: linear-gradient(145deg, #fff0e2 0%, #fff7ef 100%);
+  box-shadow: 0 7px 18px rgba(217, 95, 11, .08);
+}
+
+.agency-dashboard__side-card--network-request .agency-dashboard__card-label {
+  color: #55504c;
+  font-weight: 900;
+}
+
+.agency-dashboard__side-card--network-offer .agency-dashboard__card-label {
+  color: #d75f0b;
+  font-weight: 950;
+}
+
+.agency-dashboard__network-match-score {
+  align-self: center;
+  justify-self: center;
+  width: 72px;
+  height: 72px;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 5px solid #f47a1f;
+  border-radius: 50%;
+  background: #fff8f1;
+  color: #c95408;
+  box-shadow: 0 0 0 4px rgba(244, 122, 31, .12);
+  line-height: 1.05;
 }
 
-.agency-dashboard__candidate-main > strong {
-  color: #342d29;
-
-  font-size: 0.8rem;
-  font-weight: 900;
+.agency-dashboard__network-match-score b {
+  font-size: 1.08rem;
+  font-weight: 950;
 }
 
-.agency-dashboard__candidate-main > span {
-  margin-top: 2px;
-
-  color: #8d8077;
-
-  font-size: 0.66rem;
-}
-
-.agency-dashboard__candidate-main > small {
+.agency-dashboard__network-match-score small {
   margin-top: 4px;
-
-  color: #6f8b70;
-
-  font-size: 0.61rem;
-  font-weight: 750;
-}
-
-.agency-dashboard__candidate > a {
-  flex: 0 0 auto;
-
-  padding: 7px 10px;
-
-  border-radius: 10px;
-
-  background: #fff3e8;
-  color: #d95f0b;
-
-  font-size: 0.66rem;
+  font-size: .5rem;
   font-weight: 900;
 }
 
-@media (max-width: 900px) {
-  .agency-dashboard__stats {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+@media (max-width: 760px) {
+  .agency-dashboard__network-match-score {
+    width: 62px;
+    height: 62px;
   }
-}
-
-@media (max-width: 620px) {
-  .agency-dashboard__stats {
-    grid-template-columns: 1fr;
-  }
-
-  .agency-dashboard__smart-request {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .agency-dashboard__candidate {
-    grid-template-columns:
-      54px minmax(0, 1fr);
-  }
-
-  .agency-dashboard__candidate > a {
-    grid-column: 1 / -1;
-
-    width: 100%;
-
-    text-align: center;
-  }
-
-  .agency-dashboard__candidate-score {
-    width: 50px;
-    height: 50px;
-  }
-}
-
-
-/* =========================================================
-   COMPACT HERO - نسخه نهایی ارتفاع هدر پنل
-   ========================================================= */
-
-.agency-dashboard__hero {
-  padding: 10px 0 18px !important;
-}
-
-.agency-dashboard__hero
-.agency-dashboard__container {
-  gap: 24px;
-}
-
-.agency-dashboard__eyebrow {
-  margin-bottom: 6px;
-  padding: 5px 10px;
-}
-
-.agency-dashboard__hero h1 {
-  margin: 5px 0 8px !important;
-  font-size: clamp(1.8rem, 3.4vw, 3rem);
-  line-height: 1.12 !important;
-}
-
-.agency-dashboard__hero p {
-  font-size: 0.84rem;
-  line-height: 1.65;
-}
-
-.agency-dashboard__hero-actions {
-  margin-top: 10px !important;
-}
-
-.agency-dashboard__hero-card {
-  min-height: 120px !important;
-  padding: 12px 18px !important;
-  border-radius: 22px;
-}
-
-.agency-dashboard__hero-card-icon {
-  width: 48px;
-  height: 48px;
-  margin-bottom: 7px;
-  border-radius: 15px;
-  font-size: 1.35rem;
-}
-
-.agency-dashboard__hero-card p {
-  margin-top: 5px;
-  line-height: 1.6;
-}
-
-@media (max-width: 950px) {
-  .agency-dashboard__hero-card {
-    min-height: 120px !important;
-  }
-}
-
-@media (max-width: 680px) {
-  .agency-dashboard__hero {
-    padding: 10px 0 18px !important;
-  }
-}
-
-
-/* =========================================================
-   MATCH ENGINE TABS
-   ========================================================= */
-
-.agency-dashboard__match-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-
-  margin-bottom: 14px;
-}
-
-.agency-dashboard__match-tab {
-  min-height: 38px;
-
-  padding: 7px 11px;
-
-  border: 1px solid #eadfd7;
-  border-radius: 999px;
-
-  background: #fffaf6;
-  color: #6f6259;
-
-  cursor: pointer;
-
-  font-family: inherit;
-  font-size: 0.68rem;
-  font-weight: 900;
-
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-
-.agency-dashboard__match-tab:hover {
-  transform: translateY(-1px);
-
-  border-color:
-    rgba(244, 122, 31, 0.28);
-
-  color: #d95f0b;
-}
-
-.agency-dashboard__match-tab--active {
-  border-color:
-    rgba(244, 122, 31, 0.32);
-
-  background:
-    linear-gradient(
-      135deg,
-      #fff0e3,
-      #fff8f2
-    );
-
-  color: #d95f0b;
-
-  box-shadow:
-    inset 0 0 0 1px
-      rgba(244, 122, 31, 0.07);
 }

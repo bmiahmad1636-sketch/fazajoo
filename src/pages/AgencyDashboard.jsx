@@ -8,448 +8,364 @@ import {
 
 import "./AgencyDashboard.css";
 
-function MatchGroup({
-  items = [],
-  emptyTitle,
-  emptyText,
-}) {
+const TAB_CONFIG = {
+  "my-offers": {
+    eyebrow: "فایل‌های شما",
+    title: "متقاضیان مناسب آگهی‌های شما",
+    description:
+      "درخواست‌هایی که با فایل‌های ثبت‌شده شما هم‌خوانی دارند.",
+    emptyTitle: "فعلاً متقاضی مناسبی برای آگهی‌های شما پیدا نشده",
+    emptyText:
+      "با ثبت درخواست‌های جدید، فضاجو دوباره فایل‌های شما را بررسی می‌کند.",
+  },
+  "my-requests": {
+    eyebrow: "متقاضیان شما",
+    title: "آگهی‌های مناسب متقاضیان شما",
+    description:
+      "فایل‌هایی که با نیازهای ثبت‌شده شما یا مشتریانتان هم‌خوانی دارند.",
+    emptyTitle: "فعلاً آگهی مناسبی برای متقاضیان شما پیدا نشده",
+    emptyText:
+      "با اضافه‌شدن فایل‌های جدید، نتیجه‌های مناسب در همین بخش دیده می‌شوند.",
+  },
+  network: {
+    eyebrow: "شبکه فضاجو",
+    title: "فرصت‌های شبکه فضاجو برای شما",
+    description:
+      "تطبیق‌های ارزشمند بیرون از فایل‌ها و متقاضیان مستقیم شما.",
+    emptyTitle: "فعلاً فرصت شبکه‌ای مناسبی آماده نیست",
+    emptyText:
+      "با رشد آگهی‌ها و درخواست‌های فضاجو، فرصت‌های جدید اینجا نمایش داده می‌شوند.",
+  },
+};
+
+function faNumber(value) {
+  return Number(value || 0).toLocaleString("fa-IR");
+}
+
+function MatchGroup({ items = [], activeTab }) {
+  const config = TAB_CONFIG[activeTab];
+
   if (!items.length) {
     return (
       <div className="agency-dashboard__empty">
-        <span>✨</span>
-        <h3>{emptyTitle}</h3>
-        <p>{emptyText}</p>
+        <span className="agency-dashboard__empty-icon">⌁</span>
+        <h3>{config.emptyTitle}</h3>
+        <p>{config.emptyText}</p>
       </div>
     );
   }
 
   return (
-    <div className="agency-dashboard__smart-matches">
-      {items.slice(0, 6).map(
-        ({
-          request,
-          candidates,
-        }) => (
-          <article
-            className="agency-dashboard__smart-card"
-            key={request.id}
-          >
-            <div className="agency-dashboard__smart-request">
-              <div>
-                <span className="agency-dashboard__request-badge">
-                  🔎 درخواست
-                </span>
+    <div className="agency-dashboard__match-list">
+      {items.slice(0, 8).map(({ request, candidates }) => {
+        const primaryCandidate = candidates?.[0];
+        const offer = primaryCandidate?.offer;
+        const score = primaryCandidate?.score;
+        const reasons = primaryCandidate?.reasons || [];
 
-                <h3>
-                  {request.title ||
-                    `دنبال ${getCategoryLabel(
-                      request
-                    )}`}
-                </h3>
+        if (!offer) return null;
 
-                <p>
-                  📍{" "}
-                  {request.city ||
-                    "شهر ثبت نشده"}
-                </p>
-              </div>
-
-              <Link
-                to={`/parking/${request.id}`}
-              >
-                جزئیات درخواست
-              </Link>
-            </div>
-
-            <div className="agency-dashboard__candidate-list">
-              {candidates.map(
-                ({
-                  offer,
-                  score,
-                  reasons,
-                }) => (
-                  <div
-                    className="agency-dashboard__candidate"
-                    key={offer.id}
-                  >
-                    <div className="agency-dashboard__candidate-score">
-                      <strong>
-                        {score.toLocaleString(
-                          "fa-IR"
-                        )}
-                        ٪
-                      </strong>
-
-                      <span>
-                        تطبیق
-                      </span>
-                    </div>
-
-                    <div className="agency-dashboard__candidate-main">
-                      <strong>
-                        {offer.title ||
-                          getCategoryLabel(
-                            offer
-                          )}
-                      </strong>
-
-                      <span>
-                        {offer.city ||
-                          "شهر ثبت نشده"}
-                        {offer.area
-                          ? ` • ${offer.area} متر`
-                          : ""}
-                      </span>
-
-                      <small>
-                        {reasons.join(
-                          " • "
-                        )}
-                      </small>
-                    </div>
-
-                    <Link
-                      to={`/parking/${offer.id}`}
-                    >
-                      مشاهده فایل
-                    </Link>
+        return (
+          <article className="agency-dashboard__match-row" key={`${request.id}-${offer.id}`}>
+            {activeTab === "my-offers" ? (
+              <>
+                <div className="agency-dashboard__side-card agency-dashboard__side-card--my-file">
+                  <div className="agency-dashboard__role-head">
+                    <span className="agency-dashboard__card-label">فایل شما</span>
+                    <span className="agency-dashboard__property-match-badge" title="درصد تطبیق این فایل با متقاضی">
+                      <b>{faNumber(score)}٪</b>
+                      <small>تطبیق فایل</small>
+                    </span>
                   </div>
-                )
-              )}
-            </div>
+                  <h3 className="agency-dashboard__file-title">
+                    {offer.title || getCategoryLabel(offer)}
+                  </h3>
+                  <p>
+                    {offer.city || "شهر ثبت نشده"}
+                    {offer.area ? ` • ${faNumber(offer.area)} متر` : ""}
+                  </p>
+
+                  {!!reasons.length && (
+                    <div className="agency-dashboard__reasons">
+                      {reasons.slice(0, 3).map((reason) => (
+                        <span key={reason}>✓ {reason}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  <Link to={`/parking/${offer.id}`}>مشاهده فایل شما</Link>
+                </div>
+
+                <div className="agency-dashboard__match-connector" aria-hidden="true">
+                  <span>↔</span>
+                </div>
+
+                <div className="agency-dashboard__side-card agency-dashboard__side-card--matched-applicant">
+                  <span className="agency-dashboard__card-label">متقاضی مناسب این فایل</span>
+                  <h3 className="agency-dashboard__applicant-title">
+                    {request.title || `دنبال ${getCategoryLabel(request)}`}
+                  </h3>
+                  <p>
+                    {request.city || "شهر ثبت نشده"}
+                    {request.area ? ` • ${faNumber(request.area)} متر` : ""}
+                  </p>
+                  <Link to={`/parking/${request.id}`}>مشاهده متقاضی</Link>
+                </div>
+              </>
+            ) : activeTab === "network" ? (
+              <>
+                <div className="agency-dashboard__side-card agency-dashboard__side-card--network-request">
+                  <span className="agency-dashboard__card-label">متقاضی شبکه فضاجو</span>
+                  <h3 className="agency-dashboard__applicant-title">
+                    {request.title || `دنبال ${getCategoryLabel(request)}`}
+                  </h3>
+                  <p>
+                    {request.city || "شهر ثبت نشده"}
+                    {request.area ? ` • ${faNumber(request.area)} متر` : ""}
+                  </p>
+                  <Link to={`/parking/${request.id}`}>مشاهده متقاضی</Link>
+                </div>
+
+                <div className="agency-dashboard__network-match-score" aria-label={`درصد تطبیق ${faNumber(score)} درصد`}>
+                  <b>{faNumber(score)}٪</b>
+                  <small>تطبیق</small>
+                </div>
+
+                <div className="agency-dashboard__side-card agency-dashboard__side-card--network-offer">
+                  <span className="agency-dashboard__card-label">فایل شبکه فضاجو</span>
+                  <h3 className="agency-dashboard__file-title">
+                    {offer.title || getCategoryLabel(offer)}
+                  </h3>
+                  <p>
+                    {offer.city || "شهر ثبت نشده"}
+                    {offer.area ? ` • ${faNumber(offer.area)} متر` : ""}
+                  </p>
+
+                  {!!reasons.length && (
+                    <div className="agency-dashboard__reasons">
+                      {reasons.slice(0, 3).map((reason) => (
+                        <span key={reason}>✓ {reason}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  <Link to={`/parking/${offer.id}`}>مشاهده فایل</Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="agency-dashboard__side-card agency-dashboard__side-card--request agency-dashboard__side-card--my-applicant">
+                  <div className="agency-dashboard__role-head">
+                    <span className="agency-dashboard__card-label">متقاضی شما</span>
+                    <span className="agency-dashboard__applicant-match-badge" title="درصد تطبیق متقاضی شما با این فایل">
+                      <b>{faNumber(primaryCandidate?.score)}٪</b>
+                      <small>تطبیق متقاضی</small>
+                    </span>
+                  </div>
+                  <h3 className="agency-dashboard__applicant-title">
+                    {request.title || `دنبال ${getCategoryLabel(request)}`}
+                  </h3>
+                  <p>
+                    {request.city || "شهر ثبت نشده"}
+                    {request.area ? ` • ${faNumber(request.area)} متر` : ""}
+                  </p>
+                  <Link to={`/parking/${request.id}`}>مشاهده درخواست</Link>
+                </div>
+
+                <div className="agency-dashboard__match-connector" aria-hidden="true">
+                  <span>↔</span>
+                  <small>تطبیق فضاجو</small>
+                </div>
+
+                <div className="agency-dashboard__candidate-stack">
+                  {candidates.slice(0, 3).map(({ offer, score, reasons }, index) => (
+                    <div className="agency-dashboard__side-card agency-dashboard__side-card--offer" key={offer.id}>
+                      <div className="agency-dashboard__offer-head">
+                        <span className="agency-dashboard__card-label">
+                          {index === 0 ? "بهترین آگهی پیشنهادی" : "آگهی پیشنهادی"}
+                        </span>
+                      </div>
+
+                      <h3 className="agency-dashboard__file-title">{offer.title || getCategoryLabel(offer)}</h3>
+                      <p>
+                        {offer.city || "شهر ثبت نشده"}
+                        {offer.area ? ` • ${faNumber(offer.area)} متر` : ""}
+                      </p>
+
+                      {!!reasons?.length && (
+                        <div className="agency-dashboard__reasons">
+                          {reasons.slice(0, 3).map((reason) => (
+                            <span key={reason}>✓ {reason}</span>
+                          ))}
+                        </div>
+                      )}
+
+                      <Link to={`/parking/${offer.id}`}>مشاهده آگهی</Link>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </article>
-        )
-      )}
+        );
+      })}
     </div>
   );
 }
 
-function AgencyDashboard({
-  parkings = [],
-  currentUser = null,
-}) {
-  const [activeTab, setActiveTab] =
-    useState("my-offers");
+function AgencyDashboard({ parkings = [], currentUser = null }) {
+  const [activeTab, setActiveTab] = useState("my-offers");
 
-  const dashboardData =
-    useMemo(
-      () =>
-        buildMatchingDashboard({
-          parkings,
-          currentUser,
-        }),
-      [
-        parkings,
-        currentUser,
-      ]
-    );
-
-  const matchedCount =
-    dashboardData.networkOpportunities
-      .reduce(
-        (total, item) =>
-          total +
-          item.candidates.length,
-        0
-      );
+  const dashboardData = useMemo(
+    () => buildMatchingDashboard({ parkings, currentUser }),
+    [parkings, currentUser]
+  );
 
   const tabItems = {
-    "my-offers":
-      dashboardData.myOfferOpportunities,
-
-    "my-requests":
-      dashboardData.myRequestMatches,
-
-    network:
-      dashboardData.networkOpportunities,
+    "my-offers": dashboardData.myOfferOpportunities,
+    "my-requests": dashboardData.myRequestMatches,
+    network: dashboardData.networkOpportunities,
   };
+
+  const tabCounts = {
+    "my-offers": dashboardData.myOfferOpportunities.length,
+    "my-requests": dashboardData.myRequestMatches.length,
+    network: dashboardData.networkOpportunities.length,
+  };
+
+  const activeConfig = TAB_CONFIG[activeTab];
+  const displayName =
+    currentUser?.displayName ||
+    currentUser?.fullName ||
+    currentUser?.name ||
+    "مشاور فضاجو";
 
   return (
     <main className="agency-dashboard">
       <section className="agency-dashboard__hero">
-        <div className="agency-dashboard__container">
-          <div className="agency-dashboard__hero-copy">
-            <span className="agency-dashboard__eyebrow">
-              موتور تطبیق حرفه‌ای فضاجو
-            </span>
-
-            <h1>
-              فضاجو؛
-              <span>
-                {" "}
-                دستیار فایل و متقاضی شما
-              </span>
+        <div className="agency-dashboard__container agency-dashboard__hero-inner">
+          <div>
+            <span className="agency-dashboard__eyebrow">پنل حرفه‌ای مشاور املاک</span>
+            <h1 className="agency-dashboard__welcome-title">
+              <strong>سلام {displayName}</strong>
+              <span>، فرصت‌های مناسب را یکجا ببینید</span>
             </h1>
-
             <p>
-              درخواست‌ها و فایل‌ها را هوشمند کنار هم
-              می‌گذاریم تا فرصت‌های واقعی معامله سریع‌تر
-              دیده شوند.
+              فضاجو فایل‌ها و درخواست‌ها را کنار هم می‌گذارد تا سریع‌تر به
+              متقاضی، آگهی و فرصت مناسب برسید.
             </p>
-
-            <div className="agency-dashboard__hero-actions">
-              <Link
-                to="/parking"
-                className="agency-dashboard__primary-action"
-              >
-                مشاهده فایل‌ها و درخواست‌ها
-              </Link>
-
-              <Link
-                to="/add-parking"
-                className="agency-dashboard__secondary-action"
-              >
-                ثبت فایل یا نیاز مشتری
-              </Link>
-            </div>
           </div>
 
-          <div className="agency-dashboard__hero-card">
-            <span className="agency-dashboard__hero-card-icon">
-              🧠
-            </span>
-
-            <strong>
-              موتور تطبیق فضاجو
-            </strong>
-
-            <p>
-              نوع فضا، شهر، متراژ، بودجه و تازگی فایل
-              بررسی می‌شود و نتایج ناسازگار حذف می‌شوند.
-            </p>
+          <div className="agency-dashboard__hero-actions">
+            <Link to="/add-parking" className="agency-dashboard__primary-action">
+              + ثبت فایل یا درخواست
+            </Link>
+            <Link to="/agency/inbox" className="agency-dashboard__secondary-action">
+              گفتگوهای کاری
+            </Link>
           </div>
         </div>
       </section>
 
       <section className="agency-dashboard__content">
         <div className="agency-dashboard__container">
-          <div className="agency-dashboard__stats">
-            <article>
-              <span>فایل‌های عرضه</span>
-              <strong>
-                {dashboardData.offers.length.toLocaleString(
-                  "fa-IR"
-                )}
-              </strong>
-              <small>
-                کل فایل‌های قابل بررسی
-              </small>
-            </article>
+          <nav className="agency-dashboard__section-tabs" aria-label="بخش‌های تطبیق مشاور">
+            {Object.entries(TAB_CONFIG).map(([key, item]) => (
+              <button
+                key={key}
+                type="button"
+                className={
+                  activeTab === key
+                    ? "agency-dashboard__section-tab agency-dashboard__section-tab--active"
+                    : "agency-dashboard__section-tab"
+                }
+                onClick={() => setActiveTab(key)}
+              >
+                <span className="agency-dashboard__section-tab-copy">
+                  <small>{item.eyebrow}</small>
+                  <strong>{item.title}</strong>
+                </span>
+                <span className="agency-dashboard__section-tab-count">
+                  {faNumber(tabCounts[key])}
+                </span>
+              </button>
+            ))}
+          </nav>
 
-            <article>
-              <span>درخواست‌ها</span>
-              <strong>
-                {dashboardData.requests.length.toLocaleString(
-                  "fa-IR"
-                )}
-              </strong>
-              <small>
-                نیازهای ثبت‌شده
-              </small>
-            </article>
-
-            <article>
-              <span>فرصت‌های تطبیق</span>
-              <strong>
-                {matchedCount.toLocaleString(
-                  "fa-IR"
-                )}
-              </strong>
-              <small>
-                فایل‌های نزدیک به درخواست‌ها
-              </small>
-            </article>
-
-            <article>
-              <span>فایل‌های من</span>
-              <strong>
-                {dashboardData.myOffers.length.toLocaleString(
-                  "fa-IR"
-                )}
-              </strong>
-              <small>
-                فایل‌های ثبت‌شده شما
-              </small>
-            </article>
-          </div>
-
-          <div className="agency-dashboard__grid">
-            <section className="agency-dashboard__panel">
-              <div className="agency-dashboard__panel-heading">
+          <div className="agency-dashboard__workspace">
+            <section className="agency-dashboard__results">
+              <header className="agency-dashboard__results-heading">
                 <div>
-                  <span>
-                    قلب پنل مشاور
-                  </span>
-
-                  <h2>
-                    موتور تطبیق فضاجو
-                  </h2>
+                  <span>{activeConfig.eyebrow}</span>
+                  <h2>{activeConfig.title}</h2>
+                  <p>{activeConfig.description}</p>
                 </div>
-              </div>
+                <strong>{faNumber(tabCounts[activeTab])} نتیجه</strong>
+              </header>
 
-              <div className="agency-dashboard__match-tabs">
-                <button
-                  type="button"
-                  className={
-                    activeTab === "my-offers"
-                      ? "agency-dashboard__match-tab agency-dashboard__match-tab--active"
-                      : "agency-dashboard__match-tab"
-                  }
-                  onClick={() =>
-                    setActiveTab(
-                      "my-offers"
-                    )
-                  }
-                >
-                  متقاضی مناسب فایل‌های من
-                </button>
-
-                <button
-                  type="button"
-                  className={
-                    activeTab === "my-requests"
-                      ? "agency-dashboard__match-tab agency-dashboard__match-tab--active"
-                      : "agency-dashboard__match-tab"
-                  }
-                  onClick={() =>
-                    setActiveTab(
-                      "my-requests"
-                    )
-                  }
-                >
-                  فایل مناسب درخواست‌های من
-                </button>
-
-                <button
-                  type="button"
-                  className={
-                    activeTab === "network"
-                      ? "agency-dashboard__match-tab agency-dashboard__match-tab--active"
-                      : "agency-dashboard__match-tab"
-                  }
-                  onClick={() =>
-                    setActiveTab(
-                      "network"
-                    )
-                  }
-                >
-                  فرصت‌های شبکه فضاجو
-                </button>
-              </div>
-
-              <MatchGroup
-                items={
-                  tabItems[activeTab]
-                }
-                emptyTitle={
-                  activeTab === "my-offers"
-                    ? "هنوز متقاضی مناسبی برای فایل‌های شما پیدا نشده"
-                    : activeTab === "my-requests"
-                      ? "هنوز فایل مناسبی برای درخواست‌های شما پیدا نشده"
-                      : "هنوز فرصت شبکه‌ای آماده‌ای نداریم"
-                }
-                emptyText={
-                  activeTab === "network"
-                    ? "با بیشتر شدن آگهی‌ها و درخواست‌ها، فرصت‌های شبکه فضاجو اینجا نمایش داده می‌شوند."
-                    : "با ثبت فایل و درخواست بیشتر، موتور تطبیق نتایج مناسب را همین‌جا نشان می‌دهد."
-                }
-              />
+              <MatchGroup items={tabItems[activeTab]} activeTab={activeTab} />
             </section>
 
             <aside className="agency-dashboard__tools">
-              <div className="agency-dashboard__panel-heading">
-                <div>
-                  <span>
-                    ابزارهای کاری
-                  </span>
-
-                  <h2>
-                    میانبر مشاور
-                  </h2>
-                </div>
+              <div className="agency-dashboard__tools-heading">
+                <span>دسترسی سریع</span>
+                <h2>ابزارهای کاری شما</h2>
               </div>
 
               <div className="agency-dashboard__tool-list">
                 <Link to="/agency/applicants">
-                  <span>🔍</span>
+                  <span>⌕</span>
                   <div>
-                    <strong>
-                      پیدا کردن متقاضی
-                    </strong>
-                    <small>
-                      درخواست‌های «دنبال فضا» را بررسی کن
-                    </small>
+                    <strong>متقاضیان ثبت‌شده</strong>
+                    <small>درخواست‌های دنبال فضا را ببینید</small>
                   </div>
                 </Link>
 
                 <Link to="/add-parking">
                   <span>＋</span>
                   <div>
-                    <strong>
-                      ثبت فایل جدید
-                    </strong>
-                    <small>
-                      فایل عرضه یا نیاز مشتری ثبت کن
-                    </small>
+                    <strong>ثبت فایل جدید</strong>
+                    <small>فایل عرضه یا نیاز مشتری ثبت کنید</small>
                   </div>
                 </Link>
 
                 <Link to="/agency/inbox">
-                  <span>💬</span>
+                  <span>◌</span>
                   <div>
-                    <strong>
-                      گفتگوهای کاری
-                    </strong>
-                    <small>
-                      همه گفتگوهای واقعی حساب مشاورت را یکجا ببین
-                    </small>
+                    <strong>گفتگوهای کاری</strong>
+                    <small>پیام‌های واقعی حساب مشاور</small>
                   </div>
                 </Link>
 
                 <Link to="/my-parkings">
-                  <span>📁</span>
+                  <span>▣</span>
                   <div>
-                    <strong>
-                      مدیریت فایل‌های من
-                    </strong>
-                    <small>
-                      فایل‌های ثبت‌شده خودت را مدیریت کن
-                    </small>
+                    <strong>مدیریت فایل‌های من</strong>
+                    <small>آگهی‌ها و درخواست‌های خودتان</small>
                   </div>
                 </Link>
+              </div>
+
+              <div className="agency-dashboard__summary">
+                <span>خلاصه حساب</span>
+                <div>
+                  <p>فایل‌های من <strong>{faNumber(dashboardData.myOffers.length)}</strong></p>
+                  <p>درخواست‌های من <strong>{faNumber(dashboardData.myRequests.length)}</strong></p>
+                </div>
               </div>
             </aside>
           </div>
 
-          <section className="agency-dashboard__roadmap">
-            <div>
-              <span>
-                مرحله بعدی موتور
-              </span>
-
-              <h2>
-                محله، امکانات و اعلان تطبیق جدید
-              </h2>
+          {activeTab === "network" && (
+            <div className="agency-dashboard__network-note">
+              <strong>فرصت‌های شبکه فضاجو</strong>
+              <p>
+                این بخش پایه سرویس ویژه مشاوران است. سهمیه رایگان، بازکردن فرصت
+                و محدودیت حداکثر سه مشاور در مرحله بعد به Backend و پنل مدیریت
+                متصل می‌شود.
+              </p>
             </div>
-
-            <div className="agency-dashboard__roadmap-items">
-              <span>
-                ✓ رد خودکار شهر نامرتبط
-              </span>
-
-              <span>
-                ✓ تطبیق فضای خاص
-              </span>
-
-              <span>
-                ✓ وزن‌دهی متراژ و بودجه
-              </span>
-
-              <span>
-                ✓ آماده توسعه برای اعلان هوشمند
-              </span>
-            </div>
-          </section>
+          )}
         </div>
       </section>
     </main>
