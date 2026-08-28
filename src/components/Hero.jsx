@@ -126,6 +126,37 @@ function Hero() {
             </button>
           </form>
 
+          <button
+            type="button"
+            className="home-hero__smart-find"
+            onClick={() => navigate("/find-for-me")}
+            aria-label="جستجوی هوشمند فضاجو"
+          >
+            <span className="home-hero__smart-find-info">
+              <span className="home-hero__smart-find-icon" aria-hidden="true">
+                <span className="home-hero__smart-find-lens">
+                  <span className="home-hero__smart-find-glint" />
+                </span>
+                <span className="home-hero__smart-find-handle" />
+                  <span className="home-hero__smart-find-finger" aria-hidden="true">👆</span>
+              </span>
+              <span>
+                <strong>جستجوی هوشمند</strong>
+                <small>سریع، دقیق و هوشمند</small>
+              </span>
+            </span>
+
+            <span className="home-hero__smart-find-mark" aria-hidden="true">!</span>
+
+            <span className="home-hero__smart-find-copy">
+              <strong>فضاجو،</strong>
+              <small>خواسته ات رو بنویس، فضاجو بهترین گزینه‌ها رو برات پیدا می‌کنه.</small>
+              <span className="home-hero__smart-find-cta">شروع جستجوی هوشمند <b aria-hidden="true">←</b></span>
+            </span>
+
+            <span className="home-hero__smart-find-sparkles" aria-hidden="true">✦ ✧</span>
+          </button>
+
           <div className="home-hero__categories">
             {categories.map(
               (category) => (

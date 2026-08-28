@@ -26,6 +26,7 @@ import AgencyDashboard from "./pages/AgencyDashboard";
 import AgencyApplicants from "./pages/AgencyApplicants";
 import AgencyAccess from "./pages/AgencyAccess";
 import AdminDashboard from "./pages/AdminDashboard";
+import FindForMe from "./pages/FindForMe";
 
 import { getSpaces } from "./services/spaceService";
 
@@ -461,6 +462,14 @@ function App() {
                 parkingsError
               }
             />
+          }
+        />
+
+
+        <Route
+          path="/find-for-me"
+          element={
+            <FindForMe parkings={parkings} />
           }
         />
 
