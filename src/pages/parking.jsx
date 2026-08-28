@@ -8,7 +8,7 @@ import {
 import ParkingCard from "../components/ParkingCard";
 import "./Parking.css";
 
-function Parking({ parkings = [], initialListingType = "" }) {
+function Parking({ parkings = [], initialListingType = "", showHero = true }) {
   const [searchParams] =
     useSearchParams();
 
@@ -149,6 +149,7 @@ function Parking({ parkings = [], initialListingType = "" }) {
   const categories = [
     { value: "parking", label: "پارکینگ", icon: "🚘" },
     { value: "residential", label: "مسکونی", icon: "🏠" },
+    { value: "villa", label: "ویلا", icon: "🏡" },
     { value: "storage", label: "انبار", icon: "📦" },
     { value: "warehouse", label: "سوله", icon: "🏭" },
     { value: "shop", label: "مغازه", icon: "🏪" },
@@ -388,6 +389,7 @@ function Parking({ parkings = [], initialListingType = "" }) {
 
   return (
     <main className="parking-page">
+      {showHero && (
       <section className="parking-page__hero">
         <div className="parking-page__hero-shape parking-page__hero-shape--one" />
         <div className="parking-page__hero-shape parking-page__hero-shape--two" />
@@ -430,6 +432,7 @@ function Parking({ parkings = [], initialListingType = "" }) {
           </div>
         </div>
       </section>
+      )}
 
       <section className="parking-page__content page-section">
         <div className="container">
@@ -538,8 +541,8 @@ function Parking({ parkings = [], initialListingType = "" }) {
                     <select value={selectedPropertyType} onChange={(e)=>setSelectedPropertyType(e.target.value)}>
                       <option value="">همه انواع مسکونی</option>
                       <option value="apartment">آپارتمان</option>
-                      <option value="house">خانه / ویلایی</option>
-                      <option value="villa">ویلا</option>
+                      <option value="house">خانه</option>
+                      <option value="villa">خانه ویلایی</option>
                       <option value="suite">سوئیت</option>
                       <option value="penthouse">پنت‌هاوس</option>
                       <option value="other">سایر مسکونی</option>

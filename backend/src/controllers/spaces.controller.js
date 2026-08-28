@@ -2,7 +2,7 @@ const crypto = require("crypto");
 const { query } = require("../db/pool");
 
 const MAX_IMAGES = 8;
-const FIELDS = `id, listing_type, category, custom_category, category_label, status, title, city, area, price, phone, image_url, image_urls, residential_details, description, owner_id, created_at, updated_at`;
+const FIELDS = `id, listing_type, category, custom_category, category_label, status, title, city, area, price, price_type, phone, image_url, image_urls, residential_details, villa_details, description, owner_id, created_at, updated_at`;
 
 let imageSchemaPromise = null;
 function ensureImageSchema() {
@@ -10,13 +10,15 @@ function ensureImageSchema() {
     imageSchemaPromise = (async () => {
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS image_urls JSONB NOT NULL DEFAULT '[]'::jsonb`);
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS residential_details JSONB NOT NULL DEFAULT '{}'::jsonb`);
+      await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS price_type VARCHAR(20) NOT NULL DEFAULT 'monthly'`);
+      await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS villa_details JSONB NOT NULL DEFAULT '{}'::jsonb`);
 
       // دیتابیس‌های قدیمی فضاجو دسته residential را در CHECK نداشتند.
       await query(`ALTER TABLE spaces DROP CONSTRAINT IF EXISTS spaces_category_check`);
       await query(`
         ALTER TABLE spaces
         ADD CONSTRAINT spaces_category_check
-        CHECK (category IN ('parking','residential','storage','warehouse','shop','land','other'))
+        CHECK (category IN ('parking','residential','villa','storage','warehouse','shop','land','other'))
       `);
       await query(`
         UPDATE spaces
@@ -59,10 +61,12 @@ function mapSpace(row) {
     city: row.city,
     area: Number(row.area || 0),
     price: row.price,
+    priceType: row.price_type || "monthly",
     phone: row.phone,
     imageUrl: imageUrls[0] || "",
     imageUrls,
     residentialDetails: row.residential_details || {},
+    villaDetails: row.villa_details || {},
     description: row.description || "",
     ownerId: row.owner_id,
     createdAt: row.created_at,
@@ -74,7 +78,7 @@ function clean(body = {}) {
   const imageUrls = normalizeImages(body.imageUrls, body.imageUrl);
   return {
     listingType: body.listingType === "wanted" ? "wanted" : "offer",
-    category: ["parking", "residential", "storage", "warehouse", "shop", "land", "other"].includes(body.category) ? body.category : "parking",
+    category: ["parking", "residential", "villa", "storage", "warehouse", "shop", "land", "other"].includes(body.category) ? body.category : "parking",
     customCategory: String(body.customCategory || "").trim().slice(0, 80),
     categoryLabel: String(body.categoryLabel || "").trim().slice(0, 80),
     status: ["active", "inactive", "rented"].includes(body.status) ? body.status : "active",
@@ -82,6 +86,7 @@ function clean(body = {}) {
     city: String(body.city || "").trim().slice(0, 100),
     area: Math.max(0, Number(body.area) || 0),
     price: String(body.price || "").trim().slice(0, 100),
+    priceType: ["daily", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly",
     phone: String(body.phone || "").replace(/\s/g, "").slice(0, 20),
     imageUrl: imageUrls[0] || "",
     imageUrls,
@@ -100,6 +105,31 @@ function clean(body = {}) {
           furnished: Boolean(body.residentialDetails.furnished),
         }
       : {},
+    villaDetails:
+      body.category === "villa" &&
+      body.villaDetails &&
+      typeof body.villaDetails === "object"
+        ? {
+            bedrooms: Math.max(0, Math.min(30, Number(body.villaDetails.bedrooms) || 0)),
+            capacity: Math.max(0, Math.min(100, Number(body.villaDetails.capacity) || 0)),
+            extraGuestPrice: Math.max(0, Number(body.villaDetails.extraGuestPrice) || 0),
+            distanceToSea: String(body.villaDetails.distanceToSea || "").trim().slice(0, 120),
+            distanceToForest: String(body.villaDetails.distanceToForest || "").trim().slice(0, 120),
+            checkInTime: String(body.villaDetails.checkInTime || "").trim().slice(0, 10),
+            checkOutTime: String(body.villaDetails.checkOutTime || "").trim().slice(0, 10),
+            houseRules: String(body.villaDetails.houseRules || "").trim().slice(0, 2000),
+            pool: Boolean(body.villaDetails.pool),
+            heatedPool: Boolean(body.villaDetails.heatedPool),
+            parking: Boolean(body.villaDetails.parking),
+            yard: Boolean(body.villaDetails.yard),
+            furnished: Boolean(body.villaDetails.furnished),
+            barbecue: Boolean(body.villaDetails.barbecue),
+            airConditioning: Boolean(body.villaDetails.airConditioning),
+            heating: Boolean(body.villaDetails.heating),
+            wifi: Boolean(body.villaDetails.wifi),
+            petFriendly: Boolean(body.villaDetails.petFriendly),
+          }
+        : {},
     description: String(body.description || "").trim().slice(0, 5000),
   };
 }
@@ -159,10 +189,10 @@ async function create(req, res) {
     if (error) return res.status(400).json({ ok: false, message: error });
     const id = crypto.randomUUID();
     const result = await query(
-      `INSERT INTO spaces (id,listing_type,category,custom_category,category_label,status,title,city,area,price,phone,image_url,image_urls,residential_details,description,owner_id)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::jsonb,$14::jsonb,$15,$16)
+      `INSERT INTO spaces (id,listing_type,category,custom_category,category_label,status,title,city,area,price,price_type,phone,image_url,image_urls,residential_details,villa_details,description,owner_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::jsonb,$15::jsonb,$16::jsonb,$17,$18)
        RETURNING ${FIELDS}`,
-      [id, space.listingType, space.category, space.customCategory, space.categoryLabel, space.status, space.title, space.city, space.area, space.price, space.phone, space.imageUrl, JSON.stringify(space.imageUrls), JSON.stringify(space.residentialDetails), space.description, req.user.id]
+      [id, space.listingType, space.category, space.customCategory, space.categoryLabel, space.status, space.title, space.city, space.area, space.price, space.priceType, space.phone, space.imageUrl, JSON.stringify(space.imageUrls), JSON.stringify(space.residentialDetails), JSON.stringify(space.villaDetails), space.description, req.user.id]
     );
     return res.status(201).json({ ok: true, message: "آگهی با موفقیت ثبت شد.", space: mapSpace(result.rows[0]) });
   } catch (error) {
@@ -183,9 +213,9 @@ async function update(req, res) {
     const error = validate(merged);
     if (error) return res.status(400).json({ ok: false, message: error });
     const result = await query(
-      `UPDATE spaces SET listing_type=$2,category=$3,custom_category=$4,category_label=$5,status=$6,title=$7,city=$8,area=$9,price=$10,phone=$11,image_url=$12,image_urls=$13::jsonb,residential_details=$14::jsonb,description=$15,updated_at=NOW()
+      `UPDATE spaces SET listing_type=$2,category=$3,custom_category=$4,category_label=$5,status=$6,title=$7,city=$8,area=$9,price=$10,price_type=$11,phone=$12,image_url=$13,image_urls=$14::jsonb,residential_details=$15::jsonb,villa_details=$16::jsonb,description=$17,updated_at=NOW()
        WHERE id=$1 RETURNING ${FIELDS}`,
-      [req.params.id, merged.listingType, merged.category, merged.customCategory, merged.categoryLabel, merged.status, merged.title, merged.city, merged.area, merged.price, merged.phone, merged.imageUrl, JSON.stringify(merged.imageUrls), JSON.stringify(merged.residentialDetails), merged.description]
+      [req.params.id, merged.listingType, merged.category, merged.customCategory, merged.categoryLabel, merged.status, merged.title, merged.city, merged.area, merged.price, merged.priceType, merged.phone, merged.imageUrl, JSON.stringify(merged.imageUrls), JSON.stringify(merged.residentialDetails), JSON.stringify(merged.villaDetails), merged.description]
     );
     return res.json({ ok: true, message: "آگهی ویرایش شد.", space: mapSpace(result.rows[0]) });
   } catch (error) {

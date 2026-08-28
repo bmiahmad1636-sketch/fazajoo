@@ -20,6 +20,10 @@ const CATEGORY_INFO = {
     label: "مسکونی",
     icon: "🏠",
   },
+  villa: {
+    label: "ویلا",
+    icon: "🏡",
+  },
   storage: {
     label: "انبار",
     icon: "📦",
@@ -193,8 +197,9 @@ function ParkingDetails({
   })();
 
   const residential = parking?.residentialDetails || {};
+  const villa = parking?.villaDetails || {};
   const residentialTypeLabels = {
-    apartment: "آپارتمان", house: "خانه / ویلایی", villa: "ویلا",
+    apartment: "آپارتمان", house: "خانه", villa: "خانه ویلایی",
     suite: "سوئیت", penthouse: "پنت‌هاوس", other: "سایر مسکونی",
   };
 
@@ -655,6 +660,85 @@ function ParkingDetails({
                     {residential.storage && <b>✓ انباری</b>}
                     {residential.furnished && <b>✓ مبله</b>}
                   </div>
+                </div>
+              )}
+
+              {category === "villa" && (
+                <div className="parking-details-residential">
+                  <h3>🏡 مشخصات ویلای تفریحی</h3>
+
+                  <div className="parking-details-residential__grid">
+                    <span>
+                      <small>اتاق خواب</small>
+                      <strong>{Number(villa.bedrooms || 0).toLocaleString("fa-IR")}</strong>
+                    </span>
+                    <span>
+                      <small>ظرفیت</small>
+                      <strong>{Number(villa.capacity || 0).toLocaleString("fa-IR")} نفر</strong>
+                    </span>
+
+                    {Number(villa.extraGuestPrice || 0) > 0 && (
+                      <span>
+                        <small>هر نفر اضافه</small>
+                        <strong>{Number(villa.extraGuestPrice).toLocaleString("fa-IR")} ریال</strong>
+                      </span>
+                    )}
+
+                    {villa.distanceToSea && (
+                      <span>
+                        <small>فاصله تا دریا</small>
+                        <strong>{villa.distanceToSea}</strong>
+                      </span>
+                    )}
+
+                    {villa.distanceToForest && (
+                      <span>
+                        <small>فاصله تا جنگل</small>
+                        <strong>{villa.distanceToForest}</strong>
+                      </span>
+                    )}
+
+                    {villa.checkInTime && (
+                      <span>
+                        <small>تحویل ویلا</small>
+                        <strong>{villa.checkInTime}</strong>
+                      </span>
+                    )}
+
+                    {villa.checkOutTime && (
+                      <span>
+                        <small>تخلیه ویلا</small>
+                        <strong>{villa.checkOutTime}</strong>
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="parking-details-residential__amenities">
+                    {villa.pool && <b>✓ استخر</b>}
+                    {villa.heatedPool && <b>✓ استخر آب‌گرم</b>}
+                    {villa.parking && <b>✓ پارکینگ</b>}
+                    {villa.yard && <b>✓ حیاط</b>}
+                    {villa.furnished && <b>✓ مبله</b>}
+                    {villa.barbecue && <b>✓ باربیکیو</b>}
+                    {villa.airConditioning && <b>✓ سرمایش</b>}
+                    {villa.heating && <b>✓ گرمایش</b>}
+                    {villa.wifi && <b>✓ وای‌فای</b>}
+                    {villa.petFriendly && <b>✓ ورود حیوان خانگی</b>}
+                  </div>
+
+                  {villa.houseRules && (
+                    <div style={{ marginTop: "14px" }}>
+                      <h3 style={{ marginBottom: "8px" }}>
+                        📋 قوانین و توضیحات اقامت
+                      </h3>
+                      <p
+                        className="parking-details-description"
+                        style={{ whiteSpace: "pre-line", margin: 0 }}
+                      >
+                        {villa.houseRules}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 

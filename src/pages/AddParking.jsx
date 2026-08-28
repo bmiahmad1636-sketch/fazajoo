@@ -4,6 +4,7 @@ import { createSpace } from "../services/spaceService";
 import { getAuthToken } from "../services/authService";
 import ImageUploader from "../components/ImageUploader";
 import ResidentialFields, { emptyResidentialDetails } from "../components/ResidentialFields";
+import VillaFields, { emptyVillaDetails } from "../components/VillaFields";
 import "../components/ResidentialFields.css";
 
 import "./AddParking.css";
@@ -22,6 +23,7 @@ const INITIAL_FORM = {
   imageUrls: [],
   description: "",
   residentialDetails: { ...emptyResidentialDetails },
+  villaDetails: { ...emptyVillaDetails },
 };
 
 const STEPS = [
@@ -52,6 +54,11 @@ const SPACE_CATEGORIES = [
     value: "residential",
     label: "مسکونی",
     icon: "🏠",
+  },
+  {
+    value: "villa",
+    label: "ویلا",
+    icon: "🏡",
   },
   {
     value: "storage",
@@ -338,6 +345,10 @@ function AddParking() {
           residentialDetails:
             form.category === "residential"
               ? form.residentialDetails
+              : {},
+          villaDetails:
+            form.category === "villa"
+              ? form.villaDetails
               : {},
           phone: form.phone
             .replace(/\s/g, "")
@@ -676,6 +687,12 @@ function AddParking() {
                                     category.value === "other"
                                       ? currentForm.customCategory
                                       : "",
+                                  priceType:
+                                    category.value === "villa"
+                                      ? "daily"
+                                      : currentForm.category === "villa"
+                                        ? "monthly"
+                                        : currentForm.priceType,
                                 }));
 
                                 setErrors((currentErrors) => ({
@@ -729,6 +746,19 @@ function AddParking() {
                             residentialDetails,
                             price:
                               String(residentialDetails.monthlyRent || residentialDetails.deposit || ""),
+                          }))
+                        }
+                      />
+                    )}
+
+                    {form.category === "villa" && (
+                      <VillaFields
+                        value={form.villaDetails}
+                        disabled={loading}
+                        onChange={(villaDetails) =>
+                          setForm((currentForm) => ({
+                            ...currentForm,
+                            villaDetails,
                           }))
                         }
                       />
@@ -1072,9 +1102,13 @@ function AddParking() {
                             name="price"
                             type="text"
                             placeholder={
-                              isWantedAd
-                                ? "مثلاً تا ماهانه ۳ میلیون"
-                                : "مثلاً ماهانه ۳ میلیون"
+                              form.category === "villa"
+                                ? isWantedAd
+                                  ? "مثلاً تا شبی ۵۰,۰۰۰,۰۰۰ ریال"
+                                  : "مثلاً شبی ۵۰,۰۰۰,۰۰۰ ریال"
+                                : isWantedAd
+                                  ? "مثلاً تا ماهانه ۳ میلیون"
+                                  : "مثلاً ماهانه ۳ میلیون"
                             }
                             value={form.price}
                             onChange={
@@ -1100,7 +1134,12 @@ function AddParking() {
                             }
                             disabled={loading}
                           >
-                            {PRICE_TYPES.map((item) => (
+                            {(form.category === "villa"
+                              ? PRICE_TYPES.filter((item) =>
+                                  ["daily", "negotiable"].includes(item.value)
+                                )
+                              : PRICE_TYPES
+                            ).map((item) => (
                               <option key={item.value} value={item.value}>
                                 {item.label}
                               </option>

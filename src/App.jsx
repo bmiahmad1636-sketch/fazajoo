@@ -134,6 +134,7 @@ function Home({
       ) : parkings.length > 0 ? (
         <Parking
           parkings={parkings}
+          showHero={false}
         />
       ) : (
         <div

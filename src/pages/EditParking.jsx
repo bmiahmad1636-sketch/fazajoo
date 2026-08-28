@@ -12,6 +12,7 @@ import {
 import { updateSpace } from "../services/spaceService";
 import ImageUploader from "../components/ImageUploader";
 import ResidentialFields, { emptyResidentialDetails } from "../components/ResidentialFields";
+import VillaFields, { emptyVillaDetails } from "../components/VillaFields";
 import "../components/ResidentialFields.css";
 
 import "./EditParking.css";
@@ -27,6 +28,7 @@ const EMPTY_FORM = {
   imageUrls: [],
   description: "",
   residentialDetails: { ...emptyResidentialDetails },
+  villaDetails: { ...emptyVillaDetails },
 };
 
 const PRICE_TYPES = [
@@ -85,6 +87,7 @@ function createFormFromParking(parking) {
           ? [parking.imageUrl]
           : [],
     residentialDetails: { ...emptyResidentialDetails, ...(parking?.residentialDetails || {}) },
+    villaDetails: { ...emptyVillaDetails, ...(parking?.villaDetails || {}) },
     description: parking?.description || "",
   };
 }
@@ -340,6 +343,10 @@ function EditParking({
         parking?.category === "residential"
           ? form.residentialDetails
           : {},
+      villaDetails:
+        parking?.category === "villa"
+          ? form.villaDetails
+          : {},
       phone: normalizedPhone,
       imageUrl: form.imageUrl,
       imageUrls: form.imageUrls,
@@ -534,6 +541,19 @@ function EditParking({
                 ...currentForm,
                 residentialDetails,
                 price: String(residentialDetails.monthlyRent || residentialDetails.deposit || ""),
+              }))
+            }
+          />
+        )}
+
+        {parking?.category === "villa" && (
+          <VillaFields
+            value={form.villaDetails}
+            disabled={loading}
+            onChange={(villaDetails) =>
+              setForm((currentForm) => ({
+                ...currentForm,
+                villaDetails,
               }))
             }
           />
@@ -791,7 +811,9 @@ function EditParking({
                     {parking?.category !== "residential" && (
 <div className="edit-parking-field">
                       <label htmlFor="price">
-                        قیمت
+                        {parking?.category === "villa"
+                          ? "اجاره روزانه"
+                          : "قیمت"}
                         <span>*</span>
                       </label>
 
@@ -816,7 +838,11 @@ function EditParking({
                           inputMode="numeric"
                           value={form.price}
                           onChange={handleChange}
-                          placeholder="مثلاً 30000000"
+                          placeholder={
+                            parking?.category === "villa"
+                              ? "مثلاً 50000000"
+                              : "مثلاً 30000000"
+                          }
                           autoComplete="off"
                           disabled={loading}
                         />
@@ -853,7 +879,12 @@ function EditParking({
                               : "pointer",
                           }}
                         >
-                          {PRICE_TYPES.map((item) => (
+                          {(parking?.category === "villa"
+                            ? PRICE_TYPES.filter((item) =>
+                                ["daily", "negotiable"].includes(item.value)
+                              )
+                            : PRICE_TYPES
+                          ).map((item) => (
                             <option
                               key={item.value}
                               value={item.value}
