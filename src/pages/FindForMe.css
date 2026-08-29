@@ -1,1 +1,129 @@
-.find-for-me{max-width:1180px;margin:0 auto;padding:18px 18px 44px;color:#2f2a27}.find-for-me__hero{position:relative;overflow:hidden;padding:20px 24px;border:1px solid #f1dfd3;border-radius:22px;background:linear-gradient(135deg,#fffaf6 0%,#fff 62%,#fff4eb 100%);box-shadow:0 12px 34px rgba(62,45,34,.06)}.find-for-me__eyebrow{display:inline-flex;padding:5px 10px;border-radius:999px;background:#fff0e5;color:#b84d13;font-size:12px;font-weight:850}.find-for-me__hero h1{margin:8px 0 4px;font-size:clamp(27px,3.4vw,38px);line-height:1.18;color:#28231f}.find-for-me__hero>p{max-width:900px;margin:0;color:#6b625c;line-height:1.75;font-size:14px}.find-for-me__form{margin-top:13px;padding:9px 12px;border:1px solid #eaded6;border-radius:17px;background:#fff;box-shadow:0 8px 22px rgba(53,40,31,.05)}.find-for-me__form textarea{width:100%;resize:vertical;min-height:62px;max-height:120px;border:0;outline:0;padding:5px 7px;font:inherit;font-size:14px;line-height:1.75;color:#312b27;background:transparent}.find-for-me__form-footer{display:flex;gap:12px;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid #f1e8e2}.find-for-me__form-footer span{color:#8a8078;font-size:11px}.find-for-me__form-footer button{border:0;border-radius:12px;padding:9px 16px;background:#e56620;color:#fff;font:inherit;font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 7px 18px rgba(229,102,32,.20)}.find-for-me__examples{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}.find-for-me__examples button{border:1px solid #eaded6;background:rgba(255,255,255,.76);border-radius:999px;padding:6px 10px;color:#645b55;font:inherit;font-size:11px;cursor:pointer}.find-for-me__understood{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-top:13px;padding:12px 16px;border:1px solid #ece5e0;border-radius:16px;background:#fff}.find-for-me__understood>div:first-child{min-width:0}.find-for-me__understood span{font-size:11px;color:#8a8078}.find-for-me__understood h2{margin:3px 0 0;font-size:15px;line-height:1.55;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:620px}.find-for-me__chips{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;max-width:54%}.find-for-me__chips span{padding:6px 9px;border-radius:10px;background:#f7f4f2;color:#665e58}.find-for-me__chips b{color:#29241f}.find-for-me__results{margin-top:18px}.find-for-me__results-head{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:10px}.find-for-me__results-head span{color:#e56620;font-weight:850;font-size:11px}.find-for-me__results-head h2{margin:2px 0 0;font-size:20px}.find-for-me__results-head a{color:#5e554f;text-decoration:none;font-size:12px;font-weight:750}.find-for-me__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.find-for-me__match{position:relative;border:1px solid #ece4df;border-radius:18px;background:#fff;overflow:visible}.find-for-me__match .parking-card{box-shadow:none!important;border:0!important;margin:0!important}.find-for-me__score{position:absolute;z-index:3;top:10px;left:10px;width:56px;height:56px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#2d2926;color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.16)}.find-for-me__score strong{font-size:15px;line-height:1}.find-for-me__score span{margin-top:2px;font-size:9px;color:#f4d9ca}.find-for-me__reasons{display:flex;flex-wrap:wrap;gap:5px;padding:0 10px 10px}.find-for-me__reasons span{font-size:10px;color:#615852;background:#f8f5f3;border-radius:999px;padding:5px 7px}.find-for-me__empty{text-align:center;padding:28px 18px;border:1px dashed #dccfc7;border-radius:18px;background:#fbfaf9}.find-for-me__empty>div{font-size:28px}.find-for-me__empty h3{margin:5px 0;font-size:17px}.find-for-me__empty p{max-width:650px;margin:0 auto;color:#756b65;line-height:1.7;font-size:13px}@media(max-width:1000px){.find-for-me__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.find-for-me{padding:12px 10px 36px}.find-for-me__hero{padding:16px 13px;border-radius:18px}.find-for-me__hero h1{font-size:27px}.find-for-me__hero>p{font-size:12px}.find-for-me__form textarea{min-height:58px}.find-for-me__form-footer,.find-for-me__understood,.find-for-me__results-head{align-items:stretch;flex-direction:column}.find-for-me__form-footer button{width:100%}.find-for-me__understood h2{white-space:normal}.find-for-me__chips{max-width:none;justify-content:flex-start}.find-for-me__grid{grid-template-columns:1fr}.find-for-me__results{margin-top:14px}}
+.find-for-me{max-width:1120px;margin:0 auto;padding:34px 20px 70px;color:#2f2a27}.find-for-me__hero{position:relative;overflow:hidden;padding:34px;border:1px solid #f1dfd3;border-radius:28px;background:linear-gradient(135deg,#fffaf6 0%,#fff 62%,#fff4eb 100%);box-shadow:0 18px 50px rgba(62,45,34,.07)}.find-for-me__eyebrow{display:inline-flex;padding:7px 12px;border-radius:999px;background:#fff0e5;color:#b84d13;font-size:14px;font-weight:800}.find-for-me__hero h1{margin:14px 0 8px;font-size:clamp(30px,5vw,52px);line-height:1.15;color:#28231f}.find-for-me__hero>p{max-width:760px;margin:0;color:#6b625c;line-height:2;font-size:16px}.find-for-me__form{margin-top:24px;padding:14px;border:1px solid #eaded6;border-radius:22px;background:#fff;box-shadow:0 12px 34px rgba(53,40,31,.06)}.find-for-me__form textarea{width:100%;resize:vertical;min-height:104px;border:0;outline:0;padding:10px 12px;font:inherit;font-size:16px;line-height:1.9;color:#312b27;background:transparent}.find-for-me__form-footer{display:flex;gap:16px;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid #f1e8e2}.find-for-me__form-footer span{color:#8a8078;font-size:13px}.find-for-me__form-footer button{border:0;border-radius:14px;padding:12px 20px;background:#e56620;color:#fff;font:inherit;font-weight:900;cursor:pointer;box-shadow:0 8px 22px rgba(229,102,32,.25)}.find-for-me__examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.find-for-me__examples button{border:1px solid #eaded6;background:rgba(255,255,255,.76);border-radius:999px;padding:8px 12px;color:#645b55;font:inherit;font-size:13px;cursor:pointer}.find-for-me__understood{display:flex;justify-content:space-between;gap:22px;align-items:flex-start;margin-top:24px;padding:20px 22px;border:1px solid #ece5e0;border-radius:20px;background:#fff}.find-for-me__understood span{font-size:13px;color:#8a8078}.find-for-me__understood h2{margin:6px 0 0;font-size:18px;line-height:1.8}.find-for-me__chips{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;max-width:52%}.find-for-me__chips span{padding:8px 11px;border-radius:12px;background:#f7f4f2;color:#665e58}.find-for-me__chips b{color:#29241f}.find-for-me__results{margin-top:32px}.find-for-me__results-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:16px}.find-for-me__results-head span{color:#e56620;font-weight:800;font-size:13px}.find-for-me__results-head h2{margin:4px 0 0;font-size:24px}.find-for-me__results-head a{color:#5e554f;text-decoration:none;font-weight:700}.find-for-me__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.find-for-me__match{position:relative;padding-top:0;border:1px solid #ece4df;border-radius:22px;background:#fff;overflow:visible}.find-for-me__match .parking-card{box-shadow:none!important;border:0!important}.find-for-me__score{position:absolute;z-index:3;top:12px;left:12px;width:66px;height:66px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#2d2926;color:#fff;box-shadow:0 7px 20px rgba(0,0,0,.18)}.find-for-me__score strong{font-size:18px;line-height:1}.find-for-me__score span{margin-top:3px;font-size:10px;color:#f4d9ca}.find-for-me__reasons{display:flex;flex-wrap:wrap;gap:7px;padding:0 14px 14px}.find-for-me__reasons span{font-size:12px;color:#615852;background:#f8f5f3;border-radius:999px;padding:6px 9px}.find-for-me__empty{text-align:center;padding:46px 20px;border:1px dashed #dccfc7;border-radius:22px;background:#fbfaf9}.find-for-me__empty>div{font-size:34px}.find-for-me__empty h3{margin:8px 0}.find-for-me__empty p{max-width:650px;margin:0 auto;color:#756b65;line-height:1.9}@media(max-width:760px){.find-for-me{padding:20px 12px 50px}.find-for-me__hero{padding:22px 16px;border-radius:22px}.find-for-me__form-footer,.find-for-me__understood,.find-for-me__results-head{align-items:stretch;flex-direction:column}.find-for-me__form-footer button{width:100%}.find-for-me__chips{max-width:none;justify-content:flex-start}.find-for-me__grid{grid-template-columns:1fr}}
+
+/* ===== Smart alert v1 ===== */
+.find-for-me__alert-box,
+.find-for-me__watch-panel {
+  width: min(100%, 1180px);
+  margin: 14px auto 0;
+  border: 1px solid rgba(230, 105, 24, .15);
+  border-radius: 20px;
+  background: rgba(255, 250, 245, .96);
+  box-shadow: 0 10px 28px rgba(79, 47, 27, .06);
+}
+
+.find-for-me__alert-box {
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.find-for-me__alert-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: #fff0e3;
+  font-size: 1.2rem;
+}
+
+.find-for-me__alert-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.find-for-me__alert-copy strong { color: #342b26; font-size: .86rem; font-weight: 950; }
+.find-for-me__alert-copy span { color: #786a61; font-size: .68rem; font-weight: 700; line-height: 1.75; }
+.find-for-me__alert-copy span b { color: #df650f; }
+.find-for-me__alert-copy small { color: #b65310; font-size: .64rem; font-weight: 850; margin-top: 2px; }
+
+.find-for-me__alert-box > button,
+.find-for-me__alert-box > a {
+  min-height: 40px;
+  padding: 8px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f68a35, #e66812);
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: .69rem;
+  font-weight: 950;
+  box-shadow: 0 8px 18px rgba(230, 104, 18, .2);
+}
+
+.find-for-me__alert-box > button:disabled { opacity: .65; cursor: wait; }
+
+.find-for-me__watch-panel { padding: 14px 16px; }
+
+.find-for-me__watch-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+}
+
+.find-for-me__watch-head > div { display: flex; flex-direction: column; gap: 2px; }
+.find-for-me__watch-head span { color: #d9610f; font-size: .65rem; font-weight: 900; }
+.find-for-me__watch-head h2 { margin: 0; color: #352d28; font-size: .92rem; font-weight: 950; }
+.find-for-me__watch-head > button {
+  border: 1px solid rgba(224, 100, 16, .18);
+  border-radius: 10px;
+  background: #fff;
+  color: #d45d0d;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: .62rem;
+  font-weight: 900;
+  padding: 7px 10px;
+}
+
+.find-for-me__notifications { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 4px; }
+
+.find-for-me__notification {
+  position: relative;
+  min-width: 0;
+  padding: 10px 11px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid rgba(88, 66, 50, .08);
+  border-radius: 13px;
+  background: #fff;
+  color: inherit;
+}
+
+.find-for-me__notification.is-unread { border-color: rgba(239, 116, 27, .25); background: #fff9f4; }
+.find-for-me__notification-score { color: #e16917; font-size: .82rem; font-weight: 950; text-align: center; }
+.find-for-me__notification > div:nth-child(2) { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.find-for-me__notification strong { overflow: hidden; color: #39302b; font-size: .7rem; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }
+.find-for-me__notification span { overflow: hidden; color: #85766d; font-size: .58rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.find-for-me__notification small { color: #aaa099; font-size: .52rem; }
+.find-for-me__notification i { padding: 3px 6px; border-radius: 999px; background: #ed741d; color: white; font-size: .48rem; font-style: normal; font-weight: 950; }
+
+.find-for-me__saved-searches { margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(83, 61, 46, .12); display: flex; flex-direction: column; gap: 7px; }
+.find-for-me__saved-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 9px; border-radius: 11px; background: rgba(255,255,255,.72); }
+.find-for-me__saved-row > div:first-child { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.find-for-me__saved-row strong { overflow: hidden; color: #443932; font-size: .65rem; font-weight: 850; text-overflow: ellipsis; white-space: nowrap; }
+.find-for-me__saved-row span { color: #95877f; font-size: .54rem; }
+.find-for-me__saved-actions { flex: 0 0 auto; display: flex; gap: 5px; }
+.find-for-me__saved-actions button { border: 1px solid rgba(86,65,51,.1); border-radius: 9px; background: #f7f4f1; color: #756860; cursor: pointer; font-family: inherit; font-size: .55rem; font-weight: 900; padding: 5px 8px; }
+.find-for-me__saved-actions button.is-active { background: #fff0e2; color: #d65f0e; border-color: rgba(230,101,15,.18); }
+.find-for-me__saved-actions button.is-delete { color: #a44949; }
+
+@media (max-width: 760px) {
+  .find-for-me__alert-box { grid-template-columns: 40px minmax(0,1fr); }
+  .find-for-me__alert-box > button,
+  .find-for-me__alert-box > a { grid-column: 1 / -1; width: 100%; }
+  .find-for-me__notifications { grid-template-columns: 1fr; }
+  .find-for-me__saved-row { align-items: flex-start; flex-direction: column; }
+}

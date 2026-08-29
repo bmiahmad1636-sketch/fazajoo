@@ -1,10 +1,21 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import ParkingCard from "../components/ParkingCard";
 import { normalizeText, scoreMatch } from "../utils/matchingEngine";
+import {
+  deleteSmartSearch,
+  getSmartNotifications,
+  getSmartSearches,
+  markAllSmartNotificationsRead,
+  markSmartNotificationRead,
+  saveSmartSearch,
+  setSmartSearchActive,
+} from "../services/smartSearchService";
 
 import "./FindForMe.css";
+
+const ALERT_THRESHOLD = 70;
 
 const CATEGORY_RULES = [
   { category: "villa", label: "ویلا", words: ["ویلا", "ویلای", "اقامتگاه"] },
@@ -21,6 +32,7 @@ const IRAN_CITIES = [
   "لاهیجان", "شهرضا", "کاشان", "ارومیه", "قزوین", "یزد", "کرمان", "ساری",
   "گرگان", "بندرعباس", "همدان", "اراک", "اردبیل", "سنندج", "خرم آباد",
   "خرم‌آباد", "بوشهر", "زنجان", "شاهین شهر", "شاهین‌شهر", "نجف آباد", "نجف‌آباد",
+  "آستانه اشرفیه", "آستانه‌اشرفیه",
 ];
 
 function toEnglishDigits(value = "") {
@@ -35,6 +47,33 @@ function extractNumber(raw = "") {
   const normalized = toEnglishDigits(raw).replace(/,/g, "").replace(/٬/g, "");
   const match = normalized.match(/\d+(?:\.\d+)?/);
   return match ? Number(match[0]) : 0;
+}
+
+function normalizePlace(value = "") {
+  return normalizeText(value)
+    .replace(/[ۀة]/g, "ه")
+    .replace(/[ؤ]/g, "و")
+    .replace(/[إأٱ]/g, "ا")
+    .replace(/[،,؛;:_\-–—/\\()\[\]{}]+/g, " ")
+    .replace(/^(استان|شهرستان|شهر|بخش|منطقه)\s+/g, "")
+    .replace(/\s+(استان|شهرستان|شهر)$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function compactPlace(value = "") {
+  return normalizePlace(value)
+    .replace(/\b(استان|شهرستان|شهر|بخش|منطقه)\b/g, " ")
+    .replace(/\s+/g, "");
+}
+
+function samePlace(a = "", b = "") {
+  const first = compactPlace(a);
+  const second = compactPlace(b);
+  if (!first || !second) return false;
+  if (first === second) return true;
+  if (Math.min(first.length, second.length) < 4) return false;
+  return first.includes(second) || second.includes(first);
 }
 
 function extractBudget(text) {
@@ -58,16 +97,31 @@ function extractBudget(text) {
 function parseNaturalRequest(text, parkings = []) {
   const normalized = normalizeText(text);
 
-  const categoryRule = CATEGORY_RULES.find((rule) =>
-    rule.words.some((word) => normalized.includes(normalizeText(word)))
-  );
+  // نوع اصلی فضا را از اولین اشارهٔ واقعی کاربر می‌گیریم.
+  // مثال: «زمین ۲۰۰۰ متری جهت انبار» => زمین، نه انبار.
+  const categoryCandidates = CATEGORY_RULES.flatMap((rule) =>
+    rule.words.map((word) => ({
+      rule,
+      index: normalized.indexOf(normalizeText(word)),
+      wordLength: normalizeText(word).length,
+    }))
+  )
+    .filter((item) => item.index >= 0)
+    .sort((a, b) => a.index - b.index || b.wordLength - a.wordLength);
+
+  const categoryRule = categoryCandidates[0]?.rule || null;
 
   const knownCities = [...new Set([
     ...IRAN_CITIES,
     ...parkings.map((item) => String(item?.city || "").trim()).filter(Boolean),
   ])].sort((a, b) => b.length - a.length);
 
-  const city = knownCities.find((name) => normalized.includes(normalizeText(name))) || "";
+  const matchedCity = knownCities.find((name) => {
+    const place = compactPlace(name);
+    const requestText = compactPlace(normalized);
+    return Boolean(place && requestText.includes(place));
+  });
+  const city = matchedCity ? normalizePlace(matchedCity) : "";
 
   const englishText = toEnglishDigits(normalized);
   const areaMatch = englishText.match(/(\d+(?:\.\d+)?)\s*(?:متر|مترمربع|متر مربع)/);
@@ -109,9 +163,30 @@ function formatRial(value) {
   return Number(value || 0).toLocaleString("fa-IR") + " ریال";
 }
 
-function FindForMe({ parkings = [] }) {
+function formatDate(value) {
+  if (!value) return "";
+  try {
+    return new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(value));
+  } catch {
+    return "";
+  }
+}
+
+function FindForMe({ parkings = [], user = null }) {
   const [text, setText] = useState("");
   const [submittedText, setSubmittedText] = useState("");
+  const [savedSearches, setSavedSearches] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [savingAlert, setSavingAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [panelLoading, setPanelLoading] = useState(false);
 
   const parsed = useMemo(
     () => (submittedText ? parseNaturalRequest(submittedText, parkings) : null),
@@ -122,7 +197,7 @@ function FindForMe({ parkings = [] }) {
     if (!parsed) return [];
 
     const request = parsed.request;
-    const requestCity = normalizeText(request.city);
+    const requestCity = request.city;
     const requestCategory = request.category;
     const requestBedrooms = Number(request.villaDetails?.bedrooms || request.residentialDetails?.bedrooms || 0);
 
@@ -135,10 +210,10 @@ function FindForMe({ parkings = [] }) {
 
         let score = Math.max(strict.score || 0, 45);
         const reasons = [...(strict.reasons || [])];
-        const offerCity = normalizeText(offer.city);
+        const offerCity = offer.city;
 
         if (requestCity && offerCity) {
-          if (requestCity === offerCity) {
+          if (samePlace(requestCity, offerCity)) {
             score = Math.max(score, 70);
             if (!reasons.includes("شهر یکسان")) reasons.push("شهر یکسان");
           } else {
@@ -163,8 +238,9 @@ function FindForMe({ parkings = [] }) {
         const offerArea = Number(offer.area || 0);
         if (reqArea && offerArea) {
           const diff = Math.abs(reqArea - offerArea) / Math.max(reqArea, 1);
-          if (diff <= 0.25 && !reasons.some((r) => r.includes("متراژ"))) {
-            score += 7; reasons.push("متراژ نزدیک");
+          if (diff <= 0.25 && !reasons.some((reason) => reason.includes("متراژ"))) {
+            score += 7;
+            reasons.push("متراژ نزدیک");
           }
         }
 
@@ -176,11 +252,101 @@ function FindForMe({ parkings = [] }) {
       .slice(0, 12);
   }, [parkings, parsed]);
 
+  const loadSmartPanel = async () => {
+    if (!user) {
+      setSavedSearches([]);
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
+    }
+
+    setPanelLoading(true);
+    try {
+      const [searches, notificationData] = await Promise.all([
+        getSmartSearches(),
+        getSmartNotifications(),
+      ]);
+      setSavedSearches(searches);
+      setNotifications(notificationData.notifications || []);
+      setUnreadCount(Number(notificationData.unreadCount || 0));
+    } catch (error) {
+      console.error("Load smart search panel error:", error);
+    } finally {
+      setPanelLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadSmartPanel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, user?.uid, user?.backendId]);
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const value = text.trim();
     if (value.length < 4) return;
+    setAlertMessage("");
     setSubmittedText(value);
+  };
+
+  const handleSaveAlert = async () => {
+    if (!parsed || !user || savingAlert) return;
+    setSavingAlert(true);
+    setAlertMessage("");
+    try {
+      const data = await saveSmartSearch({
+        rawText: submittedText,
+        criteria: parsed.request,
+        threshold: ALERT_THRESHOLD,
+        bestSeenScore: matches[0]?.score || 0,
+      });
+      setAlertMessage(data.message || "پیگیری هوشمند فعال شد.");
+      await loadSmartPanel();
+    } catch (error) {
+      setAlertMessage(error?.message || "فعال‌کردن اعلان انجام نشد.");
+    } finally {
+      setSavingAlert(false);
+    }
+  };
+
+  const handleToggle = async (search) => {
+    try {
+      const updated = await setSmartSearchActive(search.id, !search.isActive);
+      setSavedSearches((items) => items.map((item) => (item.id === updated.id ? updated : item)));
+    } catch (error) {
+      setAlertMessage(error?.message || "تغییر وضعیت پیگیری انجام نشد.");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteSmartSearch(id);
+      setSavedSearches((items) => items.filter((item) => item.id !== id));
+    } catch (error) {
+      setAlertMessage(error?.message || "حذف پیگیری انجام نشد.");
+    }
+  };
+
+  const openNotification = async (notification) => {
+    if (!notification.isRead) {
+      try {
+        await markSmartNotificationRead(notification.id);
+        setNotifications((items) => items.map((item) => item.id === notification.id ? { ...item, isRead: true } : item));
+        setUnreadCount((count) => Math.max(0, count - 1));
+      } catch {
+        // باز شدن آگهی به خاطر خطای ثبت خوانده‌شدن متوقف نمی‌شود.
+      }
+    }
+  };
+
+  const handleReadAll = async () => {
+    try {
+      await markAllSmartNotificationsRead();
+      setNotifications((items) => items.map((item) => ({ ...item, isRead: true })));
+      setUnreadCount(0);
+    } catch (error) {
+      setAlertMessage(error?.message || "ثبت مشاهده اعلان‌ها انجام نشد.");
+    }
   };
 
   return (
@@ -213,6 +379,58 @@ function FindForMe({ parkings = [] }) {
         </div>
       </section>
 
+      {user && (notifications.length > 0 || savedSearches.length > 0 || panelLoading) && (
+        <section className="find-for-me__watch-panel">
+          <div className="find-for-me__watch-head">
+            <div>
+              <span>🔔 پیگیری هوشمند من</span>
+              <h2>{unreadCount ? `${unreadCount.toLocaleString("fa-IR")} مورد جدید برایت پیدا شده` : "فضاجو حواسش به درخواست‌هایت هست"}</h2>
+            </div>
+            {unreadCount > 0 && <button type="button" onClick={handleReadAll}>همه را دیدم</button>}
+          </div>
+
+          {notifications.length > 0 && (
+            <div className="find-for-me__notifications">
+              {notifications.slice(0, 6).map((notification) => (
+                <Link
+                  to={`/parking/${notification.spaceId}`}
+                  key={notification.id}
+                  className={`find-for-me__notification ${notification.isRead ? "is-read" : "is-unread"}`}
+                  onClick={() => openNotification(notification)}
+                >
+                  <div className="find-for-me__notification-score">{notification.matchScore.toLocaleString("fa-IR")}٪</div>
+                  <div>
+                    <strong>{notification.space?.title || "آگهی مناسب جدید"}</strong>
+                    <span>{notification.space?.city || ""} · {notification.reasons.slice(0, 2).join(" · ")}</span>
+                    <small>{formatDate(notification.createdAt)}</small>
+                  </div>
+                  {!notification.isRead && <i>جدید</i>}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {savedSearches.length > 0 && (
+            <div className="find-for-me__saved-searches">
+              {savedSearches.map((search) => (
+                <div className="find-for-me__saved-row" key={search.id}>
+                  <div>
+                    <strong>{search.rawText}</strong>
+                    <span>اعلان از {search.threshold.toLocaleString("fa-IR")}٪ تطابق به بالا</span>
+                  </div>
+                  <div className="find-for-me__saved-actions">
+                    <button type="button" className={search.isActive ? "is-active" : ""} onClick={() => handleToggle(search)}>
+                      {search.isActive ? "فعال" : "متوقف"}
+                    </button>
+                    <button type="button" className="is-delete" onClick={() => handleDelete(search.id)}>حذف</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
       {parsed && (
         <>
           <section className="find-for-me__understood">
@@ -227,6 +445,22 @@ function FindForMe({ parkings = [] }) {
               {parsed.extracted.price > 0 && <span>بودجه: <b>{formatRial(parsed.extracted.price)}</b></span>}
               {parsed.extracted.bedrooms > 0 && <span>خواب: <b>{parsed.extracted.bedrooms.toLocaleString("fa-IR")}</b></span>}
             </div>
+          </section>
+
+          <section className="find-for-me__alert-box">
+            <div className="find-for-me__alert-icon" aria-hidden="true">🔔</div>
+            <div className="find-for-me__alert-copy">
+              <strong>اگر آگهی مناسب جدید آمد، فضاجو خبرت کند؟</strong>
+              <span>هر آگهی تازه‌ای که حداقل <b>۷۰٪</b> با همین خواسته تطابق داشته باشد، داخل فضاجو بهت اعلام می‌شود.</span>
+              {alertMessage && <small>{alertMessage}</small>}
+            </div>
+            {user ? (
+              <button type="button" onClick={handleSaveAlert} disabled={savingAlert}>
+                {savingAlert ? "در حال فعال‌سازی..." : "🔔 خبرم کن"}
+              </button>
+            ) : (
+              <Link to="/login">ورود و فعال‌کردن اعلان</Link>
+            )}
           </section>
 
           <section className="find-for-me__results">
@@ -260,8 +494,7 @@ function FindForMe({ parkings = [] }) {
                 <div>🔎</div>
                 <h3>این یکی را هنوز پیدا نکردیم</h3>
                 <p>
-                  درخواستت خوب ثبت شده؛ با زیاد شدن آگهی‌ها همین موتور می‌تواند فایل‌های جدید را هم برایت پیدا کند.
-                  در نسخه بعدی، ذخیره درخواست و اعلان خودکار را به همین بخش وصل می‌کنیم.
+                  درخواستت را نگه دار؛ با فعال‌کردن «خبرم کن»، هر آگهی جدیدی که حداقل ۷۰٪ مناسب باشد خود فضاجو برایت علامت می‌زند.
                 </p>
               </div>
             )}

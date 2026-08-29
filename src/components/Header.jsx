@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 
 import MessageBadge from "./MessageBadge";
+import SmartSearchBadge from "./SmartSearchBadge";
 
 import "./Header.css";
 
@@ -223,6 +224,10 @@ function Header({
                 isApprovedAgent={
                   isApprovedAgent
                 }
+              />
+
+              <SmartSearchBadge
+                onNavigate={closeMenu}
               />
 
 

@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const { query } = require("../db/pool");
+const { createNotificationsForNewOffer } = require("../services/smartSearch.service");
 
 const MAX_IMAGES = 8;
 const FIELDS = `id, listing_type, category, custom_category, category_label, status, title, city, area, price, price_type, phone, image_url, image_urls, residential_details, villa_details, description, owner_id, created_at, updated_at`;
@@ -194,7 +195,9 @@ async function create(req, res) {
        RETURNING ${FIELDS}`,
       [id, space.listingType, space.category, space.customCategory, space.categoryLabel, space.status, space.title, space.city, space.area, space.price, space.priceType, space.phone, space.imageUrl, JSON.stringify(space.imageUrls), JSON.stringify(space.residentialDetails), JSON.stringify(space.villaDetails), space.description, req.user.id]
     );
-    return res.status(201).json({ ok: true, message: "آگهی با موفقیت ثبت شد.", space: mapSpace(result.rows[0]) });
+    const createdSpace = mapSpace(result.rows[0]);
+    createNotificationsForNewOffer(createdSpace, req.user.id);
+    return res.status(201).json({ ok: true, message: "آگهی با موفقیت ثبت شد.", space: createdSpace });
   } catch (error) {
     console.error("Create space error:", error);
     return res.status(500).json({ ok: false, message: "ثبت آگهی انجام نشد." });

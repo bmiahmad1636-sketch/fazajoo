@@ -469,7 +469,7 @@ function App() {
         <Route
           path="/find-for-me"
           element={
-            <FindForMe parkings={parkings} />
+            <FindForMe parkings={parkings} user={user} />
           }
         />
 

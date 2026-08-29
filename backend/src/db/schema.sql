@@ -154,3 +154,35 @@ CREATE TABLE IF NOT EXISTS messages (
 
 CREATE INDEX IF NOT EXISTS idx_messages_chat_created ON messages(chat_id, created_at ASC);
 CREATE INDEX IF NOT EXISTS idx_messages_unread ON messages(chat_id, read_at) WHERE read_at IS NULL;
+
+-- Smart saved searches and in-app notifications
+CREATE TABLE IF NOT EXISTS smart_searches (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  raw_text TEXT NOT NULL,
+  criteria JSONB NOT NULL DEFAULT '{}'::jsonb,
+  threshold INTEGER NOT NULL DEFAULT 70 CHECK (threshold BETWEEN 1 AND 100),
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  best_seen_score INTEGER NOT NULL DEFAULT 0,
+  last_notified_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_smart_searches_user_active
+ON smart_searches(user_id, is_active, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS smart_search_notifications (
+  id UUID PRIMARY KEY,
+  smart_search_id UUID NOT NULL REFERENCES smart_searches(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  space_id UUID NOT NULL REFERENCES spaces(id) ON DELETE CASCADE,
+  match_score INTEGER NOT NULL CHECK (match_score BETWEEN 0 AND 100),
+  reasons JSONB NOT NULL DEFAULT '[]'::jsonb,
+  is_read BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (smart_search_id, space_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_smart_notifications_user_read
+ON smart_search_notifications(user_id, is_read, created_at DESC);

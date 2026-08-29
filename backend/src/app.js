@@ -12,6 +12,7 @@ const chatsRoutes = require("./routes/chats.routes");
 const uploadsRoutes = require("./routes/uploads.routes");
 const adminRoutes = require("./routes/admin.routes");
 const agencyRoutes = require("./routes/agency.routes");
+const smartSearchRoutes = require("./routes/smartSearch.routes");
 
 
 const app = express();
@@ -135,6 +136,11 @@ app.use(
 app.use(
   "/api/agency",
   agencyRoutes
+);
+
+app.use(
+  "/api/smart-searches",
+  smartSearchRoutes
 );
 
 

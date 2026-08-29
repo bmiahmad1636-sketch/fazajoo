@@ -1,6 +1,7 @@
 const CATEGORY_LABELS = {
   parking: "پارکینگ",
   residential: "مسکونی",
+  villa: "ویلا",
   storage: "انبار",
   warehouse: "سوله",
   shop: "مغازه",
@@ -44,7 +45,14 @@ const SPACE_SYNONYMS = [
     "پارک خودرو",
   ],
   [
-    "مسکونی","آپارتمان","خانه","منزل","ویلا","ویلایی","سوئیت","پنت هاوس","پنت‌هاوس"
+    "مسکونی","آپارتمان","خانه","منزل","خانه ویلایی","ویلایی","سوئیت","پنت هاوس","پنت‌هاوس"
+  ],
+  [
+    "ویلا",
+    "ویلای تفریحی",
+    "اقامتگاه ویلایی",
+    "ویلا استخردار",
+    "اجاره ویلا",
   ],
   [
     "انبار",
@@ -135,13 +143,18 @@ export function normalizeText(
   return String(value)
     .trim()
     .toLowerCase()
-    .replace(/\u200c/g, " ")
-    .replace(/ي/g, "ی")
+    .replace(/[\u200c\u200d\u200e\u200f]/g, " ")
+    .replace(/[يى]/g, "ی")
     .replace(/ك/g, "ک")
+    .replace(/[ۀة]/g, "ه")
+    .replace(/[ؤ]/g, "و")
+    .replace(/[إأٱ]/g, "ا")
+    .replace(/[َُِّْٰ]/g, "")
     .replace(
       /[^\u0600-\u06FFa-z0-9\s-]/g,
       " "
     )
+    .replace(/[-_]+/g, " ")
     .replace(/\s+/g, " ");
 }
 
@@ -465,17 +478,23 @@ function getCategoryScore(
   };
 }
 
+function normalizeCity(value = "") {
+  return normalizeText(value)
+    .replace(/^(شهرستان|شهر)\s+/g, "")
+    .replace(/\s+/g, "");
+}
+
 function getLocationScore(
   request,
   offer
 ) {
   const requestCity =
-    normalizeText(
+    normalizeCity(
       request.city
     );
 
   const offerCity =
-    normalizeText(
+    normalizeCity(
       offer.city
     );
 
