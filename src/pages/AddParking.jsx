@@ -24,6 +24,7 @@ const INITIAL_FORM = {
   description: "",
   residentialDetails: { ...emptyResidentialDetails },
   villaDetails: { ...emptyVillaDetails },
+  agencyNetworkConsent: false,
 };
 
 const STEPS = [
@@ -359,6 +360,8 @@ function AddParking() {
 
           description:
             form.description.trim(),
+
+          agencyNetworkConsent: Boolean(form.agencyNetworkConsent),
 
         });
 
@@ -1261,6 +1264,28 @@ function AddParking() {
                         </span>
                       </div>
                     </div>
+
+                    <label className="add-parking-network-consent">
+                      <input
+                        type="checkbox"
+                        checked={form.agencyNetworkConsent}
+                        onChange={(event) =>
+                          setForm((currentForm) => ({
+                            ...currentForm,
+                            agencyNetworkConsent: event.target.checked,
+                          }))
+                        }
+                        disabled={loading}
+                      />
+                      <span>
+                        <strong>کمک مشاوران فضاجو برای پیدا کردن {isWantedAd ? "فایل مناسب" : "مشتری"}</strong>
+                        <small>
+                          {isWantedAd
+                            ? "مایلم مشاوران تأییدشده فضاجو برای پیدا کردن فایل مناسب با من ارتباط بگیرند."
+                            : "مایلم مشاوران تأییدشده فضاجو بتوانند برای این آگهی با من ارتباط بگیرند."}
+                        </small>
+                      </span>
+                    </label>
 
                     <div className="add-parking-preview">
                       <div className="add-parking-preview__heading">

@@ -945,13 +945,28 @@ export function buildMatchingDashboard({
    * هیچ فایل یا درخواست متعلق
    * به currentUser وارد این بخش نمی‌شود.
    */
+  // فرصت شبکه فقط بین دو کاربر عادی ساخته می‌شود.
+  // اگر یکی از دو طرف متعلق به مشاور تأییدشده باشد،
+  // آن تطبیق فرصت اختصاصی همان مشاور است و به شبکه عمومی نمی‌رود.
+  const networkRequests = publicRequests.filter(
+    (item) =>
+      item.agencyNetworkConsent === true &&
+      item.ownerIsApprovedAgent !== true
+  );
+
+  const networkOffers = publicOffers.filter(
+    (item) =>
+      item.agencyNetworkConsent === true &&
+      item.ownerIsApprovedAgent !== true
+  );
+
   const networkOpportunities =
-    publicRequests
+    networkRequests
       .map((request) => {
         const candidates =
           rankForRequest(
             request,
-            publicOffers
+            networkOffers
           ).slice(0, 5);
 
         return {

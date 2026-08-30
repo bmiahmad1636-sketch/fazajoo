@@ -117,9 +117,16 @@ async function unlockNetworkOpportunity(userId, requestSpaceId, offerSpaceId) {
     await ensureCreditRow(client, userId);
 
     const spaces = await client.query(
-      `SELECT id, listing_type, status, owner_id
-       FROM spaces
-       WHERE id = ANY($1::uuid[])`,
+      `SELECT s.id, s.listing_type, s.status, s.owner_id, s.agency_network_consent,
+              EXISTS (
+                SELECT 1 FROM users u
+                WHERE u.id = s.owner_id
+                  AND u.is_active = TRUE
+                  AND u.account_type = 'agent'
+                  AND u.agency_status = 'approved'
+              ) AS owner_is_approved_agent
+       FROM spaces s
+       WHERE s.id = ANY($1::uuid[])`,
       [[requestSpaceId, offerSpaceId]]
     );
 
@@ -138,9 +145,21 @@ async function unlockNetworkOpportunity(userId, requestSpaceId, offerSpaceId) {
       throw error;
     }
 
+    if (!requestSpace.agency_network_consent || !offerSpace.agency_network_consent) {
+      const error = new Error("صاحب آگهی یا متقاضی اجازه معرفی این فرصت به شبکه مشاوران را نداده است.");
+      error.status = 403;
+      throw error;
+    }
+
     if (requestSpace.owner_id === userId || offerSpace.owner_id === userId) {
       const error = new Error("فرصت شبکه باید بین فایل‌ها و متقاضیان دیگر کاربران باشد.");
       error.status = 400;
+      throw error;
+    }
+
+    if (requestSpace.owner_is_approved_agent || offerSpace.owner_is_approved_agent) {
+      const error = new Error("این تطبیق متعلق به یک مشاور تأییدشده است و فرصت اختصاصی همان مشاور محسوب می‌شود.");
+      error.status = 403;
       throw error;
     }
 

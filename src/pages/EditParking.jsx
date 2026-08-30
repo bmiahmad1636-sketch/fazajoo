@@ -29,6 +29,7 @@ const EMPTY_FORM = {
   description: "",
   residentialDetails: { ...emptyResidentialDetails },
   villaDetails: { ...emptyVillaDetails },
+  agencyNetworkConsent: false,
 };
 
 const PRICE_TYPES = [
@@ -89,6 +90,7 @@ function createFormFromParking(parking) {
     residentialDetails: { ...emptyResidentialDetails, ...(parking?.residentialDetails || {}) },
     villaDetails: { ...emptyVillaDetails, ...(parking?.villaDetails || {}) },
     description: parking?.description || "",
+    agencyNetworkConsent: Boolean(parking?.agencyNetworkConsent),
   };
 }
 
@@ -353,6 +355,7 @@ function EditParking({
 
       description:
         form.description.trim(),
+      agencyNetworkConsent: Boolean(form.agencyNetworkConsent),
 
     };
 
@@ -1001,6 +1004,28 @@ function EditParking({
                   </div>
                 </div>
               </section>
+
+              <label className="edit-parking-network-consent">
+                <input
+                  type="checkbox"
+                  checked={form.agencyNetworkConsent}
+                  onChange={(event) =>
+                    setForm((currentForm) => ({
+                      ...currentForm,
+                      agencyNetworkConsent: event.target.checked,
+                    }))
+                  }
+                  disabled={loading}
+                />
+                <span>
+                  <strong>کمک مشاوران فضاجو برای پیدا کردن {isWanted ? "فایل مناسب" : "مشتری"}</strong>
+                  <small>
+                    {isWanted
+                      ? "مایلم مشاوران تأییدشده فضاجو برای پیدا کردن فایل مناسب با من ارتباط بگیرند."
+                      : "مایلم مشاوران تأییدشده فضاجو بتوانند برای این آگهی با من ارتباط بگیرند."}
+                  </small>
+                </span>
+              </label>
 
               <div className="edit-parking-actions">
                 <button
