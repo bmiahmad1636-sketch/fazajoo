@@ -784,3 +784,84 @@
     height: 62px;
   }
 }
+
+
+/* Fazajoo network opportunities — quota + unlock */
+.agency-dashboard__quota-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border: 1px solid rgba(224, 120, 35, .28);
+  border-radius: 16px;
+  background: rgba(255, 247, 239, .78);
+}
+
+.agency-dashboard__quota-card > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.agency-dashboard__quota-card span,
+.agency-dashboard__quota-card small {
+  color: #6f665f;
+}
+
+.agency-dashboard__quota-card strong {
+  color: #2f2b28;
+  font-size: 1rem;
+}
+
+.agency-dashboard__quota-badge {
+  min-width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #e97823;
+  color: #fff !important;
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.agency-dashboard__unlock-button {
+  width: 100%;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 11px;
+  padding: 9px 12px;
+  background: #e97823;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.agency-dashboard__unlock-button:hover {
+  filter: brightness(.96);
+}
+
+.agency-dashboard__unlock-button:disabled {
+  opacity: .62;
+  cursor: wait;
+}
+
+.agency-dashboard__locked-link {
+  display: block;
+  margin-top: 10px;
+  color: #81766d;
+  font-size: .78rem;
+}
+
+.agency-dashboard__network-error {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid #e7b9b2;
+  border-radius: 12px;
+  background: #fff5f3;
+  color: #8a352b;
+  font-size: .85rem;
+}

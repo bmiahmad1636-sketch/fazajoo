@@ -13,6 +13,8 @@ import {
   approveAgent as approveAgentApi,
   rejectAgent as rejectAgentApi,
   getAdminDocumentBlob,
+  getAdminNetworkAgents,
+  grantAdminNetworkCredits,
 } from "../services/adminService";
 
 import "./AdminDashboard.css";
@@ -73,6 +75,13 @@ function AdminDashboard() {
     useState("");
 
 
+  const [networkCredits, setNetworkCredits] = useState([]);
+  const [networkCreditsLoading, setNetworkCreditsLoading] = useState(true);
+  const [networkCreditsError, setNetworkCreditsError] = useState("");
+  const [grantAmounts, setGrantAmounts] = useState({});
+  const [grantWorkingId, setGrantWorkingId] = useState("");
+
+
   useEffect(() => {
     async function loadUsers() {
       try {
@@ -90,6 +99,22 @@ function AdminDashboard() {
     }
 
     loadUsers();
+
+    async function loadNetworkCredits() {
+      try {
+        setNetworkCreditsLoading(true);
+        setNetworkCreditsError("");
+        const rows = await getAdminNetworkAgents();
+        setNetworkCredits(rows);
+      } catch (loadError) {
+        console.error("Admin network credits load error:", loadError);
+        setNetworkCreditsError(loadError?.message || "دریافت سهمیه مشاوران انجام نشد.");
+      } finally {
+        setNetworkCreditsLoading(false);
+      }
+    }
+
+    loadNetworkCredits();
   }, []);
 
 
@@ -490,6 +515,42 @@ function AdminDashboard() {
     };
 
 
+
+  const grantNetworkCredits = async (user) => {
+    const amount = Number(grantAmounts[user.id] || 0);
+
+    if (!Number.isInteger(amount) || amount < 1) {
+      alert("تعداد سهمیه را وارد کنید.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `آیا ${amount.toLocaleString("fa-IR")} فرصت به سهمیه «${user.agencyName || user.agentName || user.phone || "این مشاور"}» اضافه شود؟`
+    );
+    if (!confirmed) return;
+
+    try {
+      setGrantWorkingId(user.id);
+      const result = await grantAdminNetworkCredits(user.id, amount);
+
+      setNetworkCredits((current) =>
+        current.map((item) =>
+          item.userId === user.id
+            ? { ...item, ...result.quota }
+            : item
+        )
+      );
+      setGrantAmounts((current) => ({ ...current, [user.id]: "" }));
+      alert("سهمیه با موفقیت اضافه شد.");
+    } catch (grantError) {
+      console.error("Grant network credits error:", grantError);
+      alert(grantError?.message || "شارژ سهمیه انجام نشد.");
+    } finally {
+      setGrantWorkingId("");
+    }
+  };
+
+
   return (
     <main className="admin-dashboard">
 
@@ -634,6 +695,7 @@ function AdminDashboard() {
           </div>
 
 
+          {(loading || error || pendingRequests.length > 0) && (
           <section className="admin-dashboard__panel">
 
             <div className="admin-dashboard__panel-heading">
@@ -1090,6 +1152,7 @@ function AdminDashboard() {
             )}
 
           </section>
+          )}
 
 
           <section className="admin-dashboard__panel admin-dashboard__panel--approved">
@@ -1110,6 +1173,12 @@ function AdminDashboard() {
 
             </div>
 
+
+            {networkCreditsError && (
+              <div className="admin-dashboard__state admin-dashboard__state--error">
+                {networkCreditsError}
+              </div>
+            )}
 
             {approvedAgents.length ===
             0 ? (
@@ -1152,9 +1221,52 @@ function AdminDashboard() {
                       </div>
 
 
-                      <span className="admin-dashboard__approved-badge">
-                        ✓ تأییدشده
-                      </span>
+                      {(() => {
+                        const credit = networkCredits.find(
+                          (item) => item.userId === user.id
+                        );
+
+                        return (
+                          <div className="admin-dashboard__network-credit-control">
+                            <div className="admin-dashboard__network-credit-stats">
+                              <span>
+                                سهمیه باقی‌مانده
+                                <strong>{credit ? credit.totalRemaining.toLocaleString("fa-IR") : "…"}</strong>
+                              </span>
+                              <small>
+                                رایگان: {credit ? credit.freeRemaining.toLocaleString("fa-IR") : "…"}
+                                {" • "}
+                                شارژی: {credit ? credit.paidRemaining.toLocaleString("fa-IR") : "…"}
+                                {" • "}
+                                دریافت‌شده: {credit ? credit.unlockCount.toLocaleString("fa-IR") : "…"}
+                              </small>
+                            </div>
+
+                            <div className="admin-dashboard__network-grant">
+                              <input
+                                type="number"
+                                min="1"
+                                max="10000"
+                                placeholder="مثلاً ۵۰"
+                                value={grantAmounts[user.id] || ""}
+                                onChange={(event) =>
+                                  setGrantAmounts((current) => ({
+                                    ...current,
+                                    [user.id]: event.target.value,
+                                  }))
+                                }
+                              />
+                              <button
+                                type="button"
+                                disabled={grantWorkingId === user.id || networkCreditsLoading}
+                                onClick={() => grantNetworkCredits(user)}
+                              >
+                                {grantWorkingId === user.id ? "در حال شارژ..." : "افزودن سهمیه"}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })()}
 
                     </article>
                   )

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import {
@@ -42,7 +42,15 @@ function faNumber(value) {
   return Number(value || 0).toLocaleString("fa-IR");
 }
 
-function MatchGroup({ items = [], activeTab }) {
+function getApiBase() {
+  return (import.meta.env.VITE_API_URL || "http://localhost:6060/api").replace(/\/$/, "");
+}
+
+function getAuthToken() {
+  return localStorage.getItem("fazajoo_auth_token") || "";
+}
+
+function MatchGroup({ items = [], activeTab, networkState = {} }) {
   const config = TAB_CONFIG[activeTab];
 
   if (!items.length) {
@@ -123,7 +131,11 @@ function MatchGroup({ items = [], activeTab }) {
                     {request.city || "شهر ثبت نشده"}
                     {request.area ? ` • ${faNumber(request.area)} متر` : ""}
                   </p>
-                  <Link to={`/parking/${request.id}`}>مشاهده متقاضی</Link>
+                  {networkState.isUnlocked(request.id, offer.id) ? (
+                    <Link to={`/parking/${request.id}`}>مشاهده متقاضی</Link>
+                  ) : (
+                    <span className="agency-dashboard__locked-link">اطلاعات کامل پس از دریافت فرصت</span>
+                  )}
                 </div>
 
                 <div className="agency-dashboard__network-match-score" aria-label={`درصد تطبیق ${faNumber(score)} درصد`}>
@@ -149,7 +161,20 @@ function MatchGroup({ items = [], activeTab }) {
                     </div>
                   )}
 
-                  <Link to={`/parking/${offer.id}`}>مشاهده فایل</Link>
+                  {networkState.isUnlocked(request.id, offer.id) ? (
+                    <Link to={`/parking/${offer.id}`}>مشاهده فایل</Link>
+                  ) : (
+                    <button
+                      type="button"
+                      className="agency-dashboard__unlock-button"
+                      disabled={networkState.unlockingKey === `${request.id}:${offer.id}`}
+                      onClick={() => networkState.unlock(request.id, offer.id)}
+                    >
+                      {networkState.unlockingKey === `${request.id}:${offer.id}`
+                        ? "در حال دریافت..."
+                        : "دریافت فرصت"}
+                    </button>
+                  )}
                 </div>
               </>
             ) : (
@@ -215,6 +240,63 @@ function MatchGroup({ items = [], activeTab }) {
 
 function AgencyDashboard({ parkings = [], currentUser = null }) {
   const [activeTab, setActiveTab] = useState("my-offers");
+  const [networkQuota, setNetworkQuota] = useState(null);
+  const [networkError, setNetworkError] = useState("");
+  const [unlockingKey, setUnlockingKey] = useState("");
+
+  const loadNetworkQuota = async () => {
+    try {
+      setNetworkError("");
+      const response = await fetch(`${getApiBase()}/agency/network/quota`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+      });
+      const data = await response.json();
+      if (!response.ok || !data?.ok) throw new Error(data?.message || "دریافت سهمیه انجام نشد.");
+      setNetworkQuota(data);
+    } catch (error) {
+      setNetworkError(error.message || "دریافت سهمیه انجام نشد.");
+    }
+  };
+
+  useEffect(() => {
+    loadNetworkQuota();
+  }, []);
+
+  const unlockedKeys = useMemo(
+    () =>
+      new Set(
+        (networkQuota?.unlocked || []).map(
+          (item) => `${item.requestSpaceId}:${item.offerSpaceId}`
+        )
+      ),
+    [networkQuota]
+  );
+
+  const isNetworkUnlocked = (requestId, offerId) =>
+    unlockedKeys.has(`${requestId}:${offerId}`);
+
+  const unlockNetworkOpportunity = async (requestId, offerId) => {
+    const key = `${requestId}:${offerId}`;
+    try {
+      setUnlockingKey(key);
+      setNetworkError("");
+      const response = await fetch(`${getApiBase()}/agency/network/unlock`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify({ requestSpaceId: requestId, offerSpaceId: offerId }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data?.ok) throw new Error(data?.message || "دریافت فرصت انجام نشد.");
+      setNetworkQuota(data.quota);
+    } catch (error) {
+      setNetworkError(error.message || "دریافت فرصت انجام نشد.");
+    } finally {
+      setUnlockingKey("");
+    }
+  };
 
   const dashboardData = useMemo(
     () => buildMatchingDashboard({ parkings, currentUser }),
@@ -303,7 +385,40 @@ function AgencyDashboard({ parkings = [], currentUser = null }) {
                 <strong>{faNumber(tabCounts[activeTab])} نتیجه</strong>
               </header>
 
-              <MatchGroup items={tabItems[activeTab]} activeTab={activeTab} />
+              {activeTab === "network" && (
+                <div className="agency-dashboard__quota-card">
+                  <div>
+                    <span>سهمیه فرصت‌های شبکه</span>
+                    <strong>
+                      {networkQuota
+                        ? `${faNumber(networkQuota.totalRemaining)} فرصت باقی‌مانده`
+                        : "در حال دریافت سهمیه..."}
+                    </strong>
+                    <small>
+                      {networkQuota
+                        ? `${faNumber(networkQuota.freeRemaining)} رایگان${networkQuota.paidRemaining ? ` + ${faNumber(networkQuota.paidRemaining)} خریداری‌شده` : ""}`
+                        : "دیدن خلاصه فرصت از سهمیه کم نمی‌کند."}
+                    </small>
+                  </div>
+                  <span className="agency-dashboard__quota-badge">
+                    {networkQuota ? faNumber(networkQuota.totalRemaining) : "…"}
+                  </span>
+                </div>
+              )}
+
+              {networkError && (
+                <div className="agency-dashboard__network-error">{networkError}</div>
+              )}
+
+              <MatchGroup
+                items={tabItems[activeTab]}
+                activeTab={activeTab}
+                networkState={{
+                  isUnlocked: isNetworkUnlocked,
+                  unlock: unlockNetworkOpportunity,
+                  unlockingKey,
+                }}
+              />
             </section>
 
             <aside className="agency-dashboard__tools">
@@ -360,9 +475,9 @@ function AgencyDashboard({ parkings = [], currentUser = null }) {
             <div className="agency-dashboard__network-note">
               <strong>فرصت‌های شبکه فضاجو</strong>
               <p>
-                این بخش پایه سرویس ویژه مشاوران است. سهمیه رایگان، بازکردن فرصت
-                و محدودیت حداکثر سه مشاور در مرحله بعد به Backend و پنل مدیریت
-                متصل می‌شود.
+                خلاصه فرصت‌ها رایگان دیده می‌شود. فقط با انتخاب «دریافت فرصت»
+                یک سهمیه مصرف می‌شود و اطلاعات کامل همان تطبیق برای شما باز می‌شود.
+                هر فرصت شبکه حداکثر برای سه مشاور قابل دریافت است.
               </p>
             </div>
           )}

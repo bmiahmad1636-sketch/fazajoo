@@ -95,3 +95,18 @@ export async function getAdminDocumentBlob(userId, documentType, download = fals
     contentDisposition: response.headers.get("Content-Disposition") || "",
   };
 }
+
+
+// سهمیه فرصت‌های شبکه مشاوران تأییدشده
+export async function getAdminNetworkAgents() {
+  const data = await request("/admin/network/agents");
+  return data.agents || [];
+}
+
+// شارژ دستی بسته فرصت شبکه برای یک مشاور
+export async function grantAdminNetworkCredits(userId, amount) {
+  return request(`/admin/network/agents/${encodeURIComponent(userId)}/grant`, {
+    method: "POST",
+    body: JSON.stringify({ amount }),
+  });
+}

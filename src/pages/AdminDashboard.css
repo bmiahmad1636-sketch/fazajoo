@@ -1033,3 +1033,185 @@
     border-radius: 19px;
   }
 }
+
+/* Fazajoo — admin network opportunity credits */
+.admin-dashboard__network-credit-control {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.admin-dashboard__network-credit-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 190px;
+}
+
+.admin-dashboard__network-credit-stats > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: #6f6259;
+  font-size: .7rem;
+}
+
+.admin-dashboard__network-credit-stats strong {
+  color: #e97823;
+  font-size: .95rem;
+}
+
+.admin-dashboard__network-credit-stats small {
+  color: #8c7d73;
+  font-size: .62rem;
+}
+
+.admin-dashboard__network-grant {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.admin-dashboard__network-grant input {
+  width: 92px;
+  padding: 8px 9px;
+  border: 1px solid #e6d9cf;
+  border-radius: 10px;
+  background: #fff;
+  font: inherit;
+  font-size: .72rem;
+  outline: none;
+}
+
+.admin-dashboard__network-grant input:focus {
+  border-color: #e97823;
+}
+
+.admin-dashboard__network-grant button {
+  border: 0;
+  border-radius: 10px;
+  padding: 8px 11px;
+  background: #e97823;
+  color: #fff;
+  font: inherit;
+  font-size: .68rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.admin-dashboard__network-grant button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+@media (max-width: 760px) {
+  .admin-dashboard__network-credit-control {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-dashboard__network-grant input {
+    flex: 1;
+    width: auto;
+  }
+}
+
+
+/* Fazajoo — REAL compact approved-agent rows (actual selectors) */
+.admin-dashboard__panel--approved {
+  padding: 14px 16px;
+}
+
+.admin-dashboard__panel--approved .admin-dashboard__panel-heading {
+  margin-bottom: 10px;
+}
+
+.admin-dashboard__approved-list {
+  gap: 6px;
+}
+
+.admin-dashboard__approved-list article {
+  min-height: 0;
+  padding: 7px 10px;
+  gap: 10px;
+  border-radius: 11px;
+}
+
+.admin-dashboard__approved-list article > div:first-child {
+  min-width: 210px;
+  gap: 0;
+}
+
+.admin-dashboard__approved-list article > div:first-child > strong {
+  font-size: .72rem;
+  line-height: 1.25;
+}
+
+.admin-dashboard__approved-list article > div:first-child > span {
+  margin-top: 1px;
+  font-size: .58rem;
+  line-height: 1.25;
+}
+
+.admin-dashboard__approved-list .admin-dashboard__network-credit-control {
+  flex: 1 1 auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.admin-dashboard__approved-list .admin-dashboard__network-credit-stats {
+  min-width: 175px;
+  gap: 0;
+}
+
+.admin-dashboard__approved-list .admin-dashboard__network-credit-stats > span {
+  margin: 0;
+  font-size: .61rem;
+  line-height: 1.2;
+}
+
+.admin-dashboard__approved-list .admin-dashboard__network-credit-stats strong {
+  margin-right: 4px;
+  font-size: .8rem;
+}
+
+.admin-dashboard__approved-list .admin-dashboard__network-credit-stats small {
+  font-size: .55rem;
+  line-height: 1.2;
+}
+
+.admin-dashboard__approved-list .admin-dashboard__network-grant {
+  flex-direction: row;
+  gap: 5px;
+}
+
+.admin-dashboard__approved-list .admin-dashboard__network-grant input {
+  width: 76px;
+  padding: 5px 7px;
+  min-height: 30px;
+}
+
+.admin-dashboard__approved-list .admin-dashboard__network-grant button {
+  padding: 5px 9px;
+  min-height: 30px;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .admin-dashboard__approved-list article {
+    align-items: stretch;
+  }
+
+  .admin-dashboard__approved-list .admin-dashboard__network-credit-control {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+}

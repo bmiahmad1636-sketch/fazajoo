@@ -3,8 +3,59 @@ const router = express.Router();
 
 const { pool } = require("../db/pool");
 const { requireAuth } = require("../middleware/auth.middleware");
+const { getNetworkQuota, unlockNetworkOpportunity } = require("../services/networkOpportunity.service");
 
 router.use(requireAuth);
+
+// سهمیه فرصت‌های شبکه مشاور تأییدشده
+router.get("/network/quota", async (req, res) => {
+  try {
+    const data = await getNetworkQuota(req.user.id);
+    return res.json({ ok: true, ...data });
+  } catch (error) {
+    console.error("agency network quota error:", error);
+    return res.status(error.status || 500).json({
+      ok: false,
+      message: error.message || "دریافت سهمیه فرصت‌های شبکه انجام نشد.",
+    });
+  }
+});
+
+// باز کردن یک فرصت شبکه؛ فقط این عملیات یک سهمیه مصرف می‌کند
+router.post("/network/unlock", async (req, res) => {
+  try {
+    const requestSpaceId = clean(req.body?.requestSpaceId);
+    const offerSpaceId = clean(req.body?.offerSpaceId);
+
+    if (!requestSpaceId || !offerSpaceId) {
+      return res.status(400).json({
+        ok: false,
+        message: "شناسه فایل و متقاضی برای دریافت فرصت لازم است.",
+      });
+    }
+
+    const result = await unlockNetworkOpportunity(
+      req.user.id,
+      requestSpaceId,
+      offerSpaceId
+    );
+
+    const quota = await getNetworkQuota(req.user.id);
+
+    return res.json({
+      ok: true,
+      ...result,
+      quota,
+    });
+  } catch (error) {
+    console.error("agency network unlock error:", error);
+    return res.status(error.status || 500).json({
+      ok: false,
+      message: error.message || "دریافت فرصت شبکه انجام نشد.",
+    });
+  }
+});
+
 
 function clean(value) {
   return typeof value === "string" ? value.trim() : "";
