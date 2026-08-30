@@ -547,7 +547,7 @@ function getResidentialScore(request, offer) {
   const rr=Number(r.monthlyRent)||0, orr=Number(o.monthlyRent)||0;
   if (rd && od && od <= rd*1.1) { score += 5; reasons.push("رهن نزدیک به بودجه"); }
   if (rr && orr && orr <= rr*1.1) { score += 5; reasons.push("اجاره نزدیک به بودجه"); }
-  for (const [k,label] of [["elevator","آسانسور"],["parking","پارکینگ"],["storage","انباری"],["furnished","مبله"]]) {
+  for (const [k,label] of [["elevator","آسانسور"],["parking","پارکینگ"],["storage","انباری"],["furnished","مبله"],["balcony","بالکن"],["renovated","بازسازی‌شده"],["convertible","قابل تبدیل رهن و اجاره"]]) {
     if (r[k] && !o[k]) return {score:0,reasons:[],hardReject:true};
     if (r[k] && o[k]) { score += 2; reasons.push(label); }
   }

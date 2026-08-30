@@ -652,13 +652,18 @@ function ParkingDetails({
                     <span><small>اجاره ماهانه</small><strong>{Number(residential.monthlyRent || 0).toLocaleString("fa-IR")} ریال</strong></span>
                     <span><small>اتاق</small><strong>{Number(residential.bedrooms || 0).toLocaleString("fa-IR")}</strong></span>
                     {residential.floor && <span><small>طبقه</small><strong>{residential.floor}</strong></span>}
-                    {residential.buildYear > 0 && <span><small>سال ساخت</small><strong>{Number(residential.buildYear).toLocaleString("fa-IR")}</strong></span>}
+                    {Number(residential.totalFloors || 0) > 0 && <span><small>تعداد طبقات ساختمان</small><strong>{Number(residential.totalFloors).toLocaleString("fa-IR")}</strong></span>}
+                    {Number(residential.unitsPerFloor || 0) > 0 && <span><small>واحد در هر طبقه</small><strong>{Number(residential.unitsPerFloor).toLocaleString("fa-IR")}</strong></span>}
+                    {residential.buildYear > 0 && <span><small>سال ساخت</small><strong>{String(residential.buildYear).replace(/\D/g, "").replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)])}</strong></span>}
                   </div>
                   <div className="parking-details-residential__amenities">
                     {residential.elevator && <b>✓ آسانسور</b>}
                     {residential.parking && <b>✓ پارکینگ</b>}
                     {residential.storage && <b>✓ انباری</b>}
                     {residential.furnished && <b>✓ مبله</b>}
+                    {residential.balcony && <b>✓ بالکن</b>}
+                    {residential.renovated && <b>✓ بازسازی‌شده</b>}
+                    {residential.convertible && <b>✓ قابل تبدیل رهن و اجاره</b>}
                   </div>
                 </div>
               )}

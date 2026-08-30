@@ -405,18 +405,8 @@
   gap: 13px;
 }
 
-.parking-card__heading {
-  min-width: 0;
-  flex: 1;
-
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
 .parking-card__type-caption {
-  display: flex;
-  width: 100%;
+  display: inline-flex;
 
   margin-bottom: 5px;
 
@@ -432,8 +422,7 @@
 }
 
 .parking-card__title-link {
-  display: block;
-  width: 100%;
+  display: inline-block;
 }
 
 .parking-card__title {
@@ -858,202 +847,40 @@ span {
   }
 }
 
-/* ===== تفاوت واضح کارت درخواست فضا و عرضه فضا ===== */
-
-.parking-card--wanted {
-  border: 2px solid rgba(93, 64, 50, 0.22);
-  background:
-    linear-gradient(
-      155deg,
-      #fffdfb 0%,
-      #f8f0e9 100%
-    );
+/* Fazajoo: long price overflow fix */
+.parking-card__footer {
+  align-items: flex-end;
 }
 
-.parking-card--wanted .parking-card__image-wrapper {
-  height: 220px;
-  background:
-    linear-gradient(
-      145deg,
-      #5d4032 0%,
-      #795548 52%,
-      #9a725c 100%
-    );
+.parking-card__price {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
 }
 
-.parking-card__request-hero {
-  position: absolute;
-  inset: 0;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  padding: 46px 22px 44px;
-
-  text-align: center;
-  color: #ffffff;
+.parking-card__price strong {
+  display: block;
+  width: 100%;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.55;
+  font-size: 0.82rem;
 }
 
-.parking-card__request-hero::before {
-  content: "";
-
-  position: absolute;
-
-  width: 180px;
-  height: 180px;
-
-  border-radius: 50%;
-
-  background:
-    rgba(255, 255, 255, 0.08);
-
-  filter: blur(2px);
+.parking-card__details-button {
+  flex: 0 0 auto;
 }
 
-.parking-card__request-icon {
-  position: relative;
-  z-index: 1;
-
-  width: 62px;
-  height: 62px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  margin-bottom: 10px;
-
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-radius: 20px;
-
-  background:
-    rgba(255, 255, 255, 0.14);
-
-  box-shadow:
-    0 12px 28px
-      rgba(41, 25, 18, 0.2);
-
-  font-size: 1.8rem;
-}
-
-.parking-card__request-kicker {
-  position: relative;
-  z-index: 1;
-
-  margin-bottom: 3px;
-
-  color: #f7ded0;
-
-  font-size: 0.72rem;
-  font-weight: 850;
-}
-
-.parking-card__request-title {
-  position: relative;
-  z-index: 1;
-
-  font-size: 1.25rem;
-  font-weight: 950;
-  line-height: 1.5;
-}
-
-.parking-card__request-city {
-  position: relative;
-  z-index: 1;
-
-  margin-top: 3px;
-
-  color: rgba(255, 255, 255, 0.82);
-
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.parking-card--wanted .parking-card__category {
-  color: #5d4032;
-  background:
-    rgba(255, 250, 246, 0.94);
-}
-
-.parking-card--wanted .parking-card__status {
-  color: #ffffff;
-  background:
-    rgba(37, 27, 22, 0.48);
-  border-color:
-    rgba(255, 255, 255, 0.22);
-}
-
-.parking-card--wanted .parking-card__listing-type {
-  right: 50%;
-  bottom: 11px;
-
-  transform: translateX(50%);
-
-  min-width: 138px;
-
-  background: #fff8f2;
-  color: #5d4032;
-
-  border-color:
-    rgba(255, 255, 255, 0.8);
-}
-
-.parking-card--wanted .parking-card__type-caption {
-  display: inline-flex;
-  align-items: center;
-
-  margin-bottom: 7px;
-  padding: 5px 9px;
-
-  border-radius: 999px;
-
-  background: #f3e7df;
-  color: #684838;
-
-  font-size: 0.68rem;
-  font-weight: 900;
-}
-
-.parking-card--wanted .parking-card__feature {
-  border-color:
-    rgba(121, 85, 72, 0.13);
-
-  background: #fbf6f2;
-}
-
-.parking-card--wanted .parking-card__feature-icon--purple,
-.parking-card--wanted .parking-card__feature-icon--cyan {
-  background: #eee1d8;
-  color: #684838;
-}
-
-.parking-card--wanted .parking-card__price {
-  padding: 7px 10px;
-
-  border-radius: 11px;
-
-  background: #f5ebe4;
-}
-
-.parking-card--wanted .parking-card__price-label {
-  color: #80685a;
-}
-
-@media (max-width: 500px) {
-  .parking-card--wanted .parking-card__image-wrapper {
-    height: 205px;
+@media (max-width: 520px) {
+  .parking-card__footer {
+    gap: 8px;
   }
 
-  .parking-card__request-icon {
-    width: 56px;
-    height: 56px;
-
-    font-size: 1.6rem;
-  }
-
-  .parking-card__request-title {
-    font-size: 1.12rem;
+  .parking-card__price strong {
+    font-size: 0.76rem;
+    line-height: 1.5;
   }
 }

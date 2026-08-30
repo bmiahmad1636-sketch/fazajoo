@@ -1343,8 +1343,9 @@ function AddParking() {
 
                           <div>
                             <strong>
-                              {form.price ||
-                                "قیمت آگهی"}
+                              {form.price
+                                ? `${formatPriceInput(form.price)} ریال`
+                                : "قیمت آگهی"}
                             </strong>
 
                             <small>

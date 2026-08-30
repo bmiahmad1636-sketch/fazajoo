@@ -99,11 +99,15 @@ function clean(body = {}) {
           bedrooms: Math.max(0, Math.min(20, Number(body.residentialDetails.bedrooms) || 0)),
           floor: String(body.residentialDetails.floor || "").trim().slice(0, 30),
           totalFloors: Math.max(0, Math.min(100, Number(body.residentialDetails.totalFloors) || 0)),
+          unitsPerFloor: Math.max(0, Math.min(50, Number(body.residentialDetails.unitsPerFloor) || 0)),
           buildYear: Math.max(0, Math.min(2100, Number(body.residentialDetails.buildYear) || 0)),
           elevator: Boolean(body.residentialDetails.elevator),
           parking: Boolean(body.residentialDetails.parking),
           storage: Boolean(body.residentialDetails.storage),
           furnished: Boolean(body.residentialDetails.furnished),
+          balcony: Boolean(body.residentialDetails.balcony),
+          renovated: Boolean(body.residentialDetails.renovated),
+          convertible: Boolean(body.residentialDetails.convertible),
         }
       : {},
     villaDetails:
