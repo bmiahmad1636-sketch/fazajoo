@@ -47,6 +47,7 @@ async function ensureLegalSchema() {
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )`);
     await query(`CREATE INDEX IF NOT EXISTS idx_legal_audit_created ON legal_audit_log(created_at DESC)`);
+    await query(`ALTER TABLE legal_actions ALTER COLUMN target_id TYPE TEXT USING target_id::text`);
     await query(`CREATE INDEX IF NOT EXISTS idx_legal_actions_case ON legal_actions(case_id, created_at DESC)`);
   })().catch(e => { ready = null; throw e; });
   return ready;

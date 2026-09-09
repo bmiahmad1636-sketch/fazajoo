@@ -1418,3 +1418,66 @@
     font-size: 1.25rem;
   }
 }
+
+/* =========================
+   SEND ERROR IN CHAT
+========================= */
+
+.chat-send-error {
+  width: min(88%, 620px);
+  box-sizing: border-box;
+  margin: 22px auto;
+  padding: 15px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-align: center;
+  border: 1px solid #f0b5b5;
+  border-radius: 15px;
+  background: #fff1f1;
+  color: #b42318;
+  box-shadow: 0 8px 22px rgba(180, 35, 24, 0.08);
+}
+
+.chat-send-error strong {
+  font-size: 0.86rem;
+  font-weight: 950;
+}
+
+.chat-send-error span {
+  font-size: 0.76rem;
+  line-height: 1.9;
+}
+
+
+.chat-form--blocked textarea {
+  background: #f7f7f7;
+  border-color: #e2caca;
+  color: #8f8f8f;
+  cursor: not-allowed;
+}
+
+.chat-form--blocked textarea::placeholder {
+  color: #b42318;
+  opacity: 1;
+}
+
+.chat-form--blocked .chat-form__footer button {
+  background: #e5e5e5;
+  border-color: #d6d6d6;
+  color: #8b8b8b;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.chat-form--blocked .chat-form__footer button:disabled {
+  opacity: 1;
+}
+
+@media (max-width: 620px) {
+  .chat-form--blocked textarea::placeholder {
+    font-size: 0.78rem;
+  }
+}

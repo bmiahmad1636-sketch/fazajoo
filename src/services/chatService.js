@@ -48,6 +48,9 @@ export async function createOrGetChat(spaceId, chatType = "personal") {
   ).chat;
 }
 export async function getMessages(chatId) { return (await request(`/chats/${chatId}/messages`)).messages || []; }
+export async function getChatLegalStatus(chatId) {
+  return await request(`/chats/${chatId}/legal-status`);
+}
 export async function sendMessage(chatId, text) { return (await request(`/chats/${chatId}/messages`, { method: "POST", body: JSON.stringify({ text }) })).message; }
 export async function markChatRead(chatId) { return request(`/chats/${chatId}/read`, { method: "POST", body: "{}" }); }
 export async function getUnreadCount(chatType = "personal") {

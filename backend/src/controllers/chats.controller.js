@@ -201,6 +201,23 @@ async function list(req, res) {
   }
 }
 
+async function legalStatus(req, res) {
+  try {
+    await ensureChatSchema();
+    const chat = await getChatRow(req.params.id, req.user.id);
+    if (!chat) return res.status(404).json({ ok: false, message: "گفتگو پیدا نشد." });
+    const globalMode = (await query(`SELECT global_chat_mode FROM legal_system_settings WHERE id=1`)).rows[0]?.global_chat_mode || "active";
+    return res.json({
+      ok: true,
+      globalBlocked: globalMode !== "active",
+      chatBlocked: (chat.legal_mode || "active") !== "active",
+    });
+  } catch (error) {
+    console.error("Chat legal status error:", error);
+    return res.status(500).json({ ok: false, message: "وضعیت حقوقی گفتگو دریافت نشد." });
+  }
+}
+
 async function getOne(req, res) {
   try {
     const row = await getChatRow(req.params.id, req.user.id);
@@ -450,4 +467,4 @@ async function unreadCount(req, res) {
   }
 }
 
-module.exports = { list, getOne, createOrGet, messages, send, markRead, unreadCount };
+module.exports = { list, getOne, createOrGet, messages, send, markRead, unreadCount, legalStatus };

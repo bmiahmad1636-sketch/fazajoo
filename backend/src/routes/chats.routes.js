@@ -5,6 +5,7 @@ const router = express.Router();
 router.use(requireAuth);
 router.get("/", controller.list);
 router.get("/unread-count", controller.unreadCount);
+router.get("/:id/legal-status", controller.legalStatus);
 router.post("/", controller.createOrGet);
 router.get("/:id", controller.getOne);
 router.get("/:id/messages", controller.messages);
