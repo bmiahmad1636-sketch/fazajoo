@@ -1,0 +1,13 @@
+const express=require('express');
+const {requireAuth,requireAdmin}=require('../middleware/auth.middleware');
+const legal=require('../services/legal.service');
+const router=express.Router(); router.use(requireAuth,requireAdmin);
+router.get('/cases',async(req,res)=>{try{res.json({ok:true,cases:await legal.listCases()});}catch(e){res.status(500).json({ok:false,message:e.message});}});
+router.post('/cases',async(req,res)=>{try{res.status(201).json({ok:true,case:await legal.createCase(req.user.id,req.body||{})});}catch(e){res.status(e.status||500).json({ok:false,message:e.message});}});
+router.patch('/cases/:id/close',async(req,res)=>{try{res.json({ok:true,case:await legal.closeCase(req.user.id,req.params.id)});}catch(e){res.status(e.status||500).json({ok:false,message:e.message});}});
+router.get('/audit',async(req,res)=>{try{res.json({ok:true,logs:await legal.listAudit(req.query.caseId||null)});}catch(e){res.status(500).json({ok:false,message:e.message});}});
+router.post('/cases/:id/actions',async(req,res)=>{try{res.json(await legal.applyAction(req.user.id,req.params.id,req.body||{}));}catch(e){res.status(e.status||500).json({ok:false,message:e.message});}});
+router.get('/cases/:id/lookup/phone/:phone',async(req,res)=>{try{res.json({ok:true,...await legal.lookupByPhone(req.user.id,req.params.id,req.params.phone)});}catch(e){res.status(e.status||500).json({ok:false,message:e.message});}});
+router.get('/cases/:id/export/user/:userId',async(req,res)=>{try{const out=await legal.exportUserData(req.user.id,req.params.id,req.params.userId,req.query.from,req.query.to,req.query.scope||'both');res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Content-Disposition',`attachment; filename="fazajoo-legal-${req.params.userId}.json"`);res.setHeader('X-Fazajoo-SHA256',out.sha256);res.send(out.text);}catch(e){res.status(e.status||500).json({ok:false,message:e.message});}});
+router.get('/cases/:id/export/phone/:phone',async(req,res)=>{try{const out=await legal.exportUserDataByPhone(req.user.id,req.params.id,req.params.phone,req.query.from,req.query.to,req.query.scope||'both');res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Content-Disposition',`attachment; filename="fazajoo-legal-phone-${String(req.params.phone).replace(/\D/g,'')}.json"`);res.setHeader('X-Fazajoo-SHA256',out.sha256);res.send(out.text);}catch(e){res.status(e.status||500).json({ok:false,message:e.message});}});
+module.exports=router;

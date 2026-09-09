@@ -553,6 +553,7 @@ function AdminDashboard() {
 
   return (
     <main className="admin-dashboard">
+      <div style={{maxWidth:"1180px",margin:"10px auto 0",padding:"0 20px",direction:"rtl"}}><Link to="/admin/legal" style={{display:"inline-block",padding:"9px 14px",borderRadius:"10px",background:"#3f3a36",color:"white",textDecoration:"none"}}>⚖️ امور حقوقی و دستورات قضایی</Link></div>
 
       <section className="admin-dashboard__hero">
 

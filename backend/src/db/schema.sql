@@ -187,3 +187,25 @@ CREATE TABLE IF NOT EXISTS smart_search_notifications (
 
 CREATE INDEX IF NOT EXISTS idx_smart_notifications_user_read
 ON smart_search_notifications(user_id, is_read, created_at DESC);
+
+-- Legal / judicial response infrastructure
+ALTER TABLE chats ADD COLUMN IF NOT EXISTS legal_mode VARCHAR(20) NOT NULL DEFAULT 'active';
+ALTER TABLE chats ADD COLUMN IF NOT EXISTS legal_hold BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE spaces ADD COLUMN IF NOT EXISTS legal_hold BOOLEAN NOT NULL DEFAULT FALSE;
+CREATE TABLE IF NOT EXISTS legal_cases (
+  id UUID PRIMARY KEY, case_number VARCHAR(120) NOT NULL, authority VARCHAR(255) NOT NULL,
+  order_date DATE, subject TEXT NOT NULL, scope_text TEXT, order_document_ref TEXT,
+  status VARCHAR(20) NOT NULL DEFAULT 'open' CHECK (status IN ('open','closed')),
+  created_by UUID NOT NULL REFERENCES users(id), created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS legal_actions (
+  id UUID PRIMARY KEY, case_id UUID NOT NULL REFERENCES legal_cases(id) ON DELETE CASCADE,
+  action_type VARCHAR(40) NOT NULL, target_type VARCHAR(20) NOT NULL, target_id UUID,
+  details JSONB NOT NULL DEFAULT '{}'::jsonb, created_by UUID NOT NULL REFERENCES users(id), created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS legal_audit_log (
+  id UUID PRIMARY KEY, case_id UUID REFERENCES legal_cases(id) ON DELETE SET NULL,
+  admin_id UUID NOT NULL REFERENCES users(id), action VARCHAR(80) NOT NULL,
+  target_type VARCHAR(30), target_id TEXT, metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

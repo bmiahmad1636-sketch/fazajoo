@@ -11,6 +11,11 @@ function ensureChatSchema() {
         ADD COLUMN IF NOT EXISTS chat_type VARCHAR(20) NOT NULL DEFAULT 'personal'
       `);
 
+      await query(`ALTER TABLE chats ADD COLUMN IF NOT EXISTS legal_mode VARCHAR(20) NOT NULL DEFAULT 'active'`);
+      await query(`ALTER TABLE chats ADD COLUMN IF NOT EXISTS legal_hold BOOLEAN NOT NULL DEFAULT FALSE`);
+      await query(`CREATE TABLE IF NOT EXISTS legal_system_settings (id SMALLINT PRIMARY KEY CHECK (id=1), global_chat_mode VARCHAR(20) NOT NULL DEFAULT 'active', updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`);
+      await query(`INSERT INTO legal_system_settings (id,global_chat_mode) VALUES (1,'active') ON CONFLICT (id) DO NOTHING`);
+
       await query(`
         ALTER TABLE chats
         DROP CONSTRAINT IF EXISTS chats_space_requester_unique
@@ -76,12 +81,14 @@ function mapChat(row, currentUserId) {
     unreadCount: Number(row.unread_count || 0),
     updatedAt: row.last_message_at || row.updated_at || row.created_at,
     createdAt: row.created_at,
+    legalMode: row.legal_mode || 'active',
+    legalHold: Boolean(row.legal_hold),
   };
 }
 
 const CHAT_SELECT = `
   SELECT
-    c.id, c.space_id, c.owner_id, c.requester_id, c.chat_type, c.created_at, c.updated_at,
+    c.id, c.space_id, c.owner_id, c.requester_id, c.chat_type, c.legal_mode, c.legal_hold, c.created_at, c.updated_at,
     s.title AS space_title, s.city AS space_city, s.image_url AS space_image_url,
     s.listing_type AS space_listing_type,
     ou.full_name AS owner_name, ou.phone AS owner_phone,
@@ -291,6 +298,8 @@ async function messages(req, res) {
         senderId: row.sender_id,
         text: row.text,
         createdAt: row.created_at,
+    legalMode: row.legal_mode || 'active',
+    legalHold: Boolean(row.legal_hold),
         readAt: row.read_at,
       })),
     });
@@ -308,6 +317,14 @@ async function send(req, res) {
     const chat = await getChatRow(req.params.id, req.user.id);
     if (!chat) return res.status(404).json({ ok: false, message: "گفتگو پیدا نشد." });
 
+    const globalMode=(await query(`SELECT global_chat_mode FROM legal_system_settings WHERE id=1`)).rows[0]?.global_chat_mode || 'active';
+    if (globalMode !== 'active') {
+      return res.status(423).json({ ok: false, message: 'ارسال پیام در فضاجو به دستور مدیریت حقوقی موقتاً غیرفعال است.' });
+    }
+    if ((chat.legal_mode || 'active') !== 'active') {
+      return res.status(423).json({ ok: false, message: 'ارسال پیام در این گفتگو به دستور مدیریت حقوقی غیرفعال است.' });
+    }
+
     const id = crypto.randomUUID();
     const result = await query(
       `INSERT INTO messages (id, chat_id, sender_id, text)
@@ -324,6 +341,8 @@ async function send(req, res) {
       senderId: row.sender_id,
       text: row.text,
       createdAt: row.created_at,
+    legalMode: row.legal_mode || 'active',
+    legalHold: Boolean(row.legal_hold),
       readAt: row.read_at,
     };
 

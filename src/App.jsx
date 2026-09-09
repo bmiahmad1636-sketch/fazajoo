@@ -26,6 +26,7 @@ import AgencyDashboard from "./pages/AgencyDashboard";
 import AgencyApplicants from "./pages/AgencyApplicants";
 import AgencyAccess from "./pages/AgencyAccess";
 import AdminDashboard from "./pages/AdminDashboard";
+import LegalCenterJalali from "./pages/LegalCenterJalali";
 import FindForMe from "./pages/FindForMe";
 
 import { getSpaces } from "./services/spaceService";
@@ -690,6 +691,16 @@ function App() {
               profileLoading={profileLoading}
             >
               <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+
+
+        <Route
+          path="/admin/legal"
+          element={
+            <AdminRoute user={user} authLoading={authLoading} userProfile={userProfile} profileLoading={profileLoading}>
+              <LegalCenterJalali />
             </AdminRoute>
           }
         />
