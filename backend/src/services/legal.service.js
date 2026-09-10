@@ -18,11 +18,14 @@ async function ensureLegalSchema() {
         subject TEXT NOT NULL,
         scope_text TEXT,
         order_document_ref TEXT,
-        status VARCHAR(20) NOT NULL DEFAULT 'open' CHECK (status IN ('open','closed')),
+        status VARCHAR(20) NOT NULL DEFAULT 'open' CHECK (status IN ('open','archived')),
         created_by UUID NOT NULL REFERENCES users(id),
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )`);
+    await query(`ALTER TABLE legal_cases DROP CONSTRAINT IF EXISTS legal_cases_status_check`);
+    await query(`UPDATE legal_cases SET status='archived' WHERE status='closed'`);
+    await query(`ALTER TABLE legal_cases ADD CONSTRAINT legal_cases_status_check CHECK (status IN ('open','archived'))`);
     await query(`ALTER TABLE legal_cases ADD COLUMN IF NOT EXISTS order_date_jalali VARCHAR(10)`);
     await query(`
       CREATE TABLE IF NOT EXISTS legal_actions (
@@ -71,7 +74,7 @@ async function createCase(adminId, body) {
     [id,caseNumber,authority,orderDateJalali||null,subject,String(body.scopeText||'').trim()||null,String(body.orderDocumentRef||'').trim()||null,adminId]);
   await audit({adminId,caseId:id,action:'case_created',metadata:{caseNumber,authority}}); return r.rows[0];
 }
-async function closeCase(adminId,id){ await ensureLegalSchema(); const r=await query(`UPDATE legal_cases SET status='closed',updated_at=NOW() WHERE id=$1 RETURNING *`,[id]); if(!r.rows[0]){const e=new Error('پرونده پیدا نشد.');e.status=404;throw e;} await audit({adminId,caseId:id,action:'case_closed'}); return r.rows[0]; }
+async function closeCase(adminId,id){ await ensureLegalSchema(); const r=await query(`UPDATE legal_cases SET status='archived',updated_at=NOW() WHERE id=$1 RETURNING *`,[id]); if(!r.rows[0]){const e=new Error('پرونده پیدا نشد.');e.status=404;throw e;} await audit({adminId,caseId:id,action:'case_archived'}); return r.rows[0]; }
 async function listAudit(caseId){ await ensureLegalSchema(); const r=await query(`SELECT l.*,u.full_name AS admin_name,u.phone AS admin_phone FROM legal_audit_log l LEFT JOIN users u ON u.id=l.admin_id WHERE ($1::uuid IS NULL OR l.case_id=$1) ORDER BY l.created_at DESC LIMIT 500`,[caseId||null]); return r.rows; }
 
 
@@ -79,14 +82,14 @@ async function requireOpenCase(caseId){
   await ensureLegalSchema();
   const c=(await query(`SELECT * FROM legal_cases WHERE id=$1`,[caseId])).rows[0];
   if(!c){const e=new Error('ابتدا یک پرونده قضایی معتبر انتخاب کنید.');e.status=404;throw e;}
-  if(c.status!=='open'){const e=new Error('پرونده انتخاب‌شده بسته است.');e.status=409;throw e;}
+  if(c.status!=='open'){const e=new Error('پرونده انتخاب‌شده بایگانی شده است.');e.status=409;throw e;}
   return c;
 }
 
 async function applyAction(adminId, caseId, body){
   await ensureLegalSchema();
   const action=String(body.action||''); const targetType=String(body.targetType||''); const targetId=String(body.targetId||'').trim();
-  const allowed=new Set(['chat_readonly','chat_block','chat_unblock','global_chat_block','global_chat_unblock','legal_hold_on','legal_hold_off','user_suspend','user_restore','space_disable']);
+  const allowed=new Set(['chat_readonly','chat_block','chat_unblock','global_chat_block','global_chat_unblock','legal_hold_on','legal_hold_off','user_suspend','user_restore','space_disable','space_enable']);
   if(!allowed.has(action)||!['chat','user','space','system'].includes(targetType)||!targetId){const e=new Error('عملیات یا هدف معتبر نیست.');e.status=400;throw e;}
   await requireOpenCase(caseId);
   if(action==='chat_readonly') await query(`UPDATE chats SET legal_mode='readonly' WHERE id=$1`,[targetId]);
@@ -99,6 +102,7 @@ async function applyAction(adminId, caseId, body){
   if(action==='user_suspend') await query(`UPDATE users SET is_active=FALSE WHERE id=$1`,[targetId]);
   if(action==='user_restore') await query(`UPDATE users SET is_active=TRUE WHERE id=$1`,[targetId]);
   if(action==='space_disable') await query(`UPDATE spaces SET status='inactive', legal_hold=TRUE WHERE id=$1`,[targetId]);
+  if(action==='space_enable') await query(`UPDATE spaces SET status='active', legal_hold=FALSE WHERE id=$1`,[targetId]);
   await query(`INSERT INTO legal_actions (id,case_id,action_type,target_type,target_id,details,created_by) VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7)`,[crypto.randomUUID(),caseId,action,targetType,targetId,JSON.stringify({note:String(body.note||'').trim()}),adminId]);
   await audit({adminId,caseId,action,targetType,targetId,metadata:{note:String(body.note||'').trim()}}); return {ok:true};
 }
@@ -110,8 +114,20 @@ async function exportUserData(adminId, caseId, userId, from, to, scope='both'){
   const user=(await query(`SELECT id,phone,full_name,account_type,system_role,agency_status,is_active,created_at FROM users WHERE id=$1`,[userId])).rows[0]; if(!user){const e=new Error('کاربر پیدا نشد.');e.status=404;throw e;}
   const params=[userId]; let dateWhere=''; if(from){params.push(from);dateWhere+=` AND m.created_at >= $${params.length}::timestamptz`; } if(to){params.push(to);dateWhere+=` AND m.created_at <= $${params.length}::timestamptz`;}
   const messages=scope==='spaces'?[]:(await query(`SELECT m.id,m.chat_id,m.sender_id,m.text,m.created_at,m.read_at,c.space_id,c.owner_id,c.requester_id,c.chat_type FROM messages m JOIN chats c ON c.id=m.chat_id WHERE (c.owner_id=$1 OR c.requester_id=$1) ${dateWhere} ORDER BY m.created_at ASC`,params)).rows;
-  const spaces=scope==='messages'?[]:(await query(`SELECT id,title,city,category,listing_type,status,created_at,updated_at FROM spaces WHERE owner_id=$1 ORDER BY created_at ASC`,[userId])).rows;
-  const evidence={exportVersion:1,generatedAt:new Date().toISOString(),caseId,case:caseRow,user,filters:{from:from||null,to:to||null,scope},spaces,messages};
+  const spaceRows=scope==='messages'?[]:(await query(`SELECT to_jsonb(s) AS raw FROM spaces s WHERE s.owner_id=$1 ORDER BY s.created_at ASC`,[userId])).rows;
+  const imageKeys=new Set(['image','imageurl','image_url','images','image_urls','imageurls','gallery','photos','photo_urls','photourls','main_image','mainimage','main_image_url','mainimageurl']);
+  const collectImageUrls=(value,out=new Set(),depth=0)=>{
+    if(depth>5||value==null)return [...out];
+    if(typeof value==='string'){const v=value.trim();if(/^https?:\/\//i.test(v)||/^\/api\/uploads\/ad-image\//i.test(v))out.add(v);return [...out];}
+    if(Array.isArray(value)){for(const item of value)collectImageUrls(item,out,depth+1);return [...out];}
+    if(typeof value==='object'){for(const [k,v] of Object.entries(value)){const key=String(k).toLowerCase().replace(/[\s-]/g,'_');if(imageKeys.has(key)||key.includes('image')||key.includes('photo')||key.includes('gallery'))collectImageUrls(v,out,depth+1);else if(depth<2&&typeof v==='object')collectImageUrls(v,out,depth+1);}}
+    return [...out];
+  };
+  const spaces=spaceRows.map(({raw})=>{
+    const images=collectImageUrls(raw);
+    return {id:raw.id,title:raw.title,city:raw.city,category:raw.category,listing_type:raw.listing_type,status:raw.status,created_at:raw.created_at,updated_at:raw.updated_at,images,imageCount:images.length};
+  });
+  const evidence={exportVersion:2,generatedAt:new Date().toISOString(),caseId,case:caseRow,user,filters:{from:from||null,to:to||null,scope},spaces,messages};
   const evidenceText=JSON.stringify(evidence,null,2);
   const sha256=crypto.createHash('sha256').update(evidenceText,'utf8').digest('hex');
   const payload={...evidence,integrity:{algorithm:'SHA-256',sha256,scope:'evidence payload without integrity field'}};
