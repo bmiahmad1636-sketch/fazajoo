@@ -18,25 +18,88 @@ const legalRoutes = require("./routes/legal.routes");
 
 const app = express();
 
+/*
+|--------------------------------------------------------------------------
+| Express security basics
+|--------------------------------------------------------------------------
+*/
+
 app.disable("x-powered-by");
+
+/*
+|--------------------------------------------------------------------------
+| Reverse Proxy
+|--------------------------------------------------------------------------
+|
+| در Development مقدار پیش‌فرض false است.
+|
+| در Production فقط زمانی TRUST_PROXY را فعال می‌کنیم که Backend
+| واقعاً پشت Reverse Proxy مطمئن قرار گرفته باشد.
+|
+| Rate Limiter برای تشخیص IP کاربر از request.ip استفاده می‌کند،
+| بنابراین تنظیم درست trust proxy بسیار مهم است.
+|
+*/
+
+app.set(
+  "trust proxy",
+  env.TRUST_PROXY
+);
+
+/*
+|--------------------------------------------------------------------------
+| Security Headers
+|--------------------------------------------------------------------------
+*/
 
 app.use(
   helmet()
 );
 
+/*
+|--------------------------------------------------------------------------
+| CORS
+|--------------------------------------------------------------------------
+|
+| فقط Originهای موجود در CORS_ORIGINS اجازه دسترسی مرورگری دارند.
+|
+| درخواست‌هایی که Origin ندارند مثل:
+| - درخواست داخلی سرور
+| - curl
+| - Health Check
+|
+| می‌توانند عبور کنند.
+|
+*/
+
 app.use(
   cors({
-    origin(origin, callback) {
+    origin(
+      origin,
+      callback
+    ) {
       if (!origin) {
-        return callback(null, true);
+        return callback(
+          null,
+          true
+        );
       }
 
-      if (env.CORS_ORIGINS.includes(origin)) {
-        return callback(null, true);
+      if (
+        env.CORS_ORIGINS.includes(
+          origin
+        )
+      ) {
+        return callback(
+          null,
+          true
+        );
       }
 
       return callback(
-        new Error("Origin not allowed by CORS")
+        new Error(
+          "Origin not allowed by CORS"
+        )
       );
     },
 
@@ -53,69 +116,128 @@ app.use(
       "Content-Type",
       "Authorization",
     ],
-  })
-);
 
-app.use(
-  express.json({
-    limit: "100kb",
+    maxAge:
+      86400,
   })
 );
 
 /*
 |--------------------------------------------------------------------------
-| Authentication rate limits
+| JSON body limit
 |--------------------------------------------------------------------------
 |
-| هدف:
-| جلوگیری از تلاش‌های پشت‌سرهم برای ورود یا ساخت حساب توسط ربات‌ها.
-|
-| نکته:
-| این محدودیت فقط روی endpointهای حساس احراز هویت اعمال می‌شود و
-| درخواست‌های عادی سایت را محدود نمی‌کند.
+| درخواست‌های JSON فضاجو نباید حجم غیرعادی داشته باشند.
+| تصاویر از مسیر Upload جداگانه ارسال می‌شوند.
 |
 */
 
-const loginRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 10,
+app.use(
+  express.json({
+    limit:
+      "100kb",
+  })
+);
 
-  standardHeaders: "draft-7",
-  legacyHeaders: false,
+/*
+|--------------------------------------------------------------------------
+| Authentication Rate Limit
+|--------------------------------------------------------------------------
+|
+| LOGIN:
+| حداکثر 10 تلاش ناموفق در 15 دقیقه برای هر IP.
+|
+| REGISTER:
+| حداکثر 10 درخواست ثبت‌نام در یک ساعت برای هر IP.
+|
+| IP واقعی کاربر از request.ip گرفته می‌شود و در حالت Production
+| با تنظیم صحیح TRUST_PROXY پشت Reverse Proxy نیز درست کار می‌کند.
+|
+*/
 
-  skipSuccessfulRequests: true,
+const loginRateLimiter =
+  rateLimit({
+    windowMs:
+      15 *
+      60 *
+      1000,
 
-  message: {
-    ok: false,
-    message:
-      "تعداد تلاش‌های ورود بیش از حد مجاز است. لطفاً حدود ۱۵ دقیقه بعد دوباره تلاش کنید.",
-  },
-});
+    limit:
+      10,
 
-const registerRateLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  limit: 10,
+    standardHeaders:
+      "draft-7",
 
-  standardHeaders: "draft-7",
-  legacyHeaders: false,
+    legacyHeaders:
+      false,
 
-  message: {
-    ok: false,
-    message:
-      "تعداد درخواست‌های ثبت‌نام بیش از حد مجاز است. لطفاً کمی بعد دوباره تلاش کنید.",
-  },
-});
+    skipSuccessfulRequests:
+      true,
+
+    message: {
+      ok:
+        false,
+
+      message:
+        "تعداد تلاش‌های ورود بیش از حد مجاز است. لطفاً حدود ۱۵ دقیقه بعد دوباره تلاش کنید.",
+    },
+  });
+
+const registerRateLimiter =
+  rateLimit({
+    windowMs:
+      60 *
+      60 *
+      1000,
+
+    limit:
+      10,
+
+    standardHeaders:
+      "draft-7",
+
+    legacyHeaders:
+      false,
+
+    message: {
+      ok:
+        false,
+
+      message:
+        "تعداد درخواست‌های ثبت‌نام بیش از حد مجاز است. لطفاً کمی بعد دوباره تلاش کنید.",
+    },
+  });
+
+/*
+|--------------------------------------------------------------------------
+| Root
+|--------------------------------------------------------------------------
+*/
 
 app.get(
   "/",
-  (request, response) => {
+  (
+    request,
+    response
+  ) => {
     return response.json({
-      ok: true,
-      service: "Fazajoo API",
-      message: "Backend مستقل فضاجو فعال است.",
+      ok:
+        true,
+
+      service:
+        "Fazajoo API",
+
+      message:
+        "Backend مستقل فضاجو فعال است.",
     });
   }
 );
+
+/*
+|--------------------------------------------------------------------------
+| Health
+|--------------------------------------------------------------------------
+*/
 
 app.use(
   "/api/health",
@@ -142,6 +264,12 @@ app.use(
   "/api/auth",
   authRoutes
 );
+
+/*
+|--------------------------------------------------------------------------
+| Application Routes
+|--------------------------------------------------------------------------
+*/
 
 app.use(
   "/api/spaces",
@@ -183,16 +311,34 @@ app.use(
   legalRoutes
 );
 
+/*
+|--------------------------------------------------------------------------
+| 404
+|--------------------------------------------------------------------------
+*/
+
 app.use(
-  (request, response) => {
+  (
+    request,
+    response
+  ) => {
     return response
       .status(404)
       .json({
-        ok: false,
-        message: "مسیر API پیدا نشد.",
+        ok:
+          false,
+
+        message:
+          "مسیر API پیدا نشد.",
       });
   }
 );
+
+/*
+|--------------------------------------------------------------------------
+| Error Handler
+|--------------------------------------------------------------------------
+*/
 
 app.use(
   (
@@ -213,7 +359,9 @@ app.use(
       return response
         .status(403)
         .json({
-          ok: false,
+          ok:
+            false,
+
           message:
             "دسترسی این مبدأ مجاز نیست.",
         });
@@ -222,11 +370,14 @@ app.use(
     return response
       .status(500)
       .json({
-        ok: false,
+        ok:
+          false,
+
         message:
           "خطای داخلی سرور فضاجو.",
       });
   }
 );
 
-module.exports = app;
+module.exports =
+  app;

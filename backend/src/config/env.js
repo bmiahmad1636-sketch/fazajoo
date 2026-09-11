@@ -33,7 +33,92 @@ function parseBoolean(
   }
 
   return String(value)
+    .trim()
     .toLowerCase() === "true";
+}
+
+/*
+|--------------------------------------------------------------------------
+| Trust Proxy
+|--------------------------------------------------------------------------
+|
+| حالت پیش‌فرض false است.
+| یعنی در محیط توسعه یا زمانی که Backend مستقیماً در دسترس است،
+| به X-Forwarded-For اعتماد نمی‌کنیم.
+|
+| در Production، اگر Backend فقط پشت یک Reverse Proxy مطمئن
+| مثل Nginx قرار داشته باشد، می‌توان در .env نوشت:
+|
+| TRUST_PROXY=1
+|
+| عدد 1 یعنی فقط یک Proxy قابل اعتماد بین کاربر و Express وجود دارد.
+|
+*/
+
+function parseTrustProxy(
+  value
+) {
+  if (
+    value === undefined ||
+    value === null ||
+    String(value).trim() === ""
+  ) {
+    return false;
+  }
+
+  const normalized =
+    String(value)
+      .trim()
+      .toLowerCase();
+
+  if (
+    normalized === "false" ||
+    normalized === "0" ||
+    normalized === "off" ||
+    normalized === "no"
+  ) {
+    return false;
+  }
+
+  if (
+    normalized === "true"
+  ) {
+    return true;
+  }
+
+  const numericValue =
+    Number(normalized);
+
+  if (
+    Number.isInteger(
+      numericValue
+    ) &&
+    numericValue >= 0
+  ) {
+    return numericValue;
+  }
+
+  /*
+   * امکان استفاده از subnetهای معتبر Express:
+   *
+   * TRUST_PROXY=loopback
+   *
+   * یا:
+   *
+   * TRUST_PROXY=loopback,linklocal,uniquelocal
+   */
+  const values =
+    String(value)
+      .split(",")
+      .map(
+        (item) =>
+          item.trim()
+      )
+      .filter(Boolean);
+
+  return values.length
+    ? values
+    : false;
 }
 
 const env = {
@@ -50,6 +135,23 @@ const env = {
       process.env.PORT,
       6060
     ),
+
+  /*
+  |--------------------------------------------------------------------------
+  | Reverse Proxy
+  |--------------------------------------------------------------------------
+  */
+
+  TRUST_PROXY:
+    parseTrustProxy(
+      process.env.TRUST_PROXY
+    ),
+
+  /*
+  |--------------------------------------------------------------------------
+  | CORS
+  |--------------------------------------------------------------------------
+  */
 
   CORS_ORIGINS:
     (
@@ -69,6 +171,12 @@ const env = {
           item.trim()
       )
       .filter(Boolean),
+
+  /*
+  |--------------------------------------------------------------------------
+  | PostgreSQL
+  |--------------------------------------------------------------------------
+  */
 
   DB_HOST:
     process.env.DB_HOST ||
@@ -98,6 +206,12 @@ const env = {
       false
     ),
 
+  /*
+  |--------------------------------------------------------------------------
+  | Authentication
+  |--------------------------------------------------------------------------
+  */
+
   JWT_SECRET:
     process.env.JWT_SECRET ||
     "",
@@ -106,13 +220,41 @@ const env = {
     process.env.JWT_EXPIRES_IN ||
     "7d",
 
-  STORAGE_ENDPOINT: process.env.STORAGE_ENDPOINT || "",
-  STORAGE_REGION: process.env.STORAGE_REGION || "us-east-1",
-  STORAGE_BUCKET: process.env.STORAGE_BUCKET || "",
-  STORAGE_ACCESS_KEY: process.env.STORAGE_ACCESS_KEY || "",
-  STORAGE_SECRET_KEY: process.env.STORAGE_SECRET_KEY || "",
-  STORAGE_PUBLIC_BASE_URL: process.env.STORAGE_PUBLIC_BASE_URL || "",
-  STORAGE_FORCE_PATH_STYLE: parseBoolean(process.env.STORAGE_FORCE_PATH_STYLE, false),
+  /*
+  |--------------------------------------------------------------------------
+  | Object Storage
+  |--------------------------------------------------------------------------
+  */
+
+  STORAGE_ENDPOINT:
+    process.env.STORAGE_ENDPOINT ||
+    "",
+
+  STORAGE_REGION:
+    process.env.STORAGE_REGION ||
+    "us-east-1",
+
+  STORAGE_BUCKET:
+    process.env.STORAGE_BUCKET ||
+    "",
+
+  STORAGE_ACCESS_KEY:
+    process.env.STORAGE_ACCESS_KEY ||
+    "",
+
+  STORAGE_SECRET_KEY:
+    process.env.STORAGE_SECRET_KEY ||
+    "",
+
+  STORAGE_PUBLIC_BASE_URL:
+    process.env.STORAGE_PUBLIC_BASE_URL ||
+    "",
+
+  STORAGE_FORCE_PATH_STYLE:
+    parseBoolean(
+      process.env.STORAGE_FORCE_PATH_STYLE,
+      false
+    ),
 };
 
 module.exports =
