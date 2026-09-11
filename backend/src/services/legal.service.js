@@ -23,7 +23,8 @@ async function ensureLegalSchema() {
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )`);
-    await query(`ALTER TABLE legal_cases DROP CONSTRAINT IF EXISTS legal_cases_status_check`);
+    await query(`ALTER TABLE legal_cases ADD COLUMN IF NOT EXISTS order_notes TEXT`);
+     await query(`ALTER TABLE legal_cases DROP CONSTRAINT IF EXISTS legal_cases_status_check`);
     await query(`UPDATE legal_cases SET status='archived' WHERE status='closed'`);
     await query(`ALTER TABLE legal_cases ADD CONSTRAINT legal_cases_status_check CHECK (status IN ('open','archived'))`);
     await query(`ALTER TABLE legal_cases ADD COLUMN IF NOT EXISTS order_date_jalali VARCHAR(10)`);
@@ -70,12 +71,12 @@ async function createCase(adminId, body) {
   const orderDateJalali = String(body.orderDateJalali||'').trim();
   if (!caseNumber || !authority || !subject) { const e=new Error('شماره پرونده، مرجع و موضوع الزامی است.'); e.status=400; throw e; }
   if (orderDateJalali && !/^\d{4}\/\d{2}\/\d{2}$/.test(orderDateJalali)) { const e=new Error('تاریخ شمسی را به صورت ۱۴۰۵/۰۶/۰۸ وارد کنید.'); e.status=400; throw e; }
-  const r=await query(`INSERT INTO legal_cases (id,case_number,authority,order_date_jalali,subject,scope_text,order_document_ref,created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-    [id,caseNumber,authority,orderDateJalali||null,subject,String(body.scopeText||'').trim()||null,String(body.orderDocumentRef||'').trim()||null,adminId]);
+  const r=await query(`INSERT INTO legal_cases (id,case_number,authority,order_date_jalali,subject,scope_text,order_document_ref,order_notes,created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+    [id,caseNumber,authority,orderDateJalali||null,subject,String(body.scopeText||'').trim()||null,String(body.orderDocumentRef||'').trim()||null,String(body.orderNotes||'').trim()||null,adminId]);
   await audit({adminId,caseId:id,action:'case_created',metadata:{caseNumber,authority}}); return r.rows[0];
 }
-async function closeCase(adminId,id){ await ensureLegalSchema(); const r=await query(`UPDATE legal_cases SET status='archived',updated_at=NOW() WHERE id=$1 RETURNING *`,[id]); if(!r.rows[0]){const e=new Error('پرونده پیدا نشد.');e.status=404;throw e;} await audit({adminId,caseId:id,action:'case_archived'}); return r.rows[0]; }
-async function listAudit(caseId){ await ensureLegalSchema(); const r=await query(`SELECT l.*,u.full_name AS admin_name,u.phone AS admin_phone FROM legal_audit_log l LEFT JOIN users u ON u.id=l.admin_id WHERE ($1::uuid IS NULL OR l.case_id=$1) ORDER BY l.created_at DESC LIMIT 500`,[caseId||null]); return r.rows; }
+async function archiveCase(adminId,id){ await ensureLegalSchema(); const r=await query(`UPDATE legal_cases SET status='archived',updated_at=NOW() WHERE id=$1 RETURNING *`,[id]); if(!r.rows[0]){const e=new Error('پرونده پیدا نشد.');e.status=404;throw e;} await audit({adminId,caseId:id,action:'case_archived'}); return r.rows[0]; }
+async function listAudit(caseId){ await ensureLegalSchema(); const r=await query(`SELECT l.*,u.full_name AS admin_name,u.phone AS admin_phone FROM legal_audit_log l LEFT JOIN users u ON u.id=l.admin_id WHERE ($1::uuid IS NULL OR l.case_id=$1) ORDER BY l.created_at DESC LIMIT 2000`,[caseId||null]); return r.rows; }
 
 
 async function requireOpenCase(caseId){
@@ -110,7 +111,7 @@ async function applyAction(adminId, caseId, body){
 async function exportUserData(adminId, caseId, userId, from, to, scope='both'){
   await requireOpenCase(caseId);
   await ensureLegalSchema();
-  const caseRow=(await query(`SELECT id,case_number,authority,order_date_jalali,subject,scope_text,order_document_ref FROM legal_cases WHERE id=$1`,[caseId])).rows[0];
+  const caseRow=(await query(`SELECT id,case_number,authority,order_date_jalali,subject,scope_text,order_document_ref,order_notes FROM legal_cases WHERE id=$1`,[caseId])).rows[0];
   const user=(await query(`SELECT id,phone,full_name,account_type,system_role,agency_status,is_active,created_at FROM users WHERE id=$1`,[userId])).rows[0]; if(!user){const e=new Error('کاربر پیدا نشد.');e.status=404;throw e;}
   const params=[userId]; let dateWhere=''; if(from){params.push(from);dateWhere+=` AND m.created_at >= $${params.length}::timestamptz`; } if(to){params.push(to);dateWhere+=` AND m.created_at <= $${params.length}::timestamptz`;}
   const messages=scope==='spaces'?[]:(await query(`SELECT m.id,m.chat_id,m.sender_id,m.text,m.created_at,m.read_at,c.space_id,c.owner_id,c.requester_id,c.chat_type FROM messages m JOIN chats c ON c.id=m.chat_id WHERE (c.owner_id=$1 OR c.requester_id=$1) ${dateWhere} ORDER BY m.created_at ASC`,params)).rows;
@@ -166,4 +167,4 @@ async function lookupByPhone(adminId, caseId, phone){
   return {user,chats,spaces};
 }
 
-module.exports={ensureLegalSchema,listCases,createCase,closeCase,listAudit,applyAction,exportUserData,exportUserDataByPhone,lookupByPhone};
+module.exports={ensureLegalSchema,listCases,createCase,archiveCase,listAudit,applyAction,exportUserData,exportUserDataByPhone,lookupByPhone};

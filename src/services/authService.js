@@ -4,6 +4,8 @@ const API_BASE_URL =
 
 const TOKEN_STORAGE_KEY = "fazajoo_auth_token";
 const USER_STORAGE_KEY = "fazajoo_auth_user";
+const AUTH_EMAIL_DOMAIN = "auth.fazajoo.local";
+
 const authListeners = new Set();
 let currentSessionUser = null;
 
@@ -32,6 +34,16 @@ export const normalizePhoneNumber = (value = "") => {
 
 export const isValidIranianPhoneNumber = (phone) =>
   /^09\d{9}$/.test(normalizePhoneNumber(phone));
+
+export const phoneToInternalEmail = (phone) => {
+  const normalizedPhone = normalizePhoneNumber(phone);
+
+  if (!isValidIranianPhoneNumber(normalizedPhone)) {
+    throw new Error("شماره موبایل معتبر نیست.");
+  }
+
+  return `${normalizedPhone}@${AUTH_EMAIL_DOMAIN}`;
+};
 
 function getStoredToken() {
   try {
@@ -103,12 +115,17 @@ function makeSessionUser(backendUser) {
     ...backendUser,
     backendId: backendUser.id,
     uid: backendUser.id,
+    firebaseUid: null,
     displayName:
       backendUser.fullName ||
       backendUser.displayName ||
       "",
     phoneNormalized: backendUser.phone || "",
-    email: backendUser.email || "",
+    email:
+      backendUser.email ||
+      (backendUser.phone
+        ? `${backendUser.phone}@${AUTH_EMAIL_DOMAIN}`
+        : ""),
   };
 }
 

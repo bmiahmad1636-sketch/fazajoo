@@ -372,10 +372,7 @@ async function login(
     const user =
       result.rows[0];
 
-    if (
-      !user ||
-      !user.is_active
-    ) {
+    if (!user) {
       return response
         .status(401)
         .json({
@@ -392,9 +389,50 @@ async function login(
         user.password_hash
       );
 
-    if (
-      !passwordMatches
-    ) {
+    if (!passwordMatches) {
+      return response
+        .status(401)
+        .json({
+          ok: false,
+
+          message:
+            "شماره موبایل یا رمز عبور اشتباه است.",
+        });
+    }
+
+    if (!user.is_active) {
+      try {
+        const suspension = await query(
+          `
+            SELECT
+              l.action
+            FROM legal_audit_log l
+            WHERE l.target_type = 'user'
+              AND l.target_id = $1
+              AND l.action IN ('user_suspend', 'user_restore')
+            ORDER BY l.created_at DESC
+            LIMIT 1
+          `,
+          [user.id]
+        );
+
+        if (suspension.rows[0]?.action === 'user_suspend') {
+          return response
+            .status(423)
+            .json({
+              ok: false,
+              code: 'JUDICIAL_SUSPENSION',
+              message:
+                "حساب شما به موجب دستور مقام قضایی تعلیق شده است. برای پیگیری، با پشتیبانی فضاجو تماس بگیرید.",
+            });
+        }
+      } catch (legalError) {
+        console.warn(
+          "Judicial suspension lookup unavailable:",
+          legalError?.message || legalError
+        );
+      }
+
       return response
         .status(401)
         .json({

@@ -195,12 +195,12 @@ ALTER TABLE spaces ADD COLUMN IF NOT EXISTS legal_hold BOOLEAN NOT NULL DEFAULT 
 CREATE TABLE IF NOT EXISTS legal_cases (
   id UUID PRIMARY KEY, case_number VARCHAR(120) NOT NULL, authority VARCHAR(255) NOT NULL,
   order_date DATE, subject TEXT NOT NULL, scope_text TEXT, order_document_ref TEXT,
-  status VARCHAR(20) NOT NULL DEFAULT 'open' CHECK (status IN ('open','closed')),
+  status VARCHAR(20) NOT NULL DEFAULT 'open' CHECK (status IN ('open','archived')),
   created_by UUID NOT NULL REFERENCES users(id), created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE TABLE IF NOT EXISTS legal_actions (
   id UUID PRIMARY KEY, case_id UUID NOT NULL REFERENCES legal_cases(id) ON DELETE CASCADE,
-  action_type VARCHAR(40) NOT NULL, target_type VARCHAR(20) NOT NULL, target_id UUID,
+  action_type VARCHAR(40) NOT NULL, target_type VARCHAR(20) NOT NULL, target_id TEXT,
   details JSONB NOT NULL DEFAULT '{}'::jsonb, created_by UUID NOT NULL REFERENCES users(id), created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE TABLE IF NOT EXISTS legal_audit_log (

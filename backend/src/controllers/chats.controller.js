@@ -336,10 +336,10 @@ async function send(req, res) {
 
     const globalMode=(await query(`SELECT global_chat_mode FROM legal_system_settings WHERE id=1`)).rows[0]?.global_chat_mode || 'active';
     if (globalMode !== 'active') {
-      return res.status(423).json({ ok: false, message: 'ارسال پیام در فضاجو به دستور مدیریت حقوقی موقتاً غیرفعال است.' });
+      return res.status(423).json({ ok: false, message: 'ارسال پیام در فضاجو به دستور مقام قضایی موقتاً غیرفعال است.' });
     }
     if ((chat.legal_mode || 'active') !== 'active') {
-      return res.status(423).json({ ok: false, message: 'ارسال پیام در این گفتگو به دستور مدیریت حقوقی غیرفعال است.' });
+      return res.status(423).json({ ok: false, message: 'ارسال پیام در این گفتگو به دستور مقام قضایی غیرفعال است.' });
     }
 
     const id = crypto.randomUUID();
