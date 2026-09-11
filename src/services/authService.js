@@ -115,7 +115,6 @@ function makeSessionUser(backendUser) {
     ...backendUser,
     backendId: backendUser.id,
     uid: backendUser.id,
-    firebaseUid: null,
     displayName:
       backendUser.fullName ||
       backendUser.displayName ||
