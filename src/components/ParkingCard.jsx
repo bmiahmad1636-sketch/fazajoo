@@ -1,3 +1,4 @@
+import { showInSiteAlert } from "../utils/inSiteDialog";
 import {
   useEffect,
   useState,
@@ -285,9 +286,7 @@ function ParkingCard({ parking }) {
         getCurrentSessionUser();
 
       if (!sessionUser) {
-        alert(
-          "برای ذخیره آگهی ابتدا وارد حساب شوید."
-        );
+        showInSiteAlert("برای ذخیره آگهی ابتدا وارد حساب شوید.");
 
         navigate("/login");
         return;
@@ -318,15 +317,10 @@ function ParkingCard({ parking }) {
         );
 
         if (error?.status === 401) {
-          alert(
-            "نشست شما منقضی شده است. دوباره وارد شوید."
-          );
+          showInSiteAlert("نشست شما منقضی شده است. دوباره وارد شوید.");
           navigate("/login");
         } else {
-          alert(
-            error?.message ||
-              "ذخیره علاقه‌مندی انجام نشد. دوباره تلاش کنید."
-          );
+          showInSiteAlert(error?.message || "ذخیره علاقه‌مندی انجام نشد. دوباره تلاش کنید.");
         }
       } finally {
         setFavoriteChanging(false);

@@ -1,3 +1,4 @@
+import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import { useEffect, useMemo, useState } from "react";
 import {
   Link,
@@ -205,26 +206,22 @@ function ParkingDetails({
 
   const handleDelete = async () => {
     if (!user) {
-      alert(
-        "برای حذف آگهی ابتدا وارد حساب شوید."
-      );
+      showInSiteAlert("برای حذف آگهی ابتدا وارد حساب شوید.");
 
       navigate("/login");
       return;
     }
 
     if (!isOwner) {
-      alert(
-        "شما اجازه حذف این آگهی را ندارید."
-      );
+      showInSiteAlert("شما اجازه حذف این آگهی را ندارید.");
 
       return;
     }
 
-    const confirmDelete =
-      window.confirm(
-        "آیا از حذف این آگهی مطمئن هستید؟"
-      );
+    const confirmDelete = await showInSiteConfirm(
+      "آیا از حذف این آگهی مطمئن هستید؟",
+      "حذف آگهی"
+    );
 
     if (!confirmDelete) {
       return;
@@ -242,17 +239,13 @@ function ParkingDetails({
         deleteParking(id);
       }
 
-      alert(
-        "آگهی با موفقیت حذف شد."
-      );
+      showInSiteAlert("آگهی با موفقیت حذف شد.", "حذف آگهی");
 
       navigate("/parking");
     } catch (error) {
       console.error(error);
 
-      alert(
-        "خطا در حذف آگهی."
-      );
+      showInSiteAlert("خطا در حذف آگهی.", "حذف آگهی");
     } finally {
       setDeleting(false);
     }
@@ -260,18 +253,14 @@ function ParkingDetails({
 
   const handleEdit = () => {
     if (!user) {
-      alert(
-        "برای ویرایش آگهی ابتدا وارد حساب شوید."
-      );
+      showInSiteAlert("برای ویرایش آگهی ابتدا وارد حساب شوید.");
 
       navigate("/login");
       return;
     }
 
     if (!isOwner) {
-      alert(
-        "شما اجازه ویرایش این آگهی را ندارید."
-      );
+      showInSiteAlert("شما اجازه ویرایش این آگهی را ندارید.");
 
       return;
     }
@@ -305,9 +294,7 @@ function ParkingDetails({
         window.location.href
       );
 
-      alert(
-        "لینک آگهی کپی شد."
-      );
+      showInSiteAlert("لینک آگهی کپی شد.", "اشتراک‌گذاری");
     } catch (error) {
       if (
         error?.name !==
@@ -315,9 +302,7 @@ function ParkingDetails({
       ) {
         console.error(error);
 
-        alert(
-          "امکان اشتراک‌گذاری لینک وجود ندارد."
-        );
+        showInSiteAlert("امکان اشتراک‌گذاری لینک وجود ندارد.", "اشتراک‌گذاری");
       }
     }
   };

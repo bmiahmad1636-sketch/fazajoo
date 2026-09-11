@@ -84,7 +84,7 @@ ON users (
 CREATE TABLE IF NOT EXISTS spaces (
   id UUID PRIMARY KEY,
   listing_type VARCHAR(20) NOT NULL DEFAULT 'offer' CHECK (listing_type IN ('offer','wanted')),
-  category VARCHAR(30) NOT NULL DEFAULT 'parking' CHECK (category IN ('parking','residential','storage','warehouse','shop','land','other')),
+  category VARCHAR(30) NOT NULL DEFAULT 'parking' CHECK (category IN ('parking','residential','storage','warehouse','shop','land','villa','other')),
   custom_category VARCHAR(80), category_label VARCHAR(80),
   status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active','inactive','rented')),
   title VARCHAR(160) NOT NULL, city VARCHAR(100) NOT NULL,

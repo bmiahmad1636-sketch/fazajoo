@@ -1,3 +1,4 @@
+import { showInSiteAlert } from "../utils/inSiteDialog";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createSpace } from "../services/spaceService";
@@ -295,9 +296,7 @@ function AddParking() {
     const token = getAuthToken();
 
     if (!token) {
-      alert(
-        "نشست حساب کاربری پیدا نشد. لطفاً یک‌بار دوباره وارد حساب شوید."
-      );
+      showInSiteAlert("نشست حساب کاربری پیدا نشد. لطفاً یک‌بار دوباره وارد حساب شوید.");
 
       navigate("/login");
       return;
@@ -365,9 +364,7 @@ function AddParking() {
 
         });
 
-      alert(
-        "آگهی با موفقیت ثبت شد."
-      );
+      showInSiteAlert("آگهی با موفقیت ثبت شد.", "ثبت آگهی");
 
       setForm(INITIAL_FORM);
       setErrors({});
@@ -377,9 +374,7 @@ function AddParking() {
     } catch (error) {
       console.error(error);
 
-      alert(
-        "خطا در ثبت آگهی. دوباره تلاش کنید."
-      );
+      showInSiteAlert("خطا در ثبت آگهی. دوباره تلاش کنید.", "ثبت آگهی");
     } finally {
       setLoading(false);
     }

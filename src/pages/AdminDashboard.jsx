@@ -1,3 +1,4 @@
+import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import {
   useEffect,
   useMemo,
@@ -207,7 +208,7 @@ function AdminDashboard() {
   const approveAgent =
     async (user) => {
       const confirmed =
-        window.confirm(
+        await showInSiteConfirm(
           `آیا حساب «${
             user.agencyName ||
             user.agentName ||
@@ -238,7 +239,7 @@ function AdminDashboard() {
           );
         }
 
-        alert(
+        showInSiteAlert(
           "مشاور با موفقیت تأیید شد."
         );
 
@@ -248,7 +249,7 @@ function AdminDashboard() {
           updateError
         );
 
-        alert(
+        showInSiteAlert(
           "تأیید مشاور انجام نشد."
         );
 
@@ -261,7 +262,7 @@ function AdminDashboard() {
   const rejectAgent =
     async (user) => {
       const confirmed =
-        window.confirm(
+        await showInSiteConfirm(
           `آیا درخواست «${
             user.agencyName ||
             user.agentName ||
@@ -292,7 +293,7 @@ function AdminDashboard() {
           );
         }
 
-        alert(
+        showInSiteAlert(
           "درخواست مشاور رد شد."
         );
 
@@ -302,7 +303,7 @@ function AdminDashboard() {
           updateError
         );
 
-        alert(
+        showInSiteAlert(
           "رد درخواست انجام نشد."
         );
 
@@ -381,7 +382,7 @@ function AdminDashboard() {
           downloadError
         );
 
-        alert(
+        showInSiteAlert(
           downloadError?.message ||
             "دانلود مدرک انجام نشد."
         );
@@ -520,11 +521,11 @@ function AdminDashboard() {
     const amount = Number(grantAmounts[user.id] || 0);
 
     if (!Number.isInteger(amount) || amount < 1) {
-      alert("تعداد سهمیه را وارد کنید.");
+      showInSiteAlert("تعداد سهمیه را وارد کنید.");
       return;
     }
 
-    const confirmed = window.confirm(
+    const confirmed = await showInSiteConfirm(
       `آیا ${amount.toLocaleString("fa-IR")} فرصت به سهمیه «${user.agencyName || user.agentName || user.phone || "این مشاور"}» اضافه شود؟`
     );
     if (!confirmed) return;
@@ -541,10 +542,10 @@ function AdminDashboard() {
         )
       );
       setGrantAmounts((current) => ({ ...current, [user.id]: "" }));
-      alert("سهمیه با موفقیت اضافه شد.");
+      showInSiteAlert("سهمیه با موفقیت اضافه شد.");
     } catch (grantError) {
       console.error("Grant network credits error:", grantError);
-      alert(grantError?.message || "شارژ سهمیه انجام نشد.");
+      showInSiteAlert(grantError?.message || "شارژ سهمیه انجام نشد.");
     } finally {
       setGrantWorkingId("");
     }

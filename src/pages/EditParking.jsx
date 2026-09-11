@@ -1,3 +1,4 @@
+import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import {
   useEffect,
   useMemo,
@@ -266,13 +267,14 @@ function EditParking({
     );
   };
 
-  const resetChanges = () => {
+  const resetChanges = async () => {
     if (!hasChanges || loading) {
       return;
     }
 
-    const shouldReset = window.confirm(
-      "تغییرات ذخیره‌نشده حذف شوند؟"
+    const shouldReset = await showInSiteConfirm(
+      "تغییرات ذخیره‌نشده حذف شوند؟",
+      "حذف تغییرات"
     );
 
     if (!shouldReset) {
@@ -284,10 +286,11 @@ function EditParking({
     setShowSuccess(false);
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     if (hasChanges && !loading) {
-      const shouldLeave = window.confirm(
-        "تغییرات ذخیره نشده‌اند. از صفحه خارج می‌شوید؟"
+      const shouldLeave = await showInSiteConfirm(
+        "تغییرات ذخیره نشده‌اند. از صفحه خارج می‌شوید؟",
+        "خروج از صفحه"
       );
 
       if (!shouldLeave) {
@@ -395,9 +398,7 @@ function EditParking({
         error
       );
 
-      alert(
-        "ویرایش آگهی انجام نشد. دوباره تلاش کنید."
-      );
+      showInSiteAlert("ویرایش آگهی انجام نشد. دوباره تلاش کنید.", "ویرایش آگهی");
     } finally {
       setLoading(false);
     }

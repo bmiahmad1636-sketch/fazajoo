@@ -1,3 +1,4 @@
+import { showInSiteAlert } from "../utils/inSiteDialog";
 import {
   useEffect,
   useMemo,
@@ -45,7 +46,7 @@ function MyParkings() {
         if (active) setParkings(items);
       } catch (error) {
         console.error(error);
-        if (active) alert("خطا در دریافت آگهی‌های شما");
+        if (active) showInSiteAlert("خطا در دریافت آگهی‌های شما.");
       } finally { if (active) setLoading(false); }
     };
     loadMine();
@@ -97,9 +98,7 @@ function MyParkings() {
           error
         );
 
-        alert(
-          "تغییر وضعیت آگهی انجام نشد."
-        );
+        showInSiteAlert("تغییر وضعیت آگهی انجام نشد.");
       } finally {
         setUpdatingId(
           ""
