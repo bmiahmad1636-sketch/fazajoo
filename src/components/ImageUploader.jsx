@@ -23,23 +23,41 @@ function canvasToBlob(canvas, type, quality) {
 
 async function loadImageSource(file) {
   if (typeof createImageBitmap === "function") {
-    const bitmap = await createImageBitmap(file);
-    return {
-      source: bitmap,
-      width: bitmap.width,
-      height: bitmap.height,
-      cleanup: () => bitmap.close?.(),
-    };
+    try {
+      const bitmap = await createImageBitmap(file);
+
+      return {
+        source: bitmap,
+        width: bitmap.width,
+        height: bitmap.height,
+        cleanup: () => bitmap.close?.(),
+      };
+    } catch {
+      throw new Error(
+        "فایل انتخاب‌شده تصویر معتبر نیست. لطفاً یک تصویر JPG، PNG یا WebP انتخاب کنید."
+      );
+    }
   }
 
   const objectUrl = URL.createObjectURL(file);
   const image = new Image();
 
-  await new Promise((resolve, reject) => {
-    image.onload = resolve;
-    image.onerror = () => reject(new Error("خواندن تصویر انجام نشد."));
-    image.src = objectUrl;
-  });
+  try {
+    await new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = () =>
+        reject(
+          new Error(
+            "فایل انتخاب‌شده تصویر معتبر نیست. لطفاً یک تصویر JPG، PNG یا WebP انتخاب کنید."
+          )
+        );
+
+      image.src = objectUrl;
+    });
+  } catch (error) {
+    URL.revokeObjectURL(objectUrl);
+    throw error;
+  }
 
   return {
     source: image,
@@ -71,25 +89,38 @@ async function optimizeImage(file) {
     canvas.height = height;
 
     const context = canvas.getContext("2d", { alpha: true });
-    if (!context) throw new Error("پردازش تصویر در مرورگر ممکن نیست.");
+
+    if (!context) {
+      throw new Error("پردازش تصویر در مرورگر ممکن نیست.");
+    }
 
     context.imageSmoothingEnabled = true;
     context.imageSmoothingQuality = "high";
     context.drawImage(loaded.source, 0, 0, width, height);
 
     // WebP برای عکس موبایل حجم مناسب و کیفیت بالایی می‌دهد و شفافیت PNG را هم حفظ می‌کند.
-    const blob = await canvasToBlob(canvas, "image/webp", OUTPUT_QUALITY);
-    const safeName = file.name.replace(/\.[^.]+$/, "") || "fazajoo-photo";
+    const blob = await canvasToBlob(
+      canvas,
+      "image/webp",
+      OUTPUT_QUALITY
+    );
+
+    const safeName =
+      file.name.replace(/\.[^.]+$/, "") || "fazajoo-photo";
 
     // اگر خروجی به هر دلیل بزرگ‌تر شد، همان فایل اصلی را نگه می‌داریم.
     if (blob.size >= file.size && !needsResize) {
       return file;
     }
 
-    return new File([blob], `${safeName}.webp`, {
-      type: "image/webp",
-      lastModified: Date.now(),
-    });
+    return new File(
+      [blob],
+      `${safeName}.webp`,
+      {
+        type: "image/webp",
+        lastModified: Date.now(),
+      }
+    );
   } finally {
     loaded.cleanup?.();
   }
@@ -109,53 +140,87 @@ function ImageUploader({
     : [];
 
   const emit = (nextImages) => {
-    onUploadComplete?.(nextImages.slice(0, maxImages));
+    onUploadComplete?.(
+      nextImages.slice(0, maxImages)
+    );
   };
 
   const uploadImages = async (event) => {
-    const files = Array.from(event.target.files || []);
+    const files = Array.from(
+      event.target.files || []
+    );
+
     event.target.value = "";
+
     if (!files.length) return;
 
     const remaining = maxImages - images.length;
+
     if (remaining <= 0) {
-      setError(`حداکثر ${maxImages.toLocaleString("fa-IR")} عکس برای هر آگهی مجاز است.`);
+      setError(
+        `حداکثر ${maxImages.toLocaleString(
+          "fa-IR"
+        )} عکس برای هر آگهی مجاز است.`
+      );
       return;
     }
 
     if (files.length > remaining) {
       setError(
-        `فقط ${remaining.toLocaleString("fa-IR")} عکس دیگر می‌توانی اضافه کنی.`
+        `فقط ${remaining.toLocaleString(
+          "fa-IR"
+        )} عکس دیگر می‌توانی اضافه کنی.`
       );
       return;
     }
 
     for (const file of files) {
       if (!ALLOWED_TYPES.includes(file.type)) {
-        setError("فرمت همه عکس‌ها باید JPG، PNG یا WebP باشد.");
+        setError(
+          "فرمت همه عکس‌ها باید JPG، PNG یا WebP باشد."
+        );
         return;
       }
+
       if (file.size > MAX_FILE_SIZE) {
-        setError("حجم هر عکس نباید بیشتر از ۱۰ مگابایت باشد.");
+        setError(
+          "حجم هر عکس نباید بیشتر از ۱۰ مگابایت باشد."
+        );
         return;
       }
     }
 
     setUploading(true);
     setError("");
+
     const uploaded = [];
 
     try {
       for (const file of files) {
-        const optimizedFile = await optimizeImage(file);
-        const result = await uploadAdImage(optimizedFile);
+        const optimizedFile =
+          await optimizeImage(file);
+
+        const result =
+          await uploadAdImage(optimizedFile);
+
         uploaded.push(result.url);
       }
+
       emit([...images, ...uploaded]);
     } catch (uploadError) {
-      console.error("UPLOAD ERROR:", uploadError);
-      if (uploaded.length) emit([...images, ...uploaded]);
-      setError(uploadError.message || "آپلود عکس انجام نشد. دوباره تلاش کنید.");
+      console.error(
+        "UPLOAD ERROR:",
+        uploadError
+      );
+
+      if (uploaded.length) {
+        emit([...images, ...uploaded]);
+      }
+
+      setError(
+        uploadError.message ||
+          "آپلود عکس انجام نشد. دوباره تلاش کنید."
+      );
     } finally {
       setUploading(false);
     }
@@ -163,38 +228,82 @@ function ImageUploader({
 
   const removeImage = async (url) => {
     if (!url || uploading) return;
+
     setUploading(true);
     setError("");
+
     try {
-      await deleteAdImage(url).catch(() => undefined);
-      emit(images.filter((item) => item !== url));
+      await deleteAdImage(url).catch(
+        () => undefined
+      );
+
+      emit(
+        images.filter(
+          (item) => item !== url
+        )
+      );
     } catch (removeError) {
-      console.error("REMOVE ERROR:", removeError);
-      setError("حذف عکس انجام نشد. دوباره تلاش کنید.");
+      console.error(
+        "REMOVE ERROR:",
+        removeError
+      );
+
+      setError(
+        "حذف عکس انجام نشد. دوباره تلاش کنید."
+      );
     } finally {
       setUploading(false);
     }
   };
 
   const makeMain = (url) => {
-    if (!url || images[0] === url || uploading) return;
-    emit([url, ...images.filter((item) => item !== url)]);
+    if (
+      !url ||
+      images[0] === url ||
+      uploading
+    ) {
+      return;
+    }
+
+    emit([
+      url,
+      ...images.filter(
+        (item) => item !== url
+      ),
+    ]);
   };
 
   return (
-    <div className="multi-image-uploader" dir="rtl">
+    <div
+      className="multi-image-uploader"
+      dir="rtl"
+    >
       <div className="multi-image-uploader__top">
         <div>
           <strong>عکس‌های آگهی</strong>
+
           <span>
-            {images.length.toLocaleString("fa-IR")} از {maxImages.toLocaleString("fa-IR")} عکس
+            {images.length.toLocaleString(
+              "fa-IR"
+            )}{" "}
+            از{" "}
+            {maxImages.toLocaleString(
+              "fa-IR"
+            )}{" "}
+            عکس
           </span>
         </div>
+
         <button
           type="button"
           className="multi-image-uploader__add"
-          disabled={uploading || images.length >= maxImages}
-          onClick={() => inputRef.current?.click()}
+          disabled={
+            uploading ||
+            images.length >= maxImages
+          }
+          onClick={() =>
+            inputRef.current?.click()
+          }
         >
           ＋ افزودن عکس
         </button>
@@ -207,17 +316,25 @@ function ImageUploader({
         accept="image/jpeg,image/png,image/webp"
         multiple
         onChange={uploadImages}
-        disabled={uploading || images.length >= maxImages}
+        disabled={
+          uploading ||
+          images.length >= maxImages
+        }
       />
 
       {uploading && (
         <div className="multi-image-uploader__message">
           <span className="multi-image-uploader__spinner" />
-          در حال بارگذاری عکس‌ها در فضای ذخیره‌سازی فضاجو...
+          در حال بارگذاری عکس‌ها در فضای
+          ذخیره‌سازی فضاجو...
         </div>
       )}
 
-      {error && <div className="multi-image-uploader__error">{error}</div>}
+      {error && (
+        <div className="multi-image-uploader__error">
+          {error}
+        </div>
+      )}
 
       {images.length > 0 ? (
         <div className="multi-image-uploader__grid">
@@ -230,20 +347,42 @@ function ImageUploader({
                   : "multi-image-uploader__item"
               }
             >
-              <img src={url} alt={`عکس ${index + 1} آگهی`} />
+              <img
+                src={url}
+                alt={`عکس ${
+                  index + 1
+                } آگهی`}
+              />
+
               <div className="multi-image-uploader__badge">
-                {index === 0 ? "عکس اصلی" : `عکس ${(index + 1).toLocaleString("fa-IR")}`}
+                {index === 0
+                  ? "عکس اصلی"
+                  : `عکس ${(
+                      index + 1
+                    ).toLocaleString(
+                      "fa-IR"
+                    )}`}
               </div>
+
               <div className="multi-image-uploader__actions">
                 {index !== 0 && (
-                  <button type="button" onClick={() => makeMain(url)} disabled={uploading}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      makeMain(url)
+                    }
+                    disabled={uploading}
+                  >
                     انتخاب به‌عنوان اصلی
                   </button>
                 )}
+
                 <button
                   type="button"
                   className="multi-image-uploader__remove"
-                  onClick={() => removeImage(url)}
+                  onClick={() =>
+                    removeImage(url)
+                  }
                   disabled={uploading}
                 >
                   حذف
@@ -257,19 +396,34 @@ function ImageUploader({
           type="button"
           className="multi-image-uploader__empty"
           disabled={uploading}
-          onClick={() => inputRef.current?.click()}
+          onClick={() =>
+            inputRef.current?.click()
+          }
         >
           <span>📷</span>
-          <strong>عکس‌های فضا را انتخاب کن</strong>
-          <small>می‌توانی چند عکس را هم‌زمان انتخاب کنی؛ حداکثر ۸ عکس، هر عکس تا ۱۰MB؛ عکس‌های بزرگ به‌صورت خودکار بهینه می‌شوند</small>
+
+          <strong>
+            عکس‌های فضا را انتخاب کن
+          </strong>
+
+          <small>
+            می‌توانی چند عکس را هم‌زمان
+            انتخاب کنی؛ حداکثر ۸ عکس، هر
+            عکس تا ۱۰MB؛ عکس‌های بزرگ
+            به‌صورت خودکار بهینه می‌شوند
+          </small>
         </button>
       )}
 
-      {images.length > 0 && images.length < maxImages && (
-        <p className="multi-image-uploader__hint">
-          اولین عکس، تصویر اصلی کارت آگهی است. برای تغییر عکس اصلی از دکمه روی هر تصویر استفاده کن.
-        </p>
-      )}
+      {images.length > 0 &&
+        images.length < maxImages && (
+          <p className="multi-image-uploader__hint">
+            اولین عکس، تصویر اصلی کارت
+            آگهی است. برای تغییر عکس اصلی
+            از دکمه روی هر تصویر استفاده
+            کن.
+          </p>
+        )}
     </div>
   );
 }
