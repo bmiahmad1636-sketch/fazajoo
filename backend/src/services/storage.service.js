@@ -4,168 +4,409 @@ const {
   GetObjectCommand,
   DeleteObjectCommand,
 } = require("@aws-sdk/client-s3");
+
 const crypto = require("crypto");
 const path = require("path");
+
 const env = require("../config/env");
+
+const ALLOWED_AGENCY_DOCUMENT_TYPES = new Set([
+  "national_card_front",
+  "national_card_back",
+  "business_license",
+]);
 
 function assertConfigured() {
   const missing = [
-    ["STORAGE_ENDPOINT", env.STORAGE_ENDPOINT],
-    ["STORAGE_BUCKET", env.STORAGE_BUCKET],
-    ["STORAGE_ACCESS_KEY", env.STORAGE_ACCESS_KEY],
-    ["STORAGE_SECRET_KEY", env.STORAGE_SECRET_KEY],
-    ["STORAGE_PUBLIC_BASE_URL", env.STORAGE_PUBLIC_BASE_URL],
+    [
+      "STORAGE_ENDPOINT",
+      env.STORAGE_ENDPOINT,
+    ],
+    [
+      "STORAGE_BUCKET",
+      env.STORAGE_BUCKET,
+    ],
+    [
+      "STORAGE_ACCESS_KEY",
+      env.STORAGE_ACCESS_KEY,
+    ],
+    [
+      "STORAGE_SECRET_KEY",
+      env.STORAGE_SECRET_KEY,
+    ],
+    [
+      "STORAGE_PUBLIC_BASE_URL",
+      env.STORAGE_PUBLIC_BASE_URL,
+    ],
   ]
-    .filter(([, value]) => !value)
-    .map(([name]) => name);
+    .filter(
+      ([, value]) =>
+        !value
+    )
+    .map(
+      ([name]) =>
+        name
+    );
 
-  if (missing.length) {
-    throw new Error(`Storage is not configured: ${missing.join(", ")}`);
+  if (
+    missing.length
+  ) {
+    throw new Error(
+      `Storage is not configured: ${missing.join(", ")}`
+    );
   }
 }
 
 function client() {
   assertConfigured();
+
   return new S3Client({
-    region: env.STORAGE_REGION || "us-east-1",
-    endpoint: env.STORAGE_ENDPOINT,
-    forcePathStyle: env.STORAGE_FORCE_PATH_STYLE,
+    region:
+      env.STORAGE_REGION ||
+      "us-east-1",
+
+    endpoint:
+      env.STORAGE_ENDPOINT,
+
+    forcePathStyle:
+      env.STORAGE_FORCE_PATH_STYLE,
+
     credentials: {
-      accessKeyId: env.STORAGE_ACCESS_KEY,
-      secretAccessKey: env.STORAGE_SECRET_KEY,
+      accessKeyId:
+        env.STORAGE_ACCESS_KEY,
+
+      secretAccessKey:
+        env.STORAGE_SECRET_KEY,
     },
   });
 }
 
-function safeExtension(originalName, mimeType) {
-  const ext = path.extname(originalName || "").toLowerCase();
+function safeExtension(
+  originalName,
+  mimeType
+) {
+  const ext =
+    path
+      .extname(
+        originalName ||
+        ""
+      )
+      .toLowerCase();
 
-  if ([".jpg", ".jpeg", ".png", ".webp"].includes(ext)) {
-    return ext === ".jpeg" ? ".jpg" : ext;
+  if (
+    [
+      ".jpg",
+      ".jpeg",
+      ".png",
+      ".webp",
+    ].includes(
+      ext
+    )
+  ) {
+    return ext ===
+      ".jpeg"
+      ? ".jpg"
+      : ext;
   }
 
-  if (mimeType === "image/png") return ".png";
-  if (mimeType === "image/webp") return ".webp";
+  if (
+    mimeType ===
+    "image/png"
+  ) {
+    return ".png";
+  }
+
+  if (
+    mimeType ===
+    "image/webp"
+  ) {
+    return ".webp";
+  }
+
   return ".jpg";
 }
 
-function publicUrl(key) {
-  return `${env.STORAGE_PUBLIC_BASE_URL.replace(/\/$/, "")}/${key}`;
+function publicUrl(
+  key
+) {
+  return `${env.STORAGE_PUBLIC_BASE_URL.replace(
+    /\/$/,
+    ""
+  )}/${key}`;
 }
 
-function keyFromPublicUrl(url) {
-  if (!url || typeof url !== "string" || !env.STORAGE_PUBLIC_BASE_URL) {
+function keyFromPublicUrl(
+  url
+) {
+  if (
+    !url ||
+    typeof url !==
+      "string" ||
+    !env.STORAGE_PUBLIC_BASE_URL
+  ) {
     return null;
   }
 
-  const base = env.STORAGE_PUBLIC_BASE_URL.replace(/\/$/, "");
-  const prefix = `${base}/`;
+  const base =
+    env.STORAGE_PUBLIC_BASE_URL.replace(
+      /\/$/,
+      ""
+    );
 
-  if (!url.startsWith(prefix)) return null;
+  const prefix =
+    `${base}/`;
+
+  if (
+    !url.startsWith(
+      prefix
+    )
+  ) {
+    return null;
+  }
 
   try {
-    return decodeURIComponent(url.slice(prefix.length));
+    return decodeURIComponent(
+      url.slice(
+        prefix.length
+      )
+    );
   } catch {
-    return url.slice(prefix.length);
+    return url.slice(
+      prefix.length
+    );
   }
 }
 
-function keyFromAdImageApiUrl(url) {
-  if (!url || typeof url !== "string") return null;
+function keyFromAdImageApiUrl(
+  url
+) {
+  if (
+    !url ||
+    typeof url !==
+      "string"
+  ) {
+    return null;
+  }
 
   try {
-    const parsed = new URL(url, "http://fazajoo.local");
-    const marker = "/api/uploads/ad-image/";
-    const index = parsed.pathname.indexOf(marker);
+    const parsed =
+      new URL(
+        url,
+        "http://fazajoo.local"
+      );
 
-    if (index === -1) return null;
+    const marker =
+      "/api/uploads/ad-image/";
 
-    const tail = parsed.pathname.slice(index + marker.length);
-    const parts = tail.split("/").filter(Boolean).map(decodeURIComponent);
+    const index =
+      parsed.pathname.indexOf(
+        marker
+      );
 
-    if (parts.length !== 2) return null;
+    if (
+      index === -1
+    ) {
+      return null;
+    }
 
-    const [userId, filename] = parts;
-    if (!userId || !filename || filename.includes("..")) return null;
+    const tail =
+      parsed.pathname.slice(
+        index +
+          marker.length
+      );
+
+    const parts =
+      tail
+        .split("/")
+        .filter(Boolean)
+        .map(
+          decodeURIComponent
+        );
+
+    if (
+      parts.length !==
+      2
+    ) {
+      return null;
+    }
+
+    const [
+      userId,
+      filename,
+    ] =
+      parts;
+
+    if (
+      !userId ||
+      !filename ||
+      filename.includes(
+        ".."
+      )
+    ) {
+      return null;
+    }
 
     return `ad-images/${userId}/${filename}`;
+
   } catch {
     return null;
   }
 }
 
-async function uploadAdImage({ buffer, mimeType, originalName, userId }) {
-  const key = `ad-images/${userId}/${crypto.randomUUID()}${safeExtension(
-    originalName,
-    mimeType
-  )}`;
+async function uploadAdImage({
+  buffer,
+  mimeType,
+  originalName,
+  userId,
+}) {
+  const key =
+    `ad-images/${userId}/${crypto.randomUUID()}${safeExtension(
+      originalName,
+      mimeType
+    )}`;
 
   await client().send(
     new PutObjectCommand({
-      Bucket: env.STORAGE_BUCKET,
-      Key: key,
-      Body: buffer,
-      ContentType: mimeType,
-      CacheControl: "public, max-age=31536000, immutable",
+      Bucket:
+        env.STORAGE_BUCKET,
+
+      Key:
+        key,
+
+      Body:
+        buffer,
+
+      ContentType:
+        mimeType,
+
+      CacheControl:
+        "public, max-age=31536000, immutable",
     })
   );
 
-  return { key };
+  return {
+    key,
+  };
 }
 
-async function getAdImage({ userId, filename }) {
-  if (!userId || !filename || filename.includes("..") || filename.includes("/")) {
-    const error = new Error("تصویر نامعتبر است.");
-    error.statusCode = 400;
+async function getAdImage({
+  userId,
+  filename,
+}) {
+  if (
+    !userId ||
+    !filename ||
+    filename.includes(
+      ".."
+    ) ||
+    filename.includes(
+      "/"
+    )
+  ) {
+    const error =
+      new Error(
+        "تصویر نامعتبر است."
+      );
+
+    error.statusCode =
+      400;
+
     throw error;
   }
 
-  const key = `ad-images/${userId}/${filename}`;
+  const key =
+    `ad-images/${userId}/${filename}`;
 
   try {
     return await client().send(
       new GetObjectCommand({
-        Bucket: env.STORAGE_BUCKET,
-        Key: key,
+        Bucket:
+          env.STORAGE_BUCKET,
+
+        Key:
+          key,
       })
     );
-  } catch (error) {
-    if (error?.name === "NoSuchKey" || error?.$metadata?.httpStatusCode === 404) {
-      const notFound = new Error("تصویر پیدا نشد.");
-      notFound.statusCode = 404;
+
+  } catch (
+    error
+  ) {
+    if (
+      error?.name ===
+        "NoSuchKey" ||
+      error?.$metadata
+        ?.httpStatusCode ===
+        404
+    ) {
+      const notFound =
+        new Error(
+          "تصویر پیدا نشد."
+        );
+
+      notFound.statusCode =
+        404;
+
       throw notFound;
     }
+
     throw error;
   }
 }
 
-async function deleteAdImage({ url, userId }) {
-  const key = keyFromAdImageApiUrl(url) || keyFromPublicUrl(url);
+async function deleteAdImage({
+  url,
+  userId,
+}) {
+  const key =
+    keyFromAdImageApiUrl(
+      url
+    ) ||
+    keyFromPublicUrl(
+      url
+    );
 
   if (!key) {
     return {
-      deleted: false,
-      external: true,
+      deleted:
+        false,
+
+      external:
+        true,
     };
   }
 
-  const allowedPrefix = `ad-images/${userId}/`;
+  const allowedPrefix =
+    `ad-images/${userId}/`;
 
-  if (!key.startsWith(allowedPrefix)) {
-    const error = new Error("اجازه حذف این تصویر را ندارید.");
-    error.statusCode = 403;
+  if (
+    !key.startsWith(
+      allowedPrefix
+    )
+  ) {
+    const error =
+      new Error(
+        "اجازه حذف این تصویر را ندارید."
+      );
+
+    error.statusCode =
+      403;
+
     throw error;
   }
 
   await client().send(
     new DeleteObjectCommand({
-      Bucket: env.STORAGE_BUCKET,
-      Key: key,
+      Bucket:
+        env.STORAGE_BUCKET,
+
+      Key:
+        key,
     })
   );
 
   return {
-    deleted: true,
+    deleted:
+      true,
   };
 }
 
@@ -176,93 +417,233 @@ async function uploadAgencyDocument({
   userId,
   documentType,
 }) {
-  const key = `agency-documents/${userId}/${
-    documentType || "document"
-  }/${crypto.randomUUID()}${safeExtension(originalName, mimeType)}`;
+  const safeDocumentType =
+    String(
+      documentType ||
+      ""
+    ).trim();
 
-  await client().send(
-    new PutObjectCommand({
-      Bucket: env.STORAGE_BUCKET,
-      Key: key,
-      Body: buffer,
-      ContentType: mimeType,
-      CacheControl: "private, max-age=31536000",
-    })
-  );
+  if (
+    !ALLOWED_AGENCY_DOCUMENT_TYPES.has(
+      safeDocumentType
+    )
+  ) {
+    const error =
+      new Error(
+        "نوع مدرک مشاور معتبر نیست."
+      );
 
-  return {
-    key,
-    url: publicUrl(key),
-  };
-}
+    error.statusCode =
+      400;
 
-async function getAgencyDocument({ documentRecord, userId }) {
-  if (!documentRecord || !userId) {
-    const error = new Error("مدرک نامعتبر است.");
-    error.statusCode = 400;
     throw error;
   }
 
   const key =
-    (typeof documentRecord === "object" && documentRecord.key) ||
+    `agency-documents/${userId}/${safeDocumentType}/${crypto.randomUUID()}${safeExtension(
+      originalName,
+      mimeType
+    )}`;
+
+  await client().send(
+    new PutObjectCommand({
+      Bucket:
+        env.STORAGE_BUCKET,
+
+      Key:
+        key,
+
+      Body:
+        buffer,
+
+      ContentType:
+        mimeType,
+
+      CacheControl:
+        "private, no-store",
+    })
+  );
+
+  /*
+  |--------------------------------------------------------------------------
+  | نکته امنیتی
+  |--------------------------------------------------------------------------
+  |
+  | برای مدارک هویتی URL عمومی تولید نمی‌کنیم.
+  |
+  | فقط key داخلی برگردانده می‌شود.
+  | فایل بعداً فقط از مسیر احراز‌شده Admin خوانده می‌شود.
+  |
+  */
+
+  return {
+    key,
+
+    originalFilename:
+      String(
+        originalName ||
+        ""
+      ).slice(
+        0,
+        255
+      ),
+
+    mimeType:
+      mimeType ||
+      "",
+  };
+}
+
+async function getAgencyDocument({
+  documentRecord,
+  userId,
+}) {
+  if (
+    !documentRecord ||
+    !userId
+  ) {
+    const error =
+      new Error(
+        "مدرک نامعتبر است."
+      );
+
+    error.statusCode =
+      400;
+
+    throw error;
+  }
+
+  const key =
+    (
+      typeof documentRecord ===
+        "object" &&
+      documentRecord.key
+    ) ||
     keyFromPublicUrl(
-      typeof documentRecord === "string"
+      typeof documentRecord ===
+        "string"
         ? documentRecord
         : documentRecord.url
     );
 
   if (!key) {
-    const error = new Error("مسیر فایل مدرک معتبر نیست.");
-    error.statusCode = 400;
+    const error =
+      new Error(
+        "مسیر فایل مدرک معتبر نیست."
+      );
+
+    error.statusCode =
+      400;
+
     throw error;
   }
 
-  const allowedPrefix = `agency-documents/${userId}/`;
-  if (!key.startsWith(allowedPrefix) || key.includes("..")) {
-    const error = new Error("اجازه دسترسی به این مدرک را ندارید.");
-    error.statusCode = 403;
+  const allowedPrefix =
+    `agency-documents/${userId}/`;
+
+  if (
+    !key.startsWith(
+      allowedPrefix
+    ) ||
+    key.includes(
+      ".."
+    )
+  ) {
+    const error =
+      new Error(
+        "اجازه دسترسی به این مدرک را ندارید."
+      );
+
+    error.statusCode =
+      403;
+
     throw error;
   }
 
   try {
-    const result = await client().send(
-      new GetObjectCommand({
-        Bucket: env.STORAGE_BUCKET,
-        Key: key,
-      })
-    );
+    const result =
+      await client().send(
+        new GetObjectCommand({
+          Bucket:
+            env.STORAGE_BUCKET,
+
+          Key:
+            key,
+        })
+      );
 
     return {
       key,
-      body: result.Body,
-      contentType: result.ContentType || "application/octet-stream",
-      contentLength: result.ContentLength,
+
+      body:
+        result.Body,
+
+      contentType:
+        result.ContentType ||
+        "application/octet-stream",
+
+      contentLength:
+        result.ContentLength,
     };
-  } catch (error) {
-    if (error?.name === "NoSuchKey" || error?.$metadata?.httpStatusCode === 404) {
-      const notFound = new Error("فایل مدرک پیدا نشد.");
-      notFound.statusCode = 404;
+
+  } catch (
+    error
+  ) {
+    if (
+      error?.name ===
+        "NoSuchKey" ||
+      error?.$metadata
+        ?.httpStatusCode ===
+        404
+    ) {
+      const notFound =
+        new Error(
+          "فایل مدرک پیدا نشد."
+        );
+
+      notFound.statusCode =
+        404;
+
       throw notFound;
     }
+
     throw error;
   }
 }
 
-async function deleteByPublicUrl(url) {
-  const key = keyFromPublicUrl(url);
+async function deleteByPublicUrl(
+  url
+) {
+  const key =
+    keyFromPublicUrl(
+      url
+    );
 
   if (!key) {
-    return { deleted: false, url };
+    return {
+      deleted:
+        false,
+
+      url,
+    };
   }
 
   await client().send(
     new DeleteObjectCommand({
-      Bucket: env.STORAGE_BUCKET,
-      Key: key,
+      Bucket:
+        env.STORAGE_BUCKET,
+
+      Key:
+        key,
     })
   );
 
-  return { deleted: true, url };
+  return {
+    deleted:
+      true,
+
+    url,
+  };
 }
 
 module.exports = {
