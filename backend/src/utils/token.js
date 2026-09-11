@@ -1,12 +1,6 @@
-const jwt =
-  require(
-    "jsonwebtoken"
-  );
+const jwt = require("jsonwebtoken");
 
-const env =
-  require(
-    "../config/env"
-  );
+const env = require("../config/env");
 
 function ensureSecret() {
   if (
@@ -19,24 +13,34 @@ function ensureSecret() {
   }
 }
 
-function createToken(
-  user
-) {
+function createToken(user) {
   ensureSecret();
+
+  const authVersion =
+    Number(user.auth_version);
+
+  if (
+    !Number.isInteger(authVersion) ||
+    authVersion < 1
+  ) {
+    throw new Error(
+      "auth_version کاربر معتبر نیست."
+    );
+  }
 
   return jwt.sign(
     {
-      sub:
-        user.id,
+      sub: user.id,
 
-      phone:
-        user.phone,
+      phone: user.phone,
 
       systemRole:
         user.system_role,
 
       accountType:
         user.account_type,
+
+      authVersion,
     },
 
     env.JWT_SECRET,
@@ -48,9 +52,7 @@ function createToken(
   );
 }
 
-function verifyToken(
-  token
-) {
+function verifyToken(token) {
   ensureSecret();
 
   return jwt.verify(

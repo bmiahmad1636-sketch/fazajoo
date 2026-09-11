@@ -64,19 +64,41 @@ function getStoredUser() {
 
 function saveSession(token, user) {
   try {
-    if (token) localStorage.setItem(TOKEN_STORAGE_KEY, token);
-    if (user) localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+    if (token) {
+      localStorage.setItem(
+        TOKEN_STORAGE_KEY,
+        token
+      );
+    }
+
+    if (user) {
+      localStorage.setItem(
+        USER_STORAGE_KEY,
+        JSON.stringify(user)
+      );
+    }
   } catch (error) {
-    console.warn("Local auth storage warning:", error);
+    console.warn(
+      "Local auth storage warning:",
+      error
+    );
   }
 }
 
 function clearStoredSession() {
   try {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-    localStorage.removeItem(USER_STORAGE_KEY);
+    localStorage.removeItem(
+      TOKEN_STORAGE_KEY
+    );
+
+    localStorage.removeItem(
+      USER_STORAGE_KEY
+    );
   } catch (error) {
-    console.warn("Clear auth storage warning:", error);
+    console.warn(
+      "Clear auth storage warning:",
+      error
+    );
   }
 }
 
@@ -87,7 +109,10 @@ function notifyAuthListeners(user) {
     try {
       listener(user);
     } catch (error) {
-      console.error("Auth listener error:", error);
+      console.error(
+        "Auth listener error:",
+        error
+      );
     }
   }
 }
@@ -113,41 +138,71 @@ function makeSessionUser(backendUser) {
 
   return {
     ...backendUser,
-    backendId: backendUser.id,
-    uid: backendUser.id,
+
+    backendId:
+      backendUser.id,
+
+    uid:
+      backendUser.id,
+
     displayName:
       backendUser.fullName ||
       backendUser.displayName ||
       "",
-    phoneNormalized: backendUser.phone || "",
+
+    phoneNormalized:
+      backendUser.phone ||
+      "",
+
     email:
       backendUser.email ||
-      (backendUser.phone
-        ? `${backendUser.phone}@${AUTH_EMAIL_DOMAIN}`
-        : ""),
+      (
+        backendUser.phone
+          ? `${backendUser.phone}@${AUTH_EMAIL_DOMAIN}`
+          : ""
+      ),
   };
 }
 
 class ApiError extends Error {
-  constructor(message, status = 0, data = null) {
+  constructor(
+    message,
+    status = 0,
+    data = null
+  ) {
     super(message);
-    this.name = "ApiError";
-    this.status = status;
-    this.data = data;
+
+    this.name =
+      "ApiError";
+
+    this.status =
+      status;
+
+    this.data =
+      data;
   }
 }
 
-async function apiRequest(path, options = {}) {
+async function apiRequest(
+  path,
+  options = {}
+) {
   let response;
 
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
-      },
-    });
+    response = await fetch(
+      `${API_BASE_URL}${path}`,
+      {
+        ...options,
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          ...(options.headers || {}),
+        },
+      }
+    );
   } catch {
     throw new Error(
       "اتصال به سرور فضاجو برقرار نشد. مطمئن شوید Backend روی پورت 6060 روشن است."
@@ -157,7 +212,8 @@ async function apiRequest(path, options = {}) {
   let data = null;
 
   try {
-    data = await response.json();
+    data =
+      await response.json();
   } catch {
     throw new ApiError(
       "پاسخ سرور فضاجو قابل خواندن نیست.",
@@ -165,10 +221,16 @@ async function apiRequest(path, options = {}) {
     );
   }
 
-  if (!response.ok || data?.ok === false) {
+  if (
+    !response.ok ||
+    data?.ok === false
+  ) {
     throw new ApiError(
-      data?.message || "در انجام عملیات مشکلی پیش آمد.",
+      data?.message ||
+        "در انجام عملیات مشکلی پیش آمد.",
+
       response.status,
+
       data
     );
   }
@@ -176,117 +238,241 @@ async function apiRequest(path, options = {}) {
   return data;
 }
 
-async function backendLogin(phone, password) {
-  return apiRequest("/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ phone, password }),
-  });
+async function backendLogin(
+  phone,
+  password
+) {
+  return apiRequest(
+    "/auth/login",
+    {
+      method:
+        "POST",
+
+      body:
+        JSON.stringify({
+          phone,
+          password,
+        }),
+    }
+  );
 }
 
-async function backendRegister({ phone, password, displayName = "" }) {
-  return apiRequest("/auth/register", {
-    method: "POST",
-    body: JSON.stringify({
-      phone,
-      password,
-      fullName: displayName.trim(),
-    }),
-  });
+async function backendRegister({
+  phone,
+  password,
+  displayName = "",
+}) {
+  return apiRequest(
+    "/auth/register",
+    {
+      method:
+        "POST",
+
+      body:
+        JSON.stringify({
+          phone,
+          password,
+
+          fullName:
+            displayName.trim(),
+        }),
+    }
+  );
 }
 
 export async function initializeAuthSession() {
-  const token = getStoredToken();
+  const token =
+    getStoredToken();
 
   if (!token) {
-    currentSessionUser = null;
+    currentSessionUser =
+      null;
+
     return null;
   }
 
   try {
-    const data = await apiRequest("/auth/me", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const data =
+      await apiRequest(
+        "/auth/me",
+        {
+          method:
+            "GET",
 
-    const sessionUser = makeSessionUser(data.user);
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
 
-    saveSession(token, sessionUser);
-    notifyAuthListeners(sessionUser);
+    const sessionUser =
+      makeSessionUser(
+        data.user
+      );
+
+    saveSession(
+      token,
+      sessionUser
+    );
+
+    notifyAuthListeners(
+      sessionUser
+    );
 
     return sessionUser;
+
   } catch (error) {
     console.warn(
       "Stored backend session is invalid:",
-      error?.message || error
+      error?.message ||
+        error
     );
 
     clearStoredSession();
-    notifyAuthListeners(null);
+
+    notifyAuthListeners(
+      null
+    );
+
     return null;
   }
 }
 
-export const registerWithPhoneAndPassword = async ({
-  phone,
-  password,
-  displayName = "",
-}) => {
-  const normalizedPhone = normalizePhoneNumber(phone);
-
-  if (!isValidIranianPhoneNumber(normalizedPhone)) {
-    throw new Error(
-      "شماره موبایل را به شکل 09123456789 وارد کنید."
-    );
-  }
-
-  if (new TextEncoder().encode(password).length < 8) {
-    throw new Error(
-      "رمز عبور باید حداقل ۸ کاراکتر باشد."
-    );
-  }
-
-  const data = await backendRegister({
-    phone: normalizedPhone,
+export const registerWithPhoneAndPassword =
+  async ({
+    phone,
     password,
-    displayName,
-  });
+    displayName = "",
+  }) => {
+    const normalizedPhone =
+      normalizePhoneNumber(
+        phone
+      );
 
-  const sessionUser = makeSessionUser(data.user);
+    if (
+      !isValidIranianPhoneNumber(
+        normalizedPhone
+      )
+    ) {
+      throw new Error(
+        "شماره موبایل را به شکل 09123456789 وارد کنید."
+      );
+    }
 
-  saveSession(data.token, sessionUser);
-  notifyAuthListeners(sessionUser);
+    if (
+      new TextEncoder()
+        .encode(
+          password
+        )
+        .length < 8
+    ) {
+      throw new Error(
+        "رمز عبور باید حداقل ۸ کاراکتر باشد."
+      );
+    }
 
-  return sessionUser;
-};
+    const data =
+      await backendRegister({
+        phone:
+          normalizedPhone,
 
-export const loginWithPhoneAndPassword = async ({
-  phone,
-  password,
-}) => {
-  const normalizedPhone = normalizePhoneNumber(phone);
+        password,
 
-  if (!isValidIranianPhoneNumber(normalizedPhone)) {
-    throw new Error(
-      "شماره موبایل را به شکل 09123456789 وارد کنید."
+        displayName,
+      });
+
+    const sessionUser =
+      makeSessionUser(
+        data.user
+      );
+
+    saveSession(
+      data.token,
+      sessionUser
     );
-  }
 
-  const data = await backendLogin(
-    normalizedPhone,
-    password
-  );
+    notifyAuthListeners(
+      sessionUser
+    );
 
-  const sessionUser = makeSessionUser(data.user);
+    return sessionUser;
+  };
 
-  saveSession(data.token, sessionUser);
-  notifyAuthListeners(sessionUser);
+export const loginWithPhoneAndPassword =
+  async ({
+    phone,
+    password,
+  }) => {
+    const normalizedPhone =
+      normalizePhoneNumber(
+        phone
+      );
 
-  return sessionUser;
-};
+    if (
+      !isValidIranianPhoneNumber(
+        normalizedPhone
+      )
+    ) {
+      throw new Error(
+        "شماره موبایل را به شکل 09123456789 وارد کنید."
+      );
+    }
 
-export const logoutUser = async () => {
-  clearStoredSession();
-  notifyAuthListeners(null);
-};
+    const data =
+      await backendLogin(
+        normalizedPhone,
+        password
+      );
+
+    const sessionUser =
+      makeSessionUser(
+        data.user
+      );
+
+    saveSession(
+      data.token,
+      sessionUser
+    );
+
+    notifyAuthListeners(
+      sessionUser
+    );
+
+    return sessionUser;
+  };
+
+export const logoutUser =
+  async () => {
+    const token =
+      getStoredToken();
+
+    try {
+      if (token) {
+        await apiRequest(
+          "/auth/logout",
+          {
+            method:
+              "POST",
+
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        );
+      }
+    } catch (error) {
+      console.warn(
+        "Backend logout warning:",
+        error?.message ||
+          error
+      );
+    } finally {
+      clearStoredSession();
+
+      notifyAuthListeners(
+        null
+      );
+    }
+  };

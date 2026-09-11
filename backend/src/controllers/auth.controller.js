@@ -229,7 +229,8 @@ async function register(
             account_type,
             system_role,
             agency_status,
-            is_active
+            is_active,
+            auth_version
           )
           VALUES (
             $1,
@@ -239,7 +240,8 @@ async function register(
             'user',
             'user',
             'none',
-            TRUE
+            TRUE,
+            1
           )
           RETURNING
             id,
@@ -249,6 +251,7 @@ async function register(
             system_role,
             agency_status,
             is_active,
+            auth_version,
             created_at
         `,
         [
@@ -359,6 +362,7 @@ async function login(
             system_role,
             agency_status,
             is_active,
+            auth_version,
             created_at
           FROM users
           WHERE phone = $1
@@ -402,34 +406,50 @@ async function login(
 
     if (!user.is_active) {
       try {
-        const suspension = await query(
-          `
-            SELECT
-              l.action
-            FROM legal_audit_log l
-            WHERE l.target_type = 'user'
-              AND l.target_id = $1
-              AND l.action IN ('user_suspend', 'user_restore')
-            ORDER BY l.created_at DESC
-            LIMIT 1
-          `,
-          [user.id]
-        );
+        const suspension =
+          await query(
+            `
+              SELECT
+                l.action
+              FROM legal_audit_log l
+              WHERE l.target_type = 'user'
+                AND l.target_id = $1
+                AND l.action IN (
+                  'user_suspend',
+                  'user_restore'
+                )
+              ORDER BY l.created_at DESC
+              LIMIT 1
+            `,
+            [
+              user.id,
+            ]
+          );
 
-        if (suspension.rows[0]?.action === 'user_suspend') {
+        if (
+          suspension.rows[0]
+            ?.action ===
+          "user_suspend"
+        ) {
           return response
             .status(423)
             .json({
               ok: false,
-              code: 'JUDICIAL_SUSPENSION',
+
+              code:
+                "JUDICIAL_SUSPENSION",
+
               message:
                 "حساب شما به موجب دستور مقام قضایی تعلیق شده است. برای پیگیری، با پشتیبانی فضاجو تماس بگیرید.",
             });
         }
-      } catch (legalError) {
+      } catch (
+        legalError
+      ) {
         console.warn(
           "Judicial suspension lookup unavailable:",
-          legalError?.message || legalError
+          legalError?.message ||
+            legalError
         );
       }
 
@@ -495,8 +515,70 @@ async function me(
 }
 
 
+async function logout(
+  request,
+  response
+) {
+  try {
+    const result =
+      await query(
+        `
+          UPDATE users
+          SET
+            auth_version =
+              auth_version + 1,
+            updated_at =
+              NOW()
+          WHERE id = $1
+          RETURNING
+            auth_version
+        `,
+        [
+          request.user.id,
+        ]
+      );
+
+    if (
+      result.rowCount !== 1
+    ) {
+      return response
+        .status(401)
+        .json({
+          ok: false,
+
+          message:
+            "حساب کاربری معتبر نیست.",
+        });
+    }
+
+    return response.json({
+      ok: true,
+
+      message:
+        "خروج از حساب با موفقیت انجام شد.",
+    });
+
+  } catch (error) {
+    console.error(
+      "Logout error:",
+      error
+    );
+
+    return response
+      .status(500)
+      .json({
+        ok: false,
+
+        message:
+          "خروج امن از حساب انجام نشد.",
+      });
+  }
+}
+
+
 module.exports = {
   register,
   login,
   me,
+  logout,
 };

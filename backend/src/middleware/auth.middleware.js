@@ -59,6 +59,7 @@ async function requireAuth(
             system_role,
             agency_status,
             is_active,
+            auth_version,
             created_at
           FROM users
           WHERE id = $1
@@ -86,8 +87,41 @@ async function requireAuth(
         });
     }
 
+    const tokenAuthVersion =
+      Number(
+        payload.authVersion
+      );
+
+    const currentAuthVersion =
+      Number(
+        user.auth_version
+      );
+
+    if (
+      !Number.isInteger(
+        tokenAuthVersion
+      ) ||
+      tokenAuthVersion !==
+        currentAuthVersion
+    ) {
+      return response
+        .status(401)
+        .json({
+          ok: false,
+
+          code:
+            "SESSION_REVOKED",
+
+          message:
+            "نشست کاربری منقضی یا باطل شده است. لطفاً دوباره وارد شوید.",
+        });
+    }
+
     request.user =
       user;
+
+    request.authToken =
+      token;
 
     next();
 

@@ -7,6 +7,7 @@ const {
   register,
   login,
   me,
+  logout,
 } = require(
   "../controllers/auth.controller"
 );
@@ -37,6 +38,13 @@ router.get(
   "/me",
   requireAuth,
   me
+);
+
+
+router.post(
+  "/logout",
+  requireAuth,
+  logout
 );
 
 
