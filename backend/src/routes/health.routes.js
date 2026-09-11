@@ -1,17 +1,10 @@
-const express =
-  require(
-    "express"
-  );
+const express = require("express");
 
 const {
   testDbConnection,
-} = require(
-  "../db/pool"
-);
+} = require("../db/pool");
 
-const router =
-  express.Router();
-
+const router = express.Router();
 
 router.get(
   "/",
@@ -19,37 +12,52 @@ router.get(
     request,
     response
   ) => {
-    const database =
-      await testDbConnection();
+    try {
+      const database =
+        await testDbConnection();
 
-    const statusCode =
-      database.ok
-        ? 200
-        : 503;
+      if (!database.ok) {
+        return response
+          .status(503)
+          .json({
+            ok: false,
+            service:
+              "fazajoo-backend",
+            backend:
+              "online",
+            database:
+              "unavailable",
+          });
+      }
 
-    return response
-      .status(
-        statusCode
-      )
-      .json({
-        ok:
-          database.ok,
-
+      return response.json({
+        ok: true,
         service:
           "fazajoo-backend",
-
         backend:
           "online",
-
-        database,
-
-        time:
-          new Date()
-            .toISOString(),
+        database:
+          "online",
       });
+    } catch (error) {
+      console.error(
+        "Health check error:",
+        error
+      );
+
+      return response
+        .status(503)
+        .json({
+          ok: false,
+          service:
+            "fazajoo-backend",
+          backend:
+            "online",
+          database:
+            "unavailable",
+        });
+    }
   }
 );
 
-
-module.exports =
-  router;
+module.exports = router;
