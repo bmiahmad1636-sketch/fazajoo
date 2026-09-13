@@ -22,6 +22,10 @@ const {
   grantPaidNetworkCredits,
 } = require("../services/networkOpportunity.service");
 
+const {
+  listSecurityAlerts,
+} = require("../services/securityMonitoring.service");
+
 const router =
   express.Router();
 
@@ -34,6 +38,22 @@ router.get(
   "/users",
   listUsers
 );
+
+router.get("/security/alerts", async (req, res) => {
+  try {
+    const alerts = await listSecurityAlerts({
+      limit: req.query?.limit,
+    });
+
+    return res.json({ ok: true, alerts });
+  } catch (error) {
+    console.error("Admin security alerts error:", error);
+    return res.status(500).json({
+      ok: false,
+      message: "دریافت هشدارهای امنیتی انجام نشد.",
+    });
+  }
+});
 
 router.get("/network/agents", async (req, res) => {
   try {
