@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
+const crypto = require("crypto");
 const { rateLimit } = require("express-rate-limit");
 
 const env = require("./config/env");
@@ -30,15 +31,6 @@ app.disable("x-powered-by");
 |--------------------------------------------------------------------------
 | Reverse Proxy
 |--------------------------------------------------------------------------
-|
-| در Development مقدار پیش‌فرض false است.
-|
-| در Production فقط زمانی TRUST_PROXY را فعال می‌کنیم که Backend
-| واقعاً پشت Reverse Proxy مطمئن قرار گرفته باشد.
-|
-| Rate Limiter برای تشخیص IP کاربر از request.ip استفاده می‌کند،
-| بنابراین تنظیم درست trust proxy بسیار مهم است.
-|
 */
 
 app.set(
@@ -60,16 +52,6 @@ app.use(
 |--------------------------------------------------------------------------
 | CORS
 |--------------------------------------------------------------------------
-|
-| فقط Originهای موجود در CORS_ORIGINS اجازه دسترسی مرورگری دارند.
-|
-| درخواست‌هایی که Origin ندارند مثل:
-| - درخواست داخلی سرور
-| - curl
-| - Health Check
-|
-| می‌توانند عبور کنند.
-|
 */
 
 app.use(
@@ -126,10 +108,6 @@ app.use(
 |--------------------------------------------------------------------------
 | JSON body limit
 |--------------------------------------------------------------------------
-|
-| درخواست‌های JSON فضاجو نباید حجم غیرعادی داشته باشند.
-| تصاویر از مسیر Upload جداگانه ارسال می‌شوند.
-|
 */
 
 app.use(
@@ -141,19 +119,124 @@ app.use(
 
 /*
 |--------------------------------------------------------------------------
-| Authentication Rate Limit
+| Login rate limiting
 |--------------------------------------------------------------------------
 |
-| LOGIN:
-| حداکثر 10 تلاش ناموفق در 15 دقیقه برای هر IP.
+| Layer 1:
+| 10 failed login attempts / 15 min / IP.
 |
-| REGISTER:
-| حداکثر 10 درخواست ثبت‌نام در یک ساعت برای هر IP.
+| Layer 2:
+| 20 failed login attempts / 15 min / target phone.
+| This makes rotating IP addresses much less useful to an attacker.
 |
-| IP واقعی کاربر از request.ip گرفته می‌شود و در حالت Production
-| با تنظیم صحیح TRUST_PROXY پشت Reverse Proxy نیز درست کار می‌کند.
+| Successful logins are not counted.
+|
+| The account-based limiter never stores the raw phone number as a key.
+| A SHA-256 digest is used instead.
 |
 */
+
+function normalizeLoginPhone(
+  value
+) {
+  const digits =
+    String(
+      value || ""
+    )
+      .replace(
+        /[۰-۹]/g,
+        (digit) =>
+          String(
+            "۰۱۲۳۴۵۶۷۸۹".indexOf(
+              digit
+            )
+          )
+      )
+      .replace(
+        /[٠-٩]/g,
+        (digit) =>
+          String(
+            "٠١٢٣٤٥٦٧٨٩".indexOf(
+              digit
+            )
+          )
+      )
+      .replace(
+        /\D/g,
+        ""
+      );
+
+  if (
+    digits.startsWith(
+      "0098"
+    )
+  ) {
+    return `0${digits.slice(
+      4,
+      14
+    )}`;
+  }
+
+  if (
+    digits.startsWith(
+      "98"
+    )
+  ) {
+    return `0${digits.slice(
+      2,
+      12
+    )}`;
+  }
+
+  if (
+    digits.startsWith(
+      "9"
+    ) &&
+    digits.length <= 10
+  ) {
+    return `0${digits}`;
+  }
+
+  return digits.slice(
+    0,
+    11
+  );
+}
+
+function loginAccountKey(
+  request
+) {
+  const phone =
+    normalizeLoginPhone(
+      request.body?.phone
+    );
+
+  if (
+    !/^09\d{9}$/.test(
+      phone
+    )
+  ) {
+    /*
+     * Invalid/missing phone values are grouped by IP.
+     * This avoids creating unlimited arbitrary limiter keys.
+     */
+    return `invalid:${request.ip}`;
+  }
+
+  const digest =
+    crypto
+      .createHash(
+        "sha256"
+      )
+      .update(
+        phone
+      )
+      .digest(
+        "hex"
+      );
+
+  return `phone:${digest}`;
+}
 
 const loginRateLimiter =
   rateLimit({
@@ -179,7 +262,38 @@ const loginRateLimiter =
         false,
 
       message:
-        "تعداد تلاش‌های ورود بیش از حد مجاز است. لطفاً حدود ۱۵ دقیقه بعد دوباره تلاش کنید.",
+        "تعداد تلاش‌های ورود از این اتصال بیش از حد مجاز است. لطفاً حدود ۱۵ دقیقه بعد دوباره تلاش کنید.",
+    },
+  });
+
+const loginAccountRateLimiter =
+  rateLimit({
+    windowMs:
+      15 *
+      60 *
+      1000,
+
+    limit:
+      20,
+
+    standardHeaders:
+      false,
+
+    legacyHeaders:
+      false,
+
+    skipSuccessfulRequests:
+      true,
+
+    keyGenerator:
+      loginAccountKey,
+
+    message: {
+      ok:
+        false,
+
+      message:
+        "تعداد تلاش‌های ناموفق برای ورود به این حساب بیش از حد مجاز است. لطفاً کمی بعد دوباره تلاش کنید.",
     },
   });
 
@@ -252,7 +366,8 @@ app.use(
 
 app.use(
   "/api/auth/login",
-  loginRateLimiter
+  loginRateLimiter,
+  loginAccountRateLimiter
 );
 
 app.use(
