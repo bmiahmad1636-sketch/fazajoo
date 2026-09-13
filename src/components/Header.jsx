@@ -247,9 +247,11 @@ function Header({
               />
 
 
-              <div
+              <Link
+                to="/account"
                 className="fazajoo-header__user"
-                title={user.phone || userTitle}
+                title="حساب و امنیت"
+                onClick={closeMenu}
               >
 
                 <span className="fazajoo-header__user-avatar">
@@ -272,7 +274,7 @@ function Header({
 
                 </div>
 
-              </div>
+              </Link>
 
 
               {isAdmin && (

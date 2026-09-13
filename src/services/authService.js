@@ -442,6 +442,72 @@ export const loginWithPhoneAndPassword =
     return sessionUser;
   };
 
+
+export const changePassword =
+  async ({
+    currentPassword,
+    newPassword,
+  }) => {
+    const token =
+      getStoredToken();
+
+    if (!token) {
+      throw new Error(
+        "برای تغییر رمز باید وارد حساب شوید."
+      );
+    }
+
+    if (
+      new TextEncoder()
+        .encode(
+          newPassword
+        )
+        .length < 8
+    ) {
+      throw new Error(
+        "رمز عبور جدید باید حداقل ۸ کاراکتر باشد."
+      );
+    }
+
+    const data =
+      await apiRequest(
+        "/auth/change-password",
+        {
+          method: "POST",
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+          body:
+            JSON.stringify({
+              currentPassword,
+              newPassword,
+            }),
+        }
+      );
+
+    const sessionUser =
+      makeSessionUser(
+        data.user
+      );
+
+    saveSession(
+      data.token,
+      sessionUser
+    );
+
+    notifyAuthListeners(
+      sessionUser
+    );
+
+    return {
+      user: sessionUser,
+      message:
+        data.message ||
+        "رمز عبور با موفقیت تغییر کرد.",
+    };
+  };
+
 export const logoutUser =
   async () => {
     const token =

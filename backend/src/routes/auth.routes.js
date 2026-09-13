@@ -8,6 +8,7 @@ const {
   login,
   me,
   logout,
+  changePassword,
 } = require(
   "../controllers/auth.controller"
 );
@@ -16,6 +17,14 @@ const {
   requireAuth,
 } = require(
   "../middleware/auth.middleware"
+);
+
+
+
+const {
+  changePasswordLimiter,
+} = require(
+  "../middleware/accountSecurityRateLimit.middleware"
 );
 
 const router =
@@ -38,6 +47,14 @@ router.get(
   "/me",
   requireAuth,
   me
+);
+
+
+router.post(
+  "/change-password",
+  requireAuth,
+  changePasswordLimiter,
+  changePassword
 );
 
 

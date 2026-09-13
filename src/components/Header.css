@@ -141,6 +141,12 @@
     0 4px 12px rgba(93, 62, 39, 0.04);
 }
 
+.fazajoo-header__user:hover {
+  border-color: rgba(244, 122, 31, 0.3);
+  background: #fff8f2;
+  transform: translateY(-1px);
+}
+
 .fazajoo-header__user-avatar {
   flex: 0 0 auto;
   width: 30px;

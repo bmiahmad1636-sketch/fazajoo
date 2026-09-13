@@ -28,6 +28,7 @@ import AgencyAccess from "./pages/AgencyAccess";
 import AdminDashboard from "./pages/AdminDashboard";
 import LegalCenterJalali from "./pages/LegalCenterJalali";
 import FindForMe from "./pages/FindForMe";
+import Account from "./pages/Account";
 
 import { getSpaces } from "./services/spaceService";
 
@@ -702,6 +703,22 @@ function App() {
             <AdminRoute user={user} authLoading={authLoading} userProfile={userProfile} profileLoading={profileLoading}>
               <LegalCenterJalali />
             </AdminRoute>
+          }
+        />
+
+
+        <Route
+          path="/account"
+          element={
+            <ProtectedRoute
+              user={user}
+              authLoading={authLoading}
+            >
+              <Account
+                user={user}
+                userProfile={userProfile}
+              />
+            </ProtectedRoute>
           }
         />
 

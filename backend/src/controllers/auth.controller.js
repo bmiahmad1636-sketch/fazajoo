@@ -576,9 +576,187 @@ async function logout(
 }
 
 
+async function changePassword(
+  request,
+  response
+) {
+  try {
+    const {
+      currentPassword,
+      newPassword,
+    } = request.body || {};
+
+    if (
+      typeof currentPassword !== "string" ||
+      typeof newPassword !== "string"
+    ) {
+      return response
+        .status(400)
+        .json({
+          ok: false,
+          message: "رمز عبور فعلی و رمز عبور جدید را وارد کنید.",
+        });
+    }
+
+    if (
+      !validatePassword(
+        newPassword
+      )
+    ) {
+      return response
+        .status(400)
+        .json({
+          ok: false,
+          message: "رمز عبور جدید باید حداقل 8 کاراکتر و حداکثر 72 بایت باشد.",
+        });
+    }
+
+    const result =
+      await query(
+        `
+          SELECT
+            id,
+            phone,
+            password_hash,
+            full_name,
+            account_type,
+            system_role,
+            agency_status,
+            is_active,
+            auth_version,
+            created_at
+          FROM users
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [
+          request.user.id,
+        ]
+      );
+
+    const user =
+      result.rows[0];
+
+    if (
+      !user ||
+      !user.is_active
+    ) {
+      return response
+        .status(401)
+        .json({
+          ok: false,
+          message: "حساب کاربری معتبر نیست.",
+        });
+    }
+
+    const currentMatches =
+      await bcrypt.compare(
+        currentPassword,
+        user.password_hash
+      );
+
+    if (!currentMatches) {
+      return response
+        .status(401)
+        .json({
+          ok: false,
+          message: "رمز عبور فعلی صحیح نیست.",
+        });
+    }
+
+    const sameAsCurrent =
+      await bcrypt.compare(
+        newPassword,
+        user.password_hash
+      );
+
+    if (sameAsCurrent) {
+      return response
+        .status(400)
+        .json({
+          ok: false,
+          message: "رمز عبور جدید باید با رمز فعلی متفاوت باشد.",
+        });
+    }
+
+    const passwordHash =
+      await bcrypt.hash(
+        newPassword,
+        12
+      );
+
+    const updated =
+      await query(
+        `
+          UPDATE users
+          SET
+            password_hash = $2,
+            auth_version = auth_version + 1,
+            updated_at = NOW()
+          WHERE id = $1
+            AND is_active = TRUE
+          RETURNING
+            id,
+            phone,
+            full_name,
+            account_type,
+            system_role,
+            agency_status,
+            is_active,
+            auth_version,
+            created_at
+        `,
+        [
+          user.id,
+          passwordHash,
+        ]
+      );
+
+    if (updated.rowCount !== 1) {
+      return response
+        .status(401)
+        .json({
+          ok: false,
+          message: "حساب کاربری معتبر نیست.",
+        });
+    }
+
+    const updatedUser =
+      updated.rows[0];
+
+    const token =
+      createToken(
+        updatedUser
+      );
+
+    return response.json({
+      ok: true,
+      message: "رمز عبور با موفقیت تغییر کرد. نشست‌های قبلی حساب باطل شدند.",
+      token,
+      user: safeUser(
+        updatedUser
+      ),
+    });
+  } catch (error) {
+    console.error(
+      "Change password error:",
+      error
+    );
+
+    return response
+      .status(500)
+      .json({
+        ok: false,
+        message: "تغییر رمز عبور انجام نشد.",
+      });
+  }
+}
+
+
 module.exports = {
   register,
   login,
   me,
   logout,
+  changePassword,
 };
