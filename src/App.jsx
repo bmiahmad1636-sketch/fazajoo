@@ -29,6 +29,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import LegalCenterJalali from "./pages/LegalCenterJalali";
 import FindForMe from "./pages/FindForMe";
 import Account from "./pages/Account";
+import AgencyPublicProfile from "./pages/AgencyPublicProfile";
 
 import { getSpaces } from "./services/spaceService";
 
@@ -611,6 +612,12 @@ function App() {
           }
         />
 
+
+
+        <Route
+          path="/agency-profile/:userId"
+          element={<AgencyPublicProfile />}
+        />
 
         <Route
           path="/agency-access"

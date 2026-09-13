@@ -173,9 +173,11 @@ function ParkingDetails({
         ? "این آگهی موقتاً غیرفعال است"
         : "آماده استفاده";
 
-  const ownerDisplayName = isWanted
-    ? "متقاضی فضاجو"
-    : "آگهی‌دهنده فضاجو";
+  const ownerDisplayName = parking?.ownerIsApprovedAgent
+    ? "مشاور املاک تأییدشده"
+    : isWanted
+      ? "متقاضی فضاجو"
+      : "آگهی‌دهنده فضاجو";
 
   const residential = parking?.residentialDetails || {};
   const villa = parking?.villaDetails || {};
@@ -880,14 +882,16 @@ function ParkingDetails({
 
                 <div className="parking-contact-card__owner">
                   <div className="parking-contact-card__avatar">
-                    {isWanted ? "م" : "ف"}
+                    {parking?.ownerIsApprovedAgent ? "✓" : isWanted ? "م" : "ف"}
                   </div>
 
                   <div>
                     <span>
-                      {isWanted
-                        ? "ثبت‌کننده درخواست"
-                        : "ثبت‌کننده آگهی"}
+                      {parking?.ownerIsApprovedAgent
+                        ? "ثبت‌کننده تأییدشده"
+                        : isWanted
+                          ? "ثبت‌کننده درخواست"
+                          : "ثبت‌کننده آگهی"}
                     </span>
 
                     <strong>
@@ -895,6 +899,16 @@ function ParkingDetails({
                     </strong>
                   </div>
                 </div>
+
+                {parking?.ownerIsApprovedAgent && parking?.ownerId && (
+                  <Link
+                    to={`/agency-profile/${parking.ownerId}`}
+                    className="parking-contact-card__agency-profile"
+                  >
+                    <span>🏢</span>
+                    مشاهده پروفایل عمومی مشاور
+                  </Link>
+                )}
 
                 <div className="parking-contact-card__notice">
                   <span>🛡</span>

@@ -1938,3 +1938,26 @@
 .parking-details-residential__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px}
 .parking-details-residential__grid span{display:flex;flex-direction:column;gap:5px;padding:12px;background:#fff;border-radius:12px;border:1px solid #eee}
 .parking-details-residential__grid small{color:#777}.parking-details-residential__amenities{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.parking-details-residential__amenities b{padding:8px 11px;border-radius:999px;background:#fff1e6;font-size:.9rem}
+
+
+.parking-contact-card__agency-profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 13px;
+  padding: 10px 12px;
+  border: 1px solid rgba(244, 122, 31, 0.22);
+  border-radius: 12px;
+  background: #fff6ee;
+  color: #d95f0b;
+  text-decoration: none;
+  font-size: 0.76rem;
+  font-weight: 900;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.parking-contact-card__agency-profile:hover {
+  transform: translateY(-1px);
+  background: #ffede0;
+}

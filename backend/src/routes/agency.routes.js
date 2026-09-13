@@ -5,6 +5,130 @@ const { pool } = require("../db/pool");
 const { requireAuth } = require("../middleware/auth.middleware");
 const { getNetworkQuota, unlockNetworkOpportunity } = require("../services/networkOpportunity.service");
 
+// پروفایل عمومی مشاور تأییدشده؛ بدون افشای شماره تماس، آدرس، کد ملی یا مدارک
+router.get("/public/:userId", async (req, res) => {
+  try {
+    const userId = clean(req.params?.userId);
+
+    if (!userId) {
+      return res.status(400).json({
+        ok: false,
+        message: "شناسه مشاور معتبر نیست.",
+      });
+    }
+
+    const profileResult = await pool.query(
+      `SELECT
+         u.id,
+         u.full_name,
+         u.created_at AS member_since,
+         avr.agency_name,
+         avr.responsible_name,
+         avr.city,
+         avr.created_at AS verified_request_date
+       FROM users u
+       LEFT JOIN LATERAL (
+         SELECT agency_name, responsible_name, city, created_at, status
+         FROM agency_verification_requests
+         WHERE user_id = u.id
+           AND status = 'approved'
+         ORDER BY updated_at DESC, created_at DESC
+         LIMIT 1
+       ) avr ON TRUE
+       WHERE u.id = $1
+         AND u.is_active = TRUE
+         AND u.account_type = 'agent'
+         AND u.agency_status = 'approved'
+       LIMIT 1`,
+      [userId]
+    );
+
+    const row = profileResult.rows[0];
+
+    if (!row || !row.agency_name) {
+      return res.status(404).json({
+        ok: false,
+        message: "پروفایل عمومی مشاور پیدا نشد.",
+      });
+    }
+
+    const listingsResult = await pool.query(
+      `SELECT
+         id,
+         listing_type,
+         category,
+         custom_category,
+         category_label,
+         title,
+         city,
+         area,
+         price,
+         price_type,
+         image_url,
+         image_urls,
+         created_at
+       FROM spaces
+       WHERE owner_id = $1
+         AND status = 'active'
+       ORDER BY created_at DESC
+       LIMIT 12`,
+      [userId]
+    );
+
+    const countResult = await pool.query(
+      `SELECT COUNT(*)::int AS active_count
+       FROM spaces
+       WHERE owner_id = $1
+         AND status = 'active'`,
+      [userId]
+    );
+
+    const listings = listingsResult.rows.map((item) => {
+      const imageUrls = Array.isArray(item.image_urls)
+        ? item.image_urls.filter(Boolean).slice(0, 8)
+        : [];
+
+      const imageUrl = imageUrls[0] || item.image_url || "";
+
+      return {
+        id: item.id,
+        listingType: item.listing_type,
+        category: item.category,
+        customCategory: item.custom_category || "",
+        categoryLabel: item.category_label || "",
+        title: item.title,
+        city: item.city,
+        area: Number(item.area || 0),
+        price: item.price,
+        priceType: item.price_type || "monthly",
+        imageUrl,
+        imageUrls,
+        createdAt: item.created_at,
+      };
+    });
+
+    return res.json({
+      ok: true,
+      profile: {
+        userId: row.id,
+        agencyName: row.agency_name,
+        responsibleName: row.responsible_name || row.full_name || "مشاور فضاجو",
+        city: row.city || "",
+        memberSince: row.member_since,
+        verified: true,
+        activeListingsCount: Number(countResult.rows[0]?.active_count || 0),
+        listings,
+      },
+    });
+  } catch (error) {
+    console.error("public agency profile error:", error);
+    return res.status(500).json({
+      ok: false,
+      message: "دریافت پروفایل عمومی مشاور انجام نشد.",
+    });
+  }
+});
+
 router.use(requireAuth);
 
 // سهمیه فرصت‌های شبکه مشاور تأییدشده
