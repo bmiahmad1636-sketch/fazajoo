@@ -7,6 +7,66 @@ const { query } = require("./db/pool");
 
 const server = http.createServer(app);
 
+
+const CHAT_JOIN_WINDOW_MS =
+  60 * 1000;
+
+const CHAT_JOIN_MAX_PER_WINDOW =
+  60;
+
+const chatJoinUsage =
+  new Map();
+
+function canJoinChatRoom(
+  userId
+) {
+  const now =
+    Date.now();
+
+  const current =
+    chatJoinUsage.get(
+      userId
+    );
+
+  if (
+    !current ||
+    now - current.windowStartedAt >=
+      CHAT_JOIN_WINDOW_MS
+  ) {
+    chatJoinUsage.set(
+      userId,
+      {
+        windowStartedAt: now,
+        count: 1,
+      }
+    );
+
+    return true;
+  }
+
+  if (
+    current.count >=
+    CHAT_JOIN_MAX_PER_WINDOW
+  ) {
+    return false;
+  }
+
+  current.count += 1;
+
+  return true;
+}
+
+function isValidUuid(
+  value
+) {
+  return (
+    typeof value === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      value
+    )
+  );
+}
+
 const io = new Server(server, {
   cors: {
     origin: env.CORS_ORIGINS,
@@ -118,6 +178,30 @@ io.on(
         chatId
       ) => {
         try {
+          if (
+            !isValidUuid(
+              chatId
+            )
+          ) {
+            return;
+          }
+
+          if (
+            !canJoinChatRoom(
+              socket.userId
+            )
+          ) {
+            console.warn(
+              "Socket chat join rate limit exceeded",
+              {
+                userId:
+                  socket.userId,
+              }
+            );
+
+            return;
+          }
+
           const result =
             await query(
               `
