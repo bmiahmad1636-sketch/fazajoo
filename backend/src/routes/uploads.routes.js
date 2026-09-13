@@ -1,18 +1,33 @@
 const express = require("express");
 const multer = require("multer");
-const { requireAuth } = require("../middleware/auth.middleware");
+
+const {
+  requireAuth,
+} = require("../middleware/auth.middleware");
+
+const {
+  adImageUploadLimiter,
+  agencyDocumentUploadLimiter,
+} = require("../middleware/uploadRateLimit.middleware");
+
 const controller = require("../controllers/uploads.controller");
 
 const router = express.Router();
 
 const adImageUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024, files: 1 },
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+    files: 1,
+  },
 });
 
 const agencyDocumentUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+    files: 1,
+  },
 });
 
 // Public ad image delivery. Only files inside the dedicated ad-images folder
@@ -25,6 +40,7 @@ router.get(
 router.post(
   "/ad-image",
   requireAuth,
+  adImageUploadLimiter,
   adImageUpload.single("file"),
   controller.uploadAdImage
 );
@@ -38,6 +54,7 @@ router.delete(
 router.post(
   "/agency-document",
   requireAuth,
+  agencyDocumentUploadLimiter,
   agencyDocumentUpload.single("file"),
   controller.uploadAgencyDocument
 );
