@@ -1,14 +1,25 @@
 const express = require("express");
 const { requireAuth } = require("../middleware/auth.middleware");
+const {
+  sendMessageRateLimit,
+} = require("../middleware/chatRateLimit.middleware");
 const controller = require("../controllers/chats.controller");
+
 const router = express.Router();
+
 router.use(requireAuth);
+
 router.get("/", controller.list);
 router.get("/unread-count", controller.unreadCount);
 router.get("/:id/legal-status", controller.legalStatus);
 router.post("/", controller.createOrGet);
 router.get("/:id", controller.getOne);
 router.get("/:id/messages", controller.messages);
-router.post("/:id/messages", controller.send);
+router.post(
+  "/:id/messages",
+  sendMessageRateLimit,
+  controller.send
+);
 router.post("/:id/read", controller.markRead);
+
 module.exports = router;
