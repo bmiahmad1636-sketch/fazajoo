@@ -50,7 +50,7 @@ function normalizeImages(value, fallback = "") {
   return cleaned;
 }
 
-function mapSpace(row) {
+function mapSpace(row, { includePhone = false } = {}) {
   const imageUrls = normalizeImages(row.image_urls, row.image_url);
   return {
     id: row.id,
@@ -64,7 +64,7 @@ function mapSpace(row) {
     area: Number(row.area || 0),
     price: row.price,
     priceType: row.price_type || "monthly",
-    phone: row.phone,
+    ...(includePhone ? { phone: row.phone } : {}),
     imageUrl: imageUrls[0] || "",
     imageUrls,
     residentialDetails: row.residential_details || {},
@@ -172,7 +172,7 @@ async function list(req, res) {
       WHERE s.status <> 'inactive'
       ORDER BY s.created_at DESC
     `);
-    return res.json({ ok: true, spaces: result.rows.map(mapSpace) });
+    return res.json({ ok: true, spaces: result.rows.map((row) => mapSpace(row)) });
   } catch (error) {
     console.error("List spaces error:", error);
     return res.status(500).json({ ok: false, message: "دریافت آگهی‌ها انجام نشد." });
@@ -201,11 +201,52 @@ async function getOne(req, res) {
   }
 }
 
+async function getContact(req, res) {
+  try {
+    await ensureImageSchema();
+
+    const result = await query(
+      `SELECT id, phone, status FROM spaces WHERE id=$1 LIMIT 1`,
+      [req.params.id]
+    );
+
+    const space = result.rows[0];
+
+    if (!space) {
+      return res.status(404).json({ ok: false, message: "آگهی پیدا نشد." });
+    }
+
+    if (space.status === "inactive" || space.status === "rented") {
+      return res.status(409).json({
+        ok: false,
+        message: "شماره تماس این آگهی در وضعیت فعلی قابل نمایش نیست.",
+      });
+    }
+
+    const phone = String(space.phone || "").replace(/\s/g, "").trim();
+
+    if (!/^09\d{9}$/.test(phone)) {
+      return res.status(404).json({
+        ok: false,
+        message: "شماره تماس معتبری برای این آگهی ثبت نشده است.",
+      });
+    }
+
+    return res.json({ ok: true, phone });
+  } catch (error) {
+    console.error("Get space contact error:", error);
+    return res.status(500).json({
+      ok: false,
+      message: "دریافت شماره تماس انجام نشد.",
+    });
+  }
+}
+
 async function mine(req, res) {
   try {
     await ensureImageSchema();
     const result = await query(`SELECT ${FIELDS} FROM spaces WHERE owner_id=$1 ORDER BY created_at DESC`, [req.user.id]);
-    return res.json({ ok: true, spaces: result.rows.map(mapSpace) });
+    return res.json({ ok: true, spaces: result.rows.map((row) => mapSpace(row)) });
   } catch (error) {
     console.error("Mine spaces error:", error);
     return res.status(500).json({ ok: false, message: "دریافت آگهی‌های شما انجام نشد." });
@@ -225,7 +266,7 @@ async function create(req, res) {
        RETURNING ${FIELDS}`,
       [id, space.listingType, space.category, space.customCategory, space.categoryLabel, space.status, space.title, space.city, space.area, space.price, space.priceType, space.phone, space.imageUrl, JSON.stringify(space.imageUrls), JSON.stringify(space.residentialDetails), JSON.stringify(space.villaDetails), space.description, space.agencyNetworkConsent, req.user.id]
     );
-    const createdSpace = mapSpace(result.rows[0]);
+    const createdSpace = mapSpace(result.rows[0], { includePhone: true });
     createNotificationsForNewOffer(createdSpace, req.user.id);
     return res.status(201).json({ ok: true, message: "آگهی با موفقیت ثبت شد.", space: createdSpace });
   } catch (error) {
@@ -242,7 +283,7 @@ async function update(req, res) {
     if (existing.rows[0].owner_id !== req.user.id && req.user.system_role !== "admin") {
       return res.status(403).json({ ok: false, message: "اجازه ویرایش این آگهی را ندارید." });
     }
-    const merged = clean({ ...mapSpace(existing.rows[0]), ...req.body });
+    const merged = clean({ ...mapSpace(existing.rows[0], { includePhone: true }), ...req.body });
     const error = validate(merged);
     if (error) return res.status(400).json({ ok: false, message: error });
     const result = await query(
@@ -250,7 +291,7 @@ async function update(req, res) {
        WHERE id=$1 RETURNING ${FIELDS}`,
       [req.params.id, merged.listingType, merged.category, merged.customCategory, merged.categoryLabel, merged.status, merged.title, merged.city, merged.area, merged.price, merged.priceType, merged.phone, merged.imageUrl, JSON.stringify(merged.imageUrls), JSON.stringify(merged.residentialDetails), JSON.stringify(merged.villaDetails), merged.description, merged.agencyNetworkConsent]
     );
-    return res.json({ ok: true, message: "آگهی ویرایش شد.", space: mapSpace(result.rows[0]) });
+    return res.json({ ok: true, message: "آگهی ویرایش شد.", space: mapSpace(result.rows[0], { includePhone: true }) });
   } catch (error) {
     console.error("Update space error:", error);
     return res.status(500).json({ ok: false, message: "ویرایش آگهی انجام نشد." });
@@ -269,4 +310,4 @@ async function remove(req, res) {
   }
 }
 
-module.exports = { list, getOne, mine, create, update, remove };
+module.exports = { list, getOne, getContact, mine, create, update, remove };

@@ -5,6 +5,7 @@ function changed(){ window.dispatchEvent(new Event("fazajoo:spaces-changed")); }
 export async function getSpaces(){ return (await request("/spaces")).spaces||[]; }
 export async function getMySpaces(){ return (await request("/spaces/mine")).spaces||[]; }
 export async function getSpace(id){ return (await request(`/spaces/${id}`)).space; }
+export async function getSpaceContact(id){ return (await request(`/spaces/${id}/contact`)).phone||""; }
 export async function createSpace(payload){ const d=await request("/spaces",{method:"POST",body:JSON.stringify(payload)}); changed(); return d.space; }
 export async function updateSpace(id,payload){ const d=await request(`/spaces/${id}`,{method:"PATCH",body:JSON.stringify(payload)}); changed(); return d.space; }
 export async function deleteSpace(id){ const d=await request(`/spaces/${id}`,{method:"DELETE"}); changed(); return d; }

@@ -6,7 +6,7 @@ import {
   useParams,
 } from "react-router-dom";
 import { getCurrentSessionUser, subscribeToAuth } from "../services/authService";
-import { deleteSpace } from "../services/spaceService";
+import { deleteSpace, getSpaceContact } from "../services/spaceService";
 import { formatRialPrice } from "../utils/priceFormatter";
 
 import "./ParkingDetails.css";
@@ -54,8 +54,9 @@ function ParkingDetails({
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [showPhone, setShowPhone] =
-    useState(false);
+  const [showPhone, setShowPhone] = useState(false);
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactLoading, setContactLoading] = useState(false);
 
   const [user, setUser] =
     useState(null);
@@ -98,6 +99,8 @@ function ParkingDetails({
 
   useEffect(() => {
     setActiveImageIndex(0);
+    setShowPhone(false);
+    setContactPhone("");
   }, [parking?.id]);
 
   const activeImage =
@@ -170,38 +173,44 @@ function ParkingDetails({
         ? "این آگهی موقتاً غیرفعال است"
         : "آماده استفاده";
 
-  const ownerDisplayName = (() => {
-    const phone = String(
-      parking?.phone || ""
-    )
-      .replace(/\s/g, "")
-      .trim();
-
-    if (/^09\d{9}$/.test(phone)) {
-      return phone;
-    }
-
-    const ownerEmail = String(
-      parking?.ownerEmail || ""
-    ).trim();
-
-    const mobileMatch =
-      ownerEmail.match(/09\d{9}/);
-
-    if (mobileMatch) {
-      return mobileMatch[0];
-    }
-
-    return isWanted
-      ? "متقاضی فضاجو"
-      : "آگهی‌دهنده فضاجو";
-  })();
+  const ownerDisplayName = isWanted
+    ? "متقاضی فضاجو"
+    : "آگهی‌دهنده فضاجو";
 
   const residential = parking?.residentialDetails || {};
   const villa = parking?.villaDetails || {};
   const residentialTypeLabels = {
     apartment: "آپارتمان", house: "خانه", villa: "خانه ویلایی",
     suite: "سوئیت", penthouse: "پنت‌هاوس", other: "سایر مسکونی",
+  };
+
+  const handlePhoneToggle = async () => {
+    if (showPhone) {
+      setShowPhone(false);
+      return;
+    }
+
+    if (!user) {
+      showInSiteAlert("برای مشاهده شماره تماس ابتدا وارد حساب شوید.");
+      navigate("/login");
+      return;
+    }
+
+    if (contactPhone) {
+      setShowPhone(true);
+      return;
+    }
+
+    try {
+      setContactLoading(true);
+      const phone = await getSpaceContact(parking.id);
+      setContactPhone(phone);
+      setShowPhone(true);
+    } catch (error) {
+      showInSiteAlert(error?.message || "دریافت شماره تماس انجام نشد.");
+    } finally {
+      setContactLoading(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -817,53 +826,34 @@ function ParkingDetails({
                           : "این آگهی موقتاً غیرفعال است و امکان تماس یا شروع گفتگوی جدید برای آن وجود ندارد."}
                     </p>
                   </div>
-                ) : parking.phone ? (
+                ) : (
                   <div className="parking-contact-card__phone">
                     <button
                       type="button"
                       className="parking-contact-card__phone-button"
-                      onClick={() =>
-                        setShowPhone(
-                          (current) =>
-                            !current
-                        )
-                      }
+                      onClick={handlePhoneToggle}
+                      disabled={contactLoading}
                     >
-                      <span>
-                        📞
-                      </span>
+                      <span>📞</span>
 
-                      {showPhone
-                        ? "پنهان کردن شماره"
-                        : isWanted
-                          ? "نمایش شماره متقاضی"
-                          : "نمایش شماره تماس"}
+                      {contactLoading
+                        ? "در حال دریافت شماره..."
+                        : showPhone
+                          ? "پنهان کردن شماره"
+                          : isWanted
+                            ? "نمایش شماره متقاضی"
+                            : "نمایش شماره تماس"}
                     </button>
 
-                    {showPhone && (
+                    {showPhone && contactPhone && (
                       <a
-                        href={`tel:${parking.phone}`}
+                        href={`tel:${contactPhone}`}
                         className="parking-contact-card__phone-number"
                       >
-                        <span>
-                          تماس مستقیم
-                        </span>
-
-                        <strong>
-                          {parking.phone}
-                        </strong>
+                        <span>تماس مستقیم</span>
+                        <strong>{contactPhone}</strong>
                       </a>
                     )}
-                  </div>
-                ) : (
-                  <div className="parking-contact-card__unavailable">
-                    <span>📵</span>
-
-                    <p>
-                      {isWanted
-                        ? "شماره تماس برای این درخواست ثبت نشده است."
-                        : "شماره تماس برای این آگهی ثبت نشده است."}
-                    </p>
                   </div>
                 )}
 
