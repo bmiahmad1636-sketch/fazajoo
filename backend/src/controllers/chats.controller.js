@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const { query } = require("../db/pool");
+const { isEitherUserBlocked } = require("../services/trustSafety.service");
 
 let chatSchemaPromise = null;
 
@@ -340,6 +341,11 @@ async function send(req, res) {
     }
     if ((chat.legal_mode || 'active') !== 'active') {
       return res.status(423).json({ ok: false, message: 'ارسال پیام در این گفتگو به دستور مقام قضایی غیرفعال است.' });
+    }
+
+    const otherUserId = chat.owner_id === req.user.id ? chat.requester_id : chat.owner_id;
+    if (await isEitherUserBlocked(req.user.id, otherUserId)) {
+      return res.status(403).json({ ok: false, code: "USER_BLOCKED", message: "به دلیل مسدودسازی کاربر، امکان ارسال پیام در این گفتگو وجود ندارد." });
     }
 
     const id = crypto.randomUUID();

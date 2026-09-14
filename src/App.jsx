@@ -30,6 +30,7 @@ import LegalCenterJalali from "./pages/LegalCenterJalali";
 import FindForMe from "./pages/FindForMe";
 import Account from "./pages/Account";
 import AgencyPublicProfile from "./pages/AgencyPublicProfile";
+import AdminModeration from "./pages/AdminModeration";
 
 import { getSpaces } from "./services/spaceService";
 
@@ -699,6 +700,16 @@ function App() {
               profileLoading={profileLoading}
             >
               <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+
+
+        <Route
+          path="/admin/moderation"
+          element={
+            <AdminRoute user={user} authLoading={authLoading} userProfile={userProfile} profileLoading={profileLoading}>
+              <AdminModeration />
             </AdminRoute>
           }
         />

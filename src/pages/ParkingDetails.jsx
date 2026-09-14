@@ -9,6 +9,7 @@ import { getCurrentSessionUser, subscribeToAuth } from "../services/authService"
 import { deleteSpace, getSpaceContact } from "../services/spaceService";
 import { formatRialPrice } from "../utils/priceFormatter";
 
+import TrustSafetyActions from "../components/TrustSafetyActions";
 import "./ParkingDetails.css";
 
 
@@ -908,6 +909,14 @@ function ParkingDetails({
                     <span>🏢</span>
                     مشاهده پروفایل عمومی مشاور
                   </Link>
+                )}
+
+                {!authLoading && user && !isOwner && parking?.ownerId && (
+                  <TrustSafetyActions
+                    targetType="listing"
+                    targetId={parking.id}
+                    reportedUserId={parking.ownerId}
+                  />
                 )}
 
                 <div className="parking-contact-card__notice">
