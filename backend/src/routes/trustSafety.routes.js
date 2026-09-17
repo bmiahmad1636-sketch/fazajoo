@@ -23,10 +23,16 @@ router.post("/reports", trustActionLimiter, async (req, res) => {
     });
   } catch (e) {
     console.error("Create abuse report error:", e);
-    return res.status(e.status || 500).json({
-      ok: false,
-      message: e.status ? e.message : "ثبت گزارش انجام نشد.",
-    });
+    return res.status(e.status || 500).json({ ok: false, message: e.status ? e.message : "ثبت گزارش انجام نشد." });
+  }
+});
+
+router.get("/blocks", async (req, res) => {
+  try {
+    return res.json({ ok: true, users: await s.listMyBlockedUsers(req.user.id) });
+  } catch (e) {
+    console.error("List blocked users error:", e);
+    return res.status(500).json({ ok: false, message: "دریافت فهرست کاربران مسدودشده انجام نشد." });
   }
 });
 
@@ -59,6 +65,25 @@ router.delete("/blocks/:userId", trustActionLimiter, async (req, res) => {
   }
 });
 
+router.get("/notices", async (req, res) => {
+  try {
+    return res.json({ ok: true, notices: await s.getMyNotices(req.user.id) });
+  } catch (e) {
+    console.error("Get moderation notices error:", e);
+    return res.status(500).json({ ok: false, message: "دریافت هشدارهای مدیریتی انجام نشد." });
+  }
+});
+
+router.patch("/notices/:id/read", async (req, res) => {
+  try {
+    const notice = await s.markNoticeRead(req.user.id, req.params.id);
+    return res.json({ ok: true, notice });
+  } catch (e) {
+    console.error("Read moderation notice error:", e);
+    return res.status(e.status || 500).json({ ok: false, message: e.status ? e.message : "ثبت مشاهده هشدار انجام نشد." });
+  }
+});
+
 router.get("/admin/reports", requireAdmin, async (req, res) => {
   try {
     return res.json({ ok: true, reports: await s.listReports(req.query?.status) });
@@ -74,10 +99,7 @@ router.get("/admin/reports/:id/chat", requireAdmin, async (req, res) => {
     return res.json({ ok: true, ...data });
   } catch (e) {
     console.error("Admin report chat preview error:", e);
-    return res.status(e.status || 500).json({
-      ok: false,
-      message: e.status ? e.message : "دریافت گفتگوی گزارش‌شده انجام نشد.",
-    });
+    return res.status(e.status || 500).json({ ok: false, message: e.status ? e.message : "دریافت گفتگوی گزارش‌شده انجام نشد." });
   }
 });
 
@@ -90,12 +112,22 @@ router.patch("/admin/reports/:id", requireAdmin, async (req, res) => {
     });
     return res.json({ ok: true, report });
   } catch (e) {
-    // جزئیات واقعی فقط در ترمینال سرور ثبت می‌شود و به مرورگر نشت نمی‌کند.
     console.error("Admin report update error:", e);
-    return res.status(e.status || 500).json({
-      ok: false,
-      message: e.status ? e.message : "بروزرسانی گزارش انجام نشد.",
+    return res.status(e.status || 500).json({ ok: false, message: e.status ? e.message : "بروزرسانی گزارش انجام نشد." });
+  }
+});
+
+router.post("/admin/reports/:id/actions", requireAdmin, async (req, res) => {
+  try {
+    const action = await s.applyAdminAction(req.params.id, {
+      action: req.body?.action,
+      note: req.body?.note,
+      adminId: req.user.id,
     });
+    return res.json({ ok: true, message: "اقدام مدیریتی ثبت و اجرا شد.", action });
+  } catch (e) {
+    console.error("Admin moderation action error:", e);
+    return res.status(e.status || 500).json({ ok: false, message: e.status ? e.message : "اجرای اقدام مدیریتی انجام نشد." });
   }
 });
 

@@ -554,7 +554,7 @@ function AdminDashboard() {
 
   return (
     <main className="admin-dashboard">
-      <div style={{maxWidth:"1180px",margin:"10px auto 0",padding:"0 20px",direction:"rtl",display:"flex",gap:"8px",flexWrap:"wrap"}}><Link to="/admin/legal" style={{display:"inline-block",padding:"9px 14px",borderRadius:"10px",background:"#3f3a36",color:"white",textDecoration:"none"}}>⚖️ امور حقوقی و دستورات قضایی</Link><Link to="/admin/moderation" style={{display:"inline-block",padding:"9px 14px",borderRadius:"10px",background:"#ef741b",color:"white",textDecoration:"none"}}>🛡 مرکز گزارش‌ها و تخلفات</Link></div>
+      <div style={{maxWidth:"1180px",margin:"10px auto 0",padding:"0 20px",direction:"rtl",display:"flex",gap:"8px",flexWrap:"wrap"}}><Link to="/admin/legal" style={{display:"inline-block",padding:"9px 14px",borderRadius:"10px",background:"#3f3a36",color:"white",textDecoration:"none"}}>⚖️ امور حقوقی و دستورات قضایی</Link><Link to="/admin/moderation" style={{display:"inline-block",padding:"9px 14px",borderRadius:"10px",background:"#ef741b",color:"white",textDecoration:"none"}}>🛡 مرکز گزارش‌ها و تخلفات</Link><Link to="/admin/direct-management" style={{display:"inline-block",padding:"9px 14px",borderRadius:"10px",background:"#8b4b22",color:"white",textDecoration:"none"}}>👤 مدیریت مستقیم کاربران</Link></div>
 
       <section className="admin-dashboard__hero">
 

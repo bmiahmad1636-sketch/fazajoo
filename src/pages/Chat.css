@@ -1481,3 +1481,19 @@
     font-size: 0.78rem;
   }
 }
+
+/* In-chat personal unblock action */
+.chat-send-error__unblock{
+  margin-top:10px;
+  align-self:flex-start;
+  border:1px solid #d99a77;
+  background:#fff;
+  color:#a84d17;
+  border-radius:10px;
+  padding:8px 13px;
+  font:inherit;
+  font-weight:800;
+  cursor:pointer;
+}
+.chat-send-error__unblock:hover{background:#fff7f1;border-color:#ef7d32}
+.chat-send-error__unblock:disabled{opacity:.6;cursor:wait}

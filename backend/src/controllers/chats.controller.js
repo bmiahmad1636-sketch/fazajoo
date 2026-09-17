@@ -1,6 +1,6 @@
 const crypto = require("crypto");
 const { query } = require("../db/pool");
-const { isEitherUserBlocked } = require("../services/trustSafety.service");
+const { isEitherUserBlocked, getBlockStatus } = require("../services/trustSafety.service");
 
 let chatSchemaPromise = null;
 
@@ -14,6 +14,7 @@ function ensureChatSchema() {
 
       await query(`ALTER TABLE chats ADD COLUMN IF NOT EXISTS legal_mode VARCHAR(20) NOT NULL DEFAULT 'active'`);
       await query(`ALTER TABLE chats ADD COLUMN IF NOT EXISTS legal_hold BOOLEAN NOT NULL DEFAULT FALSE`);
+      await query(`ALTER TABLE chats ADD COLUMN IF NOT EXISTS moderation_mode VARCHAR(20) NOT NULL DEFAULT 'active'`);
       await query(`CREATE TABLE IF NOT EXISTS legal_system_settings (id SMALLINT PRIMARY KEY CHECK (id=1), global_chat_mode VARCHAR(20) NOT NULL DEFAULT 'active', updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())`);
       await query(`INSERT INTO legal_system_settings (id,global_chat_mode) VALUES (1,'active') ON CONFLICT (id) DO NOTHING`);
 
@@ -84,12 +85,13 @@ function mapChat(row, currentUserId) {
     createdAt: row.created_at,
     legalMode: row.legal_mode || 'active',
     legalHold: Boolean(row.legal_hold),
+    moderationMode: row.moderation_mode || 'active',
   };
 }
 
 const CHAT_SELECT = `
   SELECT
-    c.id, c.space_id, c.owner_id, c.requester_id, c.chat_type, c.legal_mode, c.legal_hold, c.created_at, c.updated_at,
+    c.id, c.space_id, c.owner_id, c.requester_id, c.chat_type, c.legal_mode, c.legal_hold, c.moderation_mode, c.created_at, c.updated_at,
     s.title AS space_title, s.city AS space_city, s.image_url AS space_image_url,
     s.listing_type AS space_listing_type,
     ou.full_name AS owner_name, ou.phone AS owner_phone,
@@ -208,10 +210,17 @@ async function legalStatus(req, res) {
     const chat = await getChatRow(req.params.id, req.user.id);
     if (!chat) return res.status(404).json({ ok: false, message: "گفتگو پیدا نشد." });
     const globalMode = (await query(`SELECT global_chat_mode FROM legal_system_settings WHERE id=1`)).rows[0]?.global_chat_mode || "active";
+    const otherUserId = chat.owner_id === req.user.id ? chat.requester_id : chat.owner_id;
+    const blockStatus = await getBlockStatus(req.user.id, otherUserId);
+
     return res.json({
       ok: true,
       globalBlocked: globalMode !== "active",
       chatBlocked: (chat.legal_mode || "active") !== "active",
+      moderationBlocked: (chat.moderation_mode || "active") !== "active",
+      pairBlocked: Boolean(blockStatus.blockedByModeration),
+      blockedByMe: Boolean(blockStatus.blockedByMe),
+      blockedMe: Boolean(blockStatus.blockedMe),
     });
   } catch (error) {
     console.error("Chat legal status error:", error);
@@ -272,6 +281,29 @@ async function createOrGet(req, res) {
       });
     }
 
+    const blockStatus = await getBlockStatus(req.user.id, space.owner_id);
+    if (blockStatus.blockedByModeration) {
+      return res.status(403).json({
+        ok: false,
+        code: "MODERATION_PAIR_BLOCKED",
+        message: "ارتباط بین شما و این کاربر به تصمیم مدیریت فضاجو محدود شده است. در حال حاضر امکان شروع یا ادامه گفتگو با این کاربر وجود ندارد.",
+      });
+    }
+    if (blockStatus.blockedByMe) {
+      return res.status(403).json({
+        ok: false,
+        code: "USER_BLOCKED_BY_ME",
+        message: "شما این کاربر را مسدود کرده‌اید. برای شروع گفتگو ابتدا مسدودسازی را بردارید.",
+      });
+    }
+    if (blockStatus.blockedMe) {
+      return res.status(403).json({
+        ok: false,
+        code: "USER_BLOCKED_BY_OTHER",
+        message: "این کاربر ارتباط با شما را مسدود کرده است. در حال حاضر امکان شروع گفتگو وجود ندارد.",
+      });
+    }
+
     const id = crypto.randomUUID();
 
     const result = await query(
@@ -318,6 +350,7 @@ async function messages(req, res) {
         createdAt: row.created_at,
     legalMode: row.legal_mode || 'active',
     legalHold: Boolean(row.legal_hold),
+    moderationMode: row.moderation_mode || 'active',
         readAt: row.read_at,
       })),
     });
@@ -342,10 +375,32 @@ async function send(req, res) {
     if ((chat.legal_mode || 'active') !== 'active') {
       return res.status(423).json({ ok: false, message: 'ارسال پیام در این گفتگو به دستور مقام قضایی غیرفعال است.' });
     }
+    if ((chat.moderation_mode || 'active') !== 'active') {
+      return res.status(423).json({ ok: false, code: 'MODERATION_RESTRICTED', message: 'ارسال پیام در این گفتگو به تصمیم مدیریت فضاجو موقتاً محدود شده است.' });
+    }
 
     const otherUserId = chat.owner_id === req.user.id ? chat.requester_id : chat.owner_id;
-    if (await isEitherUserBlocked(req.user.id, otherUserId)) {
-      return res.status(403).json({ ok: false, code: "USER_BLOCKED", message: "به دلیل مسدودسازی کاربر، امکان ارسال پیام در این گفتگو وجود ندارد." });
+    const blockStatus = await getBlockStatus(req.user.id, otherUserId);
+    if (blockStatus.blockedByModeration) {
+      return res.status(403).json({
+        ok: false,
+        code: "MODERATION_PAIR_BLOCKED",
+        message: "ارتباط بین شما و این کاربر به تصمیم مدیریت فضاجو محدود شده است. در حال حاضر امکان شروع یا ادامه گفتگو با این کاربر وجود ندارد.",
+      });
+    }
+    if (blockStatus.blockedByMe) {
+      return res.status(403).json({
+        ok: false,
+        code: "USER_BLOCKED_BY_ME",
+        message: "شما این کاربر را مسدود کرده‌اید. برای ادامه گفتگو ابتدا مسدودسازی را بردارید.",
+      });
+    }
+    if (blockStatus.blockedMe) {
+      return res.status(403).json({
+        ok: false,
+        code: "USER_BLOCKED_BY_OTHER",
+        message: "این کاربر ارتباط با شما را مسدود کرده است. در حال حاضر امکان ادامه گفتگو وجود ندارد.",
+      });
     }
 
     const id = crypto.randomUUID();
@@ -366,6 +421,7 @@ async function send(req, res) {
       createdAt: row.created_at,
     legalMode: row.legal_mode || 'active',
     legalHold: Boolean(row.legal_hold),
+    moderationMode: row.moderation_mode || 'active',
       readAt: row.read_at,
     };
 

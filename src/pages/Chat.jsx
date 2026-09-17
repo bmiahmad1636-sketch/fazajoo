@@ -4,6 +4,8 @@ import { getCurrentSessionUser, subscribeToAuth } from "../services/authService"
 import { createOrGetChat, getChat, getMessages, getChatLegalStatus, markChatRead, sendMessage, subscribeChat } from "../services/chatService";
 import ChatMessage from "../components/chat/ChatMessage";
 import TrustSafetyActions from "../components/TrustSafetyActions";
+import { unblockUser } from "../services/trustSafetyService";
+import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import "./Chat.css";
 
 function Chat({ parkings = [] }) {
@@ -24,6 +26,8 @@ function Chat({ parkings = [] }) {
   const [sendError, setSendError] = useState("");
   const [chatBlocked, setChatBlocked] = useState(false);
   const [chatBlockMessage, setChatBlockMessage] = useState("");
+  const [blockedByMe, setBlockedByMe] = useState(false);
+  const [unblocking, setUnblocking] = useState(false);
   const endRef = useRef(null);
   const parking = useMemo(() => parkings.find((item) => String(item.id) === String(parkingId)), [parkings, parkingId]);
   const userId = user?.backendId || user?.id || user?.uid || "";
@@ -72,15 +76,28 @@ function Chat({ parkings = [] }) {
       try {
         const status = await getChatLegalStatus(chat.id);
         if (!active) return;
-        if (status.globalBlocked || status.chatBlocked) {
+        setBlockedByMe(Boolean(status.blockedByMe));
+        if (status.globalBlocked || status.chatBlocked || status.pairBlocked || status.moderationBlocked || status.blockedByMe || status.blockedMe) {
           setChatBlocked(true);
-          setChatBlockMessage(status.chatBlocked
-            ? "ارسال پیام در این گفتگو به دستور مقام قضایی موقتاً غیرفعال است."
-            : "ارسال پیام در فضاجو به دستور مقام قضایی موقتاً غیرفعال است.");
+
+          if (status.globalBlocked) {
+            setChatBlockMessage("ارسال پیام در فضاجو به دستور مقام قضایی موقتاً غیرفعال است.");
+          } else if (status.chatBlocked) {
+            setChatBlockMessage("ارسال پیام در این گفتگو به دستور مقام قضایی موقتاً غیرفعال است.");
+          } else if (status.pairBlocked) {
+            setChatBlockMessage("ارتباط بین شما و این کاربر به تصمیم مدیریت فضاجو محدود شده است. در حال حاضر امکان شروع یا ادامه گفتگو با این کاربر وجود ندارد.");
+          } else if (status.moderationBlocked) {
+            setChatBlockMessage("ارسال پیام در این گفتگو توسط مدیریت فضاجو موقتاً محدود شده است. در حال حاضر امکان ارسال پیام جدید در این گفتگو وجود ندارد.");
+          } else if (status.blockedByMe) {
+            setChatBlockMessage("شما این کاربر را مسدود کرده‌اید. برای ادامه گفتگو ابتدا مسدودسازی را بردارید.");
+          } else {
+            setChatBlockMessage("این کاربر ارتباط با شما را مسدود کرده است. در حال حاضر امکان ادامه گفتگو وجود ندارد.");
+          }
         } else {
+          setBlockedByMe(false);
           setChatBlocked(false);
           setChatBlockMessage("");
-          setSendError((current) => current && /دستور مقام قضایی|دستور مدیریت حقوقی|غیرفعال است|محدودیت گفتگو/.test(current) ? "" : current);
+          setSendError((current) => current && /دستور مقام قضایی|دستور مدیریت حقوقی|غیرفعال است|محدودیت گفتگو|مسدود کرده/.test(current) ? "" : current);
         }
       } catch {
         // وضعیت حقوقی فقط برای UI است؛ کنترل نهایی همچنان در سرور انجام می‌شود.
@@ -121,13 +138,60 @@ function Chat({ parkings = [] }) {
     try { const message = await sendMessage(chat.id, text); setMessageText(""); setMessages((current)=>current.some((m)=>m.id===message.id)?current:[...current,message]); }
     catch (e) {
       const message = e.message || "ارسال پیام انجام نشد.";
-      if (/دستور مقام قضایی|دستور مدیریت حقوقی|غیرفعال است|محدودیت گفتگو/.test(message)) {
+      if (/دستور مقام قضایی|دستور مدیریت حقوقی|مدیریت فضاجو|غیرفعال است|محدودیت گفتگو|مسدود کرده|امکان شروع یا ادامه گفتگو/.test(message)) {
         setChatBlocked(true);
         setChatBlockMessage(message);
       }
       setSendError(message);
     }
     finally { setSending(false); }
+  };
+
+
+  const handleUnblockInsideChat = async () => {
+    if (!chat?.otherUserId || unblocking) return;
+    const accepted = await showInSiteConfirm(
+      "مسدودسازی این کاربر برداشته شود؟",
+      "رفع مسدودی کاربر"
+    );
+    if (!accepted) return;
+
+    try {
+      setUnblocking(true);
+      const result = await unblockUser(chat.otherUserId);
+      window.dispatchEvent(
+        new CustomEvent("fazajoo:block-status-changed", { detail: { userId: chat.otherUserId } })
+      );
+
+      const status = await getChatLegalStatus(chat.id);
+      setBlockedByMe(Boolean(status.blockedByMe));
+      if (status.globalBlocked) {
+        setChatBlocked(true);
+        setChatBlockMessage("ارسال پیام در فضاجو به دستور مقام قضایی موقتاً غیرفعال است.");
+      } else if (status.chatBlocked) {
+        setChatBlocked(true);
+        setChatBlockMessage("ارسال پیام در این گفتگو به دستور مقام قضایی موقتاً غیرفعال است.");
+      } else if (status.pairBlocked) {
+        setChatBlocked(true);
+        setChatBlockMessage("ارتباط بین شما و این کاربر به تصمیم مدیریت فضاجو محدود شده است. در حال حاضر امکان شروع یا ادامه گفتگو با این کاربر وجود ندارد.");
+      } else if (status.moderationBlocked) {
+        setChatBlocked(true);
+        setChatBlockMessage("ارسال پیام در این گفتگو توسط مدیریت فضاجو موقتاً محدود شده است. در حال حاضر امکان ارسال پیام جدید در این گفتگو وجود ندارد.");
+      } else if (status.blockedMe) {
+        setChatBlocked(true);
+        setChatBlockMessage("این کاربر ارتباط با شما را مسدود کرده است. در حال حاضر امکان ادامه گفتگو وجود ندارد.");
+      } else {
+        setChatBlocked(false);
+        setChatBlockMessage("");
+        setSendError("");
+      }
+
+      showInSiteAlert(result?.message || "مسدودسازی کاربر برداشته شد.", "رفع مسدودی کاربر");
+    } catch (e) {
+      showInSiteAlert(e?.message || "رفع مسدودی انجام نشد.", "رفع مسدودی کاربر");
+    } finally {
+      setUnblocking(false);
+    }
   };
 
   const ad = parking || (chat ? { id: chat.parkingId, title: chat.parkingTitle, city: chat.parkingCity, imageUrl: chat.parkingImageUrl } : null);
@@ -140,7 +204,7 @@ function Chat({ parkings = [] }) {
       <section className="chat-content"><div className="container"><div className="chat-layout">
         <aside className={`chat-ad-card ${ad?.imageUrl ? "" : "chat-ad-card--no-image"}`}>{ad?.imageUrl ? <img className="chat-ad-card__image" src={ad.imageUrl} alt={ad.title || "تصویر آگهی"}/> : <div className="chat-ad-card__placeholder">🚘</div>}<div className="chat-ad-card__body"><span>آگهی مرتبط</span><h2>{ad?.title || "آگهی فضاجو"}</h2><p>📍 {ad?.city || "شهر ثبت نشده"}</p><Link to={`/parking/${ad?.id || parkingId}`}>مشاهده آگهی ←</Link></div></aside>
         <section className="chat-box"><header className="chat-box__header"><div className="chat-box__avatar">{(chat?.otherUserName || "ف").slice(0,1)}</div><div><strong>{chat?.otherUserName || "کاربر فضاجو"}</strong><span>{chat?.otherUserRole || "طرف گفتگو"}</span></div><TrustSafetyActions compact targetType="chat" targetId={chat?.id} reportedUserId={chat?.otherUserId} allowBlock /></header>
-          <div className={`chat-box__messages ${messages.length===0 ? "chat-box__messages--empty" : ""}`}>{messages.length===0 ? <div className="chat-box__empty"><span>💬</span><strong>شروع گفتگو</strong><p>اولین پیام را برای این آگهی ارسال کنید.</p></div> : messages.map((message,index)=><div key={message.id}>{(index===0 || !sameDay(messages[index-1]?.createdAt,message.createdAt)) && <div className="chat-date-separator"><span>{formatDate(message.createdAt)}</span></div>}<div className="chat-message-row"><ChatMessage message={message} isMine={message.senderId===userId} isRead={Boolean(message.readAt)}/></div></div>)}{chatBlocked && <div className="chat-send-error" role="alert"><strong>امکان ارسال پیام وجود ندارد</strong><span>{chatBlockMessage || "ارسال پیام در فضاجو به دستور مقام قضایی موقتاً غیرفعال است."}</span></div>}<div ref={endRef}/></div>
+          <div className={`chat-box__messages ${messages.length===0 ? "chat-box__messages--empty" : ""}`}>{messages.length===0 ? <div className="chat-box__empty"><span>💬</span><strong>شروع گفتگو</strong><p>اولین پیام را برای این آگهی ارسال کنید.</p></div> : messages.map((message,index)=><div key={message.id}>{(index===0 || !sameDay(messages[index-1]?.createdAt,message.createdAt)) && <div className="chat-date-separator"><span>{formatDate(message.createdAt)}</span></div>}<div className="chat-message-row"><ChatMessage message={message} isMine={message.senderId===userId} isRead={Boolean(message.readAt)}/></div></div>)}{chatBlocked && <div className="chat-send-error" role="alert"><strong>امکان ارسال پیام وجود ندارد</strong><span>{chatBlockMessage || "ارسال پیام در فضاجو موقتاً غیرفعال است."}</span>{blockedByMe && <button type="button" className="chat-send-error__unblock" onClick={handleUnblockInsideChat} disabled={unblocking}>{unblocking ? "در حال رفع مسدودی..." : "رفع مسدودی این کاربر"}</button>}</div>}<div ref={endRef}/></div>
           <form className={`chat-form ${chatBlocked ? "chat-form--blocked" : ""}`} onSubmit={handleSubmit}><textarea value={messageText} onChange={(e)=>{ setMessageText(e.target.value); if (sendError) setSendError(""); }} placeholder={chatBlocked ? "ارسال پیام موقتاً غیرفعال است" : "پیام خود را بنویسید..."} maxLength={2000} disabled={chatBlocked}/><div className="chat-form__footer"><span>{messageText.length.toLocaleString("fa-IR")} / ۲۰۰۰</span><button type="submit" disabled={sending || !messageText.trim() || chatBlocked}>{sending ? "در حال ارسال..." : chatBlocked ? "ارسال موقتاً غیرفعال است" : "ارسال پیام"}</button></div></form>
         </section>
       </div></div></section>

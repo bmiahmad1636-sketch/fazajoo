@@ -31,6 +31,9 @@ import FindForMe from "./pages/FindForMe";
 import Account from "./pages/Account";
 import AgencyPublicProfile from "./pages/AgencyPublicProfile";
 import AdminModeration from "./pages/AdminModeration";
+import AdminDirectManagement from "./pages/AdminDirectManagement";
+import Notifications from "./pages/Notifications";
+import ModerationNoticeModal from "./components/ModerationNoticeModal";
 
 import { getSpaces } from "./services/spaceService";
 
@@ -453,6 +456,8 @@ function App() {
         onLogout={logoutUser}
       />
 
+      <ModerationNoticeModal user={user} />
+
       <Routes>
         <Route
           path="/"
@@ -706,6 +711,16 @@ function App() {
 
 
         <Route
+          path="/admin/direct-management"
+          element={
+            <AdminRoute user={user} authLoading={authLoading} userProfile={userProfile} profileLoading={profileLoading}>
+              <AdminDirectManagement />
+            </AdminRoute>
+          }
+        />
+
+
+        <Route
           path="/admin/moderation"
           element={
             <AdminRoute user={user} authLoading={authLoading} userProfile={userProfile} profileLoading={profileLoading}>
@@ -721,6 +736,19 @@ function App() {
             <AdminRoute user={user} authLoading={authLoading} userProfile={userProfile} profileLoading={profileLoading}>
               <LegalCenterJalali />
             </AdminRoute>
+          }
+        />
+
+
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute
+              user={user}
+              authLoading={authLoading}
+            >
+              <Notifications />
+            </ProtectedRoute>
           }
         />
 

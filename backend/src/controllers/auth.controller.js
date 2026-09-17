@@ -406,6 +406,52 @@ async function login(
 
     if (!user.is_active) {
       try {
+        const moderation =
+          await query(
+            `
+              SELECT action_type
+              FROM moderation_actions
+              WHERE target_user_id = $1
+                AND action_type IN (
+                  'user_suspend',
+                  'user_restore'
+                )
+              ORDER BY created_at DESC
+              LIMIT 1
+            `,
+            [
+              user.id,
+            ]
+          );
+
+        if (
+          moderation.rows[0]
+            ?.action_type ===
+          "user_suspend"
+        ) {
+          return response
+            .status(423)
+            .json({
+              ok: false,
+
+              code:
+                "ACCOUNT_SUSPENDED",
+
+              message:
+                "حساب کاربری شما موقتاً تعلیق شده است. در حال حاضر امکان ورود به فضاجو را ندارید. برای اطلاع از علت یا پیگیری موضوع، با پشتیبانی فضاجو در ارتباط باشید.",
+            });
+        }
+      } catch (
+        moderationError
+      ) {
+        console.warn(
+          "Moderation suspension lookup unavailable:",
+          moderationError?.message ||
+            moderationError
+        );
+      }
+
+      try {
         const suspension =
           await query(
             `
@@ -454,12 +500,15 @@ async function login(
       }
 
       return response
-        .status(401)
+        .status(423)
         .json({
           ok: false,
 
+          code:
+            "ACCOUNT_INACTIVE",
+
           message:
-            "شماره موبایل یا رمز عبور اشتباه است.",
+            "حساب کاربری شما در حال حاضر غیرفعال است. برای پیگیری، با پشتیبانی فضاجو در ارتباط باشید.",
         });
     }
 

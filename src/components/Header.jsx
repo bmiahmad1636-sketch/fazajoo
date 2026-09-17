@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 
 import MessageBadge from "./MessageBadge";
-import SmartSearchBadge from "./SmartSearchBadge";
+import NotificationBell from "./NotificationBell";
 
 import "./Header.css";
 
@@ -242,7 +242,7 @@ function Header({
                 }
               />
 
-              <SmartSearchBadge
+              <NotificationBell
                 onNavigate={closeMenu}
               />
 

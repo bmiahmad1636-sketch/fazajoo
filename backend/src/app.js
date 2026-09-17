@@ -17,6 +17,7 @@ const agencyRoutes = require("./routes/agency.routes");
 const smartSearchRoutes = require("./routes/smartSearch.routes");
 const legalRoutes = require("./routes/legal.routes");
 const trustSafetyRoutes = require("./routes/trustSafety.routes");
+const adminDirectRoutes = require("./routes/adminDirect.routes");
 
 const app = express();
 
@@ -431,6 +432,8 @@ app.use(
   "/api/trust",
   trustSafetyRoutes
 );
+
+app.use("/api/admin/direct", adminDirectRoutes);
 
 /*
 |--------------------------------------------------------------------------
