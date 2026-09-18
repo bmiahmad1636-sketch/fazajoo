@@ -260,6 +260,13 @@ const env = {
 
 /*
 |--------------------------------------------------------------------------
+| Production startup validation (fail fast)
+|--------------------------------------------------------------------------
+|
+| Development keeps its convenient local defaults. In production, however,
+| the backend must not start with missing secrets, local CORS origins, or
+| incomplete storage/database configuration.
+|
 */
 function validateProductionEnv(
   config
