@@ -60,3 +60,13 @@ export async function markAllSmartNotificationsRead() {
   window.dispatchEvent(new Event("fazajoo:smart-notifications-changed"));
   return data;
 }
+
+
+export async function updateSmartSearch(id, payload) {
+  const data = await request(`/smart-searches/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+  window.dispatchEvent(new Event("fazajoo:smart-notifications-changed"));
+  return data.search;
+}

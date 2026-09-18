@@ -571,3 +571,16 @@
   font-weight: 950;
   line-height: 1;
 }
+
+/* Shake only when unread notifications exist; one short shake every 3 seconds. */
+@keyframes fazajooBellNudge {
+  0%, 86%, 100% { transform: rotate(0deg); }
+  89% { transform: rotate(-10deg); }
+  92% { transform: rotate(9deg); }
+  95% { transform: rotate(-6deg); }
+  98% { transform: rotate(4deg); }
+}
+.fazajoo-header__smart-bell.has-unread > span { display: inline-block; transform-origin: 50% 12%; animation: fazajooBellNudge 3s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .fazajoo-header__smart-bell.has-unread > span { animation: none; }
+}

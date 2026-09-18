@@ -40,7 +40,7 @@ function NotificationBell({ onNavigate }) {
   return (
     <Link
       to="/notifications"
-      className="fazajoo-header__smart-bell"
+      className={`fazajoo-header__smart-bell ${count > 0 ? "has-unread" : ""}`}
       onClick={onNavigate}
       title="اعلان‌های فضاجو"
       aria-label={count ? `${count} اعلان خوانده‌نشده` : "اعلان‌های فضاجو"}

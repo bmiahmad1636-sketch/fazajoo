@@ -33,6 +33,40 @@ function cleanCriteria(value, rawText = "") {
   return withInferredCategory(cleaned, rawText);
 }
 
+
+function normalizeComparableText(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/ي/g, "ی")
+    .replace(/ك/g, "ک")
+    .replace(/\u200c/g, " ")
+    .replace(/\s+/g, " ");
+}
+
+function normalizeComparableNumber(value) {
+  const digits = String(value ?? "")
+    .replace(/[۰-۹]/g, (char) => String("۰۱۲۳۴۵۶۷۸۹".indexOf(char)))
+    .replace(/[٠-٩]/g, (char) => String("٠١٢٣٤٥٦٧٨٩".indexOf(char)))
+    .replace(/[^\d.]/g, "");
+  const number = Number(digits || 0);
+  return Number.isFinite(number) ? number : 0;
+}
+
+function smartSearchIdentity(criteria) {
+  const value = criteria && typeof criteria === "object" ? criteria : {};
+  return JSON.stringify({
+    category: normalizeComparableText(value.category),
+    customCategory: normalizeComparableText(value.customCategory),
+    city: normalizeComparableText(value.city),
+    area: normalizeComparableNumber(value.area),
+    price: normalizeComparableNumber(value.price),
+    bedrooms: normalizeComparableNumber(
+      value?.villaDetails?.bedrooms || value?.residentialDetails?.bedrooms || 0
+    ),
+  });
+}
+
 function mapSearch(row) {
   return {
     id: row.id,
@@ -42,6 +76,9 @@ function mapSearch(row) {
     isActive: Boolean(row.is_active),
     bestSeenScore: Number(row.best_seen_score || 0),
     lastNotifiedAt: row.last_notified_at,
+    lastCheckedAt: row.last_checked_at,
+    unreadCount: Number(row.unread_count || 0),
+    resultCount: Number(row.result_count || 0),
     createdAt: row.created_at,
   };
 }
@@ -73,7 +110,14 @@ async function list(req, res) {
     await ensureSmartSearchSchema();
     await reconcileSmartSearchNotificationsForUser(req.user.id);
     const result = await query(
-      `SELECT * FROM smart_searches WHERE user_id=$1 ORDER BY created_at DESC`,
+      `SELECT ss.*,
+              COUNT(n.id)::int AS result_count,
+              COUNT(n.id) FILTER (WHERE n.is_read=FALSE)::int AS unread_count
+       FROM smart_searches ss
+       LEFT JOIN smart_search_notifications n ON n.smart_search_id=ss.id
+       WHERE ss.user_id=$1
+       GROUP BY ss.id
+       ORDER BY ss.created_at DESC`,
       [req.user.id]
     );
     return res.json({ ok: true, searches: result.rows.map(mapSearch) });
@@ -94,15 +138,24 @@ async function create(req, res) {
       return res.status(400).json({ ok: false, message: "درخواست جستجو خیلی کوتاه است." });
     }
 
-    const duplicate = await query(
+    const existingSearches = await query(
       `SELECT * FROM smart_searches
-       WHERE user_id=$1 AND is_active=TRUE AND raw_text=$2
-       ORDER BY created_at DESC LIMIT 1`,
-      [req.user.id, rawText]
+       WHERE user_id=$1 AND is_active=TRUE
+       ORDER BY created_at DESC`,
+      [req.user.id]
     );
 
-    if (duplicate.rows[0]) {
-      return res.json({ ok: true, message: "این پیگیری از قبل فعال است.", search: mapSearch(duplicate.rows[0]) });
+    const requestedIdentity = smartSearchIdentity(criteria);
+    const duplicate = existingSearches.rows.find(
+      (row) => smartSearchIdentity(row.criteria || {}) === requestedIdentity
+    );
+
+    if (duplicate) {
+      return res.json({
+        ok: true,
+        message: "این پیگیری از قبل فعال است.",
+        search: mapSearch(duplicate),
+      });
     }
 
     const id = crypto.randomUUID();
@@ -135,17 +188,74 @@ async function create(req, res) {
 async function toggle(req, res) {
   try {
     await ensureSmartSearchSchema();
+
+    const current = await query(
+      `SELECT * FROM smart_searches WHERE id=$1 AND user_id=$2 LIMIT 1`,
+      [req.params.id, req.user.id]
+    );
+    if (!current.rows[0]) {
+      return res.status(404).json({ ok: false, message: "پیگیری پیدا نشد." });
+    }
+
+    const row = current.rows[0];
+    const hasEditPayload =
+      Object.prototype.hasOwnProperty.call(req.body || {}, "rawText") ||
+      Object.prototype.hasOwnProperty.call(req.body || {}, "criteria");
+
+    if (hasEditPayload) {
+      const rawText = String(req.body?.rawText ?? row.raw_text).trim().slice(0, 1000);
+      if (rawText.length < 4) {
+        return res.status(400).json({ ok: false, message: "درخواست جستجو خیلی کوتاه است." });
+      }
+
+      const criteria = cleanCriteria(req.body?.criteria ?? row.criteria, rawText);
+      const threshold = Math.max(
+        70,
+        Math.min(100, Number(req.body?.threshold ?? row.threshold) || 70)
+      );
+      const isActive = Object.prototype.hasOwnProperty.call(req.body || {}, "isActive")
+        ? Boolean(req.body.isActive)
+        : true;
+
+      const result = await query(
+        `UPDATE smart_searches
+         SET raw_text=$3,
+             criteria=$4::jsonb,
+             threshold=$5,
+             is_active=$6,
+             best_seen_score=$7,
+             last_checked_at=NULL,
+             updated_at=NOW()
+         WHERE id=$1 AND user_id=$2
+         RETURNING *`,
+        [
+          req.params.id,
+          req.user.id,
+          rawText,
+          JSON.stringify(criteria),
+          threshold,
+          isActive,
+          Math.max(0, Math.min(100, Number(req.body?.bestSeenScore) || 0)),
+        ]
+      );
+
+      return res.json({
+        ok: true,
+        message: "تقاضای پیگیری ویرایش و دوباره فعال شد.",
+        search: mapSearch(result.rows[0]),
+      });
+    }
+
     const isActive = Boolean(req.body?.isActive);
     const result = await query(
       `UPDATE smart_searches SET is_active=$3, updated_at=NOW()
        WHERE id=$1 AND user_id=$2 RETURNING *`,
       [req.params.id, req.user.id, isActive]
     );
-    if (!result.rows[0]) return res.status(404).json({ ok: false, message: "پیگیری پیدا نشد." });
     return res.json({ ok: true, search: mapSearch(result.rows[0]) });
   } catch (error) {
-    console.error("Toggle smart search error:", error);
-    return res.status(500).json({ ok: false, message: "تغییر وضعیت پیگیری انجام نشد." });
+    console.error("Update smart search error:", error);
+    return res.status(500).json({ ok: false, message: "به‌روزرسانی پیگیری انجام نشد." });
   }
 }
 

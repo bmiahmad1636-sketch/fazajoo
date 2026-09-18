@@ -708,6 +708,30 @@ function Parking({ parkings = [], initialListingType = "", showHero = true }) {
             </div>
           </div>
 
+          <Link
+            to="/find-for-me"
+            className="parking-smart-find"
+            aria-label="رفتن به فضاجو، برام پیدا کن"
+          >
+            <span className="parking-smart-find__brand" aria-hidden="true">
+              <span className="parking-smart-find__mark">!</span>
+              <span className="parking-smart-find__brand-name">فضاجو</span>
+            </span>
+
+            <span className="parking-smart-find__content">
+              <span className="parking-smart-find__eyebrow">جستجوی هوشمند و پیگیری خودکار</span>
+              <strong>پیدا نکردی؟ فضاجو برات پیدا می‌کنه</strong>
+              <small>
+                خواسته‌ات را بنویس؛ اگر الان یا بعداً آگهی مناسبی پیدا شود، فضاجو بهت خبر می‌دهد.
+              </small>
+            </span>
+
+            <span className="parking-smart-find__cta">
+              <span>رفتن به جستجوی هوشمند</span>
+              <b aria-hidden="true">←</b>
+            </span>
+          </Link>
+
           <div className="parking-results__header">
             <div>
               <span className="parking-results__label">

@@ -22,6 +22,11 @@ function ensureSmartSearchSchema() {
       `);
 
       await query(`
+        ALTER TABLE smart_searches
+        ADD COLUMN IF NOT EXISTS last_checked_at TIMESTAMPTZ
+      `);
+
+      await query(`
         CREATE INDEX IF NOT EXISTS idx_smart_searches_user_active
         ON smart_searches(user_id, is_active, created_at DESC)
       `);
@@ -290,6 +295,11 @@ async function createNotificationsForNewOffer(offer, ownerId) {
     for (const saved of searches.rows) {
       const effectiveCriteria = withInferredCategory(saved.criteria || {}, saved.raw_text || "");
       const result = scoreSmartCriteria(effectiveCriteria, offer, saved.raw_text || "");
+
+      await query(
+        `UPDATE smart_searches SET last_checked_at=NOW(), updated_at=NOW() WHERE id=$1`,
+        [saved.id]
+      );
       if (!result.eligible || result.score < Number(saved.threshold || 70)) continue;
 
       const notificationId = crypto.randomUUID();
@@ -414,6 +424,11 @@ async function reconcileSmartSearchNotificationsForUser(userId) {
         );
       }
     }
+
+    await query(
+      `UPDATE smart_searches SET last_checked_at=NOW(), updated_at=NOW() WHERE id=$1`,
+      [saved.id]
+    );
   }
 }
 

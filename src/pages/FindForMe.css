@@ -127,3 +127,574 @@
   .find-for-me__notifications { grid-template-columns: 1fr; }
   .find-for-me__saved-row { align-items: flex-start; flex-direction: column; }
 }
+
+/* Smart-search professional status metadata */
+.find-for-me__saved-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; margin-top: 3px; }
+.find-for-me__saved-meta small { color: #9a8d85; font-size: .52rem; }
+.find-for-me__saved-meta b { padding: 2px 7px; border-radius: 999px; background: #fff0e2; color: #d65f0e; font-size: .5rem; font-weight: 950; }
+
+/* ===== Saved smart-search card readability fix ===== */
+.find-for-me__watch-panel {
+  padding: 22px 24px;
+}
+
+.find-for-me__watch-head {
+  padding-bottom: 16px;
+}
+
+.find-for-me__watch-head span {
+  font-size: .82rem;
+}
+
+.find-for-me__watch-head h2 {
+  margin-top: 3px;
+  font-size: 1.12rem;
+  line-height: 1.7;
+}
+
+.find-for-me__saved-searches {
+  margin-top: 14px;
+  padding-top: 14px;
+  gap: 12px;
+}
+
+.find-for-me__saved-row {
+  min-height: 96px;
+  padding: 16px 18px;
+  gap: 18px;
+  border: 1px solid rgba(88, 66, 50, .07);
+  border-radius: 16px;
+  background: rgba(255,255,255,.88);
+}
+
+.find-for-me__saved-row > div:first-child {
+  gap: 5px;
+}
+
+.find-for-me__saved-row strong {
+  font-size: .88rem;
+  line-height: 1.8;
+  white-space: normal;
+}
+
+.find-for-me__saved-row span {
+  font-size: .68rem;
+  line-height: 1.7;
+}
+
+.find-for-me__saved-meta {
+  gap: 7px 14px;
+  margin-top: 4px;
+}
+
+.find-for-me__saved-meta small {
+  font-size: .64rem;
+  line-height: 1.6;
+}
+
+.find-for-me__saved-meta b {
+  padding: 4px 9px;
+  font-size: .62rem;
+}
+
+.find-for-me__saved-actions {
+  gap: 8px;
+}
+
+.find-for-me__saved-actions button {
+  min-height: 36px;
+  padding: 7px 12px;
+  border-radius: 10px;
+  font-size: .68rem;
+}
+
+@media (max-width: 760px) {
+  .find-for-me__watch-panel {
+    padding: 18px 14px;
+  }
+
+  .find-for-me__saved-row {
+    min-height: 0;
+    padding: 14px;
+  }
+
+  .find-for-me__saved-actions {
+    width: 100%;
+  }
+
+  .find-for-me__saved-actions button {
+    flex: 1;
+  }
+}
+
+
+/* UX: compact interpretation + automatic smart follow + edit request */
+.find-for-me__submit-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.find-for-me__form-footer .find-for-me__cancel-edit {
+  background: #fff;
+  color: #5b514a;
+  border: 1px solid #e8ddd5;
+  box-shadow: none;
+}
+
+.find-for-me__auto-follow-message {
+  margin-top: 14px;
+  padding: 11px 14px;
+  border: 1px solid rgba(239, 108, 24, .22);
+  border-radius: 14px;
+  background: rgba(255, 247, 240, .9);
+  color: #8b430e;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.find-for-me__understood--compact {
+  padding: 14px 18px;
+}
+
+.find-for-me__understood-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.find-for-me__understood-line > span {
+  color: #776b63;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.find-for-me__understood--compact .find-for-me__chips {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.find-for-me__understood--compact .find-for-me__chips span {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #f8f4f1;
+  font-size: 13px;
+}
+
+.find-for-me__quick-edit,
+.find-for-me__saved-actions .is-edit {
+  border: 1px solid rgba(239, 108, 24, .30);
+  background: #fff8f2;
+  color: #b6530e;
+}
+
+.find-for-me__quick-edit {
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+@media (max-width: 700px) {
+  .find-for-me__understood-line {
+    align-items: flex-start;
+  }
+
+  .find-for-me__understood--compact .find-for-me__chips {
+    flex-basis: 100%;
+  }
+
+  .find-for-me__quick-edit {
+    width: 100%;
+  }
+}
+
+
+/* Clear saved-follow status vs. action */
+.find-for-me__status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: default;
+  user-select: none;
+}
+
+.find-for-me__status-badge.is-on {
+  background: #f1f8f1;
+  border: 1px solid #cfe6d0;
+  color: #267236;
+}
+
+.find-for-me__status-badge.is-off {
+  background: #f5f3f1;
+  border: 1px solid #e2ddd9;
+  color: #746a63;
+}
+
+.find-for-me__saved-actions .is-toggle {
+  border: 1px solid rgba(239, 108, 24, .28);
+  background: #fff8f2;
+  color: #a94d0d;
+  font-weight: 750;
+}
+
+@media (max-width: 700px) {
+  .find-for-me__saved-actions {
+    gap: 7px;
+  }
+}
+
+/* Fazajoo smart-search result handoff */
+.find-for-me__fresh-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 2px;
+  padding: 12px 14px;
+  border: 1px solid #f5d8c4;
+  border-radius: 14px;
+  background: #fffaf6;
+}
+.find-for-me__fresh-summary strong { color: #b94f0b; font-size: .84rem; }
+.find-for-me__fresh-summary span { color: #786b63; font-size: .74rem; }
+#fazajoo-smart-results { scroll-margin-top: 105px; }
+@media (max-width: 720px) {
+  .find-for-me__fresh-summary { align-items: flex-start; flex-direction: column; }
+}
+
+
+/* Result arrival: keep the Fazajoo message attached to the results */
+.find-for-me__auto-follow-message--results {
+  margin: 0 0 18px;
+  padding: 15px 18px;
+  border-radius: 17px;
+  font-size: 15px;
+  line-height: 1.9;
+  box-shadow: 0 10px 28px rgba(120, 67, 30, .06);
+}
+#fazajoo-smart-results { scroll-margin-top: 112px; }
+
+/* ===== Fazajoo final compact hero height =====
+   فقط کاهش ارتفاع و فاصله‌های عمودی؛ منطق جستجو و اسکرول دست‌نخورده است.
+*/
+@media (min-width: 761px) {
+  .find-for-me {
+    padding-top: 22px;
+  }
+
+  .find-for-me__hero {
+    padding: 24px 34px 22px;
+  }
+
+  .find-for-me__hero h1 {
+    margin: 8px 0 4px;
+    font-size: clamp(30px, 4vw, 46px);
+    line-height: 1.08;
+  }
+
+  .find-for-me__hero > p {
+    line-height: 1.75;
+  }
+
+  .find-for-me__form {
+    margin-top: 16px;
+    padding: 10px 14px;
+  }
+
+  .find-for-me__form textarea {
+    min-height: 70px;
+    padding: 7px 10px;
+    line-height: 1.7;
+  }
+
+  .find-for-me__form-footer {
+    padding-top: 8px;
+  }
+
+  .find-for-me__form-footer button {
+    padding: 10px 18px;
+  }
+
+  .find-for-me__examples {
+    margin-top: 10px;
+  }
+
+  .find-for-me__examples button {
+    padding: 7px 11px;
+  }
+}
+
+@media (max-width: 760px) {
+  .find-for-me__hero {
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+
+  .find-for-me__hero h1 {
+    margin-top: 9px;
+  }
+
+  .find-for-me__form {
+    margin-top: 16px;
+    padding: 10px;
+  }
+
+  .find-for-me__form textarea {
+    min-height: 82px;
+  }
+}
+
+/* ===== Fazajoo compact hero v2 =====
+   جمع‌کردن واقعی ارتفاع کادر جستجو در دسکتاپ.
+   rows در JSX نیز ۲ شده تا ارتفاع ذاتی textarea مانع فشرده‌شدن نشود.
+*/
+@media (min-width: 761px) {
+  .find-for-me { padding-top: 14px; }
+  .find-for-me__hero { padding: 18px 30px 16px; }
+  .find-for-me__eyebrow { padding: 5px 10px; font-size: 13px; }
+  .find-for-me__hero h1 { margin: 7px 0 3px; font-size: clamp(30px, 3.5vw, 42px); }
+  .find-for-me__hero > p { line-height: 1.55; font-size: 15px; }
+  .find-for-me__form { margin-top: 12px; padding: 8px 12px; border-radius: 18px; }
+  .find-for-me__form textarea {
+    height: 58px;
+    min-height: 58px;
+    max-height: 96px;
+    padding: 5px 8px;
+    line-height: 1.55;
+    resize: vertical;
+  }
+  .find-for-me__form-footer { padding-top: 6px; gap: 10px; }
+  .find-for-me__form-footer button { padding: 9px 17px; }
+  .find-for-me__examples { margin-top: 8px; }
+  .find-for-me__examples button { padding: 6px 10px; }
+}
+\n\n/* ===== Fazajoo hero typography polish ===== */\n.find-for-me__intro strong {\n  color:#3b312b;\n  font-weight:900;\n}\n.find-for-me__intro span {\n  color:#746a63;\n}\n.find-for-me__input-label {\n  display:flex;\n  align-items:center;\n  justify-content:space-between;\n  gap:12px;\n  padding:2px 8px 5px;\n}\n.find-for-me__input-label strong {\n  color:#352d28;\n  font-size:15px;\n  font-weight:900;\n}\n.find-for-me__input-label span {\n  color:#a06a49;\n  font-size:12px;\n  font-weight:700;\n}\n.find-for-me__form textarea {\n  font-weight:650;\n}\n.find-for-me__form textarea::placeholder {\n  color:#8b817a;\n  font-weight:500;\n  opacity:1;\n}\n@media (min-width:761px) {\n  .find-for-me__intro { max-width:900px!important; }\n  .find-for-me__form textarea { height:54px; min-height:54px; }\n}\n@media (max-width:760px) {\n  .find-for-me__input-label { align-items:flex-start; flex-direction:column; gap:2px; }\n}\n
+/* ===== Fazajoo final clean smart-search hero ===== */
+.find-for-me__hero h1,
+.find-for-me__input-label { display:none !important; }
+
+.find-for-me__hero > .find-for-me__intro {
+  max-width:none !important;
+  margin:10px 0 0 !important;
+  color:#5f5650 !important;
+  font-size:15px !important;
+  font-weight:650 !important;
+  line-height:1.75 !important;
+  white-space:nowrap;
+}
+
+.find-for-me__form { margin-top:14px !important; }
+.find-for-me__form textarea {
+  padding-top:8px !important;
+  font-weight:600 !important;
+}
+.find-for-me__form textarea::placeholder {
+  color:#a39a94 !important;
+  font-size:13px !important;
+  font-weight:450 !important;
+  opacity:1 !important;
+}
+
+@media (max-width:900px) {
+  .find-for-me__hero > .find-for-me__intro { white-space:normal; }
+}
+
+/* ===== Grouped smart tracking UX ===== */
+.find-for-me__tracking-card{overflow:hidden;border:1px solid rgba(88,66,50,.08);border-radius:18px;background:rgba(255,255,255,.9)}
+.find-for-me__tracking-card .find-for-me__saved-row{margin:0;border:0;border-radius:0;background:transparent}
+.find-for-me__tracking-results{padding:0 16px 16px;border-top:1px dashed rgba(88,66,50,.1)}
+.find-for-me__tracking-results-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 2px 9px}
+.find-for-me__tracking-results-head strong{font-size:.72rem;color:#473a32}.find-for-me__tracking-results-head span{font-size:.58rem;color:#96877e}
+.find-for-me__tracking-mini-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.find-for-me__tracking-mini{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;border:1px solid rgba(229,102,32,.13);border-radius:12px;background:#fffaf6;color:inherit;text-decoration:none}
+.find-for-me__tracking-mini>div{min-width:0;display:flex;flex-direction:column;gap:2px}
+.find-for-me__tracking-mini strong{overflow:hidden;color:#40352f;font-size:.65rem;font-weight:900;text-overflow:ellipsis;white-space:nowrap}
+.find-for-me__tracking-mini span{color:#8e8077;font-size:.55rem}.find-for-me__tracking-mini>b{flex:0 0 auto;color:#df650f;font-size:.72rem;font-weight:950}
+.find-for-me__tracking-empty{margin:0 16px 14px;padding:10px 12px;border-top:1px dashed rgba(88,66,50,.1);color:#8c7e75;font-size:.62rem;font-weight:700}
+@media(max-width:900px){.find-for-me__tracking-mini-grid{grid-template-columns:1fr}}
+
+
+/* ===== Smart tracking match cards — visual polish only ===== */
+.find-for-me__tracking-mini {
+  position: relative;
+  overflow: hidden;
+  padding: 14px 16px;
+  border: 1.5px solid rgba(244, 122, 31, 0.34);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.99) 0%, rgba(255,250,246,.99) 100%);
+  box-shadow:
+    0 8px 20px rgba(91, 58, 34, 0.08),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.find-for-me__tracking-mini::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  height: 100%;
+  background: #f47a1f;
+  opacity: .82;
+}
+
+.find-for-me__tracking-mini:hover {
+  transform: translateY(-2px);
+  border-color: rgba(244, 122, 31, 0.58);
+  box-shadow:
+    0 12px 26px rgba(91, 58, 34, 0.12),
+    inset 0 1px 0 rgba(255,255,255,.95);
+}
+
+.find-for-me__tracking-mini strong {
+  color: #342a24;
+  font-size: .70rem;
+  font-weight: 950;
+}
+
+.find-for-me__tracking-mini span {
+  margin-top: 2px;
+  color: #8a786d;
+  font-size: .58rem;
+}
+
+.find-for-me__tracking-mini > b {
+  min-width: 52px;
+  padding: 7px 9px;
+  border: 1px solid rgba(244, 122, 31, 0.22);
+  border-radius: 10px;
+  background: rgba(244, 122, 31, 0.08);
+  color: #e4660d;
+  font-size: .78rem;
+  font-weight: 950;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .find-for-me__tracking-mini {
+    padding: 13px 14px;
+  }
+}
+
+
+/* ===== Match cards: agency-panel inspired visual language ===== */
+.find-for-me__tracking-mini {
+  position: relative;
+  overflow: visible;
+  min-height: 86px;
+  padding: 15px 18px 15px 82px;
+  border: 2px solid #f47a1f;
+  border-radius: 18px;
+  background: #fff8f1;
+  box-shadow:
+    0 5px 0 rgba(244, 122, 31, 0.10),
+    0 10px 24px rgba(80, 52, 33, 0.08);
+}
+
+.find-for-me__tracking-mini::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  bottom: 10px;
+  width: 4px;
+  height: auto;
+  border-radius: 999px;
+  background: #f47a1f;
+  opacity: .95;
+}
+
+.find-for-me__tracking-mini:hover {
+  transform: translateY(-2px);
+  border-color: #ef6c0a;
+  box-shadow:
+    0 6px 0 rgba(244, 122, 31, 0.13),
+    0 14px 28px rgba(80, 52, 33, 0.11);
+}
+
+.find-for-me__tracking-mini strong {
+  display: block;
+  color: #2f261f;
+  font-size: .74rem;
+  line-height: 1.9;
+  font-weight: 950;
+}
+
+.find-for-me__tracking-mini span {
+  display: block;
+  color: #8a786d;
+  font-size: .60rem;
+  line-height: 1.8;
+}
+
+.find-for-me__tracking-mini > b {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  min-width: 54px;
+  padding: 0;
+  border: 3px solid #f47a1f;
+  border-radius: 50%;
+  background: #fff2e6;
+  box-shadow:
+    0 0 0 5px rgba(244, 122, 31, 0.12),
+    inset 0 0 0 2px rgba(255,255,255,.95);
+  color: #dc5e08;
+  font-size: .78rem;
+  font-weight: 950;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .find-for-me__tracking-mini {
+    min-height: 82px;
+    padding: 13px 14px 13px 74px;
+    border-radius: 16px;
+  }
+
+  .find-for-me__tracking-mini > b {
+    left: 12px;
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+  }
+}
+
+
+/* ===== Outer frame for each complete smart-tracking block ===== */
+.find-for-me__tracking-card {
+  border: 1.5px solid rgba(244, 122, 31, 0.42);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 8px 22px rgba(92, 58, 34, 0.07);
+  overflow: hidden;
+}
+
+.find-for-me__tracking-card:hover {
+  border-color: rgba(244, 122, 31, 0.62);
+  box-shadow: 0 10px 26px rgba(92, 58, 34, 0.09);
+}
+
+@media (max-width: 700px) {
+  .find-for-me__tracking-card {
+    border-radius: 17px;
+  }
+}

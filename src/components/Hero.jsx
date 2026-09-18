@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import AnimatedLogo from "./AnimatedLogo";
@@ -42,25 +41,6 @@ const categories = [
 function Hero() {
   const navigate = useNavigate();
 
-  const [search, setSearch] =
-    useState("");
-
-  const handleSearch = (event) => {
-    event.preventDefault();
-
-    const value = search.trim();
-
-    if (!value) {
-      navigate("/parking");
-      return;
-    }
-
-    navigate(
-      `/parking?search=${encodeURIComponent(
-        value
-      )}`
-    );
-  };
 
   const handleCategoryClick = (
     category
@@ -95,67 +75,6 @@ function Hero() {
             از مالک و بدون واسطه.
           </p>
 
-          <form
-            className="home-hero__search"
-            onSubmit={handleSearch}
-          >
-            <div className="home-hero__search-input">
-              <span aria-hidden="true">
-                ⌕
-              </span>
-
-              <input
-                type="text"
-                value={search}
-                onChange={(event) =>
-                  setSearch(
-                    event.target.value
-                  )
-                }
-                placeholder="شهر، محله یا نوع فضا را جستجو کن..."
-                aria-label="جستجوی فضا"
-              />
-            </div>
-
-            <button type="submit">
-              جستجوی فضا
-
-              <span aria-hidden="true">
-                ←
-              </span>
-            </button>
-          </form>
-
-          <button
-            type="button"
-            className="home-hero__smart-find"
-            onClick={() => navigate("/find-for-me")}
-            aria-label="جستجوی هوشمند فضاجو"
-          >
-            <span className="home-hero__smart-find-info">
-              <span className="home-hero__smart-find-icon" aria-hidden="true">
-                <span className="home-hero__smart-find-lens">
-                  <span className="home-hero__smart-find-glint" />
-                </span>
-                <span className="home-hero__smart-find-handle" />
-                  <span className="home-hero__smart-find-finger" aria-hidden="true">👆</span>
-              </span>
-              <span>
-                <strong>جستجوی هوشمند</strong>
-                <small>سریع، دقیق و هوشمند</small>
-              </span>
-            </span>
-
-            <span className="home-hero__smart-find-mark" aria-hidden="true">!</span>
-
-            <span className="home-hero__smart-find-copy">
-              <strong>فضاجو،</strong>
-              <small>خواسته ات رو بنویس، فضاجو بهترین گزینه‌ها رو برات پیدا می‌کنه.</small>
-              <span className="home-hero__smart-find-cta">شروع جستجوی هوشمند <b aria-hidden="true">←</b></span>
-            </span>
-
-            <span className="home-hero__smart-find-sparkles" aria-hidden="true">✦ ✧</span>
-          </button>
 
           <div className="home-hero__categories">
             {categories.map(
