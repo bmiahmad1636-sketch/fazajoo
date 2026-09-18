@@ -257,5 +257,190 @@ const env = {
     ),
 };
 
+
+/*
+|--------------------------------------------------------------------------
+*/
+function validateProductionEnv(
+  config
+) {
+  if (
+    config.NODE_ENV !==
+    "production"
+  ) {
+    return;
+  }
+
+  const errors = [];
+
+  function requireText(
+    key,
+    value
+  ) {
+    if (
+      typeof value !== "string" ||
+      !value.trim()
+    ) {
+      errors.push(
+        `${key} is required.`
+      );
+    }
+  }
+
+  requireText(
+    "DB_HOST",
+    config.DB_HOST
+  );
+  requireText(
+    "DB_NAME",
+    config.DB_NAME
+  );
+  requireText(
+    "DB_USER",
+    config.DB_USER
+  );
+  requireText(
+    "DB_PASSWORD",
+    config.DB_PASSWORD
+  );
+
+  requireText(
+    "JWT_SECRET",
+    config.JWT_SECRET
+  );
+
+  if (
+    typeof config.JWT_SECRET ===
+      "string" &&
+    config.JWT_SECRET.length < 32
+  ) {
+    errors.push(
+      "JWT_SECRET must be at least 32 characters."
+    );
+  }
+
+  requireText(
+    "STORAGE_ENDPOINT",
+    config.STORAGE_ENDPOINT
+  );
+  requireText(
+    "STORAGE_BUCKET",
+    config.STORAGE_BUCKET
+  );
+  requireText(
+    "STORAGE_ACCESS_KEY",
+    config.STORAGE_ACCESS_KEY
+  );
+  requireText(
+    "STORAGE_SECRET_KEY",
+    config.STORAGE_SECRET_KEY
+  );
+  requireText(
+    "STORAGE_PUBLIC_BASE_URL",
+    config.STORAGE_PUBLIC_BASE_URL
+  );
+
+  if (
+    !Array.isArray(
+      config.CORS_ORIGINS
+    ) ||
+    config.CORS_ORIGINS.length === 0
+  ) {
+    errors.push(
+      "CORS_ORIGINS must contain at least one production origin."
+    );
+  } else {
+    for (
+      const origin of
+      config.CORS_ORIGINS
+    ) {
+      let parsedOrigin;
+
+      try {
+        parsedOrigin =
+          new URL(
+            origin
+          );
+      } catch {
+        errors.push(
+          `CORS_ORIGINS contains an invalid origin: ${origin}`
+        );
+        continue;
+      }
+
+      const hostname =
+        parsedOrigin.hostname
+          .toLowerCase();
+
+      if (
+        hostname === "localhost" ||
+        hostname === "127.0.0.1" ||
+        hostname === "::1"
+      ) {
+        errors.push(
+          "CORS_ORIGINS must not contain localhost origins in production."
+        );
+      }
+    }
+  }
+
+  for (
+    const [key, value] of [
+      [
+        "STORAGE_ENDPOINT",
+        config.STORAGE_ENDPOINT,
+      ],
+      [
+        "STORAGE_PUBLIC_BASE_URL",
+        config.STORAGE_PUBLIC_BASE_URL,
+      ],
+    ]
+  ) {
+    if (
+      typeof value !== "string" ||
+      !value.trim()
+    ) {
+      continue;
+    }
+
+    try {
+      new URL(
+        value
+      );
+    } catch {
+      errors.push(
+        `${key} must be a valid URL.`
+      );
+    }
+  }
+
+  if (
+    errors.length > 0
+  ) {
+    const uniqueErrors =
+      [
+        ...new Set(
+          errors
+        ),
+      ];
+
+    throw new Error(
+      [
+        "Unsafe or incomplete production environment configuration:",
+        ...uniqueErrors.map(
+          (message) =>
+            `- ${message}`
+        ),
+      ].join(
+        "\n"
+      )
+    );
+  }
+}
+
+validateProductionEnv(
+  env
+);
+
 module.exports =
   env;
