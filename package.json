@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "dev:frontend": "vite",
     "dev:backend": "npm --prefix backend run dev",
-    "dev:all": "node scripts/dev-all.cjs"
+    "dev:all": "node scripts/dev-all.cjs",
+    "db:backup": "node scripts/backup-db.cjs",
+    "db:restore": "node scripts/restore-db.cjs"
   },
   "dependencies": {
     "html2canvas": "^1.4.1",

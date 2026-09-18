@@ -33,3 +33,6 @@ dist-ssr
 *.sln
 *.swp
 *.sw?
+
+# Local database backups (may contain sensitive user data)
+backend/backups/
