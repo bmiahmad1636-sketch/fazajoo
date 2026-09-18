@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const crypto = require("crypto");
-const { rateLimit } = require("express-rate-limit");
+const { rateLimit, ipKeyGenerator } = require("express-rate-limit");
 
 const env = require("./config/env");
 
@@ -222,7 +222,7 @@ function loginAccountKey(
      * Invalid/missing phone values are grouped by IP.
      * This avoids creating unlimited arbitrary limiter keys.
      */
-    return `invalid:${request.ip}`;
+    return `invalid:${ipKeyGenerator(request.ip)}`;
   }
 
   const digest =
