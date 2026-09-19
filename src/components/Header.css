@@ -3,9 +3,9 @@
   top: 0;
   z-index: 1000;
   width: 100%;
-  border-bottom: 1px solid rgba(73, 55, 42, 0.09);
-  background: rgba(255, 250, 245, 0.96);
-  box-shadow: 0 8px 26px rgba(92, 60, 35, 0.07);
+  border-bottom: 1px solid rgba(23, 33, 31, 0.08);
+  background: rgba(248, 246, 240, 0.93);
+  box-shadow: 0 8px 26px rgba(23, 33, 31, 0.07);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 }
@@ -72,7 +72,7 @@
   justify-content: center;
   padding: 7px 9px;
   border-radius: 11px;
-  color: #554941;
+  color: #53605b;
   font-size: 0.74rem;
   font-weight: 850;
   white-space: nowrap;
@@ -84,16 +84,16 @@
 }
 
 .fazajoo-header__nav-link:hover {
-  color: #dc6311;
-  background: rgba(244, 122, 31, 0.09);
+  color: #d9542d;
+  background: rgba(232, 97, 54, 0.09);
   transform: translateY(-1px);
 }
 
 .fazajoo-header__nav-link--active {
-  color: #cf5808;
-  background: rgba(244, 122, 31, 0.13);
+  color: #c84c27;
+  background: rgba(232, 97, 54, 0.12);
   box-shadow:
-    inset 0 0 0 1px rgba(244, 122, 31, 0.08);
+    inset 0 0 0 1px rgba(232, 97, 54, 0.08);
 }
 
 .fazajoo-header__nav-link--active::after {
@@ -107,8 +107,8 @@
   background:
     linear-gradient(
       90deg,
-      #ff9a45,
-      #f36f13
+      #ef7951,
+      #d9542d
     );
 }
 
@@ -142,8 +142,8 @@
 }
 
 .fazajoo-header__user:hover {
-  border-color: rgba(244, 122, 31, 0.3);
-  background: #fff8f2;
+  border-color: rgba(232, 97, 54, 0.3);
+  background: #f4f5ef;
   transform: translateY(-1px);
 }
 
@@ -156,11 +156,7 @@
   justify-content: center;
   border-radius: 10px;
   background:
-    linear-gradient(
-      135deg,
-      #ff9c4c,
-      #ef6f14
-    );
+    linear-gradient(135deg, #24312e, #17211f);
   color: white;
   font-size: 0.72rem;
   font-weight: 950;
@@ -175,14 +171,14 @@
 }
 
 .fazajoo-header__user-text small {
-  color: #9a8d84;
+  color: #7b8581;
   font-size: 0.52rem;
   line-height: 1.4;
 }
 
 .fazajoo-header__user-text strong {
   overflow: hidden;
-  color: #3c332e;
+  color: #17211f;
   font-size: 0.62rem;
   font-weight: 900;
   text-overflow: ellipsis;
@@ -204,7 +200,7 @@
       rgba(255,255,255,0.92),
       rgba(255,245,236,0.96)
     );
-  color: #553a2a;
+  color: #35413d;
   box-shadow:
     0 7px 18px rgba(79, 47, 27, 0.07),
     inset 0 0 0 1px rgba(255,255,255,0.55);
@@ -216,19 +212,19 @@
 
 .fazajoo-header__agency-button:hover {
   transform: translateY(-1px);
-  border-color: rgba(244, 122, 31, 0.42);
+  border-color: rgba(232, 97, 54, 0.34);
   box-shadow:
     0 10px 22px rgba(79, 47, 27, 0.1),
     inset 0 0 0 1px rgba(255,255,255,0.68);
 }
 
 .fazajoo-header__agency-button--approved {
-  border-color: rgba(244, 122, 31, 0.45);
+  border-color: rgba(232, 97, 54, 0.32);
   background:
     linear-gradient(
       145deg,
-      #fff4e9,
-      #fffaf5
+      #eef3ed,
+      #f8f6f0
     );
 }
 
@@ -243,8 +239,8 @@
   background:
     linear-gradient(
       135deg,
-      #33251e,
-      #6f452e
+      #17211f,
+      #35413d
     );
   font-size: 0.85rem;
   box-shadow:
@@ -259,7 +255,7 @@
 }
 
 .fazajoo-header__agency-text small {
-  color: #a17d66;
+  color: #7b8581;
   font-size: 0.47rem;
   font-weight: 800;
   white-space: nowrap;
@@ -267,7 +263,7 @@
 
 .fazajoo-header__agency-text strong {
   margin-top: 1px;
-  color: #5c3924;
+  color: #35413d;
   font-size: 0.61rem;
   font-weight: 950;
   white-space: nowrap;
@@ -299,38 +295,30 @@
 
 .fazajoo-header__publish-button {
   background:
-    linear-gradient(
-      135deg,
-      #ff9343,
-      #ed6710
-    );
+    linear-gradient(135deg, #24312e, #17211f);
   color: white;
   box-shadow:
-    0 9px 20px rgba(237, 103, 16, 0.22);
+    0 9px 20px rgba(23, 33, 31, 0.18);
 }
 
 .fazajoo-header__publish-button:hover {
   transform: translateY(-1px);
   background:
-    linear-gradient(
-      135deg,
-      #ff9f55,
-      #e95f08
-    );
+    linear-gradient(135deg, #31413d, #17211f);
   box-shadow:
-    0 12px 26px rgba(237, 103, 16, 0.29);
+    0 12px 26px rgba(23, 33, 31, 0.23);
 }
 
 .fazajoo-header__login-button,
 .fazajoo-header__logout-button {
   border: 1px solid rgba(73, 55, 42, 0.1);
   background: rgba(255, 255, 255, 0.8);
-  color: #443a34;
+  color: #35413d;
 }
 
 .fazajoo-header__login-button:hover,
 .fazajoo-header__logout-button:hover {
-  color: #d85f0d;
+  color: #d9542d;
   border-color: rgba(244, 122, 31, 0.22);
   background: rgba(255, 244, 235, 0.95);
   transform: translateY(-1px);
@@ -359,8 +347,8 @@
   background:
     linear-gradient(
       90deg,
-      #4a403a,
-      #ee7018
+      #35413d,
+      #e86136
     );
 }
 
@@ -541,7 +529,7 @@
   border: 1px solid rgba(239, 116, 27, 0.18);
   border-radius: 11px;
   background: rgba(255, 248, 241, 0.92);
-  color: #4b3c33;
+  color: #35413d;
   font-size: 1rem;
   box-shadow: 0 5px 14px rgba(93, 62, 39, 0.05);
   transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease;
@@ -549,7 +537,7 @@
 
 .fazajoo-header__smart-bell:hover {
   transform: translateY(-1px);
-  background: #fff2e7;
+  background: #fff0e9;
   box-shadow: 0 8px 18px rgba(239, 116, 27, 0.12);
 }
 
@@ -563,9 +551,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #fffaf5;
+  border: 2px solid #f8f6f0;
   border-radius: 999px;
-  background: #e45f0b;
+  background: #d9542d;
   color: #fff;
   font-size: .52rem;
   font-weight: 950;

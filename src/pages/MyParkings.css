@@ -648,3 +648,29 @@
     height: 200px;
   }
 }
+/* ===== Fazajoo UI Upgrade — Package 07 ===== */
+.my-parkings-page{background:linear-gradient(180deg,#fbfaf5 0,#fff8f1 48%,#f6faf6 100%);min-height:100vh}
+.my-parkings-hero{position:relative;overflow:hidden;background:radial-gradient(circle at 14% 45%,rgba(174,205,184,.34),transparent 24%),radial-gradient(circle at 84% 15%,rgba(255,139,45,.14),transparent 28%),#fbfaf5;border-bottom:1px solid rgba(28,49,42,.08)}
+.my-parkings-hero:after{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(rgba(31,54,46,.08) 1px,transparent 1px);background-size:18px 18px;mask-image:linear-gradient(to left,#000,transparent 70%)}
+.my-parkings-hero__content{position:relative;z-index:1;padding-top:62px;padding-bottom:58px}
+.my-parkings-eyebrow{display:inline-flex;padding:8px 13px;border:1px solid rgba(238,107,25,.2);border-radius:999px;background:#fff8f1;color:#d85e16;font-weight:800}
+.my-parkings-hero h1{font-size:clamp(34px,4vw,58px);letter-spacing:-1.8px;color:#172a24;margin-top:13px}
+.my-parkings-hero p{color:#68746f;font-size:15px;max-width:650px}
+.my-parkings-add-button{border-radius:16px!important;background:#172a24!important;box-shadow:0 14px 28px rgba(23,42,36,.16)!important}
+.my-parkings-summary{gap:14px;margin-top:-28px;position:relative;z-index:3}
+.my-parkings-summary-card{border:1px solid rgba(28,49,42,.09)!important;border-radius:20px!important;background:rgba(255,255,255,.88)!important;box-shadow:0 16px 45px rgba(44,37,30,.07)!important;backdrop-filter:blur(12px)}
+.my-parkings-summary-card--selected{border-color:#f47b20!important;box-shadow:0 15px 38px rgba(244,123,32,.12)!important;transform:translateY(-2px)}
+.my-parkings-toolbar{border:1px solid rgba(28,49,42,.08);border-radius:22px;background:rgba(255,255,255,.74);padding:20px 22px;box-shadow:0 12px 35px rgba(44,37,30,.05)}
+.my-parkings-search{border-radius:14px!important;background:#fff!important;border:1px solid rgba(28,49,42,.1)!important}
+.my-parking-card{border-radius:24px!important;border:1px solid rgba(28,49,42,.09)!important;box-shadow:0 18px 48px rgba(44,37,30,.08)!important;overflow:hidden;transition:.22s ease}
+.my-parking-card:hover{transform:translateY(-5px);box-shadow:0 24px 56px rgba(44,37,30,.12)!important}
+.my-parking-card__media{min-height:215px;background:#eef2ed}
+.my-parking-card__media img{transition:transform .35s ease}
+.my-parking-card:hover .my-parking-card__media img{transform:scale(1.025)}
+.my-parking-card__body{background:#fffdf9}
+.my-parking-card__facts>div{border-radius:15px!important;background:#faf8f4!important;border:1px solid rgba(28,49,42,.07)!important}
+.my-parking-card__status-copy{border-radius:15px!important;background:linear-gradient(135deg,#f8faf7,#fffaf5)!important}
+.my-parking-card__action{border-radius:13px!important}
+.my-parking-card__action--primary{background:#f36f17!important;color:#fff!important;border-color:#f36f17!important}
+.my-parking-card__action--secondary{background:#172a24!important;color:#fff!important;border-color:#172a24!important}
+@media(max-width:720px){.my-parkings-hero__content{padding-top:38px;padding-bottom:46px}.my-parkings-summary{margin-top:-18px}.my-parkings-toolbar{padding:16px}.my-parking-card{border-radius:20px!important}}

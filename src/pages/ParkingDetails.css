@@ -1961,3 +1961,155 @@
   transform: translateY(-1px);
   background: #ffede0;
 }
+
+/* =========================================================
+   Fazajoo Visual Upgrade — Package 05
+   Parking Details / light premium identity
+   ========================================================= */
+
+.parking-details-page {
+  background:
+    radial-gradient(circle at 5% 12%, rgba(180, 211, 190, .26), transparent 24%),
+    radial-gradient(circle at 96% 28%, rgba(244, 122, 31, .10), transparent 28%),
+    linear-gradient(180deg, #fbfaf6 0%, #fffaf6 52%, #fbfaf7 100%);
+}
+
+.parking-details-hero {
+  padding: 26px 0 86px;
+  color: #17231e;
+  background:
+    radial-gradient(circle at 12% 58%, rgba(185, 214, 193, .42), transparent 26%),
+    radial-gradient(circle at 79% -10%, rgba(244, 122, 31, .14), transparent 31%),
+    radial-gradient(circle at 94% 85%, rgba(255, 213, 177, .20), transparent 25%),
+    linear-gradient(120deg, #f7f8f2 0%, #fffaf4 55%, #fff6ee 100%);
+  border-bottom: 1px solid rgba(234, 222, 210, .85);
+}
+
+.parking-details-hero::before {
+  background-image: radial-gradient(rgba(35, 49, 42, .08) .8px, transparent .8px);
+  background-size: 18px 18px;
+  opacity: .45;
+  mask-image: linear-gradient(to bottom, black, transparent 92%);
+}
+
+.parking-details-hero__glow--one {
+  width: 360px;
+  height: 360px;
+  top: -235px;
+  right: 24%;
+  border: 1px solid rgba(244, 122, 31, .16);
+  background: rgba(244, 122, 31, .045);
+}
+
+.parking-details-hero__glow--two {
+  width: 260px;
+  height: 260px;
+  bottom: -170px;
+  left: 5%;
+  border: 1px solid rgba(74, 116, 91, .14);
+  background: rgba(132, 174, 146, .08);
+}
+
+.parking-details-toolbar {
+  margin-bottom: 42px;
+}
+
+.parking-details-toolbar__back,
+.parking-details-toolbar__actions button {
+  border: 1px solid rgba(51, 69, 59, .13);
+  background: rgba(255, 255, 255, .76);
+  color: #26362e;
+  box-shadow: 0 8px 22px rgba(57, 47, 38, .055);
+}
+
+.parking-details-toolbar__back:hover,
+.parking-details-toolbar__actions button:hover {
+  border-color: rgba(244, 122, 31, .28);
+  background: #fff;
+  color: #e96d12;
+}
+
+.parking-details-badge--available {
+  border-color: rgba(32, 142, 79, .15);
+  background: rgba(34, 197, 94, .10);
+  color: #168344;
+}
+
+.parking-details-badge--type {
+  border-color: rgba(244, 122, 31, .18);
+  background: rgba(244, 122, 31, .09);
+  color: #d9610d;
+}
+
+.parking-details-hero h1 {
+  color: #17231e;
+  text-shadow: 0 1px 0 rgba(255,255,255,.75);
+}
+
+.parking-details-hero__content > div:first-child > p {
+  color: #617068;
+}
+
+.parking-details-hero__price {
+  border: 1px solid rgba(244, 122, 31, .17);
+  background: rgba(255, 255, 255, .78);
+  box-shadow: 0 18px 45px rgba(83, 59, 39, .09);
+}
+
+.parking-details-hero__price span,
+.parking-details-hero__price small {
+  color: #81766d;
+}
+
+.parking-details-hero__price strong {
+  background: none;
+  color: #ef7117;
+  -webkit-text-fill-color: #ef7117;
+}
+
+.parking-details-content {
+  margin-top: -48px;
+}
+
+.parking-details-gallery,
+.parking-details-section,
+.parking-details-location,
+.parking-contact-card,
+.parking-owner-card,
+.parking-owner-note {
+  border-color: rgba(226, 218, 209, .9);
+  box-shadow: 0 18px 46px rgba(66, 53, 43, .075);
+}
+
+.parking-details-gallery {
+  background: linear-gradient(135deg, #f2f1ed, #e9ece7);
+}
+
+.parking-details-section__icon {
+  background: linear-gradient(135deg, #fff6ed, #fff0e2);
+}
+
+.parking-details-feature {
+  border-color: #eee5dc;
+  background: #fcfbf8;
+}
+
+.parking-details-feature:hover {
+  border-color: rgba(244, 122, 31, .22);
+  background: #fff;
+}
+
+.parking-details-residential {
+  border-color: #e9e2da;
+  background: #fbfaf7;
+}
+
+@media (max-width: 760px) {
+  .parking-details-hero {
+    padding-bottom: 72px;
+  }
+
+  .parking-details-toolbar {
+    margin-bottom: 30px;
+  }
+}

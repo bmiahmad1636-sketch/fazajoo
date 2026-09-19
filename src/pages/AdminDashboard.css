@@ -1215,3 +1215,137 @@
     justify-content: space-between;
   }
 }
+
+
+/* ===== Fazajoo Package 10 · Admin visual refresh ===== */
+.admin-dashboard {
+  --admin-ink: #102b23;
+  --admin-green: #123c31;
+  --admin-green-2: #1d5747;
+  --admin-orange: #f47a1f;
+  --admin-paper: #fffdf9;
+  background:
+    radial-gradient(circle at 8% 24%, rgba(43,112,86,.10), transparent 24%),
+    radial-gradient(circle at 92% 13%, rgba(244,122,31,.11), transparent 27%),
+    linear-gradient(180deg,#fbfaf5 0%,#fff8f1 100%);
+  color: var(--admin-ink);
+}
+.admin-dashboard__quick-nav { padding: 18px 0 0; }
+.admin-dashboard__quick-nav-inner { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.admin-dashboard__quick-link {
+  display:flex; align-items:center; gap:12px; min-height:74px; padding:13px 15px;
+  color:var(--admin-ink); text-decoration:none; background:rgba(255,255,255,.82);
+  border:1px solid rgba(18,60,49,.10); border-radius:20px;
+  box-shadow:0 12px 30px rgba(35,50,43,.06); transition:.2s ease;
+}
+.admin-dashboard__quick-link:hover { transform:translateY(-2px); border-color:rgba(244,122,31,.38); box-shadow:0 16px 34px rgba(35,50,43,.10); }
+.admin-dashboard__quick-link > span { display:grid; place-items:center; width:44px; height:44px; flex:0 0 44px; border-radius:14px; background:#fff2e8; font-size:1.05rem; }
+.admin-dashboard__quick-link div { display:flex; flex-direction:column; gap:2px; }
+.admin-dashboard__quick-link small { color:#887b72; font-size:.62rem; }
+.admin-dashboard__quick-link strong { font-size:.82rem; font-weight:950; }
+.admin-dashboard__hero {
+  margin-top:16px; padding:42px 0 46px; position:relative; overflow:hidden;
+  background:
+    radial-gradient(circle at 16% 20%,rgba(244,122,31,.18),transparent 25%),
+    radial-gradient(circle at 80% 110%,rgba(255,255,255,.08),transparent 28%),
+    linear-gradient(125deg,#0e2f27,#174b3d 62%,#11362d);
+  border-radius:0 0 34px 34px;
+}
+.admin-dashboard__hero::after { content:""; position:absolute; width:260px; height:260px; border:1px solid rgba(244,122,31,.18); border-radius:50%; left:7%; top:-145px; }
+.admin-dashboard__eyebrow { background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.14); color:#ffd8ba; }
+.admin-dashboard__hero h1 { font-size:clamp(2rem,4vw,3.25rem); letter-spacing:-.04em; }
+.admin-dashboard__hero h1 span { color:#ff8a32; }
+.admin-dashboard__hero-badge { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.13); box-shadow:0 16px 38px rgba(0,0,0,.10); }
+.admin-dashboard__hero-badge > span { background:linear-gradient(135deg,#ff8b31,#ef6810); }
+.admin-dashboard__content { padding-top:24px; }
+.admin-dashboard__stats article, .admin-dashboard__panel { border-color:rgba(18,60,49,.10); box-shadow:0 16px 38px rgba(36,48,43,.065); }
+.admin-dashboard__stats article { position:relative; overflow:hidden; }
+.admin-dashboard__stats article::before { content:""; position:absolute; inset:0 auto 0 0; width:4px; background:linear-gradient(#ff9a50,#f47a1f); }
+.admin-dashboard__stats strong { color:var(--admin-orange); }
+.admin-dashboard__panel { background:rgba(255,255,255,.93); }
+.admin-dashboard__request-card { border-color:rgba(18,60,49,.11) !important; box-shadow:0 12px 28px rgba(36,48,43,.055); }
+.admin-dashboard__approve-button { background:var(--admin-green) !important; }
+.admin-dashboard__approve-button:hover { background:var(--admin-green-2) !important; }
+.admin-dashboard__documents-button { border-color:rgba(244,122,31,.30) !important; color:#d75f0d !important; }
+.admin-dashboard__pending-badge { background:#fff1e6 !important; color:#d85f0c !important; }
+@media (max-width: 760px) {
+  .admin-dashboard__quick-nav-inner { grid-template-columns:1fr; }
+  .admin-dashboard__hero { border-radius:0 0 24px 24px; }
+}
+
+
+/* ===== Fazajoo Admin Final Fix: quick cards + brand hero ===== */
+.admin-dashboard__quick-nav {
+  padding: 16px 0 14px;
+  background: #fffaf6;
+}
+
+.admin-dashboard__quick-nav-inner {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-dashboard__quick-link {
+  min-height: 68px;
+  padding: 10px 13px;
+  border: 1px solid rgba(244, 122, 31, 0.28);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fffdf9 0%, #fff8f1 100%);
+  box-shadow: 0 8px 22px rgba(18, 60, 49, 0.055);
+  color: #103b31;
+}
+
+.admin-dashboard__quick-link:hover {
+  transform: translateY(-2px);
+  border-color: rgba(244, 122, 31, 0.58);
+  box-shadow: 0 12px 26px rgba(18, 60, 49, 0.09);
+}
+
+.admin-dashboard__quick-link > span {
+  width: 40px;
+  height: 40px;
+  flex-basis: 40px;
+  border-radius: 12px;
+  background: #f2f6ef;
+}
+
+.admin-dashboard__quick-link small {
+  color: #173f35;
+  font-size: .69rem;
+  font-weight: 900;
+}
+
+.admin-dashboard__quick-link strong {
+  color: #60736c;
+  font-size: .64rem;
+  font-weight: 800;
+}
+
+.admin-dashboard__hero {
+  margin-top: 0;
+  background:
+    radial-gradient(circle at 8% 120%, rgba(244,122,31,.16), transparent 28%),
+    radial-gradient(circle at 94% 0%, rgba(255,255,255,.08), transparent 24%),
+    linear-gradient(125deg, #0b332a 0%, #0f493b 56%, #0a3028 100%);
+  border-radius: 0;
+}
+
+.admin-dashboard__hero::after {
+  border-color: rgba(244, 122, 31, 0.20);
+}
+
+.admin-dashboard__hero h1 span {
+  color: #ff8a32;
+}
+
+.admin-dashboard__eyebrow {
+  color: #ffe0c8;
+  background: rgba(255,255,255,.08);
+}
+
+@media (max-width: 760px) {
+  .admin-dashboard__quick-nav-inner {
+    grid-template-columns: 1fr;
+  }
+}

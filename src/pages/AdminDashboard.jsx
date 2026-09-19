@@ -554,7 +554,19 @@ function AdminDashboard() {
 
   return (
     <main className="admin-dashboard">
-      <div style={{maxWidth:"1180px",margin:"10px auto 0",padding:"0 20px",direction:"rtl",display:"flex",gap:"8px",flexWrap:"wrap"}}><Link to="/admin/legal" style={{display:"inline-block",padding:"9px 14px",borderRadius:"10px",background:"#3f3a36",color:"white",textDecoration:"none"}}>⚖️ امور حقوقی و دستورات قضایی</Link><Link to="/admin/moderation" style={{display:"inline-block",padding:"9px 14px",borderRadius:"10px",background:"#ef741b",color:"white",textDecoration:"none"}}>🛡 مرکز گزارش‌ها و تخلفات</Link><Link to="/admin/direct-management" style={{display:"inline-block",padding:"9px 14px",borderRadius:"10px",background:"#8b4b22",color:"white",textDecoration:"none"}}>👤 مدیریت مستقیم کاربران</Link></div>
+      <nav className="admin-dashboard__quick-nav" aria-label="دسترسی‌های مدیریت">
+        <div className="admin-dashboard__container admin-dashboard__quick-nav-inner">
+          <Link to="/admin/legal" className="admin-dashboard__quick-link">
+            <span>⚖️</span><div><small>پرونده‌ها و محدودیت‌ها</small><strong>امور حقوقی</strong></div>
+          </Link>
+          <Link to="/admin/moderation" className="admin-dashboard__quick-link">
+            <span>🛡️</span><div><small>گزارش‌ها و رسیدگی</small><strong>مرکز تخلفات</strong></div>
+          </Link>
+          <Link to="/admin/direct-management" className="admin-dashboard__quick-link">
+            <span>👤</span><div><small>حساب‌ها و دسترسی‌ها</small><strong>مدیریت کاربران</strong></div>
+          </Link>
+        </div>
+      </nav>
 
       <section className="admin-dashboard__hero">
 

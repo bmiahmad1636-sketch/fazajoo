@@ -10,17 +10,17 @@
 
   padding: 8px 13px;
 
-  border: 1px solid rgba(244, 122, 31, 0.16);
+  border: 1px solid rgba(23, 33, 31, 0.10);
   border-radius: 13px;
 
   background:
     linear-gradient(
       135deg,
-      #fff7f0,
-      #fffaf6
+      #f4f5ef,
+      #f8f6f0
     );
 
-  color: #4d443e;
+  color: #35413d;
 
   text-decoration: none;
 
@@ -38,13 +38,13 @@
 .message-badge:hover {
   transform: translateY(-2px);
 
-  border-color: rgba(244, 122, 31, 0.3);
+  border-color: rgba(232, 97, 54, 0.28);
 
   background:
     linear-gradient(
       135deg,
-      #fff0e3,
-      #fff8f2
+      #eef3ed,
+      #f8f6f0
     );
 
   box-shadow:
@@ -66,14 +66,14 @@
   background:
     linear-gradient(
       135deg,
-      #f47a1f,
-      #d95f0b
+      #e86136,
+      #c84c27
     );
 
   color: white;
 
   box-shadow:
-    0 7px 16px rgba(244, 122, 31, 0.22);
+    0 7px 16px rgba(232, 97, 54, 0.18);
 
   font-size: 0.82rem;
 }

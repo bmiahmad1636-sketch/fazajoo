@@ -1572,3 +1572,42 @@
   line-height: 1.8;
   font-size: 0.78rem;
 }
+
+/* ===== Fazajoo Visual Upgrade 06 — light brand identity ===== */
+.edit-parking-page {
+  background:
+    radial-gradient(circle at 8% 18%, rgba(173,204,184,.28), transparent 26%),
+    radial-gradient(circle at 92% 13%, rgba(247,127,35,.11), transparent 24%),
+    linear-gradient(180deg,#fffdf9 0%,#fbf7f0 100%);
+}
+.edit-parking-hero {
+  color: #17231f;
+  background:
+    radial-gradient(circle at 12% 30%, rgba(176,207,187,.34), transparent 28%),
+    radial-gradient(circle at 84% 0%, rgba(247,127,35,.13), transparent 27%),
+    linear-gradient(135deg,#f4f8f2 0%,#fffaf3 55%,#fff5e9 100%);
+  border-bottom: 1px solid rgba(26,50,42,.07);
+}
+.edit-parking-hero::before {
+  background-image: radial-gradient(rgba(26,50,42,.08) .8px, transparent .8px);
+  background-size: 18px 18px;
+  opacity: .42;
+}
+.edit-parking-back,
+.edit-parking-status {
+  border-color: rgba(26,50,42,.10);
+  background: rgba(255,255,255,.80);
+  color: #20342d;
+  box-shadow: 0 8px 22px rgba(34,52,45,.06);
+}
+.edit-parking-back:hover:not(:disabled) { background: #fff; }
+.edit-parking-eyebrow {
+  border-color: rgba(238,105,24,.16);
+  background: rgba(247,127,35,.10);
+  color: #dc6417;
+}
+.edit-parking-hero h1 { color: #17231f; }
+.edit-parking-hero p { color: #61706a; }
+.edit-parking-orb--one { background: rgba(176,207,187,.24); }
+.edit-parking-orb--two { background: rgba(247,127,35,.09); }
+.edit-parking-orb--three { background: rgba(176,207,187,.17); }

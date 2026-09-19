@@ -205,3 +205,27 @@
 .account-notification-summary{margin-top:20px;display:flex;align-items:center;gap:14px;padding:18px 20px;border:1px solid #eadfd7;border-radius:20px;background:#fff;box-shadow:0 12px 30px rgba(74,49,33,.05)}
 .account-notification-summary__icon{width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:#fff0e2;font-size:1.15rem;flex:0 0 auto}.account-notification-summary__copy{min-width:0;flex:1}.account-notification-summary__copy h2{margin:0;font-size:.98rem}.account-notification-summary__copy p{margin:4px 0 0;color:#88786e;font-size:.78rem}.account-notification-summary__link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-radius:12px;background:#ef741b;color:#fff;padding:10px 14px;font-size:.78rem;font-weight:900;white-space:nowrap}
 @media(max-width:620px){.account-notification-summary{align-items:stretch;flex-wrap:wrap}.account-notification-summary__copy{flex-basis:calc(100% - 62px)}.account-notification-summary__link{width:100%}}
+
+/* ===== Fazajoo UI Upgrade — Package 07 ===== */
+.account-page{background:linear-gradient(180deg,#fbfaf5 0,#fff8f1 50%,#f5faf6 100%);min-height:100vh;padding-bottom:64px}
+.account-page__hero{position:relative;overflow:hidden;border:1px solid rgba(28,49,42,.08)!important;border-radius:0 0 32px 32px!important;background:radial-gradient(circle at 12% 50%,rgba(174,205,184,.35),transparent 25%),radial-gradient(circle at 82% 10%,rgba(255,137,43,.16),transparent 28%),#fbfaf5!important;box-shadow:0 16px 45px rgba(44,37,30,.06)!important;padding:54px max(24px,calc((100vw - 1280px)/2))!important}
+.account-page__hero:after{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(rgba(31,54,46,.08) 1px,transparent 1px);background-size:18px 18px;mask-image:linear-gradient(to left,#000,transparent 72%)}
+.account-page__hero-copy,.account-page__identity{position:relative;z-index:2}
+.account-page__eyebrow{display:inline-flex!important;padding:8px 13px!important;border:1px solid rgba(238,107,25,.2)!important;border-radius:999px!important;background:#fff8f1!important;color:#d85e16!important;font-weight:800!important}
+.account-page__hero h1{font-size:clamp(34px,4vw,56px)!important;letter-spacing:-1.6px;color:#172a24!important;margin:12px 0 8px!important}
+.account-page__hero p{color:#68746f!important}
+.account-page__identity{border:1px solid rgba(28,49,42,.09)!important;border-radius:20px!important;background:rgba(255,255,255,.86)!important;box-shadow:0 15px 38px rgba(44,37,30,.07)!important;backdrop-filter:blur(12px);padding:14px 17px!important}
+.account-page__avatar{background:linear-gradient(145deg,#172a24,#294a3f)!important;color:#fff!important;box-shadow:0 8px 18px rgba(23,42,36,.18)!important}
+.account-page__grid,.account-blocked-users{width:min(1280px,calc(100% - 48px));margin-left:auto!important;margin-right:auto!important}
+.account-page__grid{gap:20px!important;margin-top:28px!important}
+.account-card,.account-blocked-users{border:1px solid rgba(28,49,42,.09)!important;border-radius:24px!important;background:rgba(255,255,255,.86)!important;box-shadow:0 18px 48px rgba(44,37,30,.07)!important;overflow:hidden}
+.account-card{padding:24px!important}
+.account-card__icon{background:#fff2e6!important;color:#e76b1c!important;border-radius:14px!important}
+.account-info>div{background:#faf8f4!important;border:1px solid rgba(28,49,42,.07)!important;border-radius:14px!important}
+.account-card__quick-links a{border-radius:13px!important;border-color:rgba(238,107,25,.2)!important;color:#cf5f19!important;background:#fff8f1!important}
+.account-security-note{border-radius:15px!important;background:#f2f7f3!important;border:1px solid rgba(75,130,94,.13)!important}
+.account-password-form input{border-radius:13px!important;background:#fcfbf8!important;border:1px solid rgba(28,49,42,.12)!important}
+.account-password-form input:focus{border-color:#f47b20!important;box-shadow:0 0 0 4px rgba(244,123,32,.09)!important}
+.account-password-form__submit{border-radius:14px!important;background:#172a24!important;box-shadow:0 12px 25px rgba(23,42,36,.14)!important}
+.account-blocked-users{margin-top:20px!important;padding:24px!important}
+@media(max-width:720px){.account-page__hero{padding:38px 18px 44px!important;border-radius:0 0 24px 24px!important}.account-page__grid,.account-blocked-users{width:calc(100% - 28px)}.account-card,.account-blocked-users{border-radius:20px!important;padding:18px!important}}

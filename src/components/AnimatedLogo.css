@@ -58,8 +58,7 @@
 
   border-radius: 999px;
 
-  transform:
-    rotate(20deg);
+  transform: rotate(20deg);
   transform-origin: right center;
 }
 
@@ -73,8 +72,7 @@
   border-radius:
     999px 999px 10px 10px;
 
-  transform:
-    skewY(-5deg);
+  transform: skewY(-5deg);
 }
 
 .fazajoo-animated-logo__door-wrap {
@@ -86,11 +84,9 @@
   width: 69%;
   height: 68%;
 
-  transform-style:
-    preserve-3d;
+  transform-style: preserve-3d;
 
-  transform-origin:
-    right center;
+  transform-origin: right center;
 }
 
 .fazajoo-animated-logo__door {
@@ -111,23 +107,15 @@
     );
 
   box-shadow:
-    0 12px 19px
-      rgba(21, 27, 33, 0.22),
-    inset 1px 1px 0
-      rgba(255, 255, 255, 0.14);
+    0 12px 19px rgba(21, 27, 33, 0.22),
+    inset 1px 1px 0 rgba(255, 255, 255, 0.14);
 
-  transform-origin:
-    right center;
+  transform-origin: right center;
 
   animation:
     fazajooDoorCycle
     5.2s
-    cubic-bezier(
-      0.4,
-      0,
-      0.2,
-      1
-    )
+    cubic-bezier(0.4, 0, 0.2, 1)
     infinite;
 
   will-change: transform;
@@ -173,10 +161,8 @@
     );
 
   box-shadow:
-    0 2px 5px
-      rgba(0, 0, 0, 0.24),
-    inset 0 1px 1px
-      rgba(255, 255, 255, 0.68);
+    0 2px 5px rgba(0, 0, 0, 0.24),
+    inset 0 1px 1px rgba(255, 255, 255, 0.68);
 }
 
 .fazajoo-animated-logo__shadow {
@@ -190,8 +176,7 @@
 
   border-radius: 50%;
 
-  background:
-    rgba(55, 38, 26, 0.18);
+  background: rgba(55, 38, 26, 0.18);
 
   filter: blur(9px);
 
@@ -204,6 +189,11 @@
     infinite;
 }
 
+/* =========================================
+   نوشته فضاجو
+   دقیقاً هماهنگ با تایپوگرافی سراسری سایت
+========================================= */
+
 .fazajoo-animated-logo__wordmark {
   direction: rtl;
 
@@ -211,43 +201,59 @@
   align-items: baseline;
   justify-content: center;
 
-  margin-top: -2%;
+  margin-top: 0;
 
   font-family:
-    Vazirmatn,
+    "Estedad",
     Tahoma,
-    sans-serif;
+    Arial,
+    sans-serif !important;
 
   font-size:
     calc(
       var(--fazajoo-logo-size)
-      * 0.255
+      * 0.225
     );
 
-  font-weight: 950;
-  line-height: 1;
+  font-weight: 700 !important;
+  line-height: 1.25;
 
-  letter-spacing: -0.075em;
+  letter-spacing: -0.025em;
 
-  filter:
-    drop-shadow(
-      0 5px 6px
-      rgba(54, 39, 29, 0.12)
-    );
+  filter: none;
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.fazajoo-animated-logo__wordmark-dark,
+.fazajoo-animated-logo__wordmark-orange {
+  font-family:
+    "Estedad",
+    Tahoma,
+    Arial,
+    sans-serif !important;
+
+  font-weight: 700 !important;
 }
 
 .fazajoo-animated-logo__wordmark-dark {
-  color: #17212b;
+  color: #17211f;
 }
 
 .fazajoo-animated-logo__wordmark-orange {
-  color: #f58a16;
+  color: #e86136;
 }
 
 .fazajoo-animated-logo--compact
 .fazajoo-animated-logo__mark {
   margin-bottom: -7%;
 }
+
+/* =========================================
+   انیمیشن در
+========================================= */
 
 @keyframes fazajooDoorCycle {
   0%,
@@ -277,8 +283,7 @@
   16%,
   58%,
   100% {
-    transform:
-      scaleX(1);
+    transform: scaleX(1);
     opacity: 0.62;
   }
 
@@ -287,14 +292,16 @@
     transform:
       scaleX(0.62)
       translateX(-7%);
+
     opacity: 0.3;
   }
 }
 
-@media (
-  prefers-reduced-motion:
-  reduce
-) {
+/* =========================================
+   دسترسی‌پذیری
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
   .fazajoo-animated-logo__door,
   .fazajoo-animated-logo__shadow {
     animation: none;

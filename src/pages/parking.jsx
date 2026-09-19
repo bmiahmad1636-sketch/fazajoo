@@ -29,7 +29,7 @@ function Parking({ parkings = [], initialListingType = "", showHero = true }) {
   const [
     selectedCategory,
     setSelectedCategory,
-  ] = useState("");
+  ] = useState(() => searchParams.get("category") || "");
 
   const [selectedPropertyType, setSelectedPropertyType] = useState("");
   const [minimumBedrooms, setMinimumBedrooms] = useState("");

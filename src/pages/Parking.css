@@ -1269,3 +1269,153 @@
     border-radius: 18px;
   }
 }
+
+/* =========================================================
+   FAZAJOO VISUAL UPGRADE — PACKAGE 04
+   Listings / filters identity refresh
+   Visual-only: no filtering, routing or data logic changes.
+========================================================= */
+
+.parking-page {
+  background:
+    radial-gradient(circle at 8% 16%, rgba(223, 233, 223, 0.68), transparent 24%),
+    radial-gradient(circle at 92% 12%, rgba(255, 231, 214, 0.62), transparent 26%),
+    linear-gradient(180deg, #fbfaf6 0%, #fffaf6 52%, #fffdfb 100%);
+}
+
+.parking-page__hero {
+  padding: 42px 0 66px;
+  background:
+    radial-gradient(circle at 13% 30%, rgba(197, 218, 200, 0.72), transparent 25%),
+    radial-gradient(circle at 83% 18%, rgba(255, 221, 199, 0.72), transparent 26%),
+    linear-gradient(135deg, #fbfaf6 0%, #fff8f2 54%, #f3f6ef 100%);
+  color: #18231f;
+  border-bottom: 1px solid rgba(93, 64, 50, 0.08);
+}
+
+.parking-page__hero::before {
+  background-image:
+    radial-gradient(circle, rgba(24, 35, 31, 0.055) 1px, transparent 1px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(to left, black, transparent 72%);
+  -webkit-mask-image: linear-gradient(to left, black, transparent 72%);
+}
+
+.parking-page__hero::after {
+  width: 360px;
+  height: 360px;
+  top: -245px;
+  left: 42%;
+  border-color: rgba(244, 122, 31, 0.12);
+  background: rgba(244, 122, 31, 0.035);
+}
+
+.parking-page__hero-shape--one {
+  border-color: rgba(244, 122, 31, 0.11);
+  background: rgba(244, 122, 31, 0.055);
+}
+
+.parking-page__hero-shape--two {
+  border-color: rgba(35, 77, 61, 0.10);
+  background: rgba(190, 214, 194, 0.22);
+}
+
+.parking-page__eyebrow {
+  border-color: rgba(93, 64, 50, 0.10);
+  background: rgba(255, 255, 255, 0.76);
+  color: #5d4032;
+  box-shadow: 0 8px 24px rgba(67, 48, 37, 0.06), inset 0 1px 0 #fff;
+}
+
+.parking-page__title {
+  color: #18231f;
+  letter-spacing: -0.035em;
+}
+
+.parking-page__title span {
+  background: linear-gradient(135deg, #ed6d32, #f47a1f 58%, #d95f0b);
+  background-clip: text;
+  -webkit-background-clip: text;
+}
+
+.parking-page__description {
+  color: #5f6964;
+  font-weight: 650;
+}
+
+.parking-page__hero-stat {
+  min-width: 176px;
+  border-color: rgba(93, 64, 50, 0.10);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 20px 45px rgba(55, 45, 37, 0.09), inset 0 1px 0 #fff;
+}
+
+.parking-page__hero-stat strong {
+  color: #18231f;
+}
+
+.parking-page__hero-stat span:last-child {
+  color: #6f7773;
+}
+
+.parking-page__hero-stat-icon {
+  background: linear-gradient(135deg, #ff9a3c, #ec6508);
+  box-shadow: 0 12px 24px rgba(244, 122, 31, 0.20);
+}
+
+.parking-page__content {
+  margin-top: -30px;
+}
+
+.parking-filter {
+  border-color: rgba(112, 91, 75, 0.11);
+  background: rgba(255, 255, 255, 0.91);
+  box-shadow: 0 24px 60px rgba(61, 47, 38, 0.09);
+}
+
+.parking-filter__header h2,
+.parking-results__header h2 {
+  color: #18231f;
+}
+
+.parking-filter__header p {
+  color: #707a75;
+}
+
+.parking-filter select,
+.parking-filter input {
+  border-color: rgba(93, 64, 50, 0.13);
+  background: #fffefa;
+  color: #26332e;
+}
+
+.parking-filter select:hover,
+.parking-filter input:hover {
+  border-color: rgba(244, 122, 31, 0.48);
+}
+
+.parking-results__count {
+  border-color: rgba(244, 122, 31, 0.14);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 8px 22px rgba(61, 47, 38, 0.05);
+}
+
+.parking-search-notice {
+  border-color: rgba(244, 122, 31, 0.14);
+  background: linear-gradient(135deg, rgba(255, 243, 233, 0.90), rgba(255,255,255,0.88));
+}
+
+@media (max-width: 760px) {
+  .parking-page__hero {
+    padding-top: 30px;
+    padding-bottom: 58px;
+  }
+
+  .parking-page__hero-content {
+    align-items: stretch;
+  }
+
+  .parking-page__hero-stat {
+    min-width: 0;
+  }
+}

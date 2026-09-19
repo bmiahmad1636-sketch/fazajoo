@@ -1,0 +1,118 @@
+/* Fazajoo Package 14 — final visual polish
+   Global, low-risk finishing layer. No application logic is changed. */
+:root {
+  --fz-green: #103b31;
+  --fz-green-2: #174b3d;
+  --fz-orange: #f47a1f;
+  --fz-orange-2: #e76508;
+  --fz-cream: #fffaf6;
+  --fz-surface: #ffffff;
+  --fz-ink: #172a24;
+  --fz-muted: #6f7b76;
+  --fz-border: rgba(16, 59, 49, .12);
+  --fz-shadow: 0 14px 34px rgba(25, 49, 41, .07);
+  --fz-radius: 18px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  color: var(--fz-ink);
+  background-color: var(--fz-cream);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: rgba(244,122,31,.22); color: #0d332a; }
+
+/* Consistent controls without changing page-specific layouts */
+button, input, select, textarea { font: inherit; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button, [role="button"], a { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease, color .18s ease; }
+button:not(:disabled), [role="button"]:not([aria-disabled="true"]) { cursor: pointer; }
+button:disabled, input:disabled, select:disabled, textarea:disabled { cursor: not-allowed; opacity: .62; }
+
+input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+  border-radius: 13px;
+  transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: rgba(244,122,31,.62) !important;
+  box-shadow: 0 0 0 3px rgba(244,122,31,.11) !important;
+}
+
+/* Keyboard focus remains clearly visible */
+:focus-visible {
+  outline: 3px solid rgba(244,122,31,.34);
+  outline-offset: 2px;
+}
+
+/* Media and long Persian content behave better on small screens */
+img, video { max-width: 100%; }
+p, h1, h2, h3, h4, strong, small, span { overflow-wrap: break-word; }
+
+/* Shared visual finishing for common white cards */
+.admin-dashboard__panel,
+.admin-dashboard__stats article,
+.agency-dashboard__panel,
+.account-card,
+.favorites-card,
+.my-parkings-card {
+  border-color: var(--fz-border);
+}
+
+/* Admin: the three management shortcuts stay compact and side-by-side on desktop */
+.admin-dashboard__quick-nav { background: var(--fz-cream); }
+.admin-dashboard__quick-nav-inner { gap: 10px; }
+.admin-dashboard__quick-link {
+  border-color: rgba(244,122,31,.28);
+  background: linear-gradient(180deg,#fffdf9 0%,#fff8f1 100%);
+  box-shadow: 0 8px 22px rgba(18,60,49,.055);
+}
+.admin-dashboard__quick-link:hover {
+  border-color: rgba(244,122,31,.58);
+  box-shadow: 0 12px 26px rgba(18,60,49,.09);
+}
+.admin-dashboard__quick-link > span { background: #f2f6ef; }
+.admin-dashboard__quick-link small { color: var(--fz-green); }
+.admin-dashboard__quick-link strong { color: #60736c; }
+
+/* Admin hero uses the same brand green as the refreshed site */
+.admin-dashboard__hero {
+  background:
+    radial-gradient(circle at 8% 120%,rgba(244,122,31,.16),transparent 28%),
+    radial-gradient(circle at 94% 0%,rgba(255,255,255,.08),transparent 24%),
+    linear-gradient(125deg,#0b332a 0%,#0f493b 56%,#0a3028 100%);
+}
+.admin-dashboard__hero h1 span { color: #ff8a32; }
+
+/* Subtle hover lift only where cards are already interactive */
+a[class*="card"]:hover,
+button[class*="card"]:hover { transform: translateY(-2px); }
+
+/* Cleaner scrollbar, kept subtle */
+* { scrollbar-width: thin; scrollbar-color: rgba(16,59,49,.28) transparent; }
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-thumb { background: rgba(16,59,49,.24); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(244,122,31,.42); background-clip: padding-box; }
+
+@media (max-width: 900px) {
+  .admin-dashboard__quick-link { min-width: 0; }
+}
+
+@media (max-width: 760px) {
+  /* On phones readability wins over forcing three tiny cards into one row. */
+  .admin-dashboard__quick-nav-inner { grid-template-columns: 1fr; }
+  button, input, select, textarea { min-height: 42px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

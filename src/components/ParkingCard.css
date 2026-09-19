@@ -985,3 +985,61 @@ span {
   }
 }
 
+
+/* =========================================================
+   FAZAJOO VISUAL UPGRADE — PACKAGE 03
+   Listing cards
+========================================================= */
+.parking-card {
+  border-color: rgba(224,216,208,.9);
+  border-radius: 27px;
+  background: linear-gradient(155deg,#fff 0%,#fffdfa 62%,#fff7f0 100%);
+  box-shadow: 0 13px 35px rgba(54,42,34,.075);
+}
+
+.parking-card::before {
+  height: 5px;
+  background: linear-gradient(90deg,#f06b12,#ff8e18,#ffb15c);
+}
+
+.parking-card:hover {
+  transform: translateY(-7px);
+  border-color: rgba(244,122,31,.32);
+  box-shadow: 0 25px 60px rgba(54,42,34,.13), 0 9px 24px rgba(244,122,31,.08);
+}
+
+.parking-card__image-wrapper {
+  height: 230px;
+  background: linear-gradient(135deg,#f8f3ee,#fffaf6);
+}
+
+.parking-card__image-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 64px;
+  pointer-events: none;
+  background: linear-gradient(to top,rgba(26,31,29,.16),transparent);
+}
+
+.parking-card__status,
+.parking-card__category,
+.parking-card__listing-type {
+  border-color: rgba(255,255,255,.88);
+  box-shadow: 0 7px 22px rgba(44,38,34,.10);
+}
+
+.parking-card__category {
+  color: #cf5b0d;
+  background: rgba(255,248,241,.95);
+}
+
+.parking-card__listing-type--offer {
+  color: #b94e08;
+  background: rgba(255,244,232,.96);
+}
+
+.parking-card__listing-type--wanted {
+  color: #31453d;
+  background: rgba(242,248,245,.96);
+}
