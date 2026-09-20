@@ -2,67 +2,158 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   "http://127.0.0.1:6060/api";
 
-const TOKEN_STORAGE_KEY = "fazajoo_auth_token";
-const USER_STORAGE_KEY = "fazajoo_auth_user";
-const AUTH_EMAIL_DOMAIN = "auth.fazajoo.local";
+const TOKEN_STORAGE_KEY =
+  "fazajoo_auth_token";
 
-const authListeners = new Set();
-let currentSessionUser = null;
+const USER_STORAGE_KEY =
+  "fazajoo_auth_user";
 
-export const convertDigitsToEnglish = (value = "") =>
-  String(value)
-    .replace(/[۰-۹]/g, (digit) => "۰۱۲۳۴۵۶۷۸۹".indexOf(digit))
-    .replace(/[٠-٩]/g, (digit) => "٠١٢٣٤٥٦٧٨٩".indexOf(digit));
+const AUTH_EMAIL_DOMAIN =
+  "auth.fazajoo.local";
 
-export const normalizePhoneNumber = (value = "") => {
-  const digits = convertDigitsToEnglish(value).replace(/\D/g, "");
+const authListeners =
+  new Set();
 
-  if (digits.startsWith("0098")) {
-    return `0${digits.slice(4, 14)}`;
-  }
+let currentSessionUser =
+  null;
 
-  if (digits.startsWith("98")) {
-    return `0${digits.slice(2, 12)}`;
-  }
 
-  if (digits.startsWith("9") && digits.length <= 10) {
-    return `0${digits}`;
-  }
+// ======================================================
+// Phone helpers
+// ======================================================
 
-  return digits.slice(0, 11);
-};
+export const convertDigitsToEnglish =
+  (value = "") =>
+    String(value)
+      .replace(
+        /[۰-۹]/g,
+        (digit) =>
+          "۰۱۲۳۴۵۶۷۸۹".indexOf(
+            digit
+          )
+      )
+      .replace(
+        /[٠-٩]/g,
+        (digit) =>
+          "٠١٢٣٤٥٦٧٨٩".indexOf(
+            digit
+          )
+      );
 
-export const isValidIranianPhoneNumber = (phone) =>
-  /^09\d{9}$/.test(normalizePhoneNumber(phone));
 
-export const phoneToInternalEmail = (phone) => {
-  const normalizedPhone = normalizePhoneNumber(phone);
+export const normalizePhoneNumber =
+  (value = "") => {
+    const digits =
+      convertDigitsToEnglish(
+        value
+      ).replace(
+        /\D/g,
+        ""
+      );
 
-  if (!isValidIranianPhoneNumber(normalizedPhone)) {
-    throw new Error("شماره موبایل معتبر نیست.");
-  }
+    if (
+      digits.startsWith(
+        "0098"
+      )
+    ) {
+      return `0${digits.slice(
+        4,
+        14
+      )}`;
+    }
 
-  return `${normalizedPhone}@${AUTH_EMAIL_DOMAIN}`;
-};
+    if (
+      digits.startsWith(
+        "98"
+      )
+    ) {
+      return `0${digits.slice(
+        2,
+        12
+      )}`;
+    }
+
+    if (
+      digits.startsWith("9") &&
+      digits.length <= 10
+    ) {
+      return `0${digits}`;
+    }
+
+    return digits.slice(
+      0,
+      11
+    );
+  };
+
+
+export const isValidIranianPhoneNumber =
+  (phone) =>
+    /^09\d{9}$/.test(
+      normalizePhoneNumber(
+        phone
+      )
+    );
+
+
+export const phoneToInternalEmail =
+  (phone) => {
+    const normalizedPhone =
+      normalizePhoneNumber(
+        phone
+      );
+
+    if (
+      !isValidIranianPhoneNumber(
+        normalizedPhone
+      )
+    ) {
+      throw new Error(
+        "شماره موبایل معتبر نیست."
+      );
+    }
+
+    return `${normalizedPhone}@${AUTH_EMAIL_DOMAIN}`;
+  };
+
+
+// ======================================================
+// Local session storage
+// ======================================================
 
 function getStoredToken() {
   try {
-    return localStorage.getItem(TOKEN_STORAGE_KEY) || "";
+    return (
+      localStorage.getItem(
+        TOKEN_STORAGE_KEY
+      ) || ""
+    );
   } catch {
     return "";
   }
 }
 
+
 function getStoredUser() {
   try {
-    const raw = localStorage.getItem(USER_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    const raw =
+      localStorage.getItem(
+        USER_STORAGE_KEY
+      );
+
+    return raw
+      ? JSON.parse(raw)
+      : null;
   } catch {
     return null;
   }
 }
 
-function saveSession(token, user) {
+
+function saveSession(
+  token,
+  user
+) {
   try {
     if (token) {
       localStorage.setItem(
@@ -85,6 +176,7 @@ function saveSession(token, user) {
   }
 }
 
+
 function clearStoredSession() {
   try {
     localStorage.removeItem(
@@ -102,10 +194,21 @@ function clearStoredSession() {
   }
 }
 
-function notifyAuthListeners(user) {
-  currentSessionUser = user;
 
-  for (const listener of authListeners) {
+// ======================================================
+// Auth listeners
+// ======================================================
+
+function notifyAuthListeners(
+  user
+) {
+  currentSessionUser =
+    user;
+
+  for (
+    const listener
+    of authListeners
+  ) {
     try {
       listener(user);
     } catch (error) {
@@ -117,24 +220,45 @@ function notifyAuthListeners(user) {
   }
 }
 
-export function subscribeToAuth(listener) {
-  authListeners.add(listener);
+
+export function subscribeToAuth(
+  listener
+) {
+  authListeners.add(
+    listener
+  );
 
   return () => {
-    authListeners.delete(listener);
+    authListeners.delete(
+      listener
+    );
   };
 }
 
+
 export function getCurrentSessionUser() {
-  return currentSessionUser || getStoredUser();
+  return (
+    currentSessionUser ||
+    getStoredUser()
+  );
 }
+
 
 export function getAuthToken() {
   return getStoredToken();
 }
 
-function makeSessionUser(backendUser) {
-  if (!backendUser) return null;
+
+// ======================================================
+// Backend user -> Fazajoo session user
+// ======================================================
+
+function makeSessionUser(
+  backendUser
+) {
+  if (!backendUser) {
+    return null;
+  }
 
   return {
     ...backendUser,
@@ -164,6 +288,11 @@ function makeSessionUser(backendUser) {
   };
 }
 
+
+// ======================================================
+// API
+// ======================================================
+
 class ApiError extends Error {
   constructor(
     message,
@@ -183,6 +312,7 @@ class ApiError extends Error {
   }
 }
 
+
 async function apiRequest(
   path,
   options = {}
@@ -190,26 +320,31 @@ async function apiRequest(
   let response;
 
   try {
-    response = await fetch(
-      `${API_BASE_URL}${path}`,
-      {
-        ...options,
+    response =
+      await fetch(
+        `${API_BASE_URL}${path}`,
+        {
+          ...options,
 
-        headers: {
-          "Content-Type":
-            "application/json",
+          headers: {
+            "Content-Type":
+              "application/json",
 
-          ...(options.headers || {}),
-        },
-      }
-    );
+            ...(
+              options.headers ||
+              {}
+            ),
+          },
+        }
+      );
   } catch {
     throw new Error(
       "اتصال به سرور فضاجو برقرار نشد. مطمئن شوید Backend روی پورت 6060 روشن است."
     );
   }
 
-  let data = null;
+  let data =
+    null;
 
   try {
     data =
@@ -238,6 +373,11 @@ async function apiRequest(
   return data;
 }
 
+
+// ======================================================
+// Backend password login
+// ======================================================
+
 async function backendLogin(
   phone,
   password
@@ -245,8 +385,7 @@ async function backendLogin(
   return apiRequest(
     "/auth/login",
     {
-      method:
-        "POST",
+      method: "POST",
 
       body:
         JSON.stringify({
@@ -257,6 +396,11 @@ async function backendLogin(
   );
 }
 
+
+// ======================================================
+// Backend registration
+// ======================================================
+
 async function backendRegister({
   phone,
   password,
@@ -265,8 +409,7 @@ async function backendRegister({
   return apiRequest(
     "/auth/register",
     {
-      method:
-        "POST",
+      method: "POST",
 
       body:
         JSON.stringify({
@@ -279,6 +422,11 @@ async function backendRegister({
     }
   );
 }
+
+
+// ======================================================
+// Restore stored session
+// ======================================================
 
 export async function initializeAuthSession() {
   const token =
@@ -296,8 +444,7 @@ export async function initializeAuthSession() {
       await apiRequest(
         "/auth/me",
         {
-          method:
-            "GET",
+          method: "GET",
 
           headers: {
             Authorization:
@@ -338,6 +485,11 @@ export async function initializeAuthSession() {
     return null;
   }
 }
+
+
+// ======================================================
+// Register with phone + password
+// ======================================================
 
 export const registerWithPhoneAndPassword =
   async ({
@@ -399,6 +551,11 @@ export const registerWithPhoneAndPassword =
     return sessionUser;
   };
 
+
+// ======================================================
+// Login with phone + password
+// ======================================================
+
 export const loginWithPhoneAndPassword =
   async ({
     phone,
@@ -443,6 +600,247 @@ export const loginWithPhoneAndPassword =
   };
 
 
+// ======================================================
+// Request OTP
+// ======================================================
+
+export const requestOtpCode =
+  async ({
+    phone,
+  }) => {
+    const normalizedPhone =
+      normalizePhoneNumber(
+        phone
+      );
+
+    if (
+      !isValidIranianPhoneNumber(
+        normalizedPhone
+      )
+    ) {
+      throw new Error(
+        "شماره موبایل را به شکل 09123456789 وارد کنید."
+      );
+    }
+
+    const data =
+      await apiRequest(
+        "/auth/otp/request",
+        {
+          method: "POST",
+
+          body:
+            JSON.stringify({
+              phone:
+                normalizedPhone,
+            }),
+        }
+      );
+
+    return {
+      ok: true,
+
+      message:
+        data.message ||
+        "کد ورود فضاجو ارسال شد.",
+
+      expiresIn:
+        Number(
+          data.expiresIn ||
+            120
+        ),
+
+      retryAfter:
+        Number(
+          data.retryAfter ||
+            60
+        ),
+    };
+  };
+
+
+// ======================================================
+// Verify OTP + create normal Fazajoo session
+// ======================================================
+
+export const verifyOtpCode =
+  async ({
+    phone,
+    code,
+  }) => {
+    const normalizedPhone =
+      normalizePhoneNumber(
+        phone
+      );
+
+    const normalizedCode =
+      convertDigitsToEnglish(
+        code
+      )
+        .replace(
+          /\D/g,
+          ""
+        )
+        .slice(
+          0,
+          6
+        );
+
+    if (
+      !isValidIranianPhoneNumber(
+        normalizedPhone
+      )
+    ) {
+      throw new Error(
+        "شماره موبایل معتبر نیست."
+      );
+    }
+
+    if (
+      !/^\d{6}$/.test(
+        normalizedCode
+      )
+    ) {
+      throw new Error(
+        "کد ورود باید ۶ رقمی باشد."
+      );
+    }
+
+    const data =
+      await apiRequest(
+        "/auth/otp/verify",
+        {
+          method: "POST",
+
+          body:
+            JSON.stringify({
+              phone:
+                normalizedPhone,
+
+              code:
+                normalizedCode,
+            }),
+        }
+      );
+
+    if (
+      !data.token ||
+      !data.user
+    ) {
+      throw new Error(
+        "پاسخ ورود از سرور کامل نیست."
+      );
+    }
+
+    const sessionUser =
+      makeSessionUser(
+        data.user
+      );
+
+    saveSession(
+      data.token,
+      sessionUser
+    );
+
+    notifyAuthListeners(
+      sessionUser
+    );
+
+    return {
+      user:
+        sessionUser,
+
+      token:
+        data.token,
+
+      message:
+        data.message ||
+        "با موفقیت وارد حساب شدید.",
+    };
+  };
+
+
+// ======================================================
+// Password reset with SMS OTP
+// ======================================================
+
+export const requestPasswordResetCode =
+  async ({ phone }) => {
+    const normalizedPhone =
+      normalizePhoneNumber(phone);
+
+    if (!isValidIranianPhoneNumber(normalizedPhone)) {
+      throw new Error(
+        "شماره موبایل را به شکل 09123456789 وارد کنید."
+      );
+    }
+
+    const data = await apiRequest(
+      "/auth/password-reset/request",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          phone: normalizedPhone,
+        }),
+      }
+    );
+
+    return {
+      ok: true,
+      message:
+        data.message ||
+        "اگر این شماره در فضاجو ثبت شده باشد، کد بازیابی برای آن ارسال می‌شود.",
+      expiresIn: Number(data.expiresIn || 120),
+      retryAfter: Number(data.retryAfter || 60),
+    };
+  };
+
+
+export const confirmPasswordReset =
+  async ({ phone, code, newPassword }) => {
+    const normalizedPhone =
+      normalizePhoneNumber(phone);
+
+    const normalizedCode =
+      convertDigitsToEnglish(code)
+        .replace(/\D/g, "")
+        .slice(0, 6);
+
+    if (!isValidIranianPhoneNumber(normalizedPhone)) {
+      throw new Error("شماره موبایل معتبر نیست.");
+    }
+
+    if (!/^\d{6}$/.test(normalizedCode)) {
+      throw new Error("کد بازیابی باید ۶ رقمی باشد.");
+    }
+
+    const passwordBytes =
+      new TextEncoder().encode(newPassword).length;
+
+    if (passwordBytes < 8 || passwordBytes > 72) {
+      throw new Error(
+        "رمز عبور جدید باید حداقل ۸ کاراکتر و حداکثر ۷۲ بایت باشد."
+      );
+    }
+
+    return apiRequest(
+      "/auth/password-reset/confirm",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          phone: normalizedPhone,
+          code: normalizedCode,
+          newPassword,
+        }),
+      }
+    );
+  };
+
+
+// ======================================================
+// Change password
+// ======================================================
+
 export const changePassword =
   async ({
     currentPassword,
@@ -474,10 +872,12 @@ export const changePassword =
         "/auth/change-password",
         {
           method: "POST",
+
           headers: {
             Authorization:
               `Bearer ${token}`,
           },
+
           body:
             JSON.stringify({
               currentPassword,
@@ -501,12 +901,19 @@ export const changePassword =
     );
 
     return {
-      user: sessionUser,
+      user:
+        sessionUser,
+
       message:
         data.message ||
         "رمز عبور با موفقیت تغییر کرد.",
     };
   };
+
+
+// ======================================================
+// Logout
+// ======================================================
 
 export const logoutUser =
   async () => {
@@ -518,8 +925,7 @@ export const logoutUser =
         await apiRequest(
           "/auth/logout",
           {
-            method:
-              "POST",
+            method: "POST",
 
             headers: {
               Authorization:
