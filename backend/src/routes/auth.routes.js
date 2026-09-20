@@ -44,7 +44,9 @@ const {
 
 const {
   otpRequestLimiter,
+  otpPhoneRequestLimiter,
   otpVerifyLimiter,
+  otpPhoneVerifyLimiter,
 } = require(
   "../middleware/otpRateLimit.middleware"
 );
@@ -72,6 +74,7 @@ router.post(
 router.post(
   "/otp/request",
   otpRequestLimiter,
+  otpPhoneRequestLimiter,
   requestOtp
 );
 
@@ -79,6 +82,7 @@ router.post(
 router.post(
   "/otp/verify",
   otpVerifyLimiter,
+  otpPhoneVerifyLimiter,
   verifyOtp
 );
 

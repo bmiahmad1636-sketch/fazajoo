@@ -490,11 +490,18 @@
   font-weight: 950;
 }
 
-.chat-box__header div:last-child {
+.chat-box__identity {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
-
+  align-items: flex-start;
   min-width: 0;
+}
+
+.chat-box__identity strong,
+.chat-box__identity span {
+  display: block;
+  max-width: 100%;
 }
 
 .chat-box__header strong {

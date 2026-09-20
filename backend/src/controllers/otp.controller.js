@@ -22,6 +22,17 @@ const OTP_RESEND_SECONDS = 60;
 const OTP_MAX_ATTEMPTS = 5;
 
 
+function sendGenericOtpRequestResponse(response) {
+  return response.json({
+    ok: true,
+    message:
+      "اگر این شماره در فضاجو ثبت شده باشد، کد ورود برای آن ارسال می‌شود.",
+    expiresIn: OTP_TTL_MINUTES * 60,
+    retryAfter: OTP_RESEND_SECONDS,
+  });
+}
+
+
 function normalizePhone(value = "") {
   let phone = String(value)
     .trim()
@@ -113,12 +124,9 @@ async function requestOtp(
      * عمومی نگه می‌داریم.
      */
     if (!user) {
-      return response.json({
-        ok: true,
-        message:
-          "اگر این شماره در فضاجو ثبت شده باشد، کد ورود برای آن ارسال می‌شود.",
-        retryAfter: OTP_RESEND_SECONDS,
-      });
+      return sendGenericOtpRequestResponse(
+        response
+      );
     }
 
     if (!user.is_active) {
@@ -127,12 +135,9 @@ async function requestOtp(
        * تا از روی endpoint درخواست OTP نتوان وضعیت
        * عضویت یک شماره موبایل را تشخیص داد.
        */
-      return response.json({
-        ok: true,
-        message:
-          "اگر این شماره در فضاجو ثبت شده باشد، کد ورود برای آن ارسال می‌شود.",
-        retryAfter: OTP_RESEND_SECONDS,
-      });
+      return sendGenericOtpRequestResponse(
+        response
+      );
     }
 
     /*
@@ -168,21 +173,9 @@ async function requestOtp(
         OTP_RESEND_SECONDS * 1000;
 
       if (elapsedMs < resendMs) {
-        const retryAfter =
-          Math.ceil(
-            (resendMs - elapsedMs) /
-              1000
-          );
-
-        return response
-          .status(429)
-          .json({
-            ok: false,
-            code: "OTP_TOO_SOON",
-            message:
-              `لطفاً ${retryAfter} ثانیه دیگر دوباره تلاش کنید.`,
-            retryAfter,
-          });
+        return sendGenericOtpRequestResponse(
+          response
+        );
       }
     }
 
@@ -271,26 +264,14 @@ async function requestOtp(
           smsError.message
       );
 
-      return response
-        .status(502)
-        .json({
-          ok: false,
-          code:
-            "OTP_DELIVERY_FAILED",
-          message:
-            "ارسال کد ورود انجام نشد. لطفاً کمی بعد دوباره تلاش کنید.",
-        });
+      return sendGenericOtpRequestResponse(
+        response
+      );
     }
 
-    return response.json({
-      ok: true,
-      message:
-        "کد ورود فضاجو ارسال شد.",
-      expiresIn:
-        OTP_TTL_MINUTES * 60,
-      retryAfter:
-        OTP_RESEND_SECONDS,
-    });
+    return sendGenericOtpRequestResponse(
+      response
+    );
 
   } catch (error) {
     console.error(
