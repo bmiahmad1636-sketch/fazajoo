@@ -126,10 +126,30 @@ async function optimizeImage(file) {
   }
 }
 
+async function sha256Hex(blob) {
+  const buffer = await blob.arrayBuffer();
+  const digest = await crypto.subtle.digest("SHA-256", buffer);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function hashExistingImage(url) {
+  try {
+    const response = await fetch(url, { cache: "force-cache" });
+    if (!response.ok) return null;
+    return await sha256Hex(await response.blob());
+  } catch {
+    // اگر مرورگر به هر دلیل اجازه خواندن تصویر قبلی را نداد،
+    // آپلود را متوقف نمی‌کنیم؛ تکراری‌های انتخاب جدید همچنان کنترل می‌شوند.
+    return null;
+  }
+}
+
 function ImageUploader({
   imageUrls = [],
   onUploadComplete,
-  maxImages = 8,
+  maxImages = 10,
 }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
@@ -196,22 +216,50 @@ function ImageUploader({
     const uploaded = [];
 
     try {
+      // ابتدا همان نسخه‌ای را می‌سازیم که واقعاً آپلود می‌شود؛ در نتیجه
+      // مقایسه با عکس‌های قبلی آگهی نیز دقیق است.
+      const optimizedFiles = [];
+      const selectedHashes = new Set();
+      let duplicateCount = 0;
+
+      const existingHashes = new Set(
+        (
+          await Promise.all(images.map(hashExistingImage))
+        ).filter(Boolean)
+      );
+
       for (const file of files) {
-        const optimizedFile =
-          await optimizeImage(file);
+        const optimizedFile = await optimizeImage(file);
+        const hash = await sha256Hex(optimizedFile);
 
-        const result =
-          await uploadAdImage(optimizedFile);
+        if (existingHashes.has(hash) || selectedHashes.has(hash)) {
+          duplicateCount += 1;
+          continue;
+        }
 
+        selectedHashes.add(hash);
+        optimizedFiles.push(optimizedFile);
+      }
+
+      if (!optimizedFiles.length) {
+        setError("این عکس قبلاً در آگهی وجود دارد؛ تصویر تکراری اضافه نشد.");
+        return;
+      }
+
+      for (const optimizedFile of optimizedFiles) {
+        const result = await uploadAdImage(optimizedFile);
         uploaded.push(result.url);
       }
 
       emit([...images, ...uploaded]);
+
+      if (duplicateCount > 0) {
+        setError(
+          `${duplicateCount.toLocaleString("fa-IR")} عکس تکراری شناسایی شد و اضافه نشد.`
+        );
+      }
     } catch (uploadError) {
-      console.error(
-        "UPLOAD ERROR:",
-        uploadError
-      );
+      console.error("UPLOAD ERROR:", uploadError);
 
       if (uploaded.length) {
         emit([...images, ...uploaded]);
@@ -282,15 +330,8 @@ function ImageUploader({
         <div>
           <strong>عکس‌های آگهی</strong>
 
-          <span>
-            {images.length.toLocaleString(
-              "fa-IR"
-            )}{" "}
-            از{" "}
-            {maxImages.toLocaleString(
-              "fa-IR"
-            )}{" "}
-            عکس
+          <span className="multi-image-uploader__counter">
+            {images.length.toLocaleString("fa-IR")} از {maxImages.toLocaleString("fa-IR")} عکس
           </span>
         </div>
 
@@ -407,10 +448,7 @@ function ImageUploader({
           </strong>
 
           <small>
-            می‌توانی چند عکس را هم‌زمان
-            انتخاب کنی؛ حداکثر ۸ عکس، هر
-            عکس تا ۱۰MB؛ عکس‌های بزرگ
-            به‌صورت خودکار بهینه می‌شوند
+            می‌توانی چند عکس را هم‌زمان انتخاب کنی؛ حداکثر ۱۰ عکس، هر عکس تا ۱۰MB؛ عکس‌های تکراری پذیرفته نمی‌شوند و تصاویر بزرگ خودکار بهینه می‌شوند
           </small>
         </button>
       )}

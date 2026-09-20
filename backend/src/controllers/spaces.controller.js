@@ -3,7 +3,7 @@ const { query } = require("../db/pool");
 const { createNotificationsForNewOffer } = require("../services/smartSearch.service");
 const { recordContactReveal } = require("../services/securityMonitoring.service");
 
-const MAX_IMAGES = 8;
+const MAX_IMAGES = 10;
 const FIELDS = `id, listing_type, category, custom_category, category_label, status, title, city, area, price, price_type, phone, image_url, image_urls, residential_details, villa_details, description, agency_network_consent, owner_id, created_at, updated_at`;
 
 let imageSchemaPromise = null;

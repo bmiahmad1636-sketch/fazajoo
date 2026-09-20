@@ -758,7 +758,7 @@ function EditParking({
                   >
                     <ImageUploader
                       imageUrls={form.imageUrls}
-                      maxImages={8}
+                      maxImages={10}
                       onUploadComplete={handleImageUpload}
                     />
                   </div>
