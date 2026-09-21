@@ -71,6 +71,9 @@ function ParkingDetails({
   const [activeImageIndex, setActiveImageIndex] =
     useState(0);
 
+  const [isGalleryOpen, setIsGalleryOpen] =
+    useState(false);
+
   useEffect(() => {
     setUser(getCurrentSessionUser());
     setAuthLoading(false);
@@ -102,10 +105,43 @@ function ParkingDetails({
     setActiveImageIndex(0);
     setShowPhone(false);
     setContactPhone("");
+    setIsGalleryOpen(false);
   }, [parking?.id]);
 
   const activeImage =
     galleryImages[activeImageIndex] || galleryImages[0] || "";
+
+  const showPreviousImage = () => {
+    if (galleryImages.length < 2) return;
+    setActiveImageIndex((current) =>
+      (current - 1 + galleryImages.length) % galleryImages.length
+    );
+  };
+
+  const showNextImage = () => {
+    if (galleryImages.length < 2) return;
+    setActiveImageIndex((current) =>
+      (current + 1) % galleryImages.length
+    );
+  };
+
+  useEffect(() => {
+    if (!isGalleryOpen) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setIsGalleryOpen(false);
+      if (event.key === "ArrowRight") showPreviousImage();
+      if (event.key === "ArrowLeft") showNextImage();
+    };
+
+    document.body.classList.add("parking-gallery-open");
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.classList.remove("parking-gallery-open");
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isGalleryOpen, galleryImages.length]);
 
   const isOwner =
     Boolean(user) &&
@@ -470,15 +506,26 @@ function ParkingDetails({
               >
                 {activeImage ? (
                   <>
-                    <img
-                      src={activeImage}
-                      alt={parking.title || `تصویر ${visibleCategory}`}
-                    />
+                    <button
+                      type="button"
+                      className="parking-details-gallery__image-button"
+                      onClick={() => setIsGalleryOpen(true)}
+                      aria-label="نمایش تصویر در اندازه بزرگ"
+                    >
+                      <img
+                        src={activeImage}
+                        alt={parking.title || `تصویر ${visibleCategory}`}
+                      />
+                    </button>
 
                     {galleryImages.length > 1 && (
-                      <div className="parking-details-gallery__counter">
-                        {(activeImageIndex + 1).toLocaleString("fa-IR")} / {galleryImages.length.toLocaleString("fa-IR")}
-                      </div>
+                      <>
+                        <button type="button" className="parking-details-gallery__nav parking-details-gallery__nav--prev" onClick={(event) => { event.stopPropagation(); showPreviousImage(); }} aria-label="عکس قبلی">‹</button>
+                        <button type="button" className="parking-details-gallery__nav parking-details-gallery__nav--next" onClick={(event) => { event.stopPropagation(); showNextImage(); }} aria-label="عکس بعدی">›</button>
+                        <div className="parking-details-gallery__counter">
+                          {(activeImageIndex + 1).toLocaleString("fa-IR")} / {galleryImages.length.toLocaleString("fa-IR")}
+                        </div>
+                      </>
                     )}
                   </>
                 ) : (
@@ -505,6 +552,20 @@ function ParkingDetails({
                   </span>
                 </div>
               </article>
+
+              {isGalleryOpen && activeImage && (
+                <div className="parking-details-lightbox" role="dialog" aria-modal="true" aria-label="نمایش بزرگ تصاویر" onClick={() => setIsGalleryOpen(false)}>
+                  <button type="button" className="parking-details-lightbox__close" onClick={() => setIsGalleryOpen(false)} aria-label="بستن">×</button>
+                  {galleryImages.length > 1 && (
+                    <button type="button" className="parking-details-lightbox__nav parking-details-lightbox__nav--prev" onClick={(event) => { event.stopPropagation(); showPreviousImage(); }} aria-label="عکس قبلی">‹</button>
+                  )}
+                  <img src={activeImage} alt={parking.title || `تصویر ${visibleCategory}`} onClick={(event) => event.stopPropagation()} />
+                  {galleryImages.length > 1 && (
+                    <button type="button" className="parking-details-lightbox__nav parking-details-lightbox__nav--next" onClick={(event) => { event.stopPropagation(); showNextImage(); }} aria-label="عکس بعدی">›</button>
+                  )}
+                  <div className="parking-details-lightbox__counter">{(activeImageIndex + 1).toLocaleString("fa-IR")} از {galleryImages.length.toLocaleString("fa-IR")}</div>
+                </div>
+              )}
 
               {galleryImages.length > 1 && (
                 <div className="parking-details-thumbnails" aria-label="گالری تصاویر آگهی">

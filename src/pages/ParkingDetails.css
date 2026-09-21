@@ -2113,3 +2113,335 @@
     margin-bottom: 30px;
   }
 }
+
+
+/* Professional listing gallery */
+.parking-details-gallery__image-button{width:100%;height:100%;padding:0;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:zoom-in}
+.parking-details-gallery__image-button img{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;transition:transform .25s ease,filter .25s ease}
+.parking-details-gallery__image-button:hover img{transform:scale(1.012);filter:saturate(1.04)}
+.parking-details-gallery__nav{position:absolute;top:50%;z-index:4;width:46px;height:46px;border:1px solid rgba(255,255,255,.48);border-radius:50%;background:rgba(35,28,24,.68);color:#fff;font-family:inherit;font-size:2rem;line-height:1;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(9px);transform:translateY(-50%);transition:background .18s ease,transform .18s ease}
+.parking-details-gallery__nav:hover{background:rgba(244,122,31,.92);transform:translateY(-50%) scale(1.06)}
+.parking-details-gallery__nav--prev{right:18px}.parking-details-gallery__nav--next{left:18px}
+.parking-details-thumbnails{grid-template-columns:repeat(10,minmax(0,1fr));overflow-x:auto;padding:3px 2px 8px;scrollbar-width:thin}
+.parking-details-thumbnail{min-width:68px}
+body.parking-gallery-open{overflow:hidden}
+.parking-details-lightbox{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:64px 86px;background:rgba(15,18,16,.94);backdrop-filter:blur(12px);animation:parkingGalleryFade .18s ease}
+.parking-details-lightbox img{display:block;max-width:min(1200px,100%);max-height:calc(100vh - 128px);object-fit:contain;border-radius:16px;box-shadow:0 28px 80px rgba(0,0,0,.35)}
+.parking-details-lightbox__close,.parking-details-lightbox__nav{position:absolute;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;backdrop-filter:blur(8px)}
+.parking-details-lightbox__close{top:22px;left:24px;width:46px;height:46px;border-radius:50%;font-size:1.8rem}
+.parking-details-lightbox__nav{top:50%;width:54px;height:54px;border-radius:50%;font-size:2.3rem;line-height:1;transform:translateY(-50%)}
+.parking-details-lightbox__nav:hover,.parking-details-lightbox__close:hover{background:#f47a1f;border-color:#f47a1f}
+.parking-details-lightbox__nav--prev{right:24px}.parking-details-lightbox__nav--next{left:24px}
+.parking-details-lightbox__counter{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff;font-size:.82rem;font-weight:900}
+@keyframes parkingGalleryFade{from{opacity:0}to{opacity:1}}
+@media(max-width:760px){.parking-details-gallery__nav{width:40px;height:40px;font-size:1.7rem}.parking-details-gallery__nav--prev{right:10px}.parking-details-gallery__nav--next{left:10px}.parking-details-thumbnails{display:flex;gap:8px;margin-bottom:18px}.parking-details-thumbnail{flex:0 0 72px;height:64px}.parking-details-lightbox{padding:60px 12px}.parking-details-lightbox img{max-height:calc(100vh - 120px);border-radius:10px}.parking-details-lightbox__nav{width:44px;height:44px;font-size:1.9rem}.parking-details-lightbox__nav--prev{right:10px}.parking-details-lightbox__nav--next{left:10px}.parking-details-lightbox__close{top:12px;left:12px;width:42px;height:42px}.parking-details-lightbox__counter{bottom:14px}}
+
+/* =========================================================
+   Fazajoo — compact details + warm amber contact actions
+   ========================================================= */
+
+/* Keep the details page visually aligned with Fazajoo's warm amber accents. */
+.parking-contact-card {
+  padding: 19px 20px;
+}
+
+.parking-contact-card::before {
+  height: 3px;
+  margin: -19px -20px 16px;
+  background: linear-gradient(90deg, #b7791f, #d69e2e, #ecc46b);
+}
+
+.parking-contact-card__eyebrow {
+  color: #b7791f;
+}
+
+.parking-contact-card__header h2 {
+  margin: 4px 0 5px;
+  font-size: 1.18rem;
+}
+
+.parking-contact-card__header p {
+  margin: 0 0 13px;
+  font-size: 0.79rem;
+  line-height: 1.7;
+}
+
+.parking-contact-card__phone {
+  gap: 8px;
+}
+
+.parking-contact-card__phone-button {
+  min-height: 44px;
+  padding: 8px 13px;
+  border: 1px solid #c58a2b;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #c58a2b, #d9a441);
+  color: #fff;
+  box-shadow: 0 9px 20px rgba(181, 126, 35, 0.18);
+}
+
+.parking-contact-card__phone-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(181, 126, 35, 0.23);
+}
+
+/* The second contact action is intentionally quieter than the primary CTA. */
+.parking-contact-card__phone-button + .parking-contact-card__phone-button {
+  background: #fffaf0;
+  color: #9a681b;
+  border-color: rgba(197, 138, 43, 0.48);
+  box-shadow: none;
+}
+
+.parking-contact-card__phone-button + .parking-contact-card__phone-button:hover {
+  background: #fff6e5;
+  box-shadow: 0 8px 18px rgba(181, 126, 35, 0.10);
+}
+
+.parking-contact-card__phone-number {
+  padding: 10px;
+  border-color: rgba(197, 138, 43, 0.26);
+  border-radius: 13px;
+  background: #fff8e9;
+  color: #8f611b;
+}
+
+.parking-contact-card__divider {
+  margin: 14px 0;
+}
+
+.parking-contact-card__avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #c58a2b, #d9a441);
+  box-shadow: 0 8px 18px rgba(181, 126, 35, 0.16);
+}
+
+.parking-contact-card__notice {
+  margin-top: 12px;
+  padding: 9px 10px;
+  background: #fff9ec;
+}
+
+.parking-contact-card__notice p {
+  font-size: 0.69rem;
+  line-height: 1.55;
+}
+
+/* Reduce vertical travel on desktop without changing page information. */
+@media (min-width: 901px) {
+  .parking-details-content {
+    padding-bottom: 36px;
+  }
+
+  .parking-details-layout {
+    gap: 18px;
+  }
+
+  .parking-details-main {
+    gap: 13px;
+  }
+
+  .parking-details-sidebar {
+    top: 92px;
+    gap: 12px;
+  }
+
+  .parking-details-gallery {
+    height: 315px;
+  }
+
+  .parking-details-section {
+    padding: 16px 19px;
+  }
+
+  .parking-details-section__heading {
+    margin-bottom: 12px;
+  }
+
+  .parking-owner-card {
+    padding: 15px 18px;
+  }
+
+  .parking-owner-note {
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  .parking-contact-card {
+    padding: 17px;
+  }
+
+  .parking-contact-card::before {
+    margin: -17px -17px 14px;
+  }
+}
+
+/* =========================================================
+   Fazajoo — final compact listing details (login-panel palette)
+   ========================================================= */
+:root {
+  --fz-detail-green: #123d32;
+  --fz-detail-green-2: #0f342b;
+  --fz-detail-amber: #d69a32;
+  --fz-detail-cream: #fffaf2;
+  --fz-detail-ink: #17231e;
+}
+
+/* Make the title area compact instead of consuming a full screen band. */
+.parking-details-hero {
+  padding: 18px 0 62px !important;
+  background:
+    radial-gradient(circle at 68% 12%, rgba(214,154,50,.12), transparent 26%),
+    radial-gradient(circle at 7% 72%, rgba(18,61,50,.08), transparent 24%),
+    linear-gradient(135deg, #fbfaf5 0%, #fff9f2 52%, #fff6ed 100%) !important;
+  color: var(--fz-detail-ink) !important;
+}
+.parking-details-hero::before { opacity: .24; }
+.parking-details-hero__glow--one {
+  background: rgba(214,154,50,.08) !important;
+  border-color: rgba(214,154,50,.13) !important;
+}
+.parking-details-hero__glow--two {
+  background: rgba(18,61,50,.045) !important;
+  border-color: rgba(18,61,50,.08) !important;
+}
+.parking-details-toolbar { margin-bottom: 18px !important; }
+.parking-details-toolbar__back,
+.parking-details-toolbar__actions button {
+  min-height: 38px !important;
+  padding: 7px 12px !important;
+  border-color: #e8e2d8 !important;
+  background: rgba(255,255,255,.82) !important;
+  color: #30463d !important;
+  box-shadow: 0 6px 18px rgba(39,55,48,.05);
+}
+.parking-details-toolbar__back:hover,
+.parking-details-toolbar__actions button:hover {
+  background: #fff !important;
+  border-color: rgba(18,61,50,.2) !important;
+}
+.parking-details-hero__content { gap: 24px !important; align-items: center !important; }
+.parking-details-hero__badges { margin-bottom: 8px !important; gap: 7px !important; }
+.parking-details-badge { min-height: 29px !important; padding: 5px 10px !important; font-size: .72rem !important; }
+.parking-details-hero h1 {
+  margin-bottom: 5px !important;
+  color: var(--fz-detail-ink) !important;
+  font-size: clamp(1.75rem, 3.6vw, 3rem) !important;
+  line-height: 1.25 !important;
+}
+.parking-details-hero__price {
+  min-width: 225px !important;
+  padding: 14px 17px !important;
+  border-radius: 18px !important;
+  background: rgba(255,255,255,.86) !important;
+}
+.parking-details-hero__price strong {
+  margin: 2px 0 !important;
+  color: #b67820 !important;
+  -webkit-text-fill-color: #b67820 !important;
+  font-size: 1.25rem !important;
+}
+
+/* Pull the real content upward and keep the desktop page dense. */
+.parking-details-content { margin-top: -34px !important; padding-bottom: 26px !important; }
+.parking-details-layout { gap: 16px !important; }
+.parking-details-main { gap: 11px !important; }
+.parking-details-gallery {
+  height: 292px !important;
+  border-radius: 20px !important;
+  background: #eef0ec !important;
+}
+.parking-details-thumbnails { margin-bottom: 2px !important; gap: 7px !important; }
+.parking-details-thumbnail { height: 58px !important; border-radius: 11px !important; }
+.parking-details-section { padding: 14px 17px !important; border-radius: 19px !important; }
+.parking-details-section__heading { margin-bottom: 10px !important; }
+.parking-details-features { gap: 8px !important; }
+.parking-details-feature { min-height: 72px !important; padding: 10px !important; }
+.parking-details-residential { padding: 13px !important; margin-top: 10px !important; }
+.parking-details-location { min-height: 126px !important; padding: 15px 18px !important; }
+
+/* Contact card: same deep green family as the login welcome panel. */
+.parking-contact-card {
+  padding: 16px 17px !important;
+  border: 1px solid rgba(18,61,50,.12) !important;
+  border-radius: 20px !important;
+  background: #fff !important;
+}
+.parking-contact-card::before {
+  height: 4px !important;
+  margin: -16px -17px 13px !important;
+  background: linear-gradient(90deg, var(--fz-detail-green-2), var(--fz-detail-green), #2d6254) !important;
+}
+.parking-contact-card__eyebrow { color: #9b6a20 !important; }
+.parking-contact-card__header h2 { margin: 3px 0 3px !important; font-size: 1.08rem !important; }
+.parking-contact-card__header p { margin-bottom: 10px !important; line-height: 1.55 !important; }
+.parking-contact-card__phone { gap: 7px !important; }
+
+/* Primary contact action */
+.parking-contact-card__phone-button {
+  min-height: 43px !important;
+  padding: 8px 12px !important;
+  border: 1px solid var(--fz-detail-green) !important;
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, var(--fz-detail-green), var(--fz-detail-green-2)) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(18,61,50,.16) !important;
+}
+.parking-contact-card__phone-button:hover {
+  background: linear-gradient(135deg, #194c40, #10372e) !important;
+  box-shadow: 0 10px 22px rgba(18,61,50,.2) !important;
+}
+
+/* Message link is the quieter secondary action, like the approved mockup. */
+.parking-contact-card > a.parking-contact-card__phone-button {
+  margin-top: 8px !important;
+  border-color: rgba(182,120,32,.42) !important;
+  background: var(--fz-detail-cream) !important;
+  color: var(--fz-detail-green) !important;
+  box-shadow: none !important;
+}
+.parking-contact-card > a.parking-contact-card__phone-button:hover {
+  border-color: rgba(182,120,32,.65) !important;
+  background: #fff5e4 !important;
+  box-shadow: 0 7px 16px rgba(104,75,34,.07) !important;
+}
+.parking-contact-card__phone-number {
+  padding: 8px 10px !important;
+  border-color: rgba(18,61,50,.16) !important;
+  background: #f4f8f5 !important;
+  color: var(--fz-detail-green) !important;
+}
+.parking-contact-card__divider { margin: 11px 0 !important; }
+.parking-contact-card__owner { gap: 9px !important; }
+.parking-contact-card__avatar {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 11px !important;
+  background: linear-gradient(135deg, var(--fz-detail-green), #285d4f) !important;
+  box-shadow: 0 7px 16px rgba(18,61,50,.14) !important;
+}
+.parking-contact-card__agency-profile { margin-top: 9px !important; min-height: 40px !important; }
+.parking-contact-card__notice { margin-top: 9px !important; padding: 8px 9px !important; background: #fff9ef !important; }
+.parking-contact-card__notice p { line-height: 1.45 !important; }
+.parking-details-sidebar { gap: 10px !important; top: 82px !important; }
+.parking-owner-card { padding: 13px 15px !important; }
+.parking-owner-note { padding: 10px 12px !important; }
+
+@media (max-width: 900px) {
+  .parking-details-hero { padding: 14px 0 52px !important; }
+  .parking-details-hero__content { gap: 13px !important; }
+  .parking-details-gallery { height: 270px !important; }
+  .parking-details-content { margin-top: -28px !important; }
+}
+
+@media (max-width: 620px) {
+  .parking-details-toolbar { margin-bottom: 13px !important; }
+  .parking-details-hero__content { align-items: stretch !important; }
+  .parking-details-hero__price { min-width: 0 !important; }
+  .parking-details-gallery { height: 238px !important; }
+  .parking-contact-card { padding: 14px !important; }
+  .parking-contact-card::before { margin: -14px -14px 12px !important; }
+}
