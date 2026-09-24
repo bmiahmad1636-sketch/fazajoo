@@ -2445,3 +2445,196 @@ body.parking-gallery-open{overflow:hidden}
   .parking-contact-card { padding: 14px !important; }
   .parking-contact-card::before { margin: -14px -14px 12px !important; }
 }
+
+/* =========================================================
+   Fazajoo — listing details / gallery release polish 2026-09-24
+   Visual-only final pass. Keeps existing data and behavior intact.
+   ========================================================= */
+.parking-details-gallery {
+  border-color: rgba(18, 61, 50, 0.10) !important;
+  box-shadow: 0 14px 34px rgba(27, 48, 40, 0.08) !important;
+}
+
+.parking-details-gallery::after {
+  background: linear-gradient(to top, rgba(12, 35, 29, 0.28), transparent 34%) !important;
+}
+
+.parking-details-gallery__image-button {
+  position: relative;
+  z-index: 1;
+}
+
+.parking-details-gallery__image-button:focus-visible,
+.parking-details-gallery__nav:focus-visible,
+.parking-details-thumbnail:focus-visible,
+.parking-details-lightbox__close:focus-visible,
+.parking-details-lightbox__nav:focus-visible {
+  outline: 3px solid rgba(214, 154, 50, 0.72);
+  outline-offset: 3px;
+}
+
+.parking-details-gallery__nav {
+  width: 42px !important;
+  height: 42px !important;
+  border-color: rgba(255, 255, 255, 0.55) !important;
+  background: rgba(15, 52, 43, 0.80) !important;
+  box-shadow: 0 7px 20px rgba(8, 30, 24, 0.20);
+  font-size: 1.75rem !important;
+}
+
+.parking-details-gallery__nav:hover {
+  background: var(--fz-detail-green) !important;
+}
+
+.parking-details-gallery__overlay,
+.parking-details-gallery__counter {
+  bottom: 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(15, 52, 43, 0.78) !important;
+  box-shadow: 0 6px 16px rgba(9, 29, 24, 0.12);
+}
+
+.parking-details-gallery__overlay {
+  right: 14px !important;
+}
+
+.parking-details-gallery__counter {
+  left: 14px !important;
+}
+
+.parking-details-thumbnails {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(18, 61, 50, 0.28) transparent;
+}
+
+.parking-details-thumbnail {
+  overflow: hidden;
+  border: 1px solid rgba(18, 61, 50, 0.10) !important;
+  background: #f4f6f3 !important;
+  box-shadow: none !important;
+}
+
+.parking-details-thumbnail:hover {
+  border-color: rgba(18, 61, 50, 0.28) !important;
+  transform: translateY(-1px);
+}
+
+.parking-details-thumbnail--active {
+  border-color: var(--fz-detail-green) !important;
+  box-shadow: 0 0 0 2px rgba(18, 61, 50, 0.10) !important;
+}
+
+.parking-details-lightbox {
+  z-index: 10050 !important;
+  background: rgba(7, 20, 17, 0.95) !important;
+  isolation: isolate;
+}
+
+.parking-details-lightbox img {
+  max-width: min(1180px, calc(100vw - 180px)) !important;
+  max-height: calc(100vh - 116px) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.44) !important;
+}
+
+.parking-details-lightbox__close,
+.parking-details-lightbox__nav {
+  z-index: 2;
+  border-color: rgba(255, 255, 255, 0.26) !important;
+  background: rgba(18, 61, 50, 0.82) !important;
+}
+
+.parking-details-lightbox__close:hover,
+.parking-details-lightbox__nav:hover {
+  border-color: rgba(214, 154, 50, 0.88) !important;
+  background: var(--fz-detail-green) !important;
+}
+
+.parking-details-lightbox__counter {
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(18, 61, 50, 0.82) !important;
+}
+
+@media (max-width: 760px) {
+  .parking-details-gallery__nav {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 1.55rem !important;
+  }
+
+  .parking-details-gallery__overlay {
+    right: 10px !important;
+    bottom: 10px !important;
+  }
+
+  .parking-details-gallery__counter {
+    left: 10px !important;
+    bottom: 10px !important;
+  }
+
+  .parking-details-lightbox {
+    padding: 58px 10px !important;
+  }
+
+  .parking-details-lightbox img {
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100vh - 116px) !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .parking-details-gallery__overlay {
+    display: none;
+  }
+}
+
+
+/* 2026-09-24 — final compact location marker */
+.parking-details-location__visual {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  min-height: 46px !important;
+  flex: 0 0 46px !important;
+  padding: 0 !important;
+  border-radius: 13px !important;
+  display: grid !important;
+  place-items: center !important;
+  align-self: center !important;
+  color: #123d32 !important;
+  border: 1px solid rgba(18, 61, 50, 0.11) !important;
+  background: linear-gradient(145deg, #fffaf2, #f3f7f4) !important;
+  box-shadow: 0 6px 16px rgba(18, 61, 50, 0.07) !important;
+}
+
+.parking-details-location__visual::before,
+.parking-details-location__visual::after,
+.parking-details-location__ring,
+.parking-details-location__visual > span {
+  display: none !important;
+  content: none !important;
+}
+
+.parking-details-location__visual svg {
+  width: 22px !important;
+  height: 22px !important;
+  display: block !important;
+  color: #123d32 !important;
+}
+
+@media (max-width: 760px) {
+  .parking-details-location__visual {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    flex-basis: 42px !important;
+    border-radius: 12px !important;
+  }
+
+  .parking-details-location__visual svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+}

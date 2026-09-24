@@ -829,11 +829,18 @@ function ParkingDetails({
                   </p>
                 </div>
 
-                <div className="parking-details-location__visual">
-                  <span>📍</span>
-
-                  <div className="parking-details-location__ring parking-details-location__ring--one" />
-                  <div className="parking-details-location__ring parking-details-location__ring--two" />
+                <div className="parking-details-location__visual" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" role="img">
+                    <path
+                      d="M12 21s6-5.15 6-11a6 6 0 1 0-12 0c0 5.85 6 11 6 11Z"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <circle cx="12" cy="10" r="2.15" fill="currentColor" />
+                  </svg>
                 </div>
               </article>
             </div>
