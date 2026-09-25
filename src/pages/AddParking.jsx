@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { createSpace } from "../services/spaceService";
 import { getAuthToken } from "../services/authService";
 import ImageUploader from "../components/ImageUploader";
+import NeshanLocationPicker from "../components/NeshanLocationPicker";
 import ResidentialFields, { emptyResidentialDetails } from "../components/ResidentialFields";
 import VillaFields, { emptyVillaDetails } from "../components/VillaFields";
 import "../components/ResidentialFields.css";
@@ -26,6 +27,7 @@ const INITIAL_FORM = {
   residentialDetails: { ...emptyResidentialDetails },
   villaDetails: { ...emptyVillaDetails },
   agencyNetworkConsent: false,
+  location: { lat: null, lng: null },
 };
 
 const STEPS = [
@@ -371,6 +373,7 @@ function AddParking() {
             form.description.trim(),
 
           agencyNetworkConsent: Boolean(form.agencyNetworkConsent),
+          location: form.location,
 
         });
 
@@ -956,6 +959,17 @@ function AddParking() {
                         )}
                       </div>
                     </div>
+
+                    <NeshanLocationPicker
+                      value={form.location}
+                      disabled={loading}
+                      onChange={(location) =>
+                        setForm((currentForm) => ({
+                          ...currentForm,
+                          location,
+                        }))
+                      }
+                    />
                   </div>
                 )}
 

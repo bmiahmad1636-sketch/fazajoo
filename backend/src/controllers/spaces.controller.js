@@ -4,7 +4,7 @@ const { createNotificationsForNewOffer } = require("../services/smartSearch.serv
 const { recordContactReveal } = require("../services/securityMonitoring.service");
 
 const MAX_IMAGES = 10;
-const FIELDS = `id, listing_type, category, custom_category, category_label, status, title, city, area, price, price_type, phone, image_url, image_urls, residential_details, villa_details, description, agency_network_consent, owner_id, created_at, updated_at`;
+const FIELDS = `id, listing_type, category, custom_category, category_label, status, title, city, area, price, price_type, phone, image_url, image_urls, residential_details, villa_details, description, agency_network_consent, location_lat, location_lng, owner_id, created_at, updated_at`;
 
 let imageSchemaPromise = null;
 function ensureImageSchema() {
@@ -15,6 +15,8 @@ function ensureImageSchema() {
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS price_type VARCHAR(20) NOT NULL DEFAULT 'monthly'`);
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS villa_details JSONB NOT NULL DEFAULT '{}'::jsonb`);
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS agency_network_consent BOOLEAN NOT NULL DEFAULT FALSE`);
+      await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS location_lat NUMERIC(9,6)`);
+      await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS location_lng NUMERIC(9,6)`);
 
       // دیتابیس‌های قدیمی فضاجو دسته residential را در CHECK نداشتند.
       await query(`ALTER TABLE spaces DROP CONSTRAINT IF EXISTS spaces_category_check`);
@@ -51,7 +53,7 @@ function normalizeImages(value, fallback = "") {
   return cleaned;
 }
 
-function mapSpace(row, { includePhone = false } = {}) {
+function mapSpace(row, { includePhone = false, includeExactLocation = false } = {}) {
   const imageUrls = normalizeImages(row.image_urls, row.image_url);
   const storedMainImage = String(row.image_url || "").trim();
   const imageUrl = storedMainImage && imageUrls.includes(storedMainImage)
@@ -76,6 +78,13 @@ function mapSpace(row, { includePhone = false } = {}) {
     villaDetails: row.villa_details || {},
     description: row.description || "",
     agencyNetworkConsent: Boolean(row.agency_network_consent),
+    ...(row.location_lat != null && row.location_lng != null
+      ? {
+          location: includeExactLocation
+            ? { lat: Number(row.location_lat), lng: Number(row.location_lng), approximate: false }
+            : { lat: Number(Number(row.location_lat).toFixed(2)), lng: Number(Number(row.location_lng).toFixed(2)), approximate: true },
+        }
+      : { location: null }),
     ownerIsApprovedAgent: Boolean(row.owner_is_approved_agent),
     ownerId: row.owner_id,
     createdAt: row.created_at,
@@ -149,6 +158,10 @@ function clean(body = {}) {
         : {},
     description: String(body.description || "").trim().slice(0, 5000),
     agencyNetworkConsent: body.agencyNetworkConsent === true,
+    locationLat: Number.isFinite(Number(body.location?.lat)) && Number(body.location.lat) >= 24 && Number(body.location.lat) <= 40
+      ? Number(Number(body.location.lat).toFixed(6)) : null,
+    locationLng: Number.isFinite(Number(body.location?.lng)) && Number(body.location.lng) >= 43 && Number(body.location.lng) <= 64
+      ? Number(Number(body.location.lng).toFixed(6)) : null,
   };
 }
 
@@ -266,7 +279,7 @@ async function mine(req, res) {
   try {
     await ensureImageSchema();
     const result = await query(`SELECT ${FIELDS} FROM spaces WHERE owner_id=$1 ORDER BY created_at DESC`, [req.user.id]);
-    return res.json({ ok: true, spaces: result.rows.map((row) => mapSpace(row)) });
+    return res.json({ ok: true, spaces: result.rows.map((row) => mapSpace(row, { includeExactLocation: true })) });
   } catch (error) {
     console.error("Mine spaces error:", error);
     return res.status(500).json({ ok: false, message: "دریافت آگهی‌های شما انجام نشد." });
@@ -281,12 +294,12 @@ async function create(req, res) {
     if (error) return res.status(400).json({ ok: false, message: error });
     const id = crypto.randomUUID();
     const result = await query(
-      `INSERT INTO spaces (id,listing_type,category,custom_category,category_label,status,title,city,area,price,price_type,phone,image_url,image_urls,residential_details,villa_details,description,agency_network_consent,owner_id)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::jsonb,$15::jsonb,$16::jsonb,$17,$18,$19)
+      `INSERT INTO spaces (id,listing_type,category,custom_category,category_label,status,title,city,area,price,price_type,phone,image_url,image_urls,residential_details,villa_details,description,agency_network_consent,location_lat,location_lng,owner_id)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::jsonb,$15::jsonb,$16::jsonb,$17,$18,$19,$20,$21)
        RETURNING ${FIELDS}`,
-      [id, space.listingType, space.category, space.customCategory, space.categoryLabel, space.status, space.title, space.city, space.area, space.price, space.priceType, space.phone, space.imageUrl, JSON.stringify(space.imageUrls), JSON.stringify(space.residentialDetails), JSON.stringify(space.villaDetails), space.description, space.agencyNetworkConsent, req.user.id]
+      [id, space.listingType, space.category, space.customCategory, space.categoryLabel, space.status, space.title, space.city, space.area, space.price, space.priceType, space.phone, space.imageUrl, JSON.stringify(space.imageUrls), JSON.stringify(space.residentialDetails), JSON.stringify(space.villaDetails), space.description, space.agencyNetworkConsent, space.locationLat, space.locationLng, req.user.id]
     );
-    const createdSpace = mapSpace(result.rows[0], { includePhone: true });
+    const createdSpace = mapSpace(result.rows[0], { includePhone: true, includeExactLocation: true });
     createNotificationsForNewOffer(createdSpace, req.user.id);
     return res.status(201).json({ ok: true, message: "آگهی با موفقیت ثبت شد.", space: createdSpace });
   } catch (error) {
@@ -303,15 +316,15 @@ async function update(req, res) {
     if (existing.rows[0].owner_id !== req.user.id && req.user.system_role !== "admin") {
       return res.status(403).json({ ok: false, message: "اجازه ویرایش این آگهی را ندارید." });
     }
-    const merged = clean({ ...mapSpace(existing.rows[0], { includePhone: true }), ...req.body });
+    const merged = clean({ ...mapSpace(existing.rows[0], { includePhone: true, includeExactLocation: true }), ...req.body });
     const error = validate(merged);
     if (error) return res.status(400).json({ ok: false, message: error });
     const result = await query(
-      `UPDATE spaces SET listing_type=$2,category=$3,custom_category=$4,category_label=$5,status=$6,title=$7,city=$8,area=$9,price=$10,price_type=$11,phone=$12,image_url=$13,image_urls=$14::jsonb,residential_details=$15::jsonb,villa_details=$16::jsonb,description=$17,agency_network_consent=$18,updated_at=NOW()
+      `UPDATE spaces SET listing_type=$2,category=$3,custom_category=$4,category_label=$5,status=$6,title=$7,city=$8,area=$9,price=$10,price_type=$11,phone=$12,image_url=$13,image_urls=$14::jsonb,residential_details=$15::jsonb,villa_details=$16::jsonb,description=$17,agency_network_consent=$18,location_lat=$19,location_lng=$20,updated_at=NOW()
        WHERE id=$1 RETURNING ${FIELDS}`,
-      [req.params.id, merged.listingType, merged.category, merged.customCategory, merged.categoryLabel, merged.status, merged.title, merged.city, merged.area, merged.price, merged.priceType, merged.phone, merged.imageUrl, JSON.stringify(merged.imageUrls), JSON.stringify(merged.residentialDetails), JSON.stringify(merged.villaDetails), merged.description, merged.agencyNetworkConsent]
+      [req.params.id, merged.listingType, merged.category, merged.customCategory, merged.categoryLabel, merged.status, merged.title, merged.city, merged.area, merged.price, merged.priceType, merged.phone, merged.imageUrl, JSON.stringify(merged.imageUrls), JSON.stringify(merged.residentialDetails), JSON.stringify(merged.villaDetails), merged.description, merged.agencyNetworkConsent, merged.locationLat, merged.locationLng]
     );
-    return res.json({ ok: true, message: "آگهی ویرایش شد.", space: mapSpace(result.rows[0], { includePhone: true }) });
+    return res.json({ ok: true, message: "آگهی ویرایش شد.", space: mapSpace(result.rows[0], { includePhone: true, includeExactLocation: true }) });
   } catch (error) {
     console.error("Update space error:", error);
     return res.status(500).json({ ok: false, message: "ویرایش آگهی انجام نشد." });
