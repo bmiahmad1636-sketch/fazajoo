@@ -88,7 +88,10 @@ router.get("/public/:userId", async (req, res) => {
         ? item.image_urls.filter(Boolean).slice(0, 8)
         : [];
 
-      const imageUrl = imageUrls[0] || item.image_url || "";
+      const storedMainImage = String(item.image_url || "").trim();
+      const imageUrl = storedMainImage && imageUrls.includes(storedMainImage)
+        ? storedMainImage
+        : (imageUrls[0] || storedMainImage || "");
 
       return {
         id: item.id,

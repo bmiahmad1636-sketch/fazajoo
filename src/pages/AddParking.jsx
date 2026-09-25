@@ -156,12 +156,22 @@ function AddParking() {
     setForm((currentForm) => ({
       ...currentForm,
       imageUrls: nextImages,
-      imageUrl: nextImages[0] || "",
+      imageUrl:
+        currentForm.imageUrl && nextImages.includes(currentForm.imageUrl)
+          ? currentForm.imageUrl
+          : nextImages[0] || "",
     }));
 
     setErrors((currentErrors) => ({
       ...currentErrors,
       imageUrl: "",
+    }));
+  };
+
+  const handleMainImageChange = (url) => {
+    setForm((currentForm) => ({
+      ...currentForm,
+      imageUrl: url || "",
     }));
   };
 
@@ -602,8 +612,8 @@ function AddParking() {
                           }
                           disabled={loading}
                           style={{
-                            minHeight: "72px",
-                            padding: "12px 14px",
+                            minHeight: "54px",
+                            padding: "8px 12px",
                             borderRadius: "16px",
                             border:
                               form.listingType === "offer"
@@ -632,8 +642,8 @@ function AddParking() {
                           }
                           disabled={loading}
                           style={{
-                            minHeight: "72px",
-                            padding: "12px 14px",
+                            minHeight: "54px",
+                            padding: "8px 12px",
                             borderRadius: "16px",
                             border:
                               form.listingType === "wanted"
@@ -699,13 +709,13 @@ function AddParking() {
                                 }));
                               }}
                               style={{
-                                minHeight: "82px",
+                                minHeight: "64px",
                                 display: "flex",
                                 flexDirection: "column",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                gap: "6px",
-                                padding: "10px",
+                                gap: "3px",
+                                padding: "7px 8px",
                                 borderRadius: "15px",
                                 border: isSelected
                                   ? "2px solid #f47a1f"
@@ -721,7 +731,7 @@ function AddParking() {
                             >
                               <span
                                 style={{
-                                  fontSize: "1.45rem",
+                                  fontSize: "1.15rem",
                                 }}
                               >
                                 {category.icon}
@@ -962,7 +972,7 @@ function AddParking() {
                         <p>
                           {isWantedAd
                             ? "اگر تصویر یا نمونه‌ای از فضای مدنظرت داری می‌توانی اضافه کنی؛ برای آگهی درخواست، تصویر اجباری نیست."
-                            : `تا ۸ عکس روشن، واضح و واقعی از ${spaceLabel} انتخاب کن.`}
+                            : `تا ۱۰ عکس روشن، واضح و واقعی از ${spaceLabel} انتخاب کن.`}
                         </p>
                       </div>
                     </div>
@@ -982,8 +992,10 @@ function AddParking() {
                     >
                       <ImageUploader
                         imageUrls={form.imageUrls}
+                        mainImageUrl={form.imageUrl}
                         maxImages={10}
                         onUploadComplete={handleImageUpload}
+                        onMainImageChange={handleMainImageChange}
                       />
                     </div>
 
@@ -1003,7 +1015,7 @@ function AddParking() {
                           </strong>
 
                           <p>
-                            اولین عکس، تصویر اصلی کارت آگهی است و همه عکس‌ها در صفحه جزئیات نمایش داده می‌شوند.
+                            عکس دارای برچسب «عکس اصلی»، تصویر کارت آگهی است و همه عکس‌ها در صفحه جزئیات نمایش داده می‌شوند.
                           </p>
                         </div>
                       </div>

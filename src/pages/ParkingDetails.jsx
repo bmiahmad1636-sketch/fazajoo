@@ -95,9 +95,12 @@ function ParkingDetails({
     const images = Array.isArray(parking?.imageUrls)
       ? parking.imageUrls.filter(Boolean)
       : [];
-    if (!images.length && parking?.imageUrl) {
-      return [parking.imageUrl];
+
+    const mainImage = parking?.imageUrl || "";
+    if (mainImage) {
+      return [mainImage, ...images.filter((url) => url !== mainImage)];
     }
+
     return images;
   }, [parking]);
 

@@ -53,6 +53,10 @@ function normalizeImages(value, fallback = "") {
 
 function mapSpace(row, { includePhone = false } = {}) {
   const imageUrls = normalizeImages(row.image_urls, row.image_url);
+  const storedMainImage = String(row.image_url || "").trim();
+  const imageUrl = storedMainImage && imageUrls.includes(storedMainImage)
+    ? storedMainImage
+    : (imageUrls[0] || "");
   return {
     id: row.id,
     listingType: row.listing_type,
@@ -66,7 +70,7 @@ function mapSpace(row, { includePhone = false } = {}) {
     price: row.price,
     priceType: row.price_type || "monthly",
     ...(includePhone ? { phone: row.phone } : {}),
-    imageUrl: imageUrls[0] || "",
+    imageUrl,
     imageUrls,
     residentialDetails: row.residential_details || {},
     villaDetails: row.villa_details || {},
@@ -81,6 +85,10 @@ function mapSpace(row, { includePhone = false } = {}) {
 
 function clean(body = {}) {
   const imageUrls = normalizeImages(body.imageUrls, body.imageUrl);
+  const requestedMainImage = String(body.imageUrl || "").trim().slice(0, 2000);
+  const imageUrl = requestedMainImage && imageUrls.includes(requestedMainImage)
+    ? requestedMainImage
+    : (imageUrls[0] || "");
   return {
     listingType: body.listingType === "wanted" ? "wanted" : "offer",
     category: ["parking", "residential", "villa", "storage", "warehouse", "shop", "land", "other"].includes(body.category) ? body.category : "parking",
@@ -93,7 +101,7 @@ function clean(body = {}) {
     price: String(body.price || "").trim().slice(0, 100),
     priceType: ["daily", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly",
     phone: String(body.phone || "").replace(/\s/g, "").slice(0, 20),
-    imageUrl: imageUrls[0] || "",
+    imageUrl,
     imageUrls,
     residentialDetails: body.category === "residential" && body.residentialDetails && typeof body.residentialDetails === "object"
       ? {

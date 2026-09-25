@@ -339,11 +339,18 @@
 }
 
 .edit-parking-success {
+  position: fixed;
+  top: 86px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+
+  width: min(92vw, 460px);
   display: flex;
   align-items: center;
   gap: 12px;
 
-  margin-bottom: 18px;
+  margin: 0;
   padding: 16px 18px;
 
   border: 1px solid
@@ -363,12 +370,12 @@
 
 @keyframes editParkingSuccessIn {
   from {
-    transform: translateY(-10px);
+    transform: translate(-50%, -12px);
     opacity: 0;
   }
 
   to {
-    transform: translateY(0);
+    transform: translate(-50%, 0);
     opacity: 1;
   }
 }

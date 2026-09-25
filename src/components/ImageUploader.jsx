@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { deleteAdImage, uploadAdImage } from "../services/uploadService";
 import "./ImageUploader.css";
 
@@ -148,21 +148,48 @@ async function hashExistingImage(url) {
 
 function ImageUploader({
   imageUrls = [],
+  mainImageUrl = "",
   onUploadComplete,
+  onMainImageChange,
   maxImages = 10,
 }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
-  const images = Array.isArray(imageUrls)
-    ? imageUrls.filter(Boolean).slice(0, maxImages)
-    : [];
+  // ترتیب عکس‌ها را داخل خود کامپوننت هم نگه می‌داریم تا تغییر
+  // «عکس اصلی» همان لحظه در رابط کاربری دیده شود و فقط وابسته
+  // به رندر مجدد فرم والد نباشد.
+  const normalizeImages = (value) =>
+    Array.isArray(value)
+      ? value.filter(Boolean).slice(0, maxImages)
+      : [];
+
+  const [images, setImages] = useState(() => normalizeImages(imageUrls));
+
+  useEffect(() => {
+    setImages(normalizeImages(imageUrls));
+  }, [imageUrls, maxImages]);
+
+  const effectiveMainImage =
+    mainImageUrl && images.includes(mainImageUrl)
+      ? mainImageUrl
+      : images[0] || "";
 
   const emit = (nextImages) => {
-    onUploadComplete?.(
-      nextImages.slice(0, maxImages)
-    );
+    const normalized = normalizeImages(nextImages);
+    setImages(normalized);
+    onUploadComplete?.(normalized);
+
+    // عکس اصلی یک state مستقل است؛ ترتیب گالری دیگر تعیین‌کننده اصلی بودن نیست.
+    const nextMain =
+      effectiveMainImage && normalized.includes(effectiveMainImage)
+        ? effectiveMainImage
+        : normalized[0] || "";
+
+    if (nextMain !== effectiveMainImage) {
+      onMainImageChange?.(nextMain);
+    }
   };
 
   const uploadImages = async (event) => {
@@ -305,20 +332,8 @@ function ImageUploader({
   };
 
   const makeMain = (url) => {
-    if (
-      !url ||
-      images[0] === url ||
-      uploading
-    ) {
-      return;
-    }
-
-    emit([
-      url,
-      ...images.filter(
-        (item) => item !== url
-      ),
-    ]);
+    if (!url || !images.includes(url) || uploading) return;
+    onMainImageChange?.(url);
   };
 
   return (
@@ -383,7 +398,7 @@ function ImageUploader({
             <article
               key={`${url}-${index}`}
               className={
-                index === 0
+                url === effectiveMainImage
                   ? "multi-image-uploader__item multi-image-uploader__item--main"
                   : "multi-image-uploader__item"
               }
@@ -396,7 +411,7 @@ function ImageUploader({
               />
 
               <div className="multi-image-uploader__badge">
-                {index === 0
+                {url === effectiveMainImage
                   ? "عکس اصلی"
                   : `عکس ${(
                       index + 1
@@ -406,12 +421,18 @@ function ImageUploader({
               </div>
 
               <div className="multi-image-uploader__actions">
-                {index !== 0 && (
+                {url === effectiveMainImage ? (
                   <button
                     type="button"
-                    onClick={() =>
-                      makeMain(url)
-                    }
+                    className="multi-image-uploader__main-status"
+                    disabled
+                  >
+                    ✓ عکس اصلی فعلی
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => makeMain(url)}
                     disabled={uploading}
                   >
                     انتخاب به‌عنوان اصلی
@@ -456,10 +477,8 @@ function ImageUploader({
       {images.length > 0 &&
         images.length < maxImages && (
           <p className="multi-image-uploader__hint">
-            اولین عکس، تصویر اصلی کارت
-            آگهی است. برای تغییر عکس اصلی
-            از دکمه روی هر تصویر استفاده
-            کن.
+            عکس دارای برچسب «عکس اصلی»، تصویر کارت آگهی است.
+            برای تغییر آن از دکمه روی هر تصویر استفاده کن.
           </p>
         )}
     </div>

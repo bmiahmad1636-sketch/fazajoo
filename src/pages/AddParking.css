@@ -1445,3 +1445,54 @@
 .add-parking-orb--one { background: rgba(176,207,187,.25); }
 .add-parking-orb--two { background: rgba(247,127,35,.09); }
 .add-parking-orb--three { background: rgba(176,207,187,.18); }
+
+/* 2026-09-24 compact polish: preserve original cards, reduce vertical scrolling only */
+@media (min-width: 769px) {
+  .add-parking-hero { padding-bottom: 12px; }
+  .add-parking-content { padding-bottom: 54px; }
+  .add-parking-layout { gap: 20px; }
+  .add-parking-sidebar { gap: 13px; }
+  .add-parking-progress-card { padding: 18px; }
+  .add-parking-form-card form { min-height: 0; }
+  .add-parking-form-header { padding: 14px 26px 11px; }
+  .add-parking-form-header__step { margin-bottom: 3px; }
+  .add-parking-form-header h2 { margin-bottom: 2px; }
+  .add-parking-step-content { padding: 14px 26px 12px; }
+  .add-parking-intro { margin-bottom: 11px; padding: 9px 12px; }
+  .add-parking-intro > span { width: 40px; height: 40px; }
+  .add-parking-field { margin-bottom: 13px; }
+  .add-parking-field label { margin-bottom: 6px; }
+  .add-parking-fields-grid { gap: 13px; }
+  .add-parking-actions { padding: 14px 30px; }
+}
+
+
+/* 2026-09-24 true compact desktop pass */
+@media (min-width: 769px) {
+  .add-parking-hero { padding: 4px 0 8px; }
+  .add-parking-hero__content { margin-top: 0; gap: 24px; }
+  .add-parking-eyebrow { margin-bottom: 5px; padding: 5px 10px; }
+  .add-parking-hero h1 { font-size: clamp(1.4rem, 2.35vw, 2rem); line-height: 1.25; }
+  .add-parking-hero p { font-size: .76rem; line-height: 1.45; }
+  .add-parking-hero__badge { padding: 7px 10px; }
+  .add-parking-hero__badge > span { width: 36px; height: 36px; }
+  .add-parking-content { margin-top: -8px; padding-bottom: 36px; }
+  .add-parking-progress-card { padding: 15px 17px; }
+  .add-parking-progress-card__heading { margin-bottom: 9px; }
+  .add-parking-progress { margin-bottom: 12px; }
+  .add-parking-steps { gap: 4px; }
+  .add-parking-step { padding: 8px 10px; gap: 9px; }
+  .add-parking-step__number { width: 34px; height: 34px; }
+  .add-parking-tip { padding: 13px 15px; }
+  .add-parking-form-header { padding: 10px 26px 8px; }
+  .add-parking-form-header h2 { font-size: 1.25rem; }
+  .add-parking-form-header p { font-size: .72rem; }
+  .add-parking-step-content { padding: 10px 26px 8px; }
+  .add-parking-intro { margin-bottom: 8px; padding: 7px 10px; border-radius: 15px; }
+  .add-parking-intro > span { width: 34px; height: 34px; border-radius: 12px; font-size: 1rem; }
+  .add-parking-intro p { margin-top: 1px; font-size: .68rem; }
+  .add-parking-field { margin-bottom: 9px; }
+  .add-parking-field label { margin-bottom: 4px; }
+  .add-parking-input { min-height: 50px; }
+  .add-parking-actions { padding: 10px 30px; }
+}

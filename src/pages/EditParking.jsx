@@ -81,7 +81,8 @@ function createFormFromParking(parking) {
     priceType:
       parking?.priceType || "monthly",
     phone: parking?.phone || "",
-    imageUrl: parking?.imageUrls?.[0] || parking?.imageUrl || "",
+    imageUrl:
+      parking?.imageUrl || parking?.imageUrls?.[0] || "",
     imageUrls:
       Array.isArray(parking?.imageUrls) && parking.imageUrls.length
         ? parking.imageUrls
@@ -189,7 +190,10 @@ function EditParking({
     setForm((currentForm) => ({
       ...currentForm,
       imageUrls: nextImages,
-      imageUrl: nextImages[0] || "",
+      imageUrl:
+        currentForm.imageUrl && nextImages.includes(currentForm.imageUrl)
+          ? currentForm.imageUrl
+          : nextImages[0] || "",
     }));
 
     setErrors((currentErrors) => ({
@@ -197,6 +201,14 @@ function EditParking({
       imageUrl: "",
     }));
 
+    setShowSuccess(false);
+  };
+
+  const handleMainImageChange = (url) => {
+    setForm((currentForm) => ({
+      ...currentForm,
+      imageUrl: url || "",
+    }));
     setShowSuccess(false);
   };
 
@@ -391,7 +403,7 @@ function EditParking({
 
       window.setTimeout(() => {
         navigate(`/parking/${id}`);
-      }, 900);
+      }, 1800);
     } catch (error) {
       console.error(
         "خطا در ویرایش آگهی:",
@@ -758,8 +770,10 @@ function EditParking({
                   >
                     <ImageUploader
                       imageUrls={form.imageUrls}
+                      mainImageUrl={form.imageUrl}
                       maxImages={10}
                       onUploadComplete={handleImageUpload}
+                      onMainImageChange={handleMainImageChange}
                     />
                   </div>
 

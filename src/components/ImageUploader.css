@@ -2,3 +2,13 @@
 
 /* Fazajoo photo uploader final polish */
 .multi-image-uploader__counter{display:inline-flex!important;align-items:center;width:max-content;margin-top:4px;padding:4px 9px;border-radius:999px;background:#fff3e8;color:#b4510b!important;font-size:.64rem!important;font-weight:900;border:1px solid #f6dcc6}.multi-image-uploader__add{transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}.multi-image-uploader__add:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(244,122,31,.26);filter:saturate(1.05)}.multi-image-uploader__item{transition:transform .18s ease,box-shadow .18s ease}.multi-image-uploader__item:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(72,48,32,.1)}.multi-image-uploader__empty{transition:border-color .18s ease,background .18s ease,transform .18s ease}.multi-image-uploader__empty:not(:disabled):hover{border-color:#f1a66d;background:linear-gradient(135deg,#fff8f2,#fff1e5);transform:translateY(-1px)}
+
+
+/* Main-photo selection fix + compact step-2 polish */
+.multi-image-uploader__main-status{background:#eef8f3!important;color:#0f513f!important;cursor:default!important}
+.multi-image-uploader__grid{gap:10px}
+.multi-image-uploader__item{min-height:138px}
+.multi-image-uploader__item img{height:106px}
+.multi-image-uploader__actions{padding:6px}
+.multi-image-uploader__hint{margin-top:7px}
+@media(min-width:761px){.multi-image-uploader__grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
