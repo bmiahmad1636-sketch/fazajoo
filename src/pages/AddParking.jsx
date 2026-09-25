@@ -570,7 +570,7 @@ function AddParking() {
                 </div>
 
                 {currentStep === 1 && (
-                  <div className="add-parking-step-content">
+                  <div className="add-parking-step-content add-parking-step-content--details">
                     <div className="add-parking-intro">
                       <span>
                         {selectedCategory?.icon || "✨"}
@@ -599,7 +599,7 @@ function AddParking() {
                           display: "grid",
                           gridTemplateColumns:
                             "repeat(2, minmax(0, 1fr))",
-                          gap: "12px",
+                          gap: "9px",
                         }}
                       >
                         <button
@@ -612,7 +612,7 @@ function AddParking() {
                           }
                           disabled={loading}
                           style={{
-                            minHeight: "54px",
+                            minHeight: "48px",
                             padding: "8px 12px",
                             borderRadius: "16px",
                             border:
@@ -642,7 +642,7 @@ function AddParking() {
                           }
                           disabled={loading}
                           style={{
-                            minHeight: "54px",
+                            minHeight: "48px",
                             padding: "8px 12px",
                             borderRadius: "16px",
                             border:
@@ -675,7 +675,7 @@ function AddParking() {
                           display: "grid",
                           gridTemplateColumns:
                             "repeat(auto-fit, minmax(120px, 1fr))",
-                          gap: "10px",
+                          gap: "8px",
                         }}
                       >
                         {SPACE_CATEGORIES.map((category) => {
@@ -709,13 +709,14 @@ function AddParking() {
                                 }));
                               }}
                               style={{
-                                minHeight: "64px",
+                                height: "44px",
+                                minHeight: "44px",
                                 display: "flex",
-                                flexDirection: "column",
+                                flexDirection: "row",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                gap: "3px",
-                                padding: "7px 8px",
+                                gap: "6px",
+                                padding: "3px 7px",
                                 borderRadius: "15px",
                                 border: isSelected
                                   ? "2px solid #f47a1f"
@@ -731,7 +732,8 @@ function AddParking() {
                             >
                               <span
                                 style={{
-                                  fontSize: "1.15rem",
+                                  fontSize: "1rem",
+                                  lineHeight: 1,
                                 }}
                               >
                                 {category.icon}
@@ -1065,7 +1067,7 @@ function AddParking() {
                 )}
 
                 {currentStep === 3 && (
-                  <div className="add-parking-step-content">
+                  <div className="add-parking-step-content add-parking-step-content--final">
                     <div className="add-parking-intro add-parking-intro--contact">
                       <span>☎</span>
 
@@ -1085,7 +1087,7 @@ function AddParking() {
                     <div className="add-parking-fields-grid">
                       {form.category !== "residential" && (
                         <>
-                      <div className="add-parking-field">
+                      <div className="add-parking-field add-parking-field--price-combo">
                         <label htmlFor="price">
                           {isWantedAd
                             ? "بودجه"
@@ -1128,7 +1130,7 @@ function AddParking() {
                           />
                         </div>
 
-                        <div className="add-parking-field" style={{ marginTop: "12px" }}>
+                        <div className="add-parking-field add-parking-field--price-type">
                           <label>
                             نوع قیمت
                             <span>*</span>
@@ -1241,7 +1243,7 @@ function AddParking() {
                           onChange={
                             handleChange
                           }
-                          rows={7}
+                          rows={4}
                           disabled={loading}
                           maxLength={800}
                         />
@@ -1272,7 +1274,14 @@ function AddParking() {
                       </div>
                     </div>
 
-                    <label className="add-parking-network-consent">
+                    <label
+                      className={`add-parking-network-consent add-parking-network-consent--fazajoo${form.agencyNetworkConsent ? " is-checked" : ""}`}
+                      style={{
+                        borderColor: form.agencyNetworkConsent ? "#1f5b48" : "rgba(31, 91, 72, 0.42)",
+                        background: form.agencyNetworkConsent ? "#eaf7f0" : "#f4faf7",
+                        boxShadow: "inset -4px 0 0 #1f5b48",
+                      }}
+                    >
                       <input
                         type="checkbox"
                         checked={form.agencyNetworkConsent}
@@ -1285,7 +1294,9 @@ function AddParking() {
                         disabled={loading}
                       />
                       <span>
-                        <strong>کمک مشاوران فضاجو برای پیدا کردن {isWantedAd ? "فایل مناسب" : "مشتری"}</strong>
+                        <strong style={{ color: "#174c3b", fontWeight: 950, fontSize: "1rem" }}>
+                          کمک مشاوران فضاجو برای پیدا کردن {isWantedAd ? "فایل مناسب" : "مشتری"}
+                        </strong>
                         <small>
                           {isWantedAd
                             ? "مایلم مشاوران تأییدشده فضاجو برای پیدا کردن فایل مناسب با من ارتباط بگیرند."

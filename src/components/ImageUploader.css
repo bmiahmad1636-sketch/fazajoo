@@ -12,3 +12,22 @@
 .multi-image-uploader__actions{padding:6px}
 .multi-image-uploader__hint{margin-top:7px}
 @media(min-width:761px){.multi-image-uploader__grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* 2026-09-26 Step 2 TRUE compact — visual only, keep upload/main-photo logic untouched */
+@media (min-width:761px){
+  .multi-image-uploader__top{gap:10px;margin-bottom:8px}
+  .multi-image-uploader__top>div{gap:1px}
+  .multi-image-uploader__add{padding:8px 13px;border-radius:11px}
+  .multi-image-uploader__counter{margin-top:2px;padding:3px 8px}
+  .multi-image-uploader__empty{min-height:112px;gap:3px;border-radius:14px}
+  .multi-image-uploader__empty span{font-size:1.35rem;line-height:1}
+  .multi-image-uploader__empty strong{font-size:.8rem}
+  .multi-image-uploader__empty small{font-size:.61rem;line-height:1.45;max-width:520px}
+  .multi-image-uploader__hint{margin-top:5px;line-height:1.45}
+  .multi-image-uploader__message,.multi-image-uploader__error{margin:6px 0;padding:7px 10px}
+  .multi-image-uploader__grid{gap:8px}
+  .multi-image-uploader__item{min-height:124px;border-radius:14px}
+  .multi-image-uploader__item img{height:94px}
+  .multi-image-uploader__actions{padding:5px;gap:4px}
+  .multi-image-uploader__actions button{min-height:27px}
+}

@@ -1496,3 +1496,355 @@
   .add-parking-input { min-height: 50px; }
   .add-parking-actions { padding: 10px 30px; }
 }
+
+/* 2026-09-26 Step 2 TRUE compact — noticeable desktop reduction */
+@media (min-width: 769px) {
+  .add-parking-step-content:has(.add-parking-uploader) { padding-top: 8px; padding-bottom: 7px; }
+  .add-parking-step-content:has(.add-parking-uploader) .add-parking-intro { margin-bottom: 7px; padding: 6px 10px; }
+  .add-parking-step-content:has(.add-parking-uploader) .add-parking-intro > span { width: 32px; height: 32px; }
+  .add-parking-uploader { padding: 10px 12px; border-radius: 17px; }
+  .add-parking-upload-success { gap: 8px; margin-top: 7px; padding: 7px 10px; border-radius: 12px; }
+  .add-parking-upload-success > span { width: 28px; height: 28px; border-radius: 9px; }
+  .add-parking-upload-success p { margin-top: 0; }
+  .add-parking-image-guide { gap: 8px; margin-top: 9px; }
+  .add-parking-image-guide > div { padding: 7px 9px; border-radius: 12px; }
+  .add-parking-image-guide span { display: inline-block; margin: 0 0 2px; font-size: .88rem; }
+  .add-parking-image-guide strong { font-size: .69rem; }
+  .add-parking-image-guide p { margin-top: 1px; font-size: .58rem; line-height: 1.35; }
+  .add-parking-form-card:has(.add-parking-uploader) .add-parking-actions { padding-top: 8px; padding-bottom: 8px; }
+}
+
+/* 2026-09-26 Step 3 compact — final information */
+@media (min-width: 769px) {
+  .add-parking-step-content:has(.add-parking-intro--contact) {
+    padding-top: 8px;
+    padding-bottom: 7px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-intro {
+    margin-bottom: 8px;
+    padding: 6px 10px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-fields-grid {
+    gap: 12px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-field {
+    margin-bottom: 8px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-field label {
+    margin-bottom: 4px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) select,
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-input input {
+    min-height: 44px;
+    height: 44px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-input {
+    min-height: 44px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-textarea textarea {
+    min-height: 88px;
+    height: 88px;
+    padding: 10px 13px;
+    line-height: 1.65;
+    resize: vertical;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-field__meta {
+    margin-top: 4px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-network-consent {
+    gap: 9px;
+    margin-top: 7px;
+    padding: 9px 12px;
+    border-radius: 12px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-network-consent input {
+    width: 17px;
+    height: 17px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-network-consent span {
+    gap: 2px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-network-consent strong {
+    font-size: .76rem;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-network-consent small {
+    font-size: .66rem;
+    line-height: 1.45;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-preview {
+    margin-top: 8px;
+    border-radius: 15px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-preview__heading {
+    padding: 8px 12px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-preview__status {
+    padding: 4px 8px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-preview__card {
+    grid-template-columns: 105px minmax(0, 1fr);
+    gap: 11px;
+    padding: 10px 12px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-preview__image {
+    height: 76px;
+    border-radius: 11px;
+  }
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-preview__content h3 {
+    margin: 2px 0 5px;
+    font-size: .86rem;
+  }
+  .add-parking-form-card:has(.add-parking-intro--contact) .add-parking-actions {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
+
+/* 2026-09-26 Step 3 TRUE compact v2 — structural desktop reduction */
+@media (min-width: 769px) {
+  .add-parking-step-content:has(.add-parking-intro--contact) {
+    padding: 7px 26px 6px;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-intro {
+    margin-bottom: 7px;
+    padding: 5px 9px;
+    min-height: 0;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-intro > span {
+    width: 31px;
+    height: 31px;
+    border-radius: 10px;
+    font-size: .9rem;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-fields-grid {
+    gap: 10px;
+    align-items: start;
+  }
+
+  /* Price and price type share one row instead of stacking vertically. */
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-field--price-combo {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 112px;
+    column-gap: 8px;
+    align-items: end;
+    margin-bottom: 6px;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-field--price-combo > label,
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-field--price-combo > .add-parking-input,
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-field--price-combo > .add-parking-error {
+    grid-column: 1;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-field--price-type {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin: 0 !important;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-field--price-type label {
+    white-space: nowrap;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-field--price-type select,
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-input,
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-input input {
+    min-height: 42px;
+    height: 42px;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-field {
+    margin-bottom: 6px;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-textarea textarea {
+    min-height: 66px;
+    height: 66px;
+    padding: 8px 12px;
+    line-height: 1.5;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-field__meta {
+    margin-top: 2px;
+    min-height: 15px;
+    line-height: 1.25;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-network-consent {
+    min-height: 0;
+    margin-top: 5px;
+    padding: 7px 10px;
+    gap: 8px;
+    border-radius: 11px;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-network-consent small {
+    line-height: 1.25;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-preview {
+    margin-top: 6px;
+    border-radius: 13px;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-preview__heading {
+    padding: 6px 10px;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-preview__heading > div {
+    gap: 0;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-preview__card {
+    grid-template-columns: 86px minmax(0, 1fr);
+    gap: 9px;
+    padding: 7px 10px;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-preview__image {
+    height: 62px;
+    border-radius: 9px;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-preview__content > div:first-of-type {
+    margin-bottom: 3px !important;
+    gap: 5px !important;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-preview__content > div:first-of-type small {
+    padding: 2px 6px !important;
+  }
+
+  .add-parking-step-content:has(.add-parking-intro--contact) .add-parking-preview__content h3 {
+    margin: 0 0 3px;
+    font-size: .82rem;
+    line-height: 1.25;
+  }
+
+  .add-parking-form-card:has(.add-parking-intro--contact) .add-parking-actions {
+    padding: 7px 30px;
+  }
+
+  .add-parking-form-card:has(.add-parking-intro--contact) .add-parking-button {
+    min-height: 42px;
+  }
+}
+
+
+/* 2026-09-26 Step 3 FINAL compact — explicit class, no :has dependency */
+@media (min-width: 769px) {
+  .add-parking-step-content--final {
+    padding: 6px 24px 5px !important;
+  }
+  .add-parking-step-content--final .add-parking-intro {
+    margin-bottom: 6px !important;
+    padding: 5px 9px !important;
+  }
+  .add-parking-step-content--final .add-parking-fields-grid {
+    gap: 9px !important;
+  }
+  .add-parking-step-content--final .add-parking-field {
+    margin-bottom: 5px !important;
+  }
+  .add-parking-step-content--final .add-parking-field label {
+    margin-bottom: 5px !important;
+  }
+  .add-parking-step-content--final .add-parking-field--price-combo {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 118px !important;
+    column-gap: 8px !important;
+    align-items: end !important;
+  }
+  .add-parking-step-content--final .add-parking-field--price-combo > label,
+  .add-parking-step-content--final .add-parking-field--price-combo > .add-parking-input,
+  .add-parking-step-content--final .add-parking-field--price-combo > .add-parking-error {
+    grid-column: 1 !important;
+  }
+  .add-parking-step-content--final .add-parking-field--price-type {
+    grid-column: 2 !important;
+    grid-row: 1 / span 2 !important;
+    margin: 0 !important;
+  }
+  .add-parking-step-content--final .add-parking-input,
+  .add-parking-step-content--final .add-parking-input input,
+  .add-parking-step-content--final select {
+    height: 40px !important;
+    min-height: 40px !important;
+  }
+  .add-parking-step-content--final .add-parking-textarea textarea {
+    min-height: 72px !important;
+    height: 72px !important;
+    padding: 8px 12px !important;
+    line-height: 1.45 !important;
+    resize: none !important;
+  }
+  .add-parking-step-content--final .add-parking-field__meta {
+    margin: 2px 0 0 !important;
+    min-height: 14px !important;
+    line-height: 1.2 !important;
+  }
+  .add-parking-step-content--final .add-parking-network-consent {
+    margin-top: 4px !important;
+    padding: 6px 10px !important;
+    gap: 8px !important;
+  }
+  .add-parking-step-content--final .add-parking-network-consent span {
+    gap: 1px !important;
+  }
+  .add-parking-step-content--final .add-parking-network-consent small {
+    line-height: 1.25 !important;
+  }
+  .add-parking-step-content--final .add-parking-preview {
+    margin-top: 5px !important;
+  }
+  .add-parking-step-content--final .add-parking-preview__heading {
+    padding: 5px 10px !important;
+  }
+  .add-parking-step-content--final .add-parking-preview__card {
+    grid-template-columns: 82px minmax(0, 1fr) !important;
+    gap: 8px !important;
+    padding: 6px 10px !important;
+  }
+  .add-parking-step-content--final .add-parking-preview__image {
+    height: 58px !important;
+  }
+  .add-parking-step-content--final .add-parking-preview__content h3 {
+    margin: 0 0 2px !important;
+    font-size: .8rem !important;
+  }
+  .add-parking-form-card:has(.add-parking-step-content--final) .add-parking-actions {
+    padding: 6px 30px !important;
+  }
+}
+\n\n/* ===== Step 1 final compact polish — isolated from steps 2 & 3 ===== */\n@media (min-width: 901px) {\n  .add-parking-step-content--details {\n    padding-top: 10px;\n    padding-bottom: 8px;\n  }\n\n  .add-parking-step-content--details .add-parking-intro {\n    margin-bottom: 9px;\n    padding: 7px 10px;\n  }\n\n  .add-parking-step-content--details .add-parking-intro > span {\n    width: 34px;\n    height: 34px;\n    border-radius: 12px;\n    font-size: 1rem;\n  }\n\n  .add-parking-step-content--details .add-parking-intro p {\n    margin-top: 1px;\n  }\n\n  .add-parking-step-content--details > .add-parking-field {\n    margin-bottom: 12px;\n  }\n\n  .add-parking-step-content--details .add-parking-field label {\n    margin-bottom: 5px;\n  }\n\n  .add-parking-step-content--details .add-parking-input {\n    min-height: 46px;\n  }\n}\n\n/* Agency-network consent — Fazajoo green emphasis */\n.add-parking-network-consent {\n  border-color: rgba(31, 91, 72, 0.34);\n  background: linear-gradient(135deg, rgba(239, 249, 244, 0.96), rgba(255, 251, 244, 0.96));\n  box-shadow: inset 3px 0 0 rgba(31, 91, 72, 0.72);\n}\n\n.add-parking-network-consent input {\n  accent-color: #1f5b48;\n}\n\n.add-parking-network-consent strong {\n  color: #173f34;\n  font-weight: 950;\n  font-size: 0.96rem;\n}\n\n.add-parking-network-consent small {\n  color: #557067;\n}\n\n.add-parking-network-consent:has(input:checked) {\n  border-color: rgba(31, 91, 72, 0.58);\n  background: linear-gradient(135deg, #eaf7f0, #fff9ef);\n}\n
+
+/* ===== Focused fix: shorter Step-1 category chips + visible Fazajoo agency consent ===== */
+@media (min-width: 901px) {
+  .add-parking-step-content--details .add-parking-field:has(button) {
+    margin-bottom: 8px;
+  }
+}
+
+.add-parking-network-consent--fazajoo {
+  border: 1px solid rgba(31, 91, 72, 0.42) !important;
+  background: #f4faf7 !important;
+  box-shadow: inset -4px 0 0 #1f5b48 !important;
+}
+.add-parking-network-consent--fazajoo input {
+  accent-color: #1f5b48 !important;
+}
+.add-parking-network-consent--fazajoo strong {
+  color: #174c3b !important;
+  font-weight: 950 !important;
+  font-size: 1rem !important;
+}
+.add-parking-network-consent--fazajoo small {
+  color: #4f6f64 !important;
+}
+.add-parking-network-consent--fazajoo.is-checked {
+  border-color: #1f5b48 !important;
+  background: #eaf7f0 !important;
+}
