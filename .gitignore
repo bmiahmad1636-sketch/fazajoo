@@ -36,3 +36,6 @@ dist-ssr
 
 # Local database backups (may contain sensitive user data)
 backend/backups/
+# Local database backups
+backups/
+*.dump
