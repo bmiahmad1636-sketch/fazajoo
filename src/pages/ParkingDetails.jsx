@@ -10,6 +10,7 @@ import { deleteSpace, getSpaceContact } from "../services/spaceService";
 import { formatRialPrice } from "../utils/priceFormatter";
 
 import TrustSafetyActions from "../components/TrustSafetyActions";
+import NeshanApproximateMap from "../components/NeshanApproximateMap";
 import "./ParkingDetails.css";
 
 
@@ -845,6 +846,14 @@ function ParkingDetails({
                     <circle cx="12" cy="10" r="2.15" fill="currentColor" />
                   </svg>
                 </div>
+
+                {parking.location?.lat != null &&
+                  parking.location?.lng != null && (
+                    <NeshanApproximateMap
+                      location={parking.location}
+                      city={parking.city}
+                    />
+                  )}
               </article>
             </div>
 
