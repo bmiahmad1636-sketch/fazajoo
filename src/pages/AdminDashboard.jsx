@@ -555,16 +555,32 @@ function AdminDashboard() {
   return (
     <main className="admin-dashboard">
       <nav className="admin-dashboard__quick-nav" aria-label="دسترسی‌های مدیریت">
-        <div className="admin-dashboard__container admin-dashboard__quick-nav-inner">
-          <Link to="/admin/legal" className="admin-dashboard__quick-link">
-            <span>⚖️</span><div><small>پرونده‌ها و محدودیت‌ها</small><strong>امور حقوقی</strong></div>
-          </Link>
-          <Link to="/admin/moderation" className="admin-dashboard__quick-link">
-            <span>🛡️</span><div><small>گزارش‌ها و رسیدگی</small><strong>مرکز تخلفات</strong></div>
-          </Link>
-          <Link to="/admin/direct-management" className="admin-dashboard__quick-link">
-            <span>👤</span><div><small>حساب‌ها و دسترسی‌ها</small><strong>مدیریت کاربران</strong></div>
-          </Link>
+        <div className="admin-dashboard__container">
+          <div className="admin-dashboard__quick-nav-heading">
+            <div>
+              <span className="admin-dashboard__quick-nav-kicker">دسترسی سریع مدیر</span>
+              <h2>ابزارهای مدیریت فضاجو</h2>
+            </div>
+            <p>بخش موردنظر را برای بررسی و مدیریت مستقیم انتخاب کنید.</p>
+          </div>
+
+          <div className="admin-dashboard__quick-nav-inner">
+            <Link to="/admin/legal" className="admin-dashboard__quick-link admin-dashboard__quick-link--legal">
+              <span className="admin-dashboard__quick-icon">⚖️</span>
+              <div><strong>امور حقوقی</strong><small>پرونده‌ها، دستورات قضایی و محدودیت‌ها</small></div>
+              <b aria-hidden="true">←</b>
+            </Link>
+            <Link to="/admin/moderation" className="admin-dashboard__quick-link admin-dashboard__quick-link--moderation">
+              <span className="admin-dashboard__quick-icon">🛡️</span>
+              <div><strong>مرکز تخلفات</strong><small>گزارش‌ها، رسیدگی و اقدامات نظارتی</small></div>
+              <b aria-hidden="true">←</b>
+            </Link>
+            <Link to="/admin/direct-management" className="admin-dashboard__quick-link admin-dashboard__quick-link--users">
+              <span className="admin-dashboard__quick-icon">👤</span>
+              <div><strong>مدیریت کاربران</strong><small>حساب‌ها، وضعیت کاربران و دسترسی‌ها</small></div>
+              <b aria-hidden="true">←</b>
+            </Link>
+          </div>
         </div>
       </nav>
 

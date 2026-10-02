@@ -1349,3 +1349,47 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== Admin management tools emphasis — 2026-10-02 ===== */
+.admin-dashboard__quick-nav {
+  padding: 22px 0 24px;
+  background: linear-gradient(180deg, #fffaf6 0%, #fffdf9 100%);
+  border-bottom: 1px solid rgba(244, 122, 31, .13);
+}
+.admin-dashboard__quick-nav-heading {
+  display:flex; align-items:flex-end; justify-content:space-between; gap:24px;
+  margin-bottom:15px; padding:0 4px;
+}
+.admin-dashboard__quick-nav-heading h2 { margin:3px 0 0; color:#123d33; font-size:1.12rem; font-weight:950; }
+.admin-dashboard__quick-nav-heading p { margin:0; color:#7a7770; font-size:.72rem; font-weight:700; }
+.admin-dashboard__quick-nav-kicker { color:#ef741c; font-size:.68rem; font-weight:950; }
+.admin-dashboard__quick-nav-inner { gap:14px; }
+.admin-dashboard__quick-link {
+  position:relative; min-height:92px; padding:16px 17px; gap:14px;
+  border:1.5px solid rgba(244,122,31,.32); border-radius:19px;
+  background:#fff; box-shadow:0 9px 24px rgba(18,60,49,.07), inset 0 3px 0 rgba(244,122,31,.08);
+  overflow:hidden;
+}
+.admin-dashboard__quick-link::after {
+  content:""; position:absolute; right:0; top:16px; bottom:16px; width:4px;
+  border-radius:4px 0 0 4px; background:#f47a1f;
+}
+.admin-dashboard__quick-link:hover {
+  transform:translateY(-3px); border-color:rgba(244,122,31,.72);
+  box-shadow:0 15px 32px rgba(18,60,49,.12), inset 0 3px 0 rgba(244,122,31,.13);
+}
+.admin-dashboard__quick-link .admin-dashboard__quick-icon {
+  width:50px; height:50px; flex:0 0 50px; border-radius:15px;
+  background:linear-gradient(145deg,#fff2e7,#f7eee6); font-size:1.28rem;
+  box-shadow:inset 0 0 0 1px rgba(244,122,31,.13);
+}
+.admin-dashboard__quick-link div { flex:1; gap:5px; }
+.admin-dashboard__quick-link strong { color:#123d33; font-size:.88rem; font-weight:950; }
+.admin-dashboard__quick-link small { color:#77756f; font-size:.66rem; font-weight:750; line-height:1.8; }
+.admin-dashboard__quick-link > b { color:#f47a1f; font-size:1rem; font-weight:900; transition:transform .2s ease; }
+.admin-dashboard__quick-link:hover > b { transform:translateX(-4px); }
+@media (max-width:760px) {
+  .admin-dashboard__quick-nav-heading { align-items:flex-start; flex-direction:column; gap:5px; }
+  .admin-dashboard__quick-nav-heading p { display:none; }
+  .admin-dashboard__quick-link { min-height:82px; }
+}
