@@ -479,7 +479,49 @@
   .find-for-me__examples { margin-top: 8px; }
   .find-for-me__examples button { padding: 6px 10px; }
 }
-\n\n/* ===== Fazajoo hero typography polish ===== */\n.find-for-me__intro strong {\n  color:#3b312b;\n  font-weight:900;\n}\n.find-for-me__intro span {\n  color:#746a63;\n}\n.find-for-me__input-label {\n  display:flex;\n  align-items:center;\n  justify-content:space-between;\n  gap:12px;\n  padding:2px 8px 5px;\n}\n.find-for-me__input-label strong {\n  color:#352d28;\n  font-size:15px;\n  font-weight:900;\n}\n.find-for-me__input-label span {\n  color:#a06a49;\n  font-size:12px;\n  font-weight:700;\n}\n.find-for-me__form textarea {\n  font-weight:650;\n}\n.find-for-me__form textarea::placeholder {\n  color:#8b817a;\n  font-weight:500;\n  opacity:1;\n}\n@media (min-width:761px) {\n  .find-for-me__intro { max-width:900px!important; }\n  .find-for-me__form textarea { height:54px; min-height:54px; }\n}\n@media (max-width:760px) {\n  .find-for-me__input-label { align-items:flex-start; flex-direction:column; gap:2px; }\n}\n
+
+
+/* ===== Fazajoo hero typography polish ===== */
+.find-for-me__intro strong {
+  color:#3b312b;
+  font-weight:900;
+}
+.find-for-me__intro span {
+  color:#746a63;
+}
+.find-for-me__input-label {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:2px 8px 5px;
+}
+.find-for-me__input-label strong {
+  color:#352d28;
+  font-size:15px;
+  font-weight:900;
+}
+.find-for-me__input-label span {
+  color:#a06a49;
+  font-size:12px;
+  font-weight:700;
+}
+.find-for-me__form textarea {
+  font-weight:650;
+}
+.find-for-me__form textarea::placeholder {
+  color:#8b817a;
+  font-weight:500;
+  opacity:1;
+}
+@media (min-width:761px) {
+  .find-for-me__intro { max-width:900px!important; }
+  .find-for-me__form textarea { height:54px; min-height:54px; }
+}
+@media (max-width:760px) {
+  .find-for-me__input-label { align-items:flex-start; flex-direction:column; gap:2px; }
+}
+
 /* ===== Fazajoo final clean smart-search hero ===== */
 .find-for-me__hero h1,
 .find-for-me__input-label { display:none !important; }

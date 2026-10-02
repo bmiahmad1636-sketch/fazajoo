@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useCallback,useEffect,useMemo,useState} from 'react';
 import {Link} from 'react-router-dom';
 import {getLegalCases,createLegalCase,closeLegalCase,getLegalAudit,applyLegalAction,exportLegalUserDataByPhone} from '../services/LegalService';
 import './LegalCenter.css';
@@ -43,8 +43,8 @@ export default function LegalCenter(){
  const [action,setAction]=useState({action:'chat_readonly',targetType:'chat',targetId:'',note:''});
  const [exp,setExp]=useState({phone:'',from:'',to:''});
  const isGlobal=useMemo(()=>action.action.startsWith('global_chat_'),[action.action]);
- async function load(){const c=await getLegalCases();setCases(c);if(!selected&&c[0])setSelected(c[0].id)}
- useEffect(()=>{load().catch(e=>setMsg(e.message))},[]);
+ const load=useCallback(async()=>{const c=await getLegalCases();setCases(c);setSelected(prev=>prev||(c[0]?.id||''));},[]);
+ useEffect(()=>{load().catch(e=>setMsg(e.message))},[load]);
  useEffect(()=>{if(selected)getLegalAudit(selected).then(setLogs).catch(e=>setMsg(e.message));},[selected]);
  useEffect(()=>{if(isGlobal)setAction(a=>({...a,targetType:'system',targetId:''}));},[isGlobal]);
  async function submit(e){e.preventDefault();try{await createLegalCase(form);setForm({caseNumber:'',authority:'',orderDateJalali:'',subject:'',scopeText:'',orderDocumentRef:''});await load();setMsg('پرونده ثبت شد.')}catch(e){setMsg(e.message)}}

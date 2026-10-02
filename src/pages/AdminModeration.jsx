@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   applyAdminModerationAction,
@@ -107,7 +107,7 @@ export default function AdminModeration() {
     }));
   }
 
-  async function load() {
+  const load = useCallback(async () => {
     try {
       setLoading(true);
       setReports(await getAdminReports(filter));
@@ -116,9 +116,9 @@ export default function AdminModeration() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [filter]);
 
-  useEffect(() => { load(); }, [filter]);
+  useEffect(() => { load(); }, [load]);
 
   const counts = useMemo(
     () => reports.reduce((a, r) => ((a[r.status] = (a[r.status] || 0) + 1), a), {}),

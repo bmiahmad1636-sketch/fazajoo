@@ -1819,7 +1819,70 @@
     padding: 6px 30px !important;
   }
 }
-\n\n/* ===== Step 1 final compact polish — isolated from steps 2 & 3 ===== */\n@media (min-width: 901px) {\n  .add-parking-step-content--details {\n    padding-top: 10px;\n    padding-bottom: 8px;\n  }\n\n  .add-parking-step-content--details .add-parking-intro {\n    margin-bottom: 9px;\n    padding: 7px 10px;\n  }\n\n  .add-parking-step-content--details .add-parking-intro > span {\n    width: 34px;\n    height: 34px;\n    border-radius: 12px;\n    font-size: 1rem;\n  }\n\n  .add-parking-step-content--details .add-parking-intro p {\n    margin-top: 1px;\n  }\n\n  .add-parking-step-content--details > .add-parking-field {\n    margin-bottom: 12px;\n  }\n\n  .add-parking-step-content--details .add-parking-field label {\n    margin-bottom: 5px;\n  }\n\n  .add-parking-step-content--details .add-parking-input {\n    min-height: 46px;\n  }\n}\n\n/* Agency-network consent — Fazajoo green emphasis */\n.add-parking-network-consent {\n  border-color: rgba(31, 91, 72, 0.34);\n  background: linear-gradient(135deg, rgba(239, 249, 244, 0.96), rgba(255, 251, 244, 0.96));\n  box-shadow: inset 3px 0 0 rgba(31, 91, 72, 0.72);\n}\n\n.add-parking-network-consent input {\n  accent-color: #1f5b48;\n}\n\n.add-parking-network-consent strong {\n  color: #173f34;\n  font-weight: 950;\n  font-size: 0.96rem;\n}\n\n.add-parking-network-consent small {\n  color: #557067;\n}\n\n.add-parking-network-consent:has(input:checked) {\n  border-color: rgba(31, 91, 72, 0.58);\n  background: linear-gradient(135deg, #eaf7f0, #fff9ef);\n}\n
+
+
+/* ===== Step 1 final compact polish — isolated from steps 2 & 3 ===== */
+@media (min-width: 901px) {
+  .add-parking-step-content--details {
+    padding-top: 10px;
+    padding-bottom: 8px;
+  }
+
+  .add-parking-step-content--details .add-parking-intro {
+    margin-bottom: 9px;
+    padding: 7px 10px;
+  }
+
+  .add-parking-step-content--details .add-parking-intro > span {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    font-size: 1rem;
+  }
+
+  .add-parking-step-content--details .add-parking-intro p {
+    margin-top: 1px;
+  }
+
+  .add-parking-step-content--details > .add-parking-field {
+    margin-bottom: 12px;
+  }
+
+  .add-parking-step-content--details .add-parking-field label {
+    margin-bottom: 5px;
+  }
+
+  .add-parking-step-content--details .add-parking-input {
+    min-height: 46px;
+  }
+}
+
+/* Agency-network consent — Fazajoo green emphasis */
+.add-parking-network-consent {
+  border-color: rgba(31, 91, 72, 0.34);
+  background: linear-gradient(135deg, rgba(239, 249, 244, 0.96), rgba(255, 251, 244, 0.96));
+  box-shadow: inset 3px 0 0 rgba(31, 91, 72, 0.72);
+}
+
+.add-parking-network-consent input {
+  accent-color: #1f5b48;
+}
+
+.add-parking-network-consent strong {
+  color: #173f34;
+  font-weight: 950;
+  font-size: 0.96rem;
+}
+
+.add-parking-network-consent small {
+  color: #557067;
+}
+
+.add-parking-network-consent:has(input:checked) {
+  border-color: rgba(31, 91, 72, 0.58);
+  background: linear-gradient(135deg, #eaf7f0, #fff9ef);
+}
+
 
 /* ===== Focused fix: shorter Step-1 category chips + visible Fazajoo agency consent ===== */
 @media (min-width: 901px) {

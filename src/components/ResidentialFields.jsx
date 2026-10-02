@@ -1,3 +1,5 @@
+import { emptyResidentialDetails } from "./residentialDetails";
+
 const TYPES = [
   ["apartment","آپارتمان"],["house","خانه"],["villa","خانه ویلایی"],
   ["suite","سوئیت"],["penthouse","پنت‌هاوس"],["other","سایر مسکونی"],
@@ -6,11 +8,6 @@ const money = (v) => {
   const d=String(v??"").replace(/\D/g,"");
   return d ? Number(d).toLocaleString("en-US") : "";
 };
-export const emptyResidentialDetails = {
-  propertyType:"apartment",deposit:"",monthlyRent:"",bedrooms:"",
-  floor:"",totalFloors:"",unitsPerFloor:"",buildYear:"",elevator:false,parking:false,storage:false,furnished:false,balcony:false,renovated:false,convertible:false,
-};
-export const residentialTypeLabel=(v)=>Object.fromEntries(TYPES)[v]||"مسکونی";
 export default function ResidentialFields({value={},onChange,disabled=false}) {
  const f={...emptyResidentialDetails,...value};
  const set=(name,val)=>onChange({...f,[name]:val});

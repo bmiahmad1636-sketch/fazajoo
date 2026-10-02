@@ -74,7 +74,7 @@ function ParkingCard({ parking }) {
     residentialDetails = {},
   } = parking;
 
-  const [user, setUser] =
+  const [, setUser] =
     useState(null);
 
   const [isFavorite, setIsFavorite] =

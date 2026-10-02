@@ -1,0 +1,17 @@
+export const emptyResidentialDetails = {
+  propertyType: "apartment",
+  deposit: "",
+  monthlyRent: "",
+  bedrooms: "",
+  floor: "",
+  totalFloors: "",
+  unitsPerFloor: "",
+  buildYear: "",
+  elevator: false,
+  parking: false,
+  storage: false,
+  furnished: false,
+  balcony: false,
+  renovated: false,
+  convertible: false,
+};

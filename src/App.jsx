@@ -47,43 +47,6 @@ import {
 import "./compact.css";
 import "./typography.css";
 
-function convertToNumber(value) {
-  if (
-    value === null ||
-    value === undefined ||
-    value === ""
-  ) {
-    return 0;
-  }
-
-  if (typeof value === "number") {
-    return value;
-  }
-
-  const persianDigits = "۰۱۲۳۴۵۶۷۸۹";
-  const arabicDigits = "٠١٢٣٤٥٦٧٨٩";
-
-  const normalizedValue = String(value)
-    .replace(/[۰-۹]/g, (digit) =>
-      persianDigits.indexOf(digit)
-    )
-    .replace(/[٠-٩]/g, (digit) =>
-      arabicDigits.indexOf(digit)
-    )
-    .replace(/,/g, "")
-    .replace(/٬/g, "");
-
-  const numbers =
-    normalizedValue.match(/\d+(\.\d+)?/g);
-
-  if (!numbers) {
-    return 0;
-  }
-
-  return Number(numbers.join(""));
-}
-
-
 function Home({
   parkings,
   parkingsLoading,

@@ -1,6 +1,5 @@
 import {
   useEffect,
-  useMemo,
   useState,
 } from "react";
 
@@ -10,17 +9,11 @@ import {
 } from "react-router-dom";
 
 import "./AgencyAccess.css";
+import { API_SERVER_URL } from "../config/api";
 import {
   getAuthToken,
   initializeAuthSession,
 } from "../services/authService";
-
-
-const DOCUMENT_SERVER_URL =
-  "http://127.0.0.1:6060";
-
-const API_SERVER_URL =
-  "http://127.0.0.1:6060";
 
 
 const INITIAL_FORM = {
@@ -153,7 +146,6 @@ function validateIranianNationalId(
 
 
 function AgencyAccess({
-  currentUser = null,
   userProfile = null,
   profileLoading = false,
 }) {
@@ -179,7 +171,7 @@ function AgencyAccess({
     );
 
   const [
-    uploadedDocuments,
+    ,
     setUploadedDocuments,
   ] =
     useState({});

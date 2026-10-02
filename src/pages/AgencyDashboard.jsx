@@ -7,6 +7,7 @@ import {
 } from "../utils/matchingEngine";
 
 import "./AgencyDashboard.css";
+import { API_BASE_URL } from "../config/api";
 
 const TAB_CONFIG = {
   "my-offers": {
@@ -43,7 +44,7 @@ function faNumber(value) {
 }
 
 function getApiBase() {
-  return (import.meta.env.VITE_API_URL || "http://localhost:6060/api").replace(/\/$/, "");
+  return API_BASE_URL;
 }
 
 function getAuthToken() {
@@ -203,7 +204,7 @@ function MatchGroup({ items = [], activeTab, networkState = {} }) {
                 </div>
 
                 <div className="agency-dashboard__candidate-stack">
-                  {candidates.slice(0, 3).map(({ offer, score, reasons }, index) => (
+                  {candidates.slice(0, 3).map(({ offer, reasons }, index) => (
                     <div className="agency-dashboard__side-card agency-dashboard__side-card--offer" key={offer.id}>
                       <div className="agency-dashboard__offer-head">
                         <span className="agency-dashboard__card-label">

@@ -6,8 +6,10 @@ import { getAuthToken } from "../services/authService";
 import ImageUploader from "../components/ImageUploader";
 import VideoUploader from "../components/VideoUploader";
 import NeshanLocationPicker from "../components/NeshanLocationPicker";
-import ResidentialFields, { emptyResidentialDetails } from "../components/ResidentialFields";
-import VillaFields, { emptyVillaDetails } from "../components/VillaFields";
+import ResidentialFields from "../components/ResidentialFields";
+import { emptyResidentialDetails } from "../components/residentialDetails";
+import VillaFields from "../components/VillaFields";
+import { emptyVillaDetails } from "../components/villaDetails";
 import "../components/ResidentialFields.css";
 
 import "./AddParking.css";
@@ -105,9 +107,6 @@ function formatPriceInput(value) {
   return digits ? Number(digits).toLocaleString("en-US") : "";
 }
 
-function getPriceTypeLabel(value) {
-  return PRICE_TYPES.find((item) => item.value === value)?.label || "";
-}
 
 function AddParking() {
   const navigate = useNavigate();

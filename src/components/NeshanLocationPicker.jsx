@@ -59,6 +59,9 @@ export default function NeshanLocationPicker({
     if (city) setCityQuery(city);
   }, [city]);
 
+  // This effect owns the map instance lifecycle. Re-running it for every coordinate
+  // change would destroy/recreate the map; coordinate changes are emitted through onChangeRef.
+  // oxlint-disable react-hooks/exhaustive-deps
   useEffect(() => {
     if (!mapElementRef.current) return undefined;
 
@@ -173,6 +176,7 @@ export default function NeshanLocationPicker({
       }
     };
   }, [disabled]);
+  // oxlint-enable react-hooks/exhaustive-deps
 
   const requestCurrentLocation = () => {
     if (disabled || geoStatus === "loading") return;

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { deleteAdImage, uploadAdImage } from "../services/uploadService";
 import "./ImageUploader.css";
 
@@ -160,16 +160,19 @@ function ImageUploader({
   // ترتیب عکس‌ها را داخل خود کامپوننت هم نگه می‌داریم تا تغییر
   // «عکس اصلی» همان لحظه در رابط کاربری دیده شود و فقط وابسته
   // به رندر مجدد فرم والد نباشد.
-  const normalizeImages = (value) =>
-    Array.isArray(value)
-      ? value.filter(Boolean).slice(0, maxImages)
-      : [];
+  const normalizeImages = useCallback(
+    (value) =>
+      Array.isArray(value)
+        ? value.filter(Boolean).slice(0, maxImages)
+        : [],
+    [maxImages]
+  );
 
   const [images, setImages] = useState(() => normalizeImages(imageUrls));
 
   useEffect(() => {
     setImages(normalizeImages(imageUrls));
-  }, [imageUrls, maxImages]);
+  }, [imageUrls, normalizeImages]);
 
   const effectiveMainImage =
     mainImageUrl && images.includes(mainImageUrl)

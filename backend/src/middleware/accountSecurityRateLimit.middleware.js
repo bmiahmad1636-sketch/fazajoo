@@ -1,4 +1,4 @@
-const rateLimit = require("express-rate-limit");
+const { rateLimit, ipKeyGenerator } = require("express-rate-limit");
 
 function normalizePhone(value) {
   let phone = String(value || "").trim().replace(/\D/g, "");
@@ -10,7 +10,8 @@ function normalizePhone(value) {
 
 function phoneAndIpKey(req) {
   const phone = normalizePhone(req.body?.phone);
-  const ip = req.ip || req.socket?.remoteAddress || "unknown";
+  const rawIp = req.ip || req.socket?.remoteAddress || "unknown";
+  const ip = rawIp === "unknown" ? "unknown" : ipKeyGenerator(rawIp);
   return phone ? `ip:${ip}|phone:${phone}` : `ip:${ip}`;
 }
 

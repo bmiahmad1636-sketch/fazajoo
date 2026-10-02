@@ -2,13 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import ParkingCard from "../components/ParkingCard";
-import { normalizeText, scoreMatch } from "../utils/matchingEngine";
+import { normalizeText } from "../utils/matchingEngine";
 import {
   deleteSmartSearch,
   getSmartNotifications,
   getSmartSearches,
   markAllSmartNotificationsRead,
-  markSmartNotificationRead,
   saveSmartSearch,
   setSmartSearchActive,
   updateSmartSearch,
@@ -55,7 +54,7 @@ function normalizePlace(value = "") {
     .replace(/[ۀة]/g, "ه")
     .replace(/[ؤ]/g, "و")
     .replace(/[إأٱ]/g, "ا")
-    .replace(/[،,؛;:_\-–—/\\()\[\]{}]+/g, " ")
+    .replace(/[،,؛;:_–—/\\()[\]{}-]+/g, " ")
     .replace(/^(استان|شهرستان|شهر|بخش|منطقه)\s+/g, "")
     .replace(/\s+(استان|شهرستان|شهر)$/g, "")
     .replace(/\s+/g, " ")
@@ -158,25 +157,6 @@ function parseNaturalRequest(text, parkings = []) {
       bedrooms,
     },
   };
-}
-
-function formatRial(value) {
-  return Number(value || 0).toLocaleString("fa-IR") + " ریال";
-}
-
-function formatDate(value) {
-  if (!value) return "";
-  try {
-    return new Intl.DateTimeFormat("fa-IR", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(new Date(value));
-  } catch {
-    return "";
-  }
 }
 
 function formatLastCheck(value) {
@@ -306,15 +286,17 @@ function FindForMe({ parkings = [], user = null }) {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [savingAlert, setSavingAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
+  const [, setAlertMessage] = useState("");
   const [panelLoading, setPanelLoading] = useState(false);
   const [editingSearchId, setEditingSearchId] = useState(null);
   const [autoFollowMessage, setAutoFollowMessage] = useState("");
   const [lastSubmissionKind, setLastSubmissionKind] = useState(null);
 
+  const lastFindStorageKey = useMemo(() => getLastFindStorageKey(user), [user]);
+
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem(getLastFindStorageKey(user));
+      const saved = window.localStorage.getItem(lastFindStorageKey);
       if (saved && saved.trim().length >= 4) {
         // آخرین جستجو برای ادامه نتایج حفظ می‌شود، اما کادر ورود دوباره خالی باز می‌شود.
         setSubmittedText(saved);
@@ -322,7 +304,7 @@ function FindForMe({ parkings = [], user = null }) {
     } catch {
       // اگر ذخیره‌سازی مرورگر در دسترس نبود، خود جستجو همچنان کار می‌کند.
     }
-  }, [user?.id, user?.uid, user?.backendId]);
+  }, [lastFindStorageKey]);
 
   const parsed = useMemo(
     () => (submittedText ? parseNaturalRequest(submittedText, parkings) : null),
@@ -425,7 +407,7 @@ function FindForMe({ parkings = [], user = null }) {
     setLastSubmissionKind(editingSearchId ? "edit" : "search");
     setSubmittedText(value);
     try {
-      window.localStorage.setItem(getLastFindStorageKey(user), value);
+      window.localStorage.setItem(lastFindStorageKey, value);
     } catch {
       // ذخیره آخرین جستجو نباید اجرای جستجو را متوقف کند.
     }
@@ -497,22 +479,10 @@ function FindForMe({ parkings = [], user = null }) {
         setSubmittedText("");
         setAutoFollowMessage("");
         setLastSubmissionKind(null);
-        try { window.localStorage.removeItem(getLastFindStorageKey(user)); } catch {}
+        try { window.localStorage.removeItem(lastFindStorageKey); } catch {}
       }
     } catch (error) {
       setAlertMessage(error?.message || "حذف پیگیری انجام نشد.");
-    }
-  };
-
-  const openNotification = async (notification) => {
-    if (!notification.isRead) {
-      try {
-        await markSmartNotificationRead(notification.id);
-        setNotifications((items) => items.map((item) => item.id === notification.id ? { ...item, isRead: true } : item));
-        setUnreadCount((count) => Math.max(0, count - 1));
-      } catch {
-        // باز شدن آگهی به خاطر خطای ثبت خوانده‌شدن متوقف نمی‌شود.
-      }
     }
   };
 

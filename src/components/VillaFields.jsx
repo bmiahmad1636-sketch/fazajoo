@@ -1,27 +1,8 @@
+import { emptyVillaDetails } from "./villaDetails";
+
 const money = (value) => {
   const digits = String(value ?? "").replace(/\D/g, "");
   return digits ? Number(digits).toLocaleString("en-US") : "";
-};
-
-export const emptyVillaDetails = {
-  bedrooms: "",
-  capacity: "",
-  extraGuestPrice: "",
-  distanceToSea: "",
-  distanceToForest: "",
-  checkInTime: "14:00",
-  checkOutTime: "12:00",
-  houseRules: "",
-  pool: false,
-  heatedPool: false,
-  parking: false,
-  yard: false,
-  furnished: true,
-  barbecue: false,
-  airConditioning: false,
-  heating: false,
-  wifi: false,
-  petFriendly: false,
 };
 
 export default function VillaFields({

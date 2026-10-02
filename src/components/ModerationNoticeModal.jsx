@@ -6,9 +6,11 @@ function ModerationNoticeModal({ user }) {
   const [notice, setNotice] = useState(null);
   const [busy, setBusy] = useState(false);
 
+  const hasUser = Boolean(user);
+
   useEffect(() => {
     let active = true;
-    if (!user) {
+    if (!hasUser) {
       setNotice(null);
       return () => { active = false; };
     }
@@ -22,7 +24,7 @@ function ModerationNoticeModal({ user }) {
       .catch(() => {});
 
     return () => { active = false; };
-  }, [user?.id, user?.uid]);
+  }, [hasUser, user?.id, user?.uid]);
 
   const acknowledge = async () => {
     if (!notice || busy) return;

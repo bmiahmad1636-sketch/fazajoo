@@ -478,7 +478,7 @@ app.use(
     error,
     request,
     response,
-    next
+    _next
   ) => {
     console.error(
       "API error:",

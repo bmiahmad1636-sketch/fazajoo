@@ -13,8 +13,10 @@ import {
 import { updateSpace } from "../services/spaceService";
 import ImageUploader from "../components/ImageUploader";
 import VideoUploader from "../components/VideoUploader";
-import ResidentialFields, { emptyResidentialDetails } from "../components/ResidentialFields";
-import VillaFields, { emptyVillaDetails } from "../components/VillaFields";
+import ResidentialFields from "../components/ResidentialFields";
+import { emptyResidentialDetails } from "../components/residentialDetails";
+import VillaFields from "../components/VillaFields";
+import { emptyVillaDetails } from "../components/villaDetails";
 import "../components/ResidentialFields.css";
 
 import "./EditParking.css";

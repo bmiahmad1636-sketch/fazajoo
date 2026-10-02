@@ -1,6 +1,6 @@
 const crypto = require("crypto");
 const { query } = require("../db/pool");
-const { isEitherUserBlocked, getBlockStatus } = require("../services/trustSafety.service");
+const { getBlockStatus } = require("../services/trustSafety.service");
 
 let chatSchemaPromise = null;
 
@@ -521,7 +521,7 @@ async function unreadCount(req, res) {
       chatType,
       unreadCount: Number(result.rows[0]?.count || 0),
     });
-  } catch (error) {
+  } catch {
     return res.status(500).json({
       ok: false,
       message: "دریافت تعداد پیام‌های خوانده‌نشده انجام نشد.",

@@ -1,5 +1,5 @@
 import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Link,
   useNavigate,
@@ -115,19 +115,19 @@ function ParkingDetails({
   const activeImage =
     galleryImages[activeImageIndex] || galleryImages[0] || "";
 
-  const showPreviousImage = () => {
+  const showPreviousImage = useCallback(() => {
     if (galleryImages.length < 2) return;
     setActiveImageIndex((current) =>
       (current - 1 + galleryImages.length) % galleryImages.length
     );
-  };
+  }, [galleryImages.length]);
 
-  const showNextImage = () => {
+  const showNextImage = useCallback(() => {
     if (galleryImages.length < 2) return;
     setActiveImageIndex((current) =>
       (current + 1) % galleryImages.length
     );
-  };
+  }, [galleryImages.length]);
 
   useEffect(() => {
     if (!isGalleryOpen) return undefined;
@@ -145,7 +145,7 @@ function ParkingDetails({
       document.body.classList.remove("parking-gallery-open");
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isGalleryOpen, galleryImages.length]);
+  }, [isGalleryOpen, showPreviousImage, showNextImage]);
 
   const isOwner =
     Boolean(user) &&

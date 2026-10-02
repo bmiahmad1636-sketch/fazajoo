@@ -143,7 +143,7 @@ export function normalizeText(
   return String(value)
     .trim()
     .toLowerCase()
-    .replace(/[\u200c\u200d\u200e\u200f]/g, " ")
+    .replace(/(?:\u200c|\u200d|\u200e|\u200f)/g, " ")
     .replace(/[يى]/g, "ی")
     .replace(/ك/g, "ک")
     .replace(/[ۀة]/g, "ه")

@@ -62,14 +62,14 @@ function normalizeText(value = "") {
   return String(value)
     .trim()
     .toLowerCase()
-    .replace(/[\u200c\u200d\u200e\u200f]/g, " ")
+    .replace(/(?:\u200c|\u200d|\u200e|\u200f)/g, " ")
     .replace(/[يى]/g, "ی")
     .replace(/ك/g, "ک")
     .replace(/[ۀة]/g, "ه")
     .replace(/[ؤ]/g, "و")
     .replace(/[إأٱآ]/g, "ا")
     .replace(/[َُِّْٰ]/g, "")
-    .replace(/[،,؛;:_\-–—/\\()\[\]{}]+/g, " ")
+    .replace(/[،,؛;:_–—/\\()[\]{}-]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }

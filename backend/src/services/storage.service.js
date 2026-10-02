@@ -126,15 +126,6 @@ function safeExtension(
   return ".jpg";
 }
 
-function publicUrl(
-  key
-) {
-  return `${env.STORAGE_PUBLIC_BASE_URL.replace(
-    /\/$/,
-    ""
-  )}/${key}`;
-}
-
 function keyFromPublicUrl(
   url
 ) {
