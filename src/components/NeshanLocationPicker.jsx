@@ -6,9 +6,39 @@ import "./NeshanLocationPicker.css";
 const DEFAULT_CENTER = [51.8668, 32.0089]; // Shahreza: [lng, lat]
 const MAP_STYLE = "https://static.neshan.org/sdk/maplibre/styles/light.json";
 
+const CITY_CENTERS = {
+  "تهران":[51.3890,35.6892],"کرج":[50.9916,35.8400],"مشهد":[59.6062,36.2605],
+  "اصفهان":[51.6776,32.6546],"شیراز":[52.5837,29.5918],"تبریز":[46.2919,38.0800],
+  "قم":[50.8764,34.6416],"اهواز":[48.6692,31.3183],"رشت":[49.5890,37.2808],
+  "ارومیه":[45.0761,37.5527],"قزوین":[50.0041,36.2688],"یزد":[54.3675,31.8974],
+  "کرمان":[57.0788,30.2839],"ساری":[53.0601,36.5659],"گرگان":[54.4342,36.8456],
+  "اراک":[49.6892,34.0917],"همدان":[48.5146,34.7989],"سنندج":[46.9988,35.3219],
+  "کرمانشاه":[47.0650,34.3142],"خرم آباد":[48.3558,33.4878],"ایلام":[46.4227,33.6374],
+  "بندرعباس":[56.2666,27.1832],"بوشهر":[50.8385,28.9234],"زاهدان":[60.8629,29.4963],
+  "بیرجند":[59.2211,32.8649],"بجنورد":[57.3290,37.4747],"سمنان":[53.3971,35.5769],
+  "اردبیل":[48.2933,38.2498],"زنجان":[48.4787,36.6736],"یاسوج":[51.5879,30.6682],
+  "شهرکرد":[50.8644,32.3256],"شهرضا":[51.8668,32.0089],"کاشان":[51.4099,33.9850],
+  "نجف آباد":[51.3668,32.6346],"خمینی شهر":[51.5211,32.7002],"فولادشهر":[51.4069,32.4894],
+  "شاهین شهر":[51.5559,32.8579],"کیش":[53.9800,26.5320],"قشم":[56.2719,26.9581],
+  "چابهار":[60.6430,25.2919],"دزفول":[48.4236,32.3831],"آبادان":[48.3043,30.3473],
+  "خرمشهر":[48.1664,30.4393],"ماهشهر":[49.1981,30.5560],"نیشابور":[58.7958,36.2141],
+  "سبزوار":[57.6819,36.2126],"کاشمر":[58.4656,35.2383],"مراغه":[46.2370,37.3892],
+  "مرند":[45.7749,38.4329],"میاندوآب":[46.1027,36.9694],"مهاباد":[45.7222,36.7631],
+  "بابل":[52.6780,36.5513],"آمل":[52.3507,36.4696],"قائم شهر":[52.8609,36.4630],
+  "بابلسر":[52.6506,36.7025],"نوشهر":[51.4950,36.6485],"لاهیجان":[50.0004,37.2073],
+  "انزلی":[49.4622,37.4727],"ساوه":[50.3566,35.0213],"ملایر":[48.8235,34.2969],
+  "بروجرد":[48.7516,33.8973],"دورود":[49.0632,33.4955],"مرودشت":[52.8027,29.8742],
+  "جهرم":[53.5609,28.5000],"فسا":[53.6482,28.9383],"لار":[54.3236,27.6740]
+};
+
+function normalizeCityName(value = "") {
+  return String(value).trim().replace(/ي/g, "ی").replace(/ك/g, "ک").replace(/\s+/g, " ");
+}
+
 export default function NeshanLocationPicker({
   value,
   onChange,
+  city = "",
   disabled = false,
 }) {
   const mapElementRef = useRef(null);
@@ -18,10 +48,16 @@ export default function NeshanLocationPicker({
   const [status, setStatus] = useState("loading");
   const [geoStatus, setGeoStatus] = useState("idle");
   const [showLocationConsent, setShowLocationConsent] = useState(false);
+  const [cityQuery, setCityQuery] = useState(city || "");
+  const [cityMessage, setCityMessage] = useState("");
 
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
+
+  useEffect(() => {
+    if (city) setCityQuery(city);
+  }, [city]);
 
   useEffect(() => {
     if (!mapElementRef.current) return undefined;
@@ -178,6 +214,22 @@ export default function NeshanLocationPicker({
     );
   };
 
+  const jumpToCity = () => {
+    const map = mapRef.current;
+    const name = normalizeCityName(cityQuery || city);
+    if (!map || !name) {
+      setCityMessage("نام شهر آگهی را وارد کن.");
+      return;
+    }
+    const center = CITY_CENTERS[name];
+    if (!center) {
+      setCityMessage("این شهر هنوز در فهرست پرش سریع نیست؛ می‌توانی با نقشه یا «موقعیت فعلی من» محل را انتخاب کنی.");
+      return;
+    }
+    setCityMessage(`نقشه روی ${name} رفت؛ حالا نقطه دقیق آگهی را انتخاب کن.`);
+    map.flyTo({ center, zoom: 12.5, essential: true });
+  };
+
   const panMap = (x, y) => {
     const map = mapRef.current;
     if (!map) return;
@@ -209,6 +261,20 @@ export default function NeshanLocationPicker({
           <span>اختیاری</span>
         )}
       </div>
+
+      {!disabled && status !== "missing-key" && (
+        <div className="neshan-location-picker__city-jump">
+          <input
+            type="text"
+            value={cityQuery}
+            onChange={(event) => setCityQuery(event.target.value)}
+            placeholder="مثلاً تهران، کیش، مشهد..."
+            aria-label="شهر مقصد روی نقشه"
+          />
+          <button type="button" onClick={jumpToCity}>رفتن به شهر آگهی</button>
+          {cityMessage && <small>{cityMessage}</small>}
+        </div>
+      )}
 
       {!disabled && status !== "missing-key" && (
         <div className="neshan-location-picker__tools">

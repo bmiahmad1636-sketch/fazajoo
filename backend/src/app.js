@@ -101,6 +101,15 @@ app.use(
       "Authorization",
     ],
 
+    // The legal evidence downloader needs these response headers in the browser
+    // so it can show the real byte/percent progress and preserve the filename.
+    exposedHeaders: [
+      "Content-Length",
+      "Content-Disposition",
+      "Content-Type",
+      "X-Fazajoo-SHA256",
+    ],
+
     maxAge:
       86400,
   })

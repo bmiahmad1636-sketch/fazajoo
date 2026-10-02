@@ -1,6 +1,7 @@
 const express=require('express');
 const {requireAuth,requireAdmin}=require('../middleware/auth.middleware');
 const legal=require('../services/legal.service');
+const storage=require('../services/storage.service');
 const router=express.Router(); router.use(requireAuth,requireAdmin);
 router.get('/cases',async(req,res)=>{try{res.json({ok:true,cases:await legal.listCases()});}catch(e){res.status(500).json({ok:false,message:e.message});}});
 router.post('/cases',async(req,res)=>{try{res.status(201).json({ok:true,case:await legal.createCase(req.user.id,req.body||{})});}catch(e){res.status(e.status||500).json({ok:false,message:e.message});}});
@@ -10,4 +11,19 @@ router.post('/cases/:id/actions',async(req,res)=>{try{res.json(await legal.apply
 router.get('/cases/:id/lookup/phone/:phone',async(req,res)=>{try{res.json({ok:true,...await legal.lookupByPhone(req.user.id,req.params.id,req.params.phone)});}catch(e){res.status(e.status||500).json({ok:false,message:e.message});}});
 router.get('/cases/:id/export/user/:userId',async(req,res)=>{try{const out=await legal.exportUserData(req.user.id,req.params.id,req.params.userId,req.query.from,req.query.to,req.query.scope||'both');res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Content-Disposition',`attachment; filename="fazajoo-legal-${req.params.userId}.json"`);res.setHeader('X-Fazajoo-SHA256',out.sha256);res.send(out.text);}catch(e){res.status(e.status||500).json({ok:false,message:e.message});}});
 router.get('/cases/:id/export/phone/:phone',async(req,res)=>{try{const out=await legal.exportUserDataByPhone(req.user.id,req.params.id,req.params.phone,req.query.from,req.query.to,req.query.scope||'both');res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Content-Disposition',`attachment; filename="fazajoo-legal-phone-${String(req.params.phone).replace(/\D/g,'')}.json"`);res.setHeader('X-Fazajoo-SHA256',out.sha256);res.send(out.text);}catch(e){res.status(e.status||500).json({ok:false,message:e.message});}});
+router.get('/cases/:id/evidence/video/:spaceId',async(req,res)=>{
+  try{
+    const meta=await legal.getVideoEvidenceDownload(req.user.id,req.params.id,req.params.spaceId);
+    const result=await storage.getAdVideo({userId:meta.userId,filename:meta.filename,range:null});
+    res.setHeader('Content-Type',result.ContentType||meta.video?.mimeType||'video/mp4');
+    res.setHeader('Content-Disposition',`attachment; filename="fazajoo-legal-video-${req.params.spaceId}.mp4"`);
+    res.setHeader('Cache-Control','private, no-store');
+    res.setHeader('X-Content-Type-Options','nosniff');
+    if(result.ContentLength!=null)res.setHeader('Content-Length',String(result.ContentLength));
+    if(!result.Body)return res.status(404).json({ok:false,message:'فایل اصلی ویدئو پیدا نشد.'});
+    result.Body.on('error',err=>res.headersSent?res.destroy(err):res.status(500).end());
+    return result.Body.pipe(res);
+  }catch(e){res.status(e.status||e.statusCode||500).json({ok:false,message:e.message||'دریافت فایل اصلی ویدئو انجام نشد.'});}
+});
+
 module.exports=router;

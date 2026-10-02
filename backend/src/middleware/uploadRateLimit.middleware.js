@@ -26,6 +26,12 @@ const adImageUploadLimiter = createUploadLimiter({
     "تعداد آپلود تصاویر در مدت کوتاه بیش از حد مجاز است. لطفاً چند دقیقه دیگر دوباره تلاش کنید.",
 });
 
+const adVideoUploadLimiter = createUploadLimiter({
+  windowMs: 30 * 60 * 1000,
+  limit: 8,
+  message: "تعداد آپلود ویدئو در مدت کوتاه بیش از حد مجاز است. لطفاً کمی بعد دوباره تلاش کنید.",
+});
+
 const agencyDocumentUploadLimiter = createUploadLimiter({
   windowMs: 30 * 60 * 1000,
   limit: 10,
@@ -35,5 +41,6 @@ const agencyDocumentUploadLimiter = createUploadLimiter({
 
 module.exports = {
   adImageUploadLimiter,
+  adVideoUploadLimiter,
   agencyDocumentUploadLimiter,
 };

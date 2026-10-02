@@ -14,3 +14,14 @@
 .legal__case-status strong{color:#a85c20}
 .legal__case-status span{display:block;color:#81756d;font-size:12px}
 @media(max-width:600px){.legal__modal{padding:23px 18px}.legal__modal-actions{flex-direction:column-reverse}.legal__modal-actions button{width:100%}}
+
+.legal-video-evidence-note{
+  margin:10px 0 12px;
+  padding:10px 12px;
+  border:1px solid rgba(238,122,34,.22);
+  border-radius:12px;
+  background:rgba(255,247,239,.82);
+  color:#6f5543;
+  font-size:.82rem;
+  line-height:1.9;
+}

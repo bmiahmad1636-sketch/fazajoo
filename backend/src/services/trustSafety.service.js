@@ -425,6 +425,8 @@ async function applyAdminAction(reportId, { action, note, adminId }) {
     "user_restore",
     "listing_disable",
     "listing_enable",
+    "video_disable",
+    "video_enable",
     "refer_legal",
   ]);
   if (!allowed.has(action)) {
@@ -456,7 +458,7 @@ async function applyAdminAction(reportId, { action, note, adminId }) {
   if (["chat_restrict", "chat_restore"].includes(action) && report.target_type !== "chat") {
     const e = new Error("این اقدام فقط برای گزارش گفتگو قابل استفاده است."); e.status = 400; throw e;
   }
-  if (["listing_disable", "listing_enable"].includes(action) && report.target_type !== "listing") {
+  if (["listing_disable", "listing_enable", "video_disable", "video_enable"].includes(action) && report.target_type !== "listing") {
     const e = new Error("این اقدام فقط برای گزارش آگهی قابل استفاده است."); e.status = 400; throw e;
   }
   if (["pair_block", "pair_unblock"].includes(action) && (!targetUserId || !report.reporter_id)) {
@@ -581,6 +583,21 @@ async function applyAdminAction(reportId, { action, note, adminId }) {
     if (!changed.rowCount) {
       const e = new Error("آگهی گزارش‌شده پیدا نشد."); e.status = 404; throw e;
     }
+  }
+
+  if (action === "video_disable" || action === "video_enable") {
+    const row = (await query(`SELECT media_items FROM spaces WHERE id=$1 LIMIT 1`, [report.target_id])).rows[0];
+    if (!row) { const e = new Error("آگهی گزارش‌شده پیدا نشد."); e.status = 404; throw e; }
+    const items = Array.isArray(row.media_items) ? row.media_items : [];
+    const wantedStatus = action === "video_disable" ? "blocked" : "ready";
+    let found = false;
+    const next = items.map((item) => {
+      if (item?.type !== "video") return item;
+      found = true;
+      return { ...item, status: wantedStatus, moderatedAt: new Date().toISOString(), moderatedBy: adminId };
+    });
+    if (!found) { const e = new Error("این آگهی ویدئویی برای مدیریت ندارد."); e.status = 409; throw e; }
+    await query(`UPDATE spaces SET media_items=$2::jsonb,updated_at=NOW() WHERE id=$1`, [report.target_id, JSON.stringify(next)]);
   }
 
   const actionId = crypto.randomUUID();

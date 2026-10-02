@@ -1,0 +1,27 @@
+.fazajoo-video-uploader{border:1px solid rgba(26,75,58,.16);border-radius:18px;background:#fffdf8;padding:12px}.fazajoo-video-uploader__pick{width:100%;min-height:118px;border:1px dashed rgba(26,75,58,.35);border-radius:15px;background:#f7faf7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;color:#173f32}.fazajoo-video-uploader__pick:hover{background:#f1f7f2}.fazajoo-video-uploader__pick:disabled{opacity:.65;cursor:not-allowed}.fazajoo-video-uploader__icon{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#1f5b45;color:#fff;padding-left:2px}.fazajoo-video-uploader__pick strong{font-size:14px}.fazajoo-video-uploader__pick small{font-size:11px;color:#6d776f}.fazajoo-video-uploader__ready{display:grid;grid-template-columns:minmax(180px,280px) 1fr auto;gap:14px;align-items:center}.fazajoo-video-uploader__ready video{width:100%;max-height:180px;border-radius:13px;background:#111}.fazajoo-video-uploader__meta{display:flex;flex-direction:column;gap:4px}.fazajoo-video-uploader__meta strong{color:#173f32}.fazajoo-video-uploader__meta span{font-size:12px;color:#69736d}.fazajoo-video-uploader__actions{display:flex;gap:7px;flex-wrap:wrap}.fazajoo-video-uploader__actions button{border:0;border-radius:10px;padding:8px 11px;background:#1f5b45;color:#fff;cursor:pointer}.fazajoo-video-uploader__actions .danger{background:#fff0ed;color:#a33d31;border:1px solid #f0c9c2}.fazajoo-video-uploader__status,.fazajoo-video-uploader__error{margin-top:8px;font-size:12px}.fazajoo-video-uploader__status{color:#1f5b45}.fazajoo-video-uploader__error{color:#a33d31}.fazajoo-video-uploader__privacy{margin:9px 2px 0;font-size:11px;line-height:1.8;color:#6c746f}@media(max-width:720px){.fazajoo-video-uploader__ready{grid-template-columns:1fr}.fazajoo-video-uploader__actions{justify-content:flex-start}}
+.fazajoo-video-uploader__progress-ring{
+  --video-progress:0deg;
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  position:relative;
+  background:conic-gradient(#1f5b45 var(--video-progress),rgba(31,91,69,.13) 0);
+  transition:background .16s linear;
+}
+.fazajoo-video-uploader__progress-ring::before{
+  content:"";
+  position:absolute;
+  inset:5px;
+  border-radius:50%;
+  background:#f7faf7;
+}
+.fazajoo-video-uploader__progress-ring span{
+  position:relative;
+  z-index:1;
+  direction:rtl;
+  font-size:12px;
+  font-weight:800;
+  color:#173f32;
+}

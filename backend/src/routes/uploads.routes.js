@@ -1,5 +1,6 @@
 const express = require("express");
 const multer = require("multer");
+const os = require("os");
 
 const {
   requireAuth,
@@ -7,6 +8,7 @@ const {
 
 const {
   adImageUploadLimiter,
+  adVideoUploadLimiter,
   agencyDocumentUploadLimiter,
 } = require("../middleware/uploadRateLimit.middleware");
 
@@ -18,6 +20,17 @@ const adImageUpload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 10 * 1024 * 1024,
+    files: 1,
+  },
+});
+
+const adVideoUpload = multer({
+  storage: multer.diskStorage({
+    destination: os.tmpdir(),
+    filename: (req, file, cb) => cb(null, `fazajoo-video-${Date.now()}-${Math.random().toString(16).slice(2)}`),
+  }),
+  limits: {
+    fileSize: 100 * 1024 * 1024,
     files: 1,
   },
 });
@@ -41,6 +54,7 @@ router.post(
   "/ad-image",
   requireAuth,
   adImageUploadLimiter,
+  adVideoUploadLimiter,
   adImageUpload.single("file"),
   controller.uploadAdImage
 );
@@ -49,6 +63,25 @@ router.delete(
   "/ad-image",
   requireAuth,
   controller.deleteAdImage
+);
+
+router.get(
+  "/ad-video/:userId/:filename",
+  controller.getAdVideo
+);
+
+router.post(
+  "/ad-video",
+  requireAuth,
+  adVideoUploadLimiter,
+  adVideoUpload.single("file"),
+  controller.uploadAdVideo
+);
+
+router.delete(
+  "/ad-video",
+  requireAuth,
+  controller.deleteAdVideo
 );
 
 router.post(

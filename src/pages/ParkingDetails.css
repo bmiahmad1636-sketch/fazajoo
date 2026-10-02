@@ -2638,3 +2638,6 @@ body.parking-gallery-open{overflow:hidden}
     height: 20px !important;
   }
 }
+
+
+.parking-details-video{border-radius:18px;overflow:hidden;background:#f7f7f2;border:1px solid rgba(28,76,59,.12);padding:10px}.parking-details-video video{display:block;width:100%;max-height:520px;border-radius:13px;background:#111}.parking-details-video p{margin:9px 4px 1px;color:#6b746e;font-size:12px;line-height:1.8}

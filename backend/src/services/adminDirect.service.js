@@ -25,6 +25,24 @@ function ensureSchema() {
       note VARCHAR(1000) NOT NULL, metadata JSONB NOT NULL DEFAULT '{}'::jsonb, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )`);
     await query(`CREATE INDEX IF NOT EXISTS idx_admin_direct_target ON admin_direct_actions(target_user_id,created_at DESC)`);
+
+    await query(`
+      CREATE TABLE IF NOT EXISTS video_action_history (
+        id UUID PRIMARY KEY,
+        space_id UUID NOT NULL REFERENCES spaces(id) ON DELETE CASCADE,
+        video_url TEXT,
+        action_type VARCHAR(40) NOT NULL,
+        source VARCHAR(30) NOT NULL,
+        source_ref TEXT,
+        previous_status VARCHAR(30),
+        new_status VARCHAR(30),
+        reason_code VARCHAR(120),
+        note TEXT,
+        actor_id UUID REFERENCES users(id),
+        video_snapshot JSONB NOT NULL DEFAULT '{}'::jsonb,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`);
+    await query(`CREATE INDEX IF NOT EXISTS idx_video_action_history_space ON video_action_history(space_id,created_at DESC)`);
   })().catch(e => { schemaPromise=null; throw e; });
   return schemaPromise;
 }
@@ -53,7 +71,7 @@ async function getUser(id){
   await ensureSchema();
   const u=(await query(`SELECT id,phone,full_name,account_type,system_role,agency_status,is_active,created_at FROM users WHERE id=$1`,[id])).rows[0];
   if(!u){const e=new Error("کاربر پیدا نشد.");e.status=404;throw e;}
-  const spaces=(await query(`SELECT id,title,category,status,city,created_at FROM spaces WHERE owner_id=$1 ORDER BY created_at DESC LIMIT 50`,[id])).rows;
+  const spaces=(await query(`SELECT id,title,category,status,city,created_at,media_items FROM spaces WHERE owner_id=$1 ORDER BY created_at DESC LIMIT 50`,[id])).rows;
   const chats=(await query(`SELECT c.id,c.space_id,c.owner_id,c.requester_id,c.moderation_mode,c.updated_at,s.title,
     CASE WHEN c.owner_id=$1 THEN c.requester_id ELSE c.owner_id END AS other_user_id,
     CASE WHEN c.owner_id=$1 THEN ur.full_name ELSE uo.full_name END AS other_name,
@@ -69,7 +87,7 @@ async function act(adminId,p){
   await ensureSchema();
   const action=String(p.action||""); const targetUserId=p.targetUserId; const chatId=p.chatId||null; const spaceId=p.spaceId||null; const relatedUserId=p.relatedUserId||null;
   const reasonCode=String(p.reasonCode||"").trim(); const note=String(p.note||"").trim().slice(0,1000);
-  const allowed=new Set(["warning","user_suspend","user_restore","chat_restrict","chat_restore","pair_block","pair_unblock","listing_disable","listing_enable"]);
+  const allowed=new Set(["warning","user_suspend","user_restore","chat_restrict","chat_restore","pair_block","pair_unblock","listing_disable","listing_enable","video_disable","video_enable"]);
   if(!allowed.has(action)){const e=new Error("اقدام مدیریتی معتبر نیست.");e.status=400;throw e;}
   if(!reasonCode){const e=new Error("علت اقدام را انتخاب کنید.");e.status=400;throw e;}
   if(note.length<3){const e=new Error("توضیح داخلی مدیر را وارد کنید.");e.status=400;throw e;}
@@ -99,6 +117,25 @@ async function act(adminId,p){
     const targetMsg=action==="pair_block" ? `ارتباط حساب شما با ${targetOther} به تصمیم مدیریت فضاجو موقتاً محدود شد. در حال حاضر امکان شروع یا ادامه گفتگو بین این دو حساب وجود ندارد.` : `محدودیت ارتباط مدیریتی حساب شما با ${targetOther} برداشته شد و امکان گفتگو دوباره فعال است.`;
     const relatedMsg=action==="pair_block" ? `ارتباط حساب شما با ${relatedOther} به تصمیم مدیریت فضاجو موقتاً محدود شد. در حال حاضر امکان شروع یا ادامه گفتگو بین این دو حساب وجود ندارد.` : `محدودیت ارتباط مدیریتی حساب شما با ${relatedOther} برداشته شد و امکان گفتگو دوباره فعال است.`;
     await notice(targetUserId,action==="pair_block"?"pair_blocked":"pair_unblocked",targetMsg,adminId); await notice(relatedUserId,action==="pair_block"?"pair_blocked":"pair_unblocked",relatedMsg,adminId);
+  }
+  if(["video_disable","video_enable"].includes(action)){
+    if(!spaceId){const e=new Error("آگهی را انتخاب کنید.");e.status=400;throw e;}
+    const row=(await query(`SELECT id,title,media_items FROM spaces WHERE id=$1 AND owner_id=$2 LIMIT 1`,[spaceId,targetUserId])).rows[0];
+    if(!row){const e=new Error("آگهی انتخاب‌شده متعلق به این کاربر نیست.");e.status=400;throw e;}
+    const items=Array.isArray(row.media_items)?row.media_items:[]; const currentVideo=items.find(item=>item?.type==="video");
+    if(!currentVideo){const e=new Error("آگهی انتخاب‌شده ویدئو ندارد.");e.status=409;throw e;}
+    const currentStatus=String(currentVideo.status||"ready");
+    if(action==="video_disable" && currentStatus==="blocked"){const e=new Error("نمایش این ویدئو قبلاً متوقف شده است؛ ثبت توقف تکراری مجاز نیست.");e.status=409;throw e;}
+    if(action==="video_enable" && currentStatus!=="blocked"){const e=new Error("نمایش این ویدئو در حال حاضر متوقف نیست.");e.status=409;throw e;}
+    const status=action==="video_disable"?"blocked":"ready";
+    const now=new Date().toISOString();
+    const next=items.map(item=>item?.type!=="video"?item:{...item,status,moderatedAt:now,moderatedBy:adminId});
+    await query(`UPDATE spaces SET media_items=$2::jsonb,updated_at=NOW() WHERE id=$1`,[spaceId,JSON.stringify(next)]);
+    await query(`INSERT INTO video_action_history(id,space_id,video_url,action_type,source,source_ref,previous_status,new_status,reason_code,note,actor_id,video_snapshot)
+      VALUES($1,$2,$3,$4,'admin_direct',NULL,$5,$6,$7,$8,$9,$10::jsonb)`,
+      [crypto.randomUUID(),spaceId,currentVideo.url||null,action,currentStatus,status,reasonCode,note,adminId,JSON.stringify(currentVideo)]);
+    await notice(targetUserId,action==="video_disable"?"video_disabled":"video_enabled",
+      action==="video_disable" ? `نمایش ویدئوی آگهی «${String(row.title||"آگهی شما").trim()}» توسط مدیریت فضاجو موقتاً متوقف شد. خود آگهی و تصاویر حذف نشده‌اند.` : `نمایش ویدئوی آگهی «${String(row.title||"آگهی شما").trim()}» دوباره فعال شد.`,adminId);
   }
   if(["listing_disable","listing_enable"].includes(action)){
     if(!spaceId){const e=new Error("آگهی را انتخاب کنید.");e.status=400;throw e;}

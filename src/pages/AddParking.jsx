@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { createSpace } from "../services/spaceService";
 import { getAuthToken } from "../services/authService";
 import ImageUploader from "../components/ImageUploader";
+import VideoUploader from "../components/VideoUploader";
 import NeshanLocationPicker from "../components/NeshanLocationPicker";
 import ResidentialFields, { emptyResidentialDetails } from "../components/ResidentialFields";
 import VillaFields, { emptyVillaDetails } from "../components/VillaFields";
@@ -23,6 +24,7 @@ const INITIAL_FORM = {
   phone: "",
   imageUrl: "",
   imageUrls: [],
+  video: null,
   description: "",
   residentialDetails: { ...emptyResidentialDetails },
   villaDetails: { ...emptyVillaDetails },
@@ -368,6 +370,7 @@ function AddParking() {
 
           imageUrl: form.imageUrl,
           imageUrls: form.imageUrls,
+          video: form.video,
 
           description:
             form.description.trim(),
@@ -962,6 +965,7 @@ function AddParking() {
 
                     <NeshanLocationPicker
                       value={form.location}
+                      city={form.city}
                       disabled={loading}
                       onChange={(location) =>
                         setForm((currentForm) => ({
@@ -1034,6 +1038,21 @@ function AddParking() {
                             عکس دارای برچسب «عکس اصلی»، تصویر کارت آگهی است و همه عکس‌ها در صفحه جزئیات نمایش داده می‌شوند.
                           </p>
                         </div>
+                      </div>
+                    )}
+
+                    {!isWantedAd && (
+                      <div style={{ marginTop: "14px" }}>
+                        <div className="add-parking-section-heading" style={{ marginBottom: "8px" }}>
+                          <div>
+                            <strong>ویدئوی کوتاه فضا (اختیاری)</strong>
+                            <p>یک ویدئوی واقعی تا ۲ دقیقه اضافه کن؛ پخش خودکار ندارد و برای کنترل هزینه فقط با درخواست کاربر پخش می‌شود.</p>
+                          </div>
+                        </div>
+                        <VideoUploader
+                          video={form.video}
+                          onChange={(video) => setForm((current) => ({ ...current, video }))}
+                        />
                       </div>
                     )}
 

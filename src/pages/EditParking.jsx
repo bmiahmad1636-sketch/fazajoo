@@ -12,6 +12,7 @@ import {
 
 import { updateSpace } from "../services/spaceService";
 import ImageUploader from "../components/ImageUploader";
+import VideoUploader from "../components/VideoUploader";
 import ResidentialFields, { emptyResidentialDetails } from "../components/ResidentialFields";
 import VillaFields, { emptyVillaDetails } from "../components/VillaFields";
 import "../components/ResidentialFields.css";
@@ -27,6 +28,7 @@ const EMPTY_FORM = {
   phone: "",
   imageUrl: "",
   imageUrls: [],
+  video: null,
   description: "",
   residentialDetails: { ...emptyResidentialDetails },
   villaDetails: { ...emptyVillaDetails },
@@ -83,6 +85,7 @@ function createFormFromParking(parking) {
     phone: parking?.phone || "",
     imageUrl:
       parking?.imageUrl || parking?.imageUrls?.[0] || "",
+    video: parking?.video || null,
     imageUrls:
       Array.isArray(parking?.imageUrls) && parking.imageUrls.length
         ? parking.imageUrls
@@ -367,6 +370,7 @@ function EditParking({
       phone: normalizedPhone,
       imageUrl: form.imageUrl,
       imageUrls: form.imageUrls,
+      video: form.video,
 
       description:
         form.description.trim(),
@@ -800,6 +804,26 @@ function EditParking({
                   )}
                 </div>
               </section>
+
+              {!isWanted && (
+                <section className="edit-parking-card">
+                  <div className="edit-parking-card__header">
+                    <div className="edit-parking-card__icon edit-parking-card__icon--cyan">▶</div>
+                    <div>
+                      <span>رسانه آگهی</span>
+                      <h2>ویدئوی کوتاه فضا</h2>
+                      <p>اختیاری؛ حداکثر ۲ دقیقه و ۱۰۰ مگابایت. می‌توانی ویدئو را نگه داری، حذف یا جایگزین کنی.</p>
+                    </div>
+                  </div>
+                  <div className="edit-parking-card__body">
+                    <VideoUploader
+                      persisted
+                      video={form.video}
+                      onChange={(video) => { setForm((current) => ({ ...current, video })); setShowSuccess(false); }}
+                    />
+                  </div>
+                </section>
+              )}
 
               <section className="edit-parking-card">
                 <div className="edit-parking-card__header">

@@ -30,6 +30,8 @@ const actionLabels = {
   user_restore: "فعال‌سازی دوباره حساب",
   listing_disable: "غیرفعال‌کردن آگهی",
   listing_enable: "فعال‌کردن دوباره آگهی",
+  video_disable: "توقف نمایش ویدئوی آگهی",
+  video_enable: "فعال‌کردن دوباره ویدئو",
   refer_legal: "ارجاع داخلی به امور حقوقی",
 };
 
@@ -45,6 +47,8 @@ function actionHelp(action) {
     user_restore: "حساب کاربر دوباره فعال می‌شود.",
     listing_disable: "فقط آگهی گزارش‌شده غیرفعال می‌شود.",
     listing_enable: "آگهی گزارش‌شده دوباره فعال می‌شود.",
+    video_disable: "فقط نمایش ویدئوی آگهی متوقف می‌شود و خود آگهی و تصاویر باقی می‌مانند. فایل برای سابقه و امور حقوقی حذف نمی‌شود.",
+    video_enable: "نمایش ویدئوی آگهی دوباره فعال می‌شود.",
     refer_legal: "فقط ارجاع داخلی ثبت می‌شود و پرونده قضایی به‌صورت خودکار ساخته نمی‌شود.",
   };
   return help[action] || "";
@@ -73,6 +77,8 @@ function availableActions(report) {
   if (report.target_type === "listing") {
     items.push(["listing_disable", "غیرفعال‌کردن آگهی"]);
     items.push(["listing_enable", "فعال‌کردن دوباره آگهی"]);
+    items.push(["video_disable", "توقف نمایش ویدئوی آگهی"]);
+    items.push(["video_enable", "فعال‌کردن دوباره ویدئو"]);
   }
   items.push(["refer_legal", "ارجاع داخلی به امور حقوقی"]);
   return items;

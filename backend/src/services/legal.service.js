@@ -53,6 +53,24 @@ async function ensureLegalSchema() {
     await query(`CREATE INDEX IF NOT EXISTS idx_legal_audit_created ON legal_audit_log(created_at DESC)`);
     await query(`ALTER TABLE legal_actions ALTER COLUMN target_id TYPE TEXT USING target_id::text`);
     await query(`CREATE INDEX IF NOT EXISTS idx_legal_actions_case ON legal_actions(case_id, created_at DESC)`);
+
+    await query(`
+      CREATE TABLE IF NOT EXISTS video_action_history (
+        id UUID PRIMARY KEY,
+        space_id UUID NOT NULL REFERENCES spaces(id) ON DELETE CASCADE,
+        video_url TEXT,
+        action_type VARCHAR(40) NOT NULL,
+        source VARCHAR(30) NOT NULL,
+        source_ref TEXT,
+        previous_status VARCHAR(30),
+        new_status VARCHAR(30),
+        reason_code VARCHAR(120),
+        note TEXT,
+        actor_id UUID REFERENCES users(id),
+        video_snapshot JSONB NOT NULL DEFAULT '{}'::jsonb,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`);
+    await query(`CREATE INDEX IF NOT EXISTS idx_video_action_history_space ON video_action_history(space_id,created_at DESC)`);
   })().catch(e => { ready = null; throw e; });
   return ready;
 }
@@ -71,7 +89,7 @@ async function createCase(adminId, body) {
   const orderDateJalali = String(body.orderDateJalali||'').trim();
   if (!caseNumber || !authority || !subject) { const e=new Error('شماره پرونده، مرجع و موضوع الزامی است.'); e.status=400; throw e; }
   if (orderDateJalali && !/^\d{4}\/\d{2}\/\d{2}$/.test(orderDateJalali)) { const e=new Error('تاریخ شمسی را به صورت ۱۴۰۵/۰۶/۰۸ وارد کنید.'); e.status=400; throw e; }
-  const r=await query(`INSERT INTO legal_cases (id,case_number,authority,order_date_jalali,subject,scope_text,order_document_ref,order_notes,created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+  const r=await query(`INSERT INTO legal_cases (id,case_number,authority,order_date_jalali,subject,scope_text,order_document_ref,order_notes,created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
     [id,caseNumber,authority,orderDateJalali||null,subject,String(body.scopeText||'').trim()||null,String(body.orderDocumentRef||'').trim()||null,String(body.orderNotes||'').trim()||null,adminId]);
   await audit({adminId,caseId:id,action:'case_created',metadata:{caseNumber,authority}}); return r.rows[0];
 }
@@ -90,7 +108,7 @@ async function requireOpenCase(caseId){
 async function applyAction(adminId, caseId, body){
   await ensureLegalSchema();
   const action=String(body.action||''); const targetType=String(body.targetType||''); const targetId=String(body.targetId||'').trim();
-  const allowed=new Set(['chat_readonly','chat_block','chat_unblock','global_chat_block','global_chat_unblock','legal_hold_on','legal_hold_off','user_suspend','user_restore','space_disable','space_enable']);
+  const allowed=new Set(['chat_readonly','chat_block','chat_unblock','global_chat_block','global_chat_unblock','legal_hold_on','legal_hold_off','user_suspend','user_restore','space_disable','space_enable','video_disable','video_enable']);
   if(!allowed.has(action)||!['chat','user','space','system'].includes(targetType)||!targetId){const e=new Error('عملیات یا هدف معتبر نیست.');e.status=400;throw e;}
   await requireOpenCase(caseId);
   if(action==='chat_readonly') await query(`UPDATE chats SET legal_mode='readonly' WHERE id=$1`,[targetId]);
@@ -104,8 +122,52 @@ async function applyAction(adminId, caseId, body){
   if(action==='user_restore') await query(`UPDATE users SET is_active=TRUE WHERE id=$1`,[targetId]);
   if(action==='space_disable') await query(`UPDATE spaces SET status='inactive', legal_hold=TRUE WHERE id=$1`,[targetId]);
   if(action==='space_enable') await query(`UPDATE spaces SET status='active', legal_hold=FALSE WHERE id=$1`,[targetId]);
+  if(action==='video_disable'||action==='video_enable') {
+    const row=(await query(`SELECT media_items FROM spaces WHERE id=$1 LIMIT 1`,[targetId])).rows[0];
+    if(!row){const e=new Error('آگهی پیدا نشد.');e.status=404;throw e;}
+    const items=Array.isArray(row.media_items)?row.media_items:[]; const currentVideo=items.find(item=>item?.type==='video');
+    if(!currentVideo){const e=new Error('این آگهی ویدئو ندارد.');e.status=409;throw e;}
+    const currentStatus=String(currentVideo.status||'ready');
+    if(action==='video_disable' && currentStatus==='blocked'){const e=new Error('نمایش این ویدئو قبلاً متوقف شده است؛ دستور تکراری ثبت نمی‌شود.');e.status=409;throw e;}
+    if(action==='video_enable' && currentStatus!=='blocked'){const e=new Error('نمایش این ویدئو در حال حاضر متوقف نیست.');e.status=409;throw e;}
+    const status=action==='video_disable'?'blocked':'ready';
+    const now=new Date().toISOString();
+    const next=items.map(item=>item?.type!=='video'?item:{...item,status,legalActionAt:now,legalActionBy:adminId});
+    await query(`UPDATE spaces SET media_items=$2::jsonb,updated_at=NOW() WHERE id=$1`,[targetId,JSON.stringify(next)]);
+    await query(`INSERT INTO video_action_history(id,space_id,video_url,action_type,source,source_ref,previous_status,new_status,note,actor_id,video_snapshot)
+      VALUES($1,$2,$3,$4,'legal_case',$5,$6,$7,$8,$9,$10::jsonb)`,
+      [crypto.randomUUID(),targetId,currentVideo.url||null,action,caseId,currentStatus,status,String(body.note||'').trim(),adminId,JSON.stringify(currentVideo)]);
+  }
   await query(`INSERT INTO legal_actions (id,case_id,action_type,target_type,target_id,details,created_by) VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7)`,[crypto.randomUUID(),caseId,action,targetType,targetId,JSON.stringify({note:String(body.note||'').trim()}),adminId]);
   await audit({adminId,caseId,action,targetType,targetId,metadata:{note:String(body.note||'').trim()}}); return {ok:true};
+}
+
+
+async function getVideoEvidenceDownload(adminId, caseId, spaceId){
+  await requireOpenCase(caseId);
+  await ensureLegalSchema();
+  const row=(await query(`SELECT id,owner_id,title,media_items,legal_hold FROM spaces WHERE id=$1 LIMIT 1`,[spaceId])).rows[0];
+  if(!row){const e=new Error('آگهی پیدا نشد.');e.status=404;throw e;}
+  const items=Array.isArray(row.media_items)?row.media_items:[];
+  const video=items.find(item=>item?.type==='video');
+  if(!video?.url){const e=new Error('برای این آگهی فایل ویدئو ثبت نشده است.');e.status=404;throw e;}
+  let userId='',filename='';
+  try{
+    const parsed=new URL(String(video.url),'http://fazajoo.local');
+    const marker='/api/uploads/ad-video/';
+    const pos=parsed.pathname.indexOf(marker);
+    if(pos<0)throw new Error('bad-url');
+    const parts=parsed.pathname.slice(pos+marker.length).split('/').filter(Boolean).map(decodeURIComponent);
+    if(parts.length!==2)throw new Error('bad-url');
+    [userId,filename]=parts;
+  }catch{
+    const e=new Error('مسیر فایل اصلی ویدئو معتبر نیست.');e.status=409;throw e;
+  }
+  if(String(userId)!==String(row.owner_id) || !filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')){
+    const e=new Error('مالکیت یا مسیر فایل ویدئو قابل تأیید نیست.');e.status=403;throw e;
+  }
+  await audit({adminId,caseId,action:'legal_video_evidence_download',targetType:'space',targetId:spaceId,metadata:{videoUrl:video.url,status:video.status||'ready',filename}});
+  return {userId:String(row.owner_id),filename,video,title:row.title||''};
 }
 
 async function exportUserData(adminId, caseId, userId, from, to, scope='both'){
@@ -113,9 +175,22 @@ async function exportUserData(adminId, caseId, userId, from, to, scope='both'){
   await ensureLegalSchema();
   const caseRow=(await query(`SELECT id,case_number,authority,order_date_jalali,subject,scope_text,order_document_ref,order_notes FROM legal_cases WHERE id=$1`,[caseId])).rows[0];
   const user=(await query(`SELECT id,phone,full_name,account_type,system_role,agency_status,is_active,created_at FROM users WHERE id=$1`,[userId])).rows[0]; if(!user){const e=new Error('کاربر پیدا نشد.');e.status=404;throw e;}
-  const params=[userId]; let dateWhere=''; if(from){params.push(from);dateWhere+=` AND m.created_at >= $${params.length}::timestamptz`; } if(to){params.push(to);dateWhere+=` AND m.created_at <= $${params.length}::timestamptz`;}
-  const messages=scope==='spaces'?[]:(await query(`SELECT m.id,m.chat_id,m.sender_id,m.text,m.created_at,m.read_at,c.space_id,c.owner_id,c.requester_id,c.chat_type FROM messages m JOIN chats c ON c.id=m.chat_id WHERE (c.owner_id=$1 OR c.requester_id=$1) ${dateWhere} ORDER BY m.created_at ASC`,params)).rows;
-  const spaceRows=scope==='messages'?[]:(await query(`SELECT to_jsonb(s) AS raw FROM spaces s WHERE s.owner_id=$1 ORDER BY s.created_at ASC`,[userId])).rows;
+
+  // Judicial exports must always have an explicit, valid time window.
+  if(!from || !to){const e=new Error('برای خروجی قضایی، بازه «از تاریخ» و «تا تاریخ» الزامی است.');e.status=400;throw e;}
+  const fromDate=new Date(from),toDate=new Date(to);
+  if(Number.isNaN(fromDate.getTime()) || Number.isNaN(toDate.getTime())){const e=new Error('بازه زمانی خروجی معتبر نیست.');e.status=400;throw e;}
+  if(fromDate>toDate){const e=new Error('«از تاریخ» نمی‌تواند بعد از «تا تاریخ» باشد.');e.status=400;throw e;}
+
+  const messages=scope==='spaces'?[]:(await query(`SELECT m.id,m.chat_id,m.sender_id,m.text,m.created_at,m.read_at,c.space_id,c.owner_id,c.requester_id,c.chat_type
+    FROM messages m JOIN chats c ON c.id=m.chat_id
+    WHERE (c.owner_id=$1 OR c.requester_id=$1) AND m.created_at >= $2::timestamptz AND m.created_at <= $3::timestamptz
+    ORDER BY m.created_at ASC`,[userId,from,to])).rows;
+
+  const spaceRows=scope==='messages'?[]:(await query(`SELECT to_jsonb(s) AS raw FROM spaces s
+    WHERE s.owner_id=$1 AND s.created_at >= $2::timestamptz AND s.created_at <= $3::timestamptz
+    ORDER BY s.created_at ASC`,[userId,from,to])).rows;
+
   const imageKeys=new Set(['image','imageurl','image_url','images','image_urls','imageurls','gallery','photos','photo_urls','photourls','main_image','mainimage','main_image_url','mainimageurl']);
   const collectImageUrls=(value,out=new Set(),depth=0)=>{
     if(depth>5||value==null)return [...out];
@@ -126,14 +201,26 @@ async function exportUserData(adminId, caseId, userId, from, to, scope='both'){
   };
   const spaces=spaceRows.map(({raw})=>{
     const images=collectImageUrls(raw);
-    return {id:raw.id,title:raw.title,city:raw.city,category:raw.category,listing_type:raw.listing_type,status:raw.status,created_at:raw.created_at,updated_at:raw.updated_at,images,imageCount:images.length};
+    return {id:raw.id,title:raw.title,city:raw.city,category:raw.category,listing_type:raw.listing_type,status:raw.status,created_at:raw.created_at,updated_at:raw.updated_at,images,imageCount:images.length,mediaItems:Array.isArray(raw.media_items)?raw.media_items:[],video:(Array.isArray(raw.media_items)?raw.media_items:[]).find(item=>item?.type==='video')||null};
   });
-  const evidence={exportVersion:2,generatedAt:new Date().toISOString(),caseId,case:caseRow,user,filters:{from:from||null,to:to||null,scope},spaces,messages};
+
+  // History is filtered by the history event timestamp itself. This does not change video storage/download behavior.
+  let videoHistory=[];
+  if(scope!=='messages'){
+    videoHistory=(await query(`SELECT vah.*,u.full_name AS actor_name,u.phone AS actor_phone
+      FROM video_action_history vah
+      JOIN spaces s ON s.id=vah.space_id
+      LEFT JOIN users u ON u.id=vah.actor_id
+      WHERE s.owner_id=$1 AND vah.created_at >= $2::timestamptz AND vah.created_at <= $3::timestamptz
+      ORDER BY vah.created_at ASC`,[userId,from,to])).rows;
+  }
+
+  const evidence={exportVersion:4,generatedAt:new Date().toISOString(),caseId,case:caseRow,user,filters:{from,to,scope},spaces,videoHistory,messages};
   const evidenceText=JSON.stringify(evidence,null,2);
   const sha256=crypto.createHash('sha256').update(evidenceText,'utf8').digest('hex');
   const payload={...evidence,integrity:{algorithm:'SHA-256',sha256,scope:'evidence payload without integrity field'}};
   const text=JSON.stringify(payload,null,2);
-  await audit({adminId,caseId,action:'user_data_export',targetType:'user',targetId:userId,metadata:{from:from||null,to:to||null,sha256,messageCount:messages.length,spaceCount:spaces.length}});
+  await audit({adminId,caseId,action:'user_data_export',targetType:'user',targetId:userId,metadata:{from,to,sha256,messageCount:messages.length,spaceCount:spaces.length,videoHistoryCount:videoHistory.length}});
   return {text,sha256};
 }
 
@@ -167,4 +254,4 @@ async function lookupByPhone(adminId, caseId, phone){
   return {user,chats,spaces};
 }
 
-module.exports={ensureLegalSchema,listCases,createCase,archiveCase,listAudit,applyAction,exportUserData,exportUserDataByPhone,lookupByPhone};
+module.exports={ensureLegalSchema,listCases,createCase,archiveCase,listAudit,applyAction,exportUserData,exportUserDataByPhone,lookupByPhone,getVideoEvidenceDownload};

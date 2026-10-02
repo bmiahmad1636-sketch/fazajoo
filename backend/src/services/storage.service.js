@@ -410,6 +410,72 @@ async function deleteAdImage({
   };
 }
 
+
+function safeVideoExtension(originalName, mimeType) {
+  const ext = path.extname(originalName || "").toLowerCase();
+  if ([".mp4", ".mov", ".webm"].includes(ext)) return ext;
+  if (mimeType === "video/quicktime") return ".mov";
+  if (mimeType === "video/webm") return ".webm";
+  return ".mp4";
+}
+
+function keyFromAdVideoApiUrl(url) {
+  if (!url || typeof url !== "string") return null;
+  try {
+    const parsed = new URL(url, "http://fazajoo.local");
+    const marker = "/api/uploads/ad-video/";
+    const index = parsed.pathname.indexOf(marker);
+    if (index === -1) return null;
+    const parts = parsed.pathname.slice(index + marker.length).split("/").filter(Boolean).map(decodeURIComponent);
+    if (parts.length !== 2) return null;
+    const [userId, filename] = parts;
+    if (!userId || !filename || filename.includes("..") || filename.includes("/")) return null;
+    return `ad-videos/${userId}/${filename}`;
+  } catch { return null; }
+}
+
+async function uploadAdVideo({ body, mimeType, originalName, userId, size }) {
+  const key = `ad-videos/${userId}/${crypto.randomUUID()}${safeVideoExtension(originalName, mimeType)}`;
+  await client().send(new PutObjectCommand({
+    Bucket: env.STORAGE_BUCKET,
+    Key: key,
+    Body: body,
+    ContentType: mimeType,
+    ContentLength: size,
+    CacheControl: "public, max-age=31536000, immutable",
+  }));
+  return { key };
+}
+
+async function getAdVideo({ userId, filename, range }) {
+  if (!userId || !filename || filename.includes("..") || filename.includes("/")) {
+    const error = new Error("ویدئو نامعتبر است."); error.statusCode = 400; throw error;
+  }
+  try {
+    return await client().send(new GetObjectCommand({
+      Bucket: env.STORAGE_BUCKET,
+      Key: `ad-videos/${userId}/${filename}`,
+      ...(range ? { Range: range } : {}),
+    }));
+  } catch (error) {
+    if (error?.name === "NoSuchKey" || error?.$metadata?.httpStatusCode === 404) {
+      const notFound = new Error("ویدئو پیدا نشد."); notFound.statusCode = 404; throw notFound;
+    }
+    throw error;
+  }
+}
+
+async function deleteAdVideo({ url, userId }) {
+  const key = keyFromAdVideoApiUrl(url) || keyFromPublicUrl(url);
+  if (!key) return { deleted: false, external: true };
+  const allowedPrefix = `ad-videos/${userId}/`;
+  if (!key.startsWith(allowedPrefix)) {
+    const error = new Error("اجازه حذف این ویدئو را ندارید."); error.statusCode = 403; throw error;
+  }
+  await client().send(new DeleteObjectCommand({ Bucket: env.STORAGE_BUCKET, Key: key }));
+  return { deleted: true };
+}
+
 async function uploadAgencyDocument({
   buffer,
   mimeType,
@@ -650,6 +716,9 @@ module.exports = {
   uploadAdImage,
   getAdImage,
   deleteAdImage,
+  uploadAdVideo,
+  getAdVideo,
+  deleteAdVideo,
   uploadAgencyDocument,
   getAgencyDocument,
   deleteByPublicUrl,

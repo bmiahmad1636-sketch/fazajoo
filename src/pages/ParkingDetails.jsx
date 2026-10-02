@@ -591,6 +591,28 @@ function ParkingDetails({
                 </div>
               )}
 
+              {!isWanted && parking.video?.url && (
+                <article className="parking-details-section parking-details-video-section">
+                  <div className="parking-details-section__heading">
+                    <div className="parking-details-section__icon">▶</div>
+                    <div>
+                      <span>ویدئوی آگهی</span>
+                      <h2>بازدید کوتاه از فضا</h2>
+                    </div>
+                  </div>
+                  <div className="parking-details-video">
+                    <video
+                      controls
+                      playsInline
+                      preload="metadata"
+                      poster={parking.video.posterUrl || undefined}
+                      src={parking.video.url}
+                    />
+                    <p>ویدئو به‌صورت خودکار پخش نمی‌شود تا مصرف اینترنت و هزینه سرویس کنترل شود.</p>
+                  </div>
+                </article>
+              )}
+
               <article className="parking-details-section">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon">

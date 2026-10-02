@@ -4,3 +4,14 @@
 
 /* Package 13 — Fazajoo unified admin visual identity */
 .legal{color:#17382f;background:linear-gradient(180deg,#f7f5ef 0,#fbfaf7 100%);border-radius:26px;margin-top:22px}.legal__head{background:linear-gradient(135deg,#123b30,#1b5142);color:#fff;border-radius:24px;padding:24px 26px;box-shadow:0 18px 45px rgba(18,59,48,.12)}.legal__head h1{color:#fff}.legal__head p{color:#d9e8e2}.legal__head a,.legal button{background:linear-gradient(135deg,#ff8a2a,#ef741b);font-weight:800;box-shadow:0 7px 18px rgba(239,116,27,.16)}.legal__grid{gap:16px}.legal__card{border-color:#e1e9e4;border-radius:18px;box-shadow:0 10px 30px rgba(18,59,48,.055)}.legal__card h2{color:#163e33}.legal input,.legal textarea,.legal select{border-color:#d7e2dc;background:#fcfdfc}.legal input:focus,.legal textarea:focus,.legal select:focus{outline:none;border-color:#ef7b22;box-shadow:0 0 0 3px rgba(239,123,34,.1)}.legal__muted{background:#173f34!important}.legal__notice,.legal__msg{background:#fff6ec;border-color:#ffd7b5}.legal__table>div{border-color:#e6ede9}.legal label{color:#35564c}.legal__export-actions button:nth-child(2){background:#173f34}
+
+.legal-video-evidence-note{
+  margin:10px 0 12px;
+  padding:10px 12px;
+  border:1px solid rgba(238,122,34,.22);
+  border-radius:12px;
+  background:rgba(255,247,239,.82);
+  color:#6f5543;
+  font-size:.82rem;
+  line-height:1.9;
+}

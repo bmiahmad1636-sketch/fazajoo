@@ -186,3 +186,10 @@
     flex-direction: column;
   }
 }
+
+.neshan-location-picker__city-jump{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin:0 0 10px}
+.neshan-location-picker__city-jump input{min-height:40px;border:1px solid rgba(31,91,72,.18);border-radius:12px;background:#fff;padding:0 12px;font:inherit;color:#294b41;outline:none}
+.neshan-location-picker__city-jump input:focus{border-color:#4b8b77;box-shadow:0 0 0 3px rgba(31,91,72,.08)}
+.neshan-location-picker__city-jump button{min-height:40px;border:0;border-radius:12px;background:#1f5b48;color:#fff;padding:0 14px;font:inherit;font-weight:900;cursor:pointer}
+.neshan-location-picker__city-jump small{grid-column:1/-1;color:#6f625b;font-size:.74rem;line-height:1.7}
+@media(max-width:560px){.neshan-location-picker__city-jump{grid-template-columns:1fr}.neshan-location-picker__city-jump small{grid-column:auto}}
