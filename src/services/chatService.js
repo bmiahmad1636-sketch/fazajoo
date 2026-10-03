@@ -1,8 +1,8 @@
+import { API_BASE_URL, API_SERVER_URL } from "../config/api";
 import { io } from "socket.io-client";
 import { getAuthToken } from "./authService";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:6060/api";
-const SOCKET_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, "");
+const SOCKET_BASE_URL = API_SERVER_URL;
 let socket = null;
 let socketToken = "";
 

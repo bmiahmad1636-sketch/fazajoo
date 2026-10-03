@@ -1,7 +1,4 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  "http://127.0.0.1:6060/api";
-
+import { API_BASE_URL } from "../config/api";
 const TOKEN_STORAGE_KEY =
   "fazajoo_auth_token";
 

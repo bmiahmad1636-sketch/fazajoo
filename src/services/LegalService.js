@@ -1,5 +1,6 @@
+import { API_BASE_URL } from "../config/api";
 import { getAuthToken } from './authService';
-const BASE=import.meta.env.VITE_API_BASE_URL||'http://127.0.0.1:6060/api';
+const BASE = API_BASE_URL;
 async function request(path,options={}){const r=await fetch(`${BASE}/admin/legal${path}`,{...options,headers:{'Content-Type':'application/json',Authorization:`Bearer ${getAuthToken()}`,...(options.headers||{})}});const d=await r.json().catch(()=>null);if(!r.ok||d?.ok===false)throw new Error(d?.message||'خطای بخش حقوقی');return d;}
 export async function getLegalCases(){return (await request('/cases')).cases||[]}
 export async function createLegalCase(body){return request('/cases',{method:'POST',body:JSON.stringify(body)})}
