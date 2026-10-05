@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-10-04T14:59:46.959Z",
+  "totalCities": 1155,
+  "previousMissing": 247,
+  "candidatesFound": 0,
+  "completed": 0,
+  "completedExact": 0,
+  "completedUniqueName": 0,
+  "totalWithCoordinates": 1155,
+  "stillMissingCount": 0,
+  "completionDetails": [],
+  "stillMissing": []
+}

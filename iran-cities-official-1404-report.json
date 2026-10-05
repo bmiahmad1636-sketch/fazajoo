@@ -1,0 +1,9 @@
+{
+  "generatedAt": "2026-10-04T17:35:04.831Z",
+  "source": "https://raw.githubusercontent.com/sajaddp/list-of-cities-in-Iran/main/dist/json/cities.json",
+  "topLevelType": "array",
+  "recordCount": 1672,
+  "persianCharacterCount": 19718,
+  "bostanFound": true,
+  "outputFile": "src\\data\\iran-cities-official-1404.json"
+}

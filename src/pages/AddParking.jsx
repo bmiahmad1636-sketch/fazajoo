@@ -6,6 +6,8 @@ import { getAuthToken } from "../services/authService";
 import ImageUploader from "../components/ImageUploader";
 import VideoUploader from "../components/VideoUploader";
 import NeshanLocationPicker from "../components/NeshanLocationPicker";
+import IranCityAutocomplete from "../components/IranCityAutocomplete";
+import "../components/IranCityAutocomplete.css";
 import ResidentialFields from "../components/ResidentialFields";
 import { emptyResidentialDetails } from "../components/residentialDetails";
 import VillaFields from "../components/VillaFields";
@@ -883,32 +885,12 @@ function AddParking() {
                           <span>*</span>
                         </label>
 
-                        <div
-                          className={[
-                            "add-parking-input",
-                            errors.city
-                              ? "add-parking-input--error"
-                              : "",
-                          ]
-                            .filter(Boolean)
-                            .join(" ")}
-                        >
-                          <span className="add-parking-input__icon">
-                            ⌖
-                          </span>
-
-                          <input
-                            id="city"
-                            name="city"
-                            type="text"
-                            placeholder="مثلاً تهران"
-                            value={form.city}
-                            onChange={
-                              handleChange
-                            }
-                            disabled={loading}
-                          />
-                        </div>
+                        <IranCityAutocomplete
+                          value={form.city}
+                          onChange={handleChange}
+                          disabled={loading}
+                          error={Boolean(errors.city)}
+                        />
 
                         {errors.city && (
                           <span className="add-parking-error">

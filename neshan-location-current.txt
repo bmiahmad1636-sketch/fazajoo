@@ -1,0 +1,385 @@
+﻿import { useEffect, useRef, useState } from "react";
+import maplibregl from "@neshan-maps-platform/maplibre-sdk";
+import "@neshan-maps-platform/maplibre-sdk/style.css";
+import "./NeshanLocationPicker.css";
+
+const DEFAULT_CENTER = [51.8668, 32.0089]; // Shahreza: [lng, lat]
+const MAP_STYLE = "https://static.neshan.org/sdk/maplibre/styles/light.json";
+
+const CITY_CENTERS = {
+  "ØªÙ‡Ø±Ø§Ù†":[51.3890,35.6892],"Ú©Ø±Ø¬":[50.9916,35.8400],"Ù…Ø´Ù‡Ø¯":[59.6062,36.2605],
+  "Ø§ØµÙÙ‡Ø§Ù†":[51.6776,32.6546],"Ø´ÛŒØ±Ø§Ø²":[52.5837,29.5918],"ØªØ¨Ø±ÛŒØ²":[46.2919,38.0800],
+  "Ù‚Ù…":[50.8764,34.6416],"Ø§Ù‡ÙˆØ§Ø²":[48.6692,31.3183],"Ø±Ø´Øª":[49.5890,37.2808],
+  "Ø§Ø±ÙˆÙ…ÛŒÙ‡":[45.0761,37.5527],"Ù‚Ø²ÙˆÛŒÙ†":[50.0041,36.2688],"ÛŒØ²Ø¯":[54.3675,31.8974],
+  "Ú©Ø±Ù…Ø§Ù†":[57.0788,30.2839],"Ø³Ø§Ø±ÛŒ":[53.0601,36.5659],"Ú¯Ø±Ú¯Ø§Ù†":[54.4342,36.8456],
+  "Ø§Ø±Ø§Ú©":[49.6892,34.0917],"Ù‡Ù…Ø¯Ø§Ù†":[48.5146,34.7989],"Ø³Ù†Ù†Ø¯Ø¬":[46.9988,35.3219],
+  "Ú©Ø±Ù…Ø§Ù†Ø´Ø§Ù‡":[47.0650,34.3142],"Ø®Ø±Ù… Ø¢Ø¨Ø§Ø¯":[48.3558,33.4878],"Ø§ÛŒÙ„Ø§Ù…":[46.4227,33.6374],
+  "Ø¨Ù†Ø¯Ø±Ø¹Ø¨Ø§Ø³":[56.2666,27.1832],"Ø¨ÙˆØ´Ù‡Ø±":[50.8385,28.9234],"Ø²Ø§Ù‡Ø¯Ø§Ù†":[60.8629,29.4963],
+  "Ø¨ÛŒØ±Ø¬Ù†Ø¯":[59.2211,32.8649],"Ø¨Ø¬Ù†ÙˆØ±Ø¯":[57.3290,37.4747],"Ø³Ù…Ù†Ø§Ù†":[53.3971,35.5769],
+  "Ø§Ø±Ø¯Ø¨ÛŒÙ„":[48.2933,38.2498],"Ø²Ù†Ø¬Ø§Ù†":[48.4787,36.6736],"ÛŒØ§Ø³ÙˆØ¬":[51.5879,30.6682],
+  "Ø´Ù‡Ø±Ú©Ø±Ø¯":[50.8644,32.3256],"Ø¨Ø±ÙˆØ¬Ù†":[51.2873,31.9652],"Ø´Ù‡Ø±Ø¶Ø§":[51.8668,32.0089],"Ú©Ø§Ø´Ø§Ù†":[51.4099,33.9850],
+  "Ù†Ø¬Ù Ø¢Ø¨Ø§Ø¯":[51.3668,32.6346],"Ø®Ù…ÛŒÙ†ÛŒ Ø´Ù‡Ø±":[51.5211,32.7002],"ÙÙˆÙ„Ø§Ø¯Ø´Ù‡Ø±":[51.4069,32.4894],
+  "Ø´Ø§Ù‡ÛŒÙ† Ø´Ù‡Ø±":[51.5559,32.8579],"Ú©ÛŒØ´":[53.9800,26.5320],"Ù‚Ø´Ù…":[56.2719,26.9581],
+  "Ú†Ø§Ø¨Ù‡Ø§Ø±":[60.6430,25.2919],"Ø¯Ø²ÙÙˆÙ„":[48.4236,32.3831],"Ø¢Ø¨Ø§Ø¯Ø§Ù†":[48.3043,30.3473],
+  "Ø®Ø±Ù…Ø´Ù‡Ø±":[48.1664,30.4393],"Ù…Ø§Ù‡Ø´Ù‡Ø±":[49.1981,30.5560],"Ù†ÛŒØ´Ø§Ø¨ÙˆØ±":[58.7958,36.2141],
+  "Ø³Ø¨Ø²ÙˆØ§Ø±":[57.6819,36.2126],"Ú©Ø§Ø´Ù…Ø±":[58.4656,35.2383],"Ù…Ø±Ø§ØºÙ‡":[46.2370,37.3892],
+  "Ù…Ø±Ù†Ø¯":[45.7749,38.4329],"Ù…ÛŒØ§Ù†Ø¯ÙˆØ¢Ø¨":[46.1027,36.9694],"Ù…Ù‡Ø§Ø¨Ø§Ø¯":[45.7222,36.7631],
+  "Ø¨Ø§Ø¨Ù„":[52.6780,36.5513],"Ø¢Ù…Ù„":[52.3507,36.4696],"Ù‚Ø§Ø¦Ù… Ø´Ù‡Ø±":[52.8609,36.4630],
+  "Ø¨Ø§Ø¨Ù„Ø³Ø±":[52.6506,36.7025],"Ù†ÙˆØ´Ù‡Ø±":[51.4950,36.6485],"Ù„Ø§Ù‡ÛŒØ¬Ø§Ù†":[50.0004,37.2073],
+  "Ø§Ù†Ø²Ù„ÛŒ":[49.4622,37.4727],"Ø³Ø§ÙˆÙ‡":[50.3566,35.0213],"Ù…Ù„Ø§ÛŒØ±":[48.8235,34.2969],
+  "Ø¨Ø±ÙˆØ¬Ø±Ø¯":[48.7516,33.8973],"Ø¯ÙˆØ±ÙˆØ¯":[49.0632,33.4955],"Ù…Ø±ÙˆØ¯Ø´Øª":[52.8027,29.8742],
+  "Ø¬Ù‡Ø±Ù…":[53.5609,28.5000],"ÙØ³Ø§":[53.6482,28.9383],"Ù„Ø§Ø±":[54.3236,27.6740]
+};
+
+function normalizeCityName(value = "") {
+  return String(value).trim().replace(/ÙŠ/g, "ÛŒ").replace(/Ùƒ/g, "Ú©").replaceAll("\u200C", " ").replaceAll("\u200D", " ").replaceAll("\u200E", " ").replaceAll("\u200F", " ").replace(/\s+/g, " ");
+}
+
+export default function NeshanLocationPicker({
+  value,
+  onChange,
+  city = "",
+  disabled = false,
+}) {
+  const mapElementRef = useRef(null);
+  const mapRef = useRef(null);
+  const markerRef = useRef(null);
+  const onChangeRef = useRef(onChange);
+  const [status, setStatus] = useState("loading");
+  const [geoStatus, setGeoStatus] = useState("idle");
+  const [showLocationConsent, setShowLocationConsent] = useState(false);
+  const [cityQuery, setCityQuery] = useState(city || "");
+  const [cityMessage, setCityMessage] = useState("");
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    if (city) setCityQuery(city);
+  }, [city]);
+
+  // This effect owns the map instance lifecycle. Re-running it for every coordinate
+  // change would destroy/recreate the map; coordinate changes are emitted through onChangeRef.
+  // oxlint-disable react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!mapElementRef.current) return undefined;
+
+    const apiKey = String(
+      import.meta.env.VITE_NESHAN_WEB_MAP_KEY || ""
+    ).trim();
+
+    if (!apiKey) {
+      setStatus("missing-key");
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    const rawLat = value?.lat;
+    const rawLng = value?.lng;
+
+    const hasValue =
+      rawLat !== null &&
+      rawLat !== undefined &&
+      rawLat !== "" &&
+      rawLng !== null &&
+      rawLng !== undefined &&
+      rawLng !== "" &&
+      Number.isFinite(Number(rawLat)) &&
+      Number.isFinite(Number(rawLng));
+
+    const center = hasValue
+      ? [Number(rawLng), Number(rawLat)]
+      : DEFAULT_CENTER;
+
+    setStatus("loading");
+
+    try {
+      const map = new maplibregl.Map({
+        container: mapElementRef.current,
+        style: MAP_STYLE,
+        center,
+        zoom: hasValue ? 15 : 12,
+        apiKey,
+        attributionControl: true,
+      });
+
+      mapRef.current = map;
+
+      map.addControl(
+        new maplibregl.NavigationControl({
+          showCompass: false,
+          showZoom: true,
+        }),
+        "top-left"
+      );
+
+      const drawPoint = (lat, lng) => {
+        if (markerRef.current) {
+          markerRef.current.setLngLat([lng, lat]);
+          return;
+        }
+
+        const markerElement = document.createElement("div");
+        markerElement.className = "neshan-location-picker__marker";
+
+        markerRef.current = new maplibregl.Marker({
+          element: markerElement,
+          anchor: "center",
+        })
+          .setLngLat([lng, lat])
+          .addTo(map);
+      };
+
+      map.__fazajooDrawPoint = drawPoint;
+
+      if (hasValue) {
+        drawPoint(Number(value.lat), Number(value.lng));
+      }
+
+      map.on("load", () => {
+        if (cancelled) return;
+        setStatus("ready");
+        window.setTimeout(() => map.resize(), 50);
+      });
+
+      map.on("error", (event) => {
+        console.error("Neshan MapLibre error:", event?.error || event);
+      });
+
+      map.on("click", (event) => {
+        if (disabled) return;
+
+        const lat = Number(event.lngLat.lat.toFixed(6));
+        const lng = Number(event.lngLat.lng.toFixed(6));
+
+        drawPoint(lat, lng);
+        onChangeRef.current?.({ lat, lng });
+      });
+    } catch (error) {
+      console.error("Neshan MapLibre load error:", error);
+      setStatus("error");
+    }
+
+    return () => {
+      cancelled = true;
+
+      if (markerRef.current) {
+        markerRef.current.remove();
+        markerRef.current = null;
+      }
+
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [disabled]);
+  // oxlint-enable react-hooks/exhaustive-deps
+
+  const requestCurrentLocation = () => {
+    if (disabled || geoStatus === "loading") return;
+
+    if (!navigator.geolocation) {
+      setGeoStatus("unsupported");
+      return;
+    }
+
+    setGeoStatus("loading");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = Number(position.coords.latitude.toFixed(6));
+        const lng = Number(position.coords.longitude.toFixed(6));
+        const map = mapRef.current;
+
+        if (map) {
+          map.flyTo({
+            center: [lng, lat],
+            zoom: 16,
+            essential: true,
+          });
+          map.__fazajooDrawPoint?.(lat, lng);
+        }
+
+        onChangeRef.current?.({ lat, lng });
+        setGeoStatus("success");
+      },
+      (error) => {
+        console.warn("Browser geolocation error:", error);
+        setGeoStatus(error?.code === 1 ? "denied" : "error");
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 12000,
+        maximumAge: 60000,
+      }
+    );
+  };
+
+  const jumpToCity = () => {
+    const map = mapRef.current;
+    const name = normalizeCityName(cityQuery || city);
+    if (!map || !name) {
+      setCityMessage("Ù†Ø§Ù… Ø´Ù‡Ø± Ø¢Ú¯Ù‡ÛŒ Ø±Ø§ ÙˆØ§Ø±Ø¯ Ú©Ù†.");
+      return;
+    }
+    const center = CITY_CENTERS[name];
+    if (!center) {
+      setCityMessage("Ø§ÛŒÙ† Ø´Ù‡Ø± Ù‡Ù†ÙˆØ² Ø¯Ø± ÙÙ‡Ø±Ø³Øª Ù¾Ø±Ø´ Ø³Ø±ÛŒØ¹ Ù†ÛŒØ³ØªØ› Ù…ÛŒâ€ŒØªÙˆØ§Ù†ÛŒ Ø¨Ø§ Ù†Ù‚Ø´Ù‡ ÛŒØ§ Â«Ù…ÙˆÙ‚Ø¹ÛŒØª ÙØ¹Ù„ÛŒ Ù…Ù†Â» Ù…Ø­Ù„ Ø±Ø§ Ø§Ù†ØªØ®Ø§Ø¨ Ú©Ù†ÛŒ.");
+      return;
+    }
+    setCityMessage(`Ù†Ù‚Ø´Ù‡ Ø±ÙˆÛŒ ${name} Ø±ÙØªØ› Ø­Ø§Ù„Ø§ Ù†Ù‚Ø·Ù‡ Ø¯Ù‚ÛŒÙ‚ Ø¢Ú¯Ù‡ÛŒ Ø±Ø§ Ø§Ù†ØªØ®Ø§Ø¨ Ú©Ù†.`);
+    map.flyTo({ center, zoom: 12.5, essential: true });
+  };
+
+  const panMap = (x, y) => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.panBy([x, y], { duration: 260 });
+  };
+
+  const hasSelectedLocation =
+    value?.lat !== null &&
+    value?.lat !== undefined &&
+    value?.lat !== "" &&
+    value?.lng !== null &&
+    value?.lng !== undefined &&
+    value?.lng !== "";
+
+  return (
+    <div className="neshan-location-picker">
+      <div className="neshan-location-picker__heading">
+        <div>
+          <strong>Ù…Ø­Ø¯ÙˆØ¯Ù‡ ØªÙ‚Ø±ÛŒØ¨ÛŒ Ø±ÙˆÛŒ Ù†Ù‚Ø´Ù‡</strong>
+          <small>
+            Ø±ÙˆÛŒ Ù†Ù‚Ø´Ù‡ Ø¨Ø²Ù† ØªØ§ Ù…Ø­Ù„ ÙØ¶Ø§ Ù…Ø´Ø®Øµ Ø´ÙˆØ¯. Ù…ÙˆÙ‚Ø¹ÛŒØª Ø¯Ù‚ÛŒÙ‚ Ø¨Ø±Ø§ÛŒ Ú©Ø§Ø±Ø¨Ø±Ø§Ù† Ø¹Ù…ÙˆÙ…ÛŒ
+            Ù†Ù…Ø§ÛŒØ´ Ø¯Ø§Ø¯Ù‡ Ù†Ù…ÛŒâ€ŒØ´ÙˆØ¯.
+          </small>
+        </div>
+
+        {hasSelectedLocation ? (
+          <span>âœ“ Ø§Ù†ØªØ®Ø§Ø¨ Ø´Ø¯</span>
+        ) : (
+          <span>Ø§Ø®ØªÛŒØ§Ø±ÛŒ</span>
+        )}
+      </div>
+
+      {!disabled && status !== "missing-key" && (
+        <div className="neshan-location-picker__city-jump">
+          <input
+            type="text"
+            value={cityQuery}
+            onChange={(event) => setCityQuery(event.target.value)}
+            placeholder="Ù…Ø«Ù„Ø§Ù‹ ØªÙ‡Ø±Ø§Ù†ØŒ Ú©ÛŒØ´ØŒ Ù…Ø´Ù‡Ø¯..."
+            aria-label="Ø´Ù‡Ø± Ù…Ù‚ØµØ¯ Ø±ÙˆÛŒ Ù†Ù‚Ø´Ù‡"
+          />
+          <button type="button" onClick={jumpToCity}>Ø±ÙØªÙ† Ø¨Ù‡ Ø´Ù‡Ø± Ø¢Ú¯Ù‡ÛŒ</button>
+          {cityMessage && <small>{cityMessage}</small>}
+        </div>
+      )}
+
+      {!disabled && status !== "missing-key" && (
+        <div className="neshan-location-picker__tools">
+          <button
+            type="button"
+            className="neshan-location-picker__locate"
+            onClick={() => setShowLocationConsent(true)}
+            disabled={geoStatus === "loading"}
+          >
+            <span aria-hidden="true">ðŸ“</span>
+            {geoStatus === "loading"
+              ? "Ø¯Ø± Ø­Ø§Ù„ Ù¾ÛŒØ¯Ø§ Ú©Ø±Ø¯Ù† Ù…ÙˆÙ‚Ø¹ÛŒØªâ€¦"
+              : "Ù…ÙˆÙ‚Ø¹ÛŒØª ÙØ¹Ù„ÛŒ Ù…Ù†"}
+          </button>
+
+          {geoStatus === "denied" && (
+            <small>Ø§Ø¬Ø§Ø²Ù‡ Ø¯Ø³ØªØ±Ø³ÛŒ Ø¨Ù‡ Ù…ÙˆÙ‚Ø¹ÛŒØª Ø¯Ø§Ø¯Ù‡ Ù†Ø´Ø¯Ø› Ù…ÛŒâ€ŒØªÙˆØ§Ù†ÛŒ Ù…Ø­Ù„ Ø±Ø§ Ø¯Ø³ØªÛŒ Ø±ÙˆÛŒ Ù†Ù‚Ø´Ù‡ Ø§Ù†ØªØ®Ø§Ø¨ Ú©Ù†ÛŒ.</small>
+          )}
+          {geoStatus === "error" && (
+            <small>Ù…ÙˆÙ‚Ø¹ÛŒØª ÙØ¹Ù„ÛŒ Ø¯Ø±ÛŒØ§ÙØª Ù†Ø´Ø¯Ø› Ù…Ø­Ù„ Ø±Ø§ Ø¯Ø³ØªÛŒ Ø±ÙˆÛŒ Ù†Ù‚Ø´Ù‡ Ø§Ù†ØªØ®Ø§Ø¨ Ú©Ù†.</small>
+          )}
+          {geoStatus === "unsupported" && (
+            <small>Ù…Ø±ÙˆØ±Ú¯Ø± Ø´Ù…Ø§ Ù…ÙˆÙ‚Ø¹ÛŒØª Ù…Ú©Ø§Ù†ÛŒ Ø±Ø§ Ù¾Ø´ØªÛŒØ¨Ø§Ù†ÛŒ Ù†Ù…ÛŒâ€ŒÚ©Ù†Ø¯.</small>
+          )}
+        </div>
+      )}
+
+      {status === "missing-key" ? (
+        <div className="neshan-location-picker__message">
+          Ú©Ù„ÛŒØ¯ Ù†Ù‚Ø´Ù‡ Ù†Ø´Ø§Ù† Ù‡Ù†ÙˆØ² Ø¯Ø± ÙØ§ÛŒÙ„ Ù…Ø­ÛŒØ·ÛŒ ÙØ¶Ø§Ø¬Ùˆ ØªÙ†Ø¸ÛŒÙ… Ù†Ø´Ø¯Ù‡ Ø§Ø³Øª.
+        </div>
+      ) : (
+        <div className="neshan-location-picker__map-wrap">
+          <div ref={mapElementRef} className="neshan-location-picker__map" />
+
+          {!disabled && status === "ready" && (
+            <div className="fazajoo-map-pan" aria-label="Ú©Ù†ØªØ±Ù„ Ø¬Ø§Ø¨Ù‡â€ŒØ¬Ø§ÛŒÛŒ Ù†Ù‚Ø´Ù‡">
+              <button type="button" className="fazajoo-map-pan__up" onClick={() => panMap(0, -120)} aria-label="Ø­Ø±Ú©Øª Ù†Ù‚Ø´Ù‡ Ø¨Ù‡ Ø¨Ø§Ù„Ø§">â†‘</button>
+              <button type="button" className="fazajoo-map-pan__right" onClick={() => panMap(120, 0)} aria-label="Ø­Ø±Ú©Øª Ù†Ù‚Ø´Ù‡ Ø¨Ù‡ Ø±Ø§Ø³Øª">â†’</button>
+              <button type="button" className="fazajoo-map-pan__down" onClick={() => panMap(0, 120)} aria-label="Ø­Ø±Ú©Øª Ù†Ù‚Ø´Ù‡ Ø¨Ù‡ Ù¾Ø§ÛŒÛŒÙ†">â†“</button>
+              <button type="button" className="fazajoo-map-pan__left" onClick={() => panMap(-120, 0)} aria-label="Ø­Ø±Ú©Øª Ù†Ù‚Ø´Ù‡ Ø¨Ù‡ Ú†Ù¾">â†</button>
+            </div>
+          )}
+
+          {status === "loading" && (
+            <div className="neshan-location-picker__overlay">
+              Ø¯Ø± Ø­Ø§Ù„ Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ Ù†Ù‚Ø´Ù‡ Ù†Ø´Ø§Ù†â€¦
+            </div>
+          )}
+
+          {status === "error" && (
+            <div className="neshan-location-picker__overlay">
+              Ù†Ù‚Ø´Ù‡ Ù†Ø´Ø§Ù† Ø¨Ø§Ø±Ú¯Ø°Ø§Ø±ÛŒ Ù†Ø´Ø¯. Ø§ØªØµØ§Ù„ Ø§ÛŒÙ†ØªØ±Ù†Øª Ùˆ Ú©Ù„ÛŒØ¯ Ø¯Ø³ØªØ±Ø³ÛŒ Ø±Ø§ Ø¨Ø±Ø±Ø³ÛŒ Ú©Ù†.
+            </div>
+          )}
+        </div>
+      )}
+
+      {hasSelectedLocation && !disabled && (
+        <button
+          type="button"
+          className="neshan-location-picker__clear"
+          onClick={() => onChange?.({ lat: null, lng: null })}
+        >
+          Ù¾Ø§Ú© Ú©Ø±Ø¯Ù† Ù…ÙˆÙ‚Ø¹ÛŒØª Ø§Ù†ØªØ®Ø§Ø¨â€ŒØ´Ø¯Ù‡
+        </button>
+      )}
+
+      {showLocationConsent && (
+        <div className="fazajoo-location-consent" role="dialog" aria-modal="true" aria-labelledby="fazajoo-location-consent-title">
+          <div className="fazajoo-location-consent__backdrop" onClick={() => setShowLocationConsent(false)} />
+          <div className="fazajoo-location-consent__card">
+            <div className="fazajoo-location-consent__icon" aria-hidden="true">ðŸ“</div>
+            <strong id="fazajoo-location-consent-title">Ù¾ÛŒØ¯Ø§ Ú©Ø±Ø¯Ù† Ù…ÙˆÙ‚Ø¹ÛŒØª ÙØ¹Ù„ÛŒ Ø´Ù…Ø§</strong>
+            <p>
+              ÙØ¶Ø§Ø¬Ùˆ ÙÙ‚Ø· Ø¨Ø§ Ø§Ø¬Ø§Ø²Ù‡ Ø´Ù…Ø§ Ø§Ø² Ù…ÙˆÙ‚Ø¹ÛŒØª Ø¯Ø³ØªÚ¯Ø§Ù‡ Ø§Ø³ØªÙØ§Ø¯Ù‡ Ù…ÛŒâ€ŒÚ©Ù†Ø¯ ØªØ§ Ù†Ù‚Ø´Ù‡ Ø±Ø§ Ù†Ø²Ø¯ÛŒÚ© Ù…Ø­Ù„ ÙØ¹Ù„ÛŒ Ø¨Ø§Ø² Ú©Ù†Ø¯.
+              Ø¨Ø¹Ø¯ Ø§Ø² Ø¢Ù† Ù…ÛŒâ€ŒØªÙˆØ§Ù†ÛŒØ¯ Ù†Ù‚Ø·Ù‡ Ø±Ø§ Ø±ÙˆÛŒ Ù†Ù‚Ø´Ù‡ Ø§ØµÙ„Ø§Ø­ Ú©Ù†ÛŒØ¯.
+            </p>
+            <small>Ù…ÙˆÙ‚Ø¹ÛŒØª Ø¯Ù‚ÛŒÙ‚ Ø¯Ø± ØµÙØ­Ù‡ Ø¹Ù…ÙˆÙ…ÛŒ Ø¢Ú¯Ù‡ÛŒ Ù†Ù…Ø§ÛŒØ´ Ø¯Ø§Ø¯Ù‡ Ù†Ù…ÛŒâ€ŒØ´ÙˆØ¯.</small>
+            <div className="fazajoo-location-consent__actions">
+              <button
+                type="button"
+                className="fazajoo-location-consent__accept"
+                onClick={() => {
+                  setShowLocationConsent(false);
+                  requestCurrentLocation();
+                }}
+              >
+                Ø§Ø¯Ø§Ù…Ù‡ Ùˆ Ø¯Ø±Ø®ÙˆØ§Ø³Øª Ø§Ø¬Ø§Ø²Ù‡
+              </button>
+              <button
+                type="button"
+                className="fazajoo-location-consent__cancel"
+                onClick={() => setShowLocationConsent(false)}
+              >
+                ÙØ¹Ù„Ø§Ù‹ Ù†Ù‡
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

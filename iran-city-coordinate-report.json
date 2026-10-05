@@ -1,0 +1,1514 @@
+{
+  "total": 1155,
+  "matched": 908,
+  "exactCount": 887,
+  "uniqueFallbackCount": 21,
+  "missingCount": 247,
+  "ambiguousCount": 1,
+  "missing": [
+    {
+      "provinceId": 3641,
+      "provinceName": "استان لرستان",
+      "cityId": 1065,
+      "cityName": "بیران شهر"
+    },
+    {
+      "provinceId": 3641,
+      "provinceName": "استان لرستان",
+      "cityId": 54252,
+      "cityName": "شول آباد"
+    },
+    {
+      "provinceId": 3641,
+      "provinceName": "استان لرستان",
+      "cityId": 1054,
+      "cityName": "هفت چشمه"
+    },
+    {
+      "provinceId": 3641,
+      "provinceName": "استان لرستان",
+      "cityId": 1061,
+      "cityName": "سرابدوره"
+    },
+    {
+      "provinceId": 3641,
+      "provinceName": "استان لرستان",
+      "cityId": 1058,
+      "cityName": "گراب آینه وند"
+    },
+    {
+      "provinceId": 3595,
+      "provinceName": "استان اصفهان",
+      "cityId": 1391,
+      "cityName": "گلشن"
+    },
+    {
+      "provinceId": 3595,
+      "provinceName": "استان اصفهان",
+      "cityId": 1379,
+      "cityName": "باغشاد"
+    },
+    {
+      "provinceId": 3595,
+      "provinceName": "استان اصفهان",
+      "cityId": 54290,
+      "cityName": "بهاران"
+    },
+    {
+      "provinceId": 3595,
+      "provinceName": "استان اصفهان",
+      "cityId": 1369,
+      "cityName": "اصغرآباد"
+    },
+    {
+      "provinceId": 3595,
+      "provinceName": "استان اصفهان",
+      "cityId": 1374,
+      "cityName": "مینا دشت"
+    },
+    {
+      "provinceId": 3595,
+      "provinceName": "استان اصفهان",
+      "cityId": 1286,
+      "cityName": "رضوان شهر"
+    },
+    {
+      "provinceId": 3595,
+      "provinceName": "استان اصفهان",
+      "cityId": 3433,
+      "cityName": "کمشجه"
+    },
+    {
+      "provinceId": 3595,
+      "provinceName": "استان اصفهان",
+      "cityId": 3438,
+      "cityName": "قلعه نو"
+    },
+    {
+      "provinceId": 3595,
+      "provinceName": "استان اصفهان",
+      "cityId": 908,
+      "cityName": "کامووچوگان"
+    },
+    {
+      "provinceId": 3595,
+      "provinceName": "استان اصفهان",
+      "cityId": 906,
+      "cityName": "ابوزیداباد"
+    },
+    {
+      "provinceId": 3595,
+      "provinceName": "استان اصفهان",
+      "cityId": 1292,
+      "cityName": "سین"
+    },
+    {
+      "provinceId": 3595,
+      "provinceName": "استان اصفهان",
+      "cityId": 1269,
+      "cityName": "بوئین ومیاندشت"
+    },
+    {
+      "provinceId": 3595,
+      "provinceName": "استان اصفهان",
+      "cityId": 827,
+      "cityName": "سفید شهر"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1476,
+      "cityName": "مشراگه"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1241,
+      "cityName": "گوریه"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1218,
+      "cityName": "الهایی"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1236,
+      "cityName": "سماله"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1250,
+      "cityName": "میداوود"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1524,
+      "cityName": "چوئبده"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1221,
+      "cityName": "حر ریاحی"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 54238,
+      "cityName": "مسجد سلیمان"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1193,
+      "cityName": "آزادی"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1231,
+      "cityName": "چغامیش"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1143,
+      "cityName": "چم گلک"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1192,
+      "cityName": "فتح المبين"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1145,
+      "cityName": "شمس آباد"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1230,
+      "cityName": "شهر امام"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1212,
+      "cityName": "ابوحمیظه"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1214,
+      "cityName": "کوت سیدنعیم"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1469,
+      "cityName": "تشان"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1237,
+      "cityName": "جنت مکان"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1144,
+      "cityName": "سیاه منصور"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1190,
+      "cityName": "بیدروبه"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1478,
+      "cityName": "شهید چمران"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1245,
+      "cityName": "ویس"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1240,
+      "cityName": "سرداران"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1247,
+      "cityName": "گل گیر"
+    },
+    {
+      "provinceId": 3682,
+      "provinceName": "استان خوزستان",
+      "cityId": 1454,
+      "cityName": "منصوریه"
+    },
+    {
+      "provinceId": 3880,
+      "provinceName": "استان ایلام",
+      "cityId": 1780,
+      "cityName": "پهله زرین آباد"
+    },
+    {
+      "provinceId": 3880,
+      "provinceName": "استان ایلام",
+      "cityId": 1799,
+      "cityName": "بلاوه"
+    },
+    {
+      "provinceId": 3880,
+      "provinceName": "استان ایلام",
+      "cityId": 1800,
+      "cityName": "شباب"
+    },
+    {
+      "provinceId": 3880,
+      "provinceName": "استان ایلام",
+      "cityId": 1807,
+      "cityName": "ایوان"
+    },
+    {
+      "provinceId": 3540,
+      "provinceName": "استان کرمان",
+      "cityId": 3240,
+      "cityName": "زنگی اباد"
+    },
+    {
+      "provinceId": 3540,
+      "provinceName": "استان کرمان",
+      "cityId": 3375,
+      "cityName": "کوه بنان"
+    },
+    {
+      "provinceId": 3540,
+      "provinceName": "استان کرمان",
+      "cityId": 1681,
+      "cityName": "کشکوییه"
+    },
+    {
+      "provinceId": 3540,
+      "provinceName": "استان کرمان",
+      "cityId": 54263,
+      "cityName": "خواجوشهر"
+    },
+    {
+      "provinceId": 3540,
+      "provinceName": "استان کرمان",
+      "cityId": 3231,
+      "cityName": "هنزا"
+    },
+    {
+      "provinceId": 3540,
+      "provinceName": "استان کرمان",
+      "cityId": 3197,
+      "cityName": "دوساری"
+    },
+    {
+      "provinceId": 3540,
+      "provinceName": "استان کرمان",
+      "cityId": 3189,
+      "cityName": "محمدآباد ریگان"
+    },
+    {
+      "provinceId": 3540,
+      "provinceName": "استان کرمان",
+      "cityId": 3201,
+      "cityName": "زهکلوت"
+    },
+    {
+      "provinceId": 3540,
+      "provinceName": "استان کرمان",
+      "cityId": 1685,
+      "cityName": "کیان شهر"
+    },
+    {
+      "provinceId": 3540,
+      "provinceName": "استان کرمان",
+      "cityId": 1712,
+      "cityName": "زیداباد"
+    },
+    {
+      "provinceId": 3540,
+      "provinceName": "استان کرمان",
+      "cityId": 3215,
+      "cityName": "بلوک"
+    },
+    {
+      "provinceId": 3540,
+      "provinceName": "استان کرمان",
+      "cityId": 3223,
+      "cityName": "دشتکار"
+    },
+    {
+      "provinceId": 3540,
+      "provinceName": "استان کرمان",
+      "cityId": 1710,
+      "cityName": "شهرک مس سرچشمه"
+    },
+    {
+      "provinceId": 3540,
+      "provinceName": "استان کرمان",
+      "cityId": 1674,
+      "cityName": "شهر بابک"
+    },
+    {
+      "provinceId": 3540,
+      "provinceName": "استان کرمان",
+      "cityId": 1686,
+      "cityName": "یزدانشهر"
+    },
+    {
+      "provinceId": 6693,
+      "provinceName": "استان البرز",
+      "cityId": 2449,
+      "cityName": "آسارا"
+    },
+    {
+      "provinceId": 6693,
+      "provinceName": "استان البرز",
+      "cityId": 2461,
+      "cityName": "گلسار"
+    },
+    {
+      "provinceId": 4149,
+      "provinceName": "استان گلستان",
+      "cityId": 2745,
+      "cityName": "سنگدوین"
+    },
+    {
+      "provinceId": 4149,
+      "provinceName": "استان گلستان",
+      "cityId": 2729,
+      "cityName": "فراغی"
+    },
+    {
+      "provinceId": 4149,
+      "provinceName": "استان گلستان",
+      "cityId": 2727,
+      "cityName": "گنبدکاوس"
+    },
+    {
+      "provinceId": 4149,
+      "provinceName": "استان گلستان",
+      "cityId": 2590,
+      "cityName": "بندرترکمن"
+    },
+    {
+      "provinceId": 4149,
+      "provinceName": "استان گلستان",
+      "cityId": 2728,
+      "cityName": "مراوه تپه"
+    },
+    {
+      "provinceId": 4149,
+      "provinceName": "استان گلستان",
+      "cityId": 2740,
+      "cityName": "تاتارعلیا"
+    },
+    {
+      "provinceId": 4149,
+      "provinceName": "استان گلستان",
+      "cityId": 2744,
+      "cityName": "مزرعه"
+    },
+    {
+      "provinceId": 4024,
+      "provinceName": "استان زنجان",
+      "cityId": 2285,
+      "cityName": "نیک پی"
+    },
+    {
+      "provinceId": 4024,
+      "provinceName": "استان زنجان",
+      "cityId": 2286,
+      "cityName": "ماهنشان"
+    },
+    {
+      "provinceId": 4024,
+      "provinceName": "استان زنجان",
+      "cityId": 2305,
+      "cityName": "نوربهار"
+    },
+    {
+      "provinceId": 4024,
+      "provinceName": "استان زنجان",
+      "cityId": 2303,
+      "cityName": "کرسف"
+    },
+    {
+      "provinceId": 4108,
+      "provinceName": "استان تهران",
+      "cityId": 2482,
+      "cityName": "شهر جدید پرند"
+    },
+    {
+      "provinceId": 4108,
+      "provinceName": "استان تهران",
+      "cityId": 2509,
+      "cityName": "ری"
+    },
+    {
+      "provinceId": 4108,
+      "provinceName": "استان تهران",
+      "cityId": 2448,
+      "cityName": "شمشک و دربندسر"
+    },
+    {
+      "provinceId": 4108,
+      "provinceName": "استان تهران",
+      "cityId": 2511,
+      "cityName": "فرون آباد"
+    },
+    {
+      "provinceId": 4108,
+      "provinceName": "استان تهران",
+      "cityId": 2530,
+      "cityName": "فیروزکوه"
+    },
+    {
+      "provinceId": 4108,
+      "provinceName": "استان تهران",
+      "cityId": 2469,
+      "cityName": "شهرقدس"
+    },
+    {
+      "provinceId": 3687,
+      "provinceName": "استان چهارمحال و بختیاری",
+      "cityId": 1278,
+      "cityName": "هارونی"
+    },
+    {
+      "provinceId": 3687,
+      "provinceName": "استان چهارمحال و بختیاری",
+      "cityId": 1256,
+      "cityName": "دشتک"
+    },
+    {
+      "provinceId": 3687,
+      "provinceName": "استان چهارمحال و بختیاری",
+      "cityId": 54299,
+      "cityName": "سردشت لردگان"
+    },
+    {
+      "provinceId": 3687,
+      "provinceName": "استان چهارمحال و بختیاری",
+      "cityId": 1259,
+      "cityName": "پردنجان"
+    },
+    {
+      "provinceId": 3687,
+      "provinceName": "استان چهارمحال و بختیاری",
+      "cityId": 1254,
+      "cityName": "سرخون"
+    },
+    {
+      "provinceId": 3687,
+      "provinceName": "استان چهارمحال و بختیاری",
+      "cityId": 1409,
+      "cityName": "الونی"
+    },
+    {
+      "provinceId": 3687,
+      "provinceName": "استان چهارمحال و بختیاری",
+      "cityId": 1262,
+      "cityName": "صمصامی"
+    },
+    {
+      "provinceId": 3687,
+      "provinceName": "استان چهارمحال و بختیاری",
+      "cityId": 1402,
+      "cityName": "دستنا"
+    },
+    {
+      "provinceId": 3687,
+      "provinceName": "استان چهارمحال و بختیاری",
+      "cityId": 1257,
+      "cityName": "کاج"
+    },
+    {
+      "provinceId": 3687,
+      "provinceName": "استان چهارمحال و بختیاری",
+      "cityId": 1258,
+      "cityName": "چلیچه"
+    },
+    {
+      "provinceId": 3687,
+      "provinceName": "استان چهارمحال و بختیاری",
+      "cityId": 1253,
+      "cityName": "منج"
+    },
+    {
+      "provinceId": 3687,
+      "provinceName": "استان چهارمحال و بختیاری",
+      "cityId": 1280,
+      "cityName": "وردنجان"
+    },
+    {
+      "provinceId": 3687,
+      "provinceName": "استان چهارمحال و بختیاری",
+      "cityId": 1263,
+      "cityName": "چمن گلی"
+    },
+    {
+      "provinceId": 3687,
+      "provinceName": "استان چهارمحال و بختیاری",
+      "cityId": 1261,
+      "cityName": "گوجان"
+    },
+    {
+      "provinceId": 3687,
+      "provinceName": "استان چهارمحال و بختیاری",
+      "cityId": 1396,
+      "cityName": "سفیددشت"
+    },
+    {
+      "provinceId": 3778,
+      "provinceName": "استان بوشهر",
+      "cityId": 1528,
+      "cityName": "شهر جدید عالیشهر"
+    },
+    {
+      "provinceId": 3778,
+      "provinceName": "استان بوشهر",
+      "cityId": 1448,
+      "cityName": "بندر ریگ"
+    },
+    {
+      "provinceId": 3778,
+      "provinceName": "استان بوشهر",
+      "cityId": 1536,
+      "cityName": "بادوله"
+    },
+    {
+      "provinceId": 3778,
+      "provinceName": "استان بوشهر",
+      "cityId": 1542,
+      "cityName": "بردستان"
+    },
+    {
+      "provinceId": 3778,
+      "provinceName": "استان بوشهر",
+      "cityId": 1545,
+      "cityName": "دوراهک"
+    },
+    {
+      "provinceId": 3778,
+      "provinceName": "استان بوشهر",
+      "cityId": 1447,
+      "cityName": "بندرگناوه"
+    },
+    {
+      "provinceId": 3778,
+      "provinceName": "استان بوشهر",
+      "cityId": 1532,
+      "cityName": "آباد"
+    },
+    {
+      "provinceId": 3778,
+      "provinceName": "استان بوشهر",
+      "cityId": 1534,
+      "cityName": "بوشکان"
+    },
+    {
+      "provinceId": 3914,
+      "provinceName": "استان کردستان",
+      "cityId": 54267,
+      "cityName": "سرو آباد"
+    },
+    {
+      "provinceId": 3914,
+      "provinceName": "استان کردستان",
+      "cityId": 1844,
+      "cityName": "ویله"
+    },
+    {
+      "provinceId": 3914,
+      "provinceName": "استان کردستان",
+      "cityId": 2293,
+      "cityName": "توپ آغاج"
+    },
+    {
+      "provinceId": 3914,
+      "provinceName": "استان کردستان",
+      "cityId": 1841,
+      "cityName": "برده رشه"
+    },
+    {
+      "provinceId": 3914,
+      "provinceName": "استان کردستان",
+      "cityId": 1845,
+      "cityName": "اورامان تخت"
+    },
+    {
+      "provinceId": 3914,
+      "provinceName": "استان کردستان",
+      "cityId": 1840,
+      "cityName": "ارمرده"
+    },
+    {
+      "provinceId": 3914,
+      "provinceName": "استان کردستان",
+      "cityId": 1864,
+      "cityName": "بویین سفلی"
+    },
+    {
+      "provinceId": 4177,
+      "provinceName": "استان سمنان",
+      "cityId": 2756,
+      "cityName": "رودیان"
+    },
+    {
+      "provinceId": 4177,
+      "provinceName": "استان سمنان",
+      "cityId": 2531,
+      "cityName": "ارادان"
+    },
+    {
+      "provinceId": 4177,
+      "provinceName": "استان سمنان",
+      "cityId": 3441,
+      "cityName": "کهن آباد"
+    },
+    {
+      "provinceId": 4177,
+      "provinceName": "استان سمنان",
+      "cityId": 2584,
+      "cityName": "کلاته"
+    },
+    {
+      "provinceId": 4177,
+      "provinceName": "استان سمنان",
+      "cityId": 2575,
+      "cityName": "مهدیشهر"
+    },
+    {
+      "provinceId": 3941,
+      "provinceName": "استان آذربایجان غربی",
+      "cityId": 1873,
+      "cityName": "میاندواب"
+    },
+    {
+      "provinceId": 3941,
+      "provinceName": "استان آذربایجان غربی",
+      "cityId": 2157,
+      "cityName": "قره ضیاالدین"
+    },
+    {
+      "provinceId": 3941,
+      "provinceName": "استان آذربایجان غربی",
+      "cityId": 2162,
+      "cityName": "آواچیق"
+    },
+    {
+      "provinceId": 3941,
+      "provinceName": "استان آذربایجان غربی",
+      "cityId": 1879,
+      "cityName": "خلیفان"
+    },
+    {
+      "provinceId": 3941,
+      "provinceName": "استان آذربایجان غربی",
+      "cityId": 2167,
+      "cityName": "نازک علیا"
+    },
+    {
+      "provinceId": 3941,
+      "provinceName": "استان آذربایجان غربی",
+      "cityId": 2158,
+      "cityName": "زرآباد"
+    },
+    {
+      "provinceId": 3941,
+      "provinceName": "استان آذربایجان غربی",
+      "cityId": 2166,
+      "cityName": "مرگنلر"
+    },
+    {
+      "provinceId": 3941,
+      "provinceName": "استان آذربایجان غربی",
+      "cityId": 1889,
+      "cityName": "نوشین شهر"
+    },
+    {
+      "provinceId": 4142,
+      "provinceName": "استان مازندران",
+      "cityId": 2581,
+      "cityName": "پایین هولار"
+    },
+    {
+      "provinceId": 4142,
+      "provinceName": "استان مازندران",
+      "cityId": 2443,
+      "cityName": "پول"
+    },
+    {
+      "provinceId": 4142,
+      "provinceName": "استان مازندران",
+      "cityId": 2388,
+      "cityName": "کتام و سادات"
+    },
+    {
+      "provinceId": 4142,
+      "provinceName": "استان مازندران",
+      "cityId": 2529,
+      "cityName": "زیراب"
+    },
+    {
+      "provinceId": 4142,
+      "provinceName": "استان مازندران",
+      "cityId": 2582,
+      "cityName": "نکاء"
+    },
+    {
+      "provinceId": 4142,
+      "provinceName": "استان مازندران",
+      "cityId": 2653,
+      "cityName": "گلوگاه بابل"
+    },
+    {
+      "provinceId": 4142,
+      "provinceName": "استان مازندران",
+      "cityId": 2395,
+      "cityName": "نمک آبرود"
+    },
+    {
+      "provinceId": 4142,
+      "provinceName": "استان مازندران",
+      "cityId": 2394,
+      "cityName": "هچی رود"
+    },
+    {
+      "provinceId": 4142,
+      "provinceName": "استان مازندران",
+      "cityId": 2444,
+      "cityName": "کجور"
+    },
+    {
+      "provinceId": 4142,
+      "provinceName": "استان مازندران",
+      "cityId": 2654,
+      "cityName": "دابو دشت"
+    },
+    {
+      "provinceId": 4142,
+      "provinceName": "استان مازندران",
+      "cityId": 2721,
+      "cityName": "امام زاده عبدالله"
+    },
+    {
+      "provinceId": 4142,
+      "provinceName": "استان مازندران",
+      "cityId": 2608,
+      "cityName": "رستمکلا"
+    },
+    {
+      "provinceId": 4142,
+      "provinceName": "استان مازندران",
+      "cityId": 2649,
+      "cityName": "ارطه"
+    },
+    {
+      "provinceId": 4142,
+      "provinceName": "استان مازندران",
+      "cityId": 2648,
+      "cityName": "قائمشهر"
+    },
+    {
+      "provinceId": 3894,
+      "provinceName": "استان کرمانشاه",
+      "cityId": 1831,
+      "cityName": "بانه وره"
+    },
+    {
+      "provinceId": 3894,
+      "provinceName": "استان کرمانشاه",
+      "cityId": 1047,
+      "cityName": "گودین"
+    },
+    {
+      "provinceId": 3894,
+      "provinceName": "استان کرمانشاه",
+      "cityId": 1815,
+      "cityName": "رباط"
+    },
+    {
+      "provinceId": 3894,
+      "provinceName": "استان کرمانشاه",
+      "cityId": 1804,
+      "cityName": "اسلام آبادغرب"
+    },
+    {
+      "provinceId": 4196,
+      "provinceName": "استان خراسان رضوی",
+      "cityId": 2983,
+      "cityName": "توس"
+    },
+    {
+      "provinceId": 4196,
+      "provinceName": "استان خراسان رضوی",
+      "cityId": 2979,
+      "cityName": "کلات نادری"
+    },
+    {
+      "provinceId": 4196,
+      "provinceName": "استان خراسان رضوی",
+      "cityId": 3330,
+      "cityName": "قاسم اباد"
+    },
+    {
+      "provinceId": 4196,
+      "provinceName": "استان خراسان رضوی",
+      "cityId": 2932,
+      "cityName": "بابک"
+    },
+    {
+      "provinceId": 4196,
+      "provinceName": "استان خراسان رضوی",
+      "cityId": 2948,
+      "cityName": "ملک اباد"
+    },
+    {
+      "provinceId": 4196,
+      "provinceName": "استان خراسان رضوی",
+      "cityId": 2909,
+      "cityName": "عشق اباد"
+    },
+    {
+      "provinceId": 4196,
+      "provinceName": "استان خراسان رضوی",
+      "cityId": 2949,
+      "cityName": "قلندراباد"
+    },
+    {
+      "provinceId": 4196,
+      "provinceName": "استان خراسان رضوی",
+      "cityId": 3013,
+      "cityName": "جاغرق"
+    },
+    {
+      "provinceId": 4196,
+      "provinceName": "استان خراسان رضوی",
+      "cityId": 2942,
+      "cityName": "رباطسنگ"
+    },
+    {
+      "provinceId": 4196,
+      "provinceName": "استان خراسان رضوی",
+      "cityId": 2953,
+      "cityName": "سفید سنگ"
+    },
+    {
+      "provinceId": 4196,
+      "provinceName": "استان خراسان رضوی",
+      "cityId": 2947,
+      "cityName": "فرهاد گرد"
+    },
+    {
+      "provinceId": 4196,
+      "provinceName": "استان خراسان رضوی",
+      "cityId": 2946,
+      "cityName": "درود"
+    },
+    {
+      "provinceId": 4196,
+      "provinceName": "استان خراسان رضوی",
+      "cityId": 3326,
+      "cityName": "مشهدریزه"
+    },
+    {
+      "provinceId": 4044,
+      "provinceName": "استان قزوین",
+      "cityId": 2338,
+      "cityName": "خرم دشت"
+    },
+    {
+      "provinceId": 4044,
+      "provinceName": "استان قزوین",
+      "cityId": 2318,
+      "cityName": "ضیاءآباد"
+    },
+    {
+      "provinceId": 4044,
+      "provinceName": "استان قزوین",
+      "cityId": 2363,
+      "cityName": "محمود اباد نمونه"
+    },
+    {
+      "provinceId": 4044,
+      "provinceName": "استان قزوین",
+      "cityId": 2382,
+      "cityName": "محمدیه"
+    },
+    {
+      "provinceId": 3472,
+      "provinceName": "استان مرکزی",
+      "cityId": 959,
+      "cityName": "آوه"
+    },
+    {
+      "provinceId": 3472,
+      "provinceName": "استان مرکزی",
+      "cityId": 923,
+      "cityName": "قروچی باشی"
+    },
+    {
+      "provinceId": 3472,
+      "provinceName": "استان مرکزی",
+      "cityId": 963,
+      "cityName": "خنجین"
+    },
+    {
+      "provinceId": 3472,
+      "provinceName": "استان مرکزی",
+      "cityId": 948,
+      "cityName": "کارچان"
+    },
+    {
+      "provinceId": 3472,
+      "provinceName": "استان مرکزی",
+      "cityId": 947,
+      "cityName": "شهباز"
+    },
+    {
+      "provinceId": 3509,
+      "provinceName": "استان سیستان و بلوچستان",
+      "cityId": 3156,
+      "cityName": "مهرستان"
+    },
+    {
+      "provinceId": 3509,
+      "provinceName": "استان سیستان و بلوچستان",
+      "cityId": 54234,
+      "cityName": "بریس"
+    },
+    {
+      "provinceId": 3509,
+      "provinceName": "استان سیستان و بلوچستان",
+      "cityId": 3133,
+      "cityName": "زرآباد"
+    },
+    {
+      "provinceId": 3509,
+      "provinceName": "استان سیستان و بلوچستان",
+      "cityId": 3157,
+      "cityName": "هیدوج"
+    },
+    {
+      "provinceId": 3509,
+      "provinceName": "استان سیستان و بلوچستان",
+      "cityId": 3138,
+      "cityName": "قصر قند"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 3132,
+      "cityName": "جاسک"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 1762,
+      "cityName": "بندر چارک"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 3210,
+      "cityName": "رودان"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 1758,
+      "cityName": "بندر کنگ"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 3129,
+      "cityName": "بندر سیریک"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 54625,
+      "cityName": "لارک"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 54485,
+      "cityName": "هندورابی"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 3126,
+      "cityName": "کوهستک"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 54502,
+      "cityName": "لاوان"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 54522,
+      "cityName": "سیری"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 54533,
+      "cityName": "هنگام"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 1557,
+      "cityName": "دشتی"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 3115,
+      "cityName": "گروک"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 1740,
+      "cityName": "تازیان پایین"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 1761,
+      "cityName": "کوخردهرنگ"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 54624,
+      "cityName": "تنب بزرگ"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 51896,
+      "cityName": "جزیره قشم"
+    },
+    {
+      "provinceId": 3874,
+      "provinceName": "استان هرمزگان",
+      "cityId": 3131,
+      "cityName": "سردست بشاگرد"
+    },
+    {
+      "provinceId": 3618,
+      "provinceName": "استان همدان",
+      "cityId": 1045,
+      "cityName": "آجین"
+    },
+    {
+      "provinceId": 3618,
+      "provinceName": "استان همدان",
+      "cityId": 2322,
+      "cityName": "قروه درگزین"
+    },
+    {
+      "provinceId": 3996,
+      "provinceName": "استان گیلان",
+      "cityId": 2180,
+      "cityName": "چمخاله"
+    },
+    {
+      "provinceId": 3996,
+      "provinceName": "استان گیلان",
+      "cityId": 2257,
+      "cityName": "ماکلوان"
+    },
+    {
+      "provinceId": 3996,
+      "provinceName": "استان گیلان",
+      "cityId": 2253,
+      "cityName": "بازارجمعه"
+    },
+    {
+      "provinceId": 3996,
+      "provinceName": "استان گیلان",
+      "cityId": 2260,
+      "cityName": "مرجغل"
+    },
+    {
+      "provinceId": 3996,
+      "provinceName": "استان گیلان",
+      "cityId": 2369,
+      "cityName": "جیرانده"
+    },
+    {
+      "provinceId": 3996,
+      "provinceName": "استان گیلان",
+      "cityId": 2370,
+      "cityName": "اطاق ور"
+    },
+    {
+      "provinceId": 3723,
+      "provinceName": "استان کهگیلویه و بویر احمد",
+      "cityId": 1424,
+      "cityName": "گچساران"
+    },
+    {
+      "provinceId": 3723,
+      "provinceName": "استان کهگیلویه و بویر احمد",
+      "cityId": 1423,
+      "cityName": "شهرچرام"
+    },
+    {
+      "provinceId": 3723,
+      "provinceName": "استان کهگیلویه و بویر احمد",
+      "cityId": 1473,
+      "cityName": "قلعه رییسی"
+    },
+    {
+      "provinceId": 3723,
+      "provinceName": "استان کهگیلویه و بویر احمد",
+      "cityId": 1421,
+      "cityName": "سرفاریاب"
+    },
+    {
+      "provinceId": 4246,
+      "provinceName": "استان خراسان شمالی",
+      "cityId": 3052,
+      "cityName": "زیارت"
+    },
+    {
+      "provinceId": 4246,
+      "provinceName": "استان خراسان شمالی",
+      "cityId": 2895,
+      "cityName": "صفی اباد"
+    },
+    {
+      "provinceId": 4246,
+      "provinceName": "استان خراسان شمالی",
+      "cityId": 3053,
+      "cityName": "قوشخانه"
+    },
+    {
+      "provinceId": 3956,
+      "provinceName": "استان آذربایجان شرقی",
+      "cityId": 2065,
+      "cityName": "طسوج"
+    },
+    {
+      "provinceId": 3956,
+      "provinceName": "استان آذربایجان شرقی",
+      "cityId": 2235,
+      "cityName": "ترک"
+    },
+    {
+      "provinceId": 3956,
+      "provinceName": "استان آذربایجان شرقی",
+      "cityId": 1890,
+      "cityName": "تیمورلو"
+    },
+    {
+      "provinceId": 3956,
+      "provinceName": "استان آذربایجان شرقی",
+      "cityId": 2241,
+      "cityName": "آچاچی"
+    },
+    {
+      "provinceId": 3956,
+      "provinceName": "استان آذربایجان شرقی",
+      "cityId": 1968,
+      "cityName": "خداجو"
+    },
+    {
+      "provinceId": 3956,
+      "provinceName": "استان آذربایجان شرقی",
+      "cityId": 1969,
+      "cityName": "نظر کهریزی"
+    },
+    {
+      "provinceId": 3956,
+      "provinceName": "استان آذربایجان شرقی",
+      "cityId": 1893,
+      "cityName": "مبارک شهر"
+    },
+    {
+      "provinceId": 3956,
+      "provinceName": "استان آذربایجان شرقی",
+      "cityId": 2017,
+      "cityName": "بناب مرند"
+    },
+    {
+      "provinceId": 3956,
+      "provinceName": "استان آذربایجان شرقی",
+      "cityId": 1896,
+      "cityName": "جوان قلعه"
+    },
+    {
+      "provinceId": 3554,
+      "provinceName": "استان خراسان جنوبی",
+      "cityId": 3247,
+      "cityName": "گزیک"
+    },
+    {
+      "provinceId": 3554,
+      "provinceName": "استان خراسان جنوبی",
+      "cityId": 54257,
+      "cityName": "ایسک"
+    },
+    {
+      "provinceId": 3554,
+      "provinceName": "استان خراسان جنوبی",
+      "cityId": 54331,
+      "cityName": "قائن"
+    },
+    {
+      "provinceId": 3554,
+      "provinceName": "استان خراسان جنوبی",
+      "cityId": 3248,
+      "cityName": "طبس مسینا"
+    },
+    {
+      "provinceId": 3554,
+      "provinceName": "استان خراسان جنوبی",
+      "cityId": 3312,
+      "cityName": "نیم بلوک"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1571,
+      "cityName": "کارزین"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1616,
+      "cityName": "داریون"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1609,
+      "cityName": "دوزه"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1575,
+      "cityName": "میانشهر"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 54260,
+      "cityName": "رونیز علیا"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1730,
+      "cityName": "خور"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1426,
+      "cityName": "کوپن"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1726,
+      "cityName": "شهر پیر"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1724,
+      "cityName": "حاجی آباد"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1566,
+      "cityName": "عماد ده"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1614,
+      "cityName": "والاشهر"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1599,
+      "cityName": "قره بلاغ"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1573,
+      "cityName": "مبارک آباد"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1551,
+      "cityName": "خوزی"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1663,
+      "cityName": "حسامی"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1662,
+      "cityName": "مزایجان"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1666,
+      "cityName": "مادرسلیمان"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1550,
+      "cityName": "اسیر"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1605,
+      "cityName": "کوهنجان"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1670,
+      "cityName": "سلطان شهر"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1603,
+      "cityName": "خاوران"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1443,
+      "cityName": "بابامنیر"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1432,
+      "cityName": "خومه زار"
+    },
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1646,
+      "cityName": "خانیمن"
+    },
+    {
+      "provinceId": 6256,
+      "provinceName": "استان اردبیل",
+      "cityId": 2225,
+      "cityName": "قصابه"
+    },
+    {
+      "provinceId": 6256,
+      "provinceName": "استان اردبیل",
+      "cityId": 2233,
+      "cityName": "کورائیم"
+    },
+    {
+      "provinceId": 6256,
+      "provinceName": "استان اردبیل",
+      "cityId": 2245,
+      "cityName": "هشجین"
+    },
+    {
+      "provinceId": 6256,
+      "provinceName": "استان اردبیل",
+      "cityId": 2212,
+      "cityName": "مرادلو"
+    },
+    {
+      "provinceId": 6256,
+      "provinceName": "استان اردبیل",
+      "cityId": 2177,
+      "cityName": "جعفر آباد"
+    },
+    {
+      "provinceId": 6256,
+      "provinceName": "استان اردبیل",
+      "cityId": 2176,
+      "cityName": "تازه کند انگوت"
+    },
+    {
+      "provinceId": 6256,
+      "provinceName": "استان اردبیل",
+      "cityId": 2173,
+      "cityName": "اسلام آباد"
+    }
+  ],
+  "ambiguous": [
+    {
+      "provinceId": 3844,
+      "provinceName": "استان فارس",
+      "cityId": 1724,
+      "cityName": "حاجی آباد",
+      "candidates": [
+        {
+          "cityName": "حاجی آباد",
+          "provinceName": "خراسان جنوبی",
+          "lat": 28.3071782,
+          "lng": 55.8984682
+        },
+        {
+          "cityName": "حاجی آباد",
+          "provinceName": "هرمزگان",
+          "lat": 28.3071782,
+          "lng": 55.8984682
+        }
+      ]
+    }
+  ]
+}
