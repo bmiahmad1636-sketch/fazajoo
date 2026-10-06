@@ -34,7 +34,6 @@ const {
 );
 
 const {
-  loginLimiter,
   passwordResetRequestLimiter,
   passwordResetConfirmLimiter,
   changePasswordLimiter,
@@ -63,7 +62,6 @@ router.post(
 
 router.post(
   "/login",
-  loginLimiter,
   login
 );
 

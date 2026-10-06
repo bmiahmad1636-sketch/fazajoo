@@ -315,28 +315,46 @@ async function apiRequest(
   options = {}
 ) {
   let response;
+  let lastNetworkError = null;
 
-  try {
-    response =
-      await fetch(
+  // A freshly-started local backend/browser connection can occasionally
+  // fail on the first TCP request even though the API is already listening.
+  // Retry only genuine network failures; HTTP errors are never retried.
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      response = await fetch(
         `${API_BASE_URL}${path}`,
         {
           ...options,
-
+          cache: "no-store",
           headers: {
-            "Content-Type":
-              "application/json",
-
-            ...(
-              options.headers ||
-              {}
-            ),
+            "Content-Type": "application/json",
+            ...(options.headers || {}),
           },
         }
       );
-  } catch {
+
+      lastNetworkError = null;
+      break;
+    } catch (error) {
+      lastNetworkError = error;
+
+      if (attempt === 0) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, 450)
+        );
+      }
+    }
+  }
+
+  if (!response) {
+    console.error(
+      "Fazajoo API network error:",
+      lastNetworkError
+    );
+
     throw new Error(
-      "اتصال به سرور فضاجو برقرار نشد. مطمئن شوید Backend روی پورت 6060 روشن است."
+      "ارتباط با سرور فضاجو برقرار نشد. لطفاً چند لحظه بعد دوباره تلاش کنید."
     );
   }
 
