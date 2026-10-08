@@ -1,11 +1,15 @@
 const path = require("path");
 const dotenv = require("dotenv");
 
+// Use the production-specific server config when deployed.
+// Environment variables supplied by the process manager retain precedence.
+const backendRoot = path.resolve(__dirname, "../..");
+const envFilename = process.env.NODE_ENV === "production"
+  ? ".env.production"
+  : ".env";
+
 dotenv.config({
-  path: path.resolve(
-    __dirname,
-    "../../.env"
-  ),
+  path: path.join(backendRoot, envFilename),
 });
 
 function parseNumber(
