@@ -1,0 +1,24 @@
+# Replace YOUR_LINUX_USER before installation.
+# Intended for a single Ubuntu VPS with NGINX as the only reverse proxy.
+[Unit]
+Description=Fazajoo Node.js Backend
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=YOUR_LINUX_USER
+Group=YOUR_LINUX_USER
+WorkingDirectory=/var/www/fazajoo/backend
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /var/www/fazajoo/backend/src/server.js
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target
