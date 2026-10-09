@@ -8,6 +8,10 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash VARCHAR(100)
     NOT NULL,
 
+  auth_version INTEGER
+    NOT NULL
+    DEFAULT 1,
+
   full_name VARCHAR(120),
 
   account_type VARCHAR(20)
@@ -233,3 +237,25 @@ CREATE TABLE IF NOT EXISTS video_action_history (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_video_action_history_space ON video_action_history(space_id, created_at DESC);
+
+
+-- OTP codes (included in baseline schema for fresh production deployments)
+CREATE TABLE IF NOT EXISTS auth_otp_codes (
+  id UUID PRIMARY KEY,
+  phone VARCHAR(11) NOT NULL,
+  code_hash VARCHAR(128) NOT NULL,
+  purpose VARCHAR(30) NOT NULL DEFAULT 'login',
+  expires_at TIMESTAMPTZ NOT NULL,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  max_attempts INTEGER NOT NULL DEFAULT 5,
+  consumed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT auth_otp_codes_phone_format CHECK (phone ~ '^09[0-9]{9}$'),
+  CONSTRAINT auth_otp_codes_attempts_nonnegative CHECK (attempts >= 0),
+  CONSTRAINT auth_otp_codes_max_attempts_positive CHECK (max_attempts > 0)
+);
+
+CREATE INDEX IF NOT EXISTS idx_auth_otp_codes_phone_purpose_created
+  ON auth_otp_codes (phone, purpose, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_auth_otp_codes_expires_at
+  ON auth_otp_codes (expires_at);
