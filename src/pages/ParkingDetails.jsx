@@ -56,6 +56,11 @@ function ParkingDetails({
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // Start each advertisement details view at the top, including after editing.
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [id]);
+
   const [showPhone, setShowPhone] = useState(false);
   const [contactPhone, setContactPhone] = useState("");
   const [contactLoading, setContactLoading] = useState(false);

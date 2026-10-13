@@ -13,6 +13,7 @@ import {
 import { updateSpace } from "../services/spaceService";
 import ImageUploader from "../components/ImageUploader";
 import VideoUploader from "../components/VideoUploader";
+import NeshanLocationPicker from "../components/NeshanLocationPicker";
 import ResidentialFields from "../components/ResidentialFields";
 import { emptyResidentialDetails } from "../components/residentialDetails";
 import VillaFields from "../components/VillaFields";
@@ -35,6 +36,7 @@ const EMPTY_FORM = {
   residentialDetails: { ...emptyResidentialDetails },
   villaDetails: { ...emptyVillaDetails },
   agencyNetworkConsent: false,
+  location: { lat: null, lng: null },
 };
 
 const PRICE_TYPES = [
@@ -98,6 +100,10 @@ function createFormFromParking(parking) {
     villaDetails: { ...emptyVillaDetails, ...(parking?.villaDetails || {}) },
     description: parking?.description || "",
     agencyNetworkConsent: Boolean(parking?.agencyNetworkConsent),
+    location: {
+      lat: parking?.location?.lat ?? null,
+      lng: parking?.location?.lng ?? null,
+    },
   };
 }
 
@@ -377,6 +383,7 @@ function EditParking({
       description:
         form.description.trim(),
       agencyNetworkConsent: Boolean(form.agencyNetworkConsent),
+      location: form.location,
 
     };
 
@@ -736,6 +743,28 @@ function EditParking({
                       )}
                     </div>
                   </div>
+                </div>
+              </section>
+
+              <section className="edit-parking-card">
+                <div className="edit-parking-card__header">
+                  <div className="edit-parking-card__icon">⌖</div>
+                  <div>
+                    <span>موقعیت مکانی</span>
+                    <h2>ویرایش موقعیت روی نقشه</h2>
+                    <p>نقطه فعلی آگهی را ببین و در صورت نیاز جای آن را تغییر بده.</p>
+                  </div>
+                </div>
+                <div className="edit-parking-card__body">
+                  <NeshanLocationPicker
+                    value={form.location}
+                    city={form.city}
+                    disabled={loading}
+                    onChange={(location) => {
+                      setForm((currentForm) => ({ ...currentForm, location }));
+                      setShowSuccess(false);
+                    }}
+                  />
                 </div>
               </section>
 

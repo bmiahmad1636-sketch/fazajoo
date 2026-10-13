@@ -1,16 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 
-import maplibregl from "@neshan-maps-platform/maplibre-sdk";
+import * as maplibregl from "maplibre-gl";
+import { FAZAJOO_MAP_STYLE } from "./FazajooMapConfig.js";
 
-import "@neshan-maps-platform/maplibre-sdk/style.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 
 import "./NeshanLocationPicker.css";
 import iranCitiesWithCoordinates from "../data/iran-cities-with-coordinates.json";
 
 const DEFAULT_CENTER = [51.8668, 32.0089]; // Shahreza: [lng, lat]
 
-const MAP_STYLE =
-  "https://static.neshan.org/sdk/maplibre/styles/light.json";
+
 
 const NESHAN_SEARCH_URL = "https://api.neshan.org/v1/search";
 
@@ -65,15 +65,6 @@ export default function NeshanLocationPicker({
       return undefined;
     }
 
-    const apiKey = String(
-      import.meta.env.VITE_NESHAN_WEB_MAP_KEY || ""
-    ).trim();
-
-    if (!apiKey) {
-      setStatus("missing-key");
-      return undefined;
-    }
-
     let cancelled = false;
 
     const rawLat = value?.lat;
@@ -98,10 +89,9 @@ export default function NeshanLocationPicker({
     try {
       const map = new maplibregl.Map({
         container: mapElementRef.current,
-        style: MAP_STYLE,
+        style: FAZAJOO_MAP_STYLE,
         center,
         zoom: hasValue ? 15 : 12,
-        apiKey,
         attributionControl: true,
       });
 
@@ -157,6 +147,7 @@ export default function NeshanLocationPicker({
       });
 
       map.on("error", (event) => {
+        if (!map.isStyleLoaded()) setStatus("error");
         console.error(
           "Neshan MapLibre error:",
           event?.error || event
