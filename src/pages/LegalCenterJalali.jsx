@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useState} from 'react';
 import {Link} from 'react-router-dom';
-import {getLegalCases,createLegalCase,archiveLegalCase,getLegalAudit,applyLegalAction,exportLegalUserDataByPhone,lookupLegalTargetByPhone,downloadLegalVideoEvidence} from '../services/legalService';
+import {getLegalCases,createLegalCase,archiveLegalCase,getLegalAudit,applyLegalAction,exportLegalUserDataByPhone,lookupLegalTargetByPhone,downloadLegalVideoEvidence} from '../services/LegalService';
 import './LegalCenter.css';
 import './LegalCenterModal.css';
 const faToEn=(v='')=>String(v).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
