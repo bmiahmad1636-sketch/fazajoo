@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { getCurrentSessionUser, subscribeToAuth } from "../services/authService";
-import { createOrGetChat, getChat, getMessages, getChatLegalStatus, markChatRead, sendMessage, subscribeChat } from "../services/chatService";
+import { createOrGetChat, getChat, getMessages, getChatLegalStatus, markChatRead, sendMessage, deleteMessageForAll, subscribeChat } from "../services/chatService";
 import ChatMessage from "../components/chat/ChatMessage";
 import TrustSafetyActions from "../components/TrustSafetyActions";
 import { unblockUser } from "../services/trustSafetyService";
@@ -23,6 +23,7 @@ function Chat({ parkings = [] }) {
   const [error, setError] = useState("");
   const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
+  const [deletingMessageId, setDeletingMessageId] = useState(null);
   const [sendError, setSendError] = useState("");
   const [chatBlocked, setChatBlocked] = useState(false);
   const [chatBlockMessage, setChatBlockMessage] = useState("");
@@ -112,6 +113,10 @@ function Chat({ parkings = [] }) {
         setMessages((current) => current.some((item) => item.id === message.id) ? current : [...current, message]);
         if (message.senderId !== userId) await markChatRead(chat.id).catch(()=>{});
       },
+      onDeleted: ({ messageId, deletedAt }) => {
+        setMessages((current) => current.map((m) => m.id === messageId
+          ? { ...m, text: "این پیام حذف شده است", deletedForAllAt: deletedAt } : m));
+      },
       onRead: ({ readAt, readerId }) => {
         if (readerId === userId) return;
         setMessages((current) => current.map((m) => m.senderId === userId && !m.readAt ? { ...m, readAt } : m));
@@ -147,6 +152,19 @@ function Chat({ parkings = [] }) {
     finally { setSending(false); }
   };
 
+
+  const handleDeleteMessage = async (message) => {
+    if (!chat?.id || deletingMessageId || message.deletedForAllAt) return;
+    const accepted = await showInSiteConfirm("این پیام برای هر دو نفر حذف شود؟", "حذف پیام برای همه");
+    if (!accepted) return;
+    setDeletingMessageId(message.id);
+    try {
+      const result = await deleteMessageForAll(chat.id, message.id);
+      setMessages((current) => current.map((m) => m.id === message.id
+        ? { ...m, text: "این پیام حذف شده است", deletedForAllAt: result.deletedAt } : m));
+    } catch (e) { showInSiteAlert(e.message || "حذف پیام انجام نشد.", "حذف پیام"); }
+    finally { setDeletingMessageId(null); }
+  };
 
   const handleUnblockInsideChat = async () => {
     if (!chat?.otherUserId || unblocking) return;
@@ -204,7 +222,11 @@ function Chat({ parkings = [] }) {
       <section className="chat-content"><div className="container"><div className="chat-layout">
         <aside className={`chat-ad-card ${ad?.imageUrl ? "" : "chat-ad-card--no-image"}`}>{ad?.imageUrl ? <img className="chat-ad-card__image" src={ad.imageUrl} alt={ad.title || "تصویر آگهی"}/> : <div className="chat-ad-card__placeholder">🚘</div>}<div className="chat-ad-card__body"><span>آگهی مرتبط</span><h2>{ad?.title || "آگهی فضاجو"}</h2><p>📍 {ad?.city || "شهر ثبت نشده"}</p><Link to={`/parking/${ad?.id || parkingId}`}>مشاهده آگهی ←</Link></div></aside>
         <section className="chat-box"><header className="chat-box__header"><div className="chat-box__avatar">{(chat?.otherUserName || "ف").slice(0,1)}</div><div className="chat-box__identity"><strong>{chat?.otherUserName || "کاربر فضاجو"}</strong><span>{chat?.otherUserRole || "طرف گفتگو"}</span></div><TrustSafetyActions compact targetType="chat" targetId={chat?.id} reportedUserId={chat?.otherUserId} allowBlock /></header>
-          <div className={`chat-box__messages ${messages.length===0 ? "chat-box__messages--empty" : ""}`}>{messages.length===0 ? <div className="chat-box__empty"><span>💬</span><strong>شروع گفتگو</strong><p>اولین پیام را برای این آگهی ارسال کنید.</p></div> : messages.map((message,index)=><div key={message.id}>{(index===0 || !sameDay(messages[index-1]?.createdAt,message.createdAt)) && <div className="chat-date-separator"><span>{formatDate(message.createdAt)}</span></div>}<div className="chat-message-row"><ChatMessage message={message} isMine={message.senderId===userId} isRead={Boolean(message.readAt)}/></div></div>)}{chatBlocked && <div className="chat-send-error" role="alert"><strong>امکان ارسال پیام وجود ندارد</strong><span>{chatBlockMessage || "ارسال پیام در فضاجو موقتاً غیرفعال است."}</span>{blockedByMe && <button type="button" className="chat-send-error__unblock" onClick={handleUnblockInsideChat} disabled={unblocking}>{unblocking ? "در حال رفع مسدودی..." : "رفع مسدودی این کاربر"}</button>}</div>}<div ref={endRef}/></div>
+          <div className={`chat-box__messages ${messages.length===0 ? "chat-box__messages--empty" : ""}`}>{messages.length===0 ? <div className="chat-box__empty"><span>💬</span><strong>شروع گفتگو</strong><p>اولین پیام را برای این آگهی ارسال کنید.</p></div> : messages.map((message,index)=><div key={message.id}>{(index===0 || !sameDay(messages[index-1]?.createdAt,message.createdAt)) && <div className="chat-date-separator"><span>{formatDate(message.createdAt)}</span></div>}<div className="chat-message-row"><ChatMessage message={message} isMine={message.senderId===userId} isRead={Boolean(message.readAt)}
+  deleting={deletingMessageId===message.id}
+  onDelete={message.senderId===userId && !message.deletedForAllAt &&
+    Date.now() - new Date(message.createdAt).getTime() <= (message.readAt ? 15 : 1440) * 60000
+    ? () => handleDeleteMessage(message) : undefined}/></div></div>)}{chatBlocked && <div className="chat-send-error" role="alert"><strong>امکان ارسال پیام وجود ندارد</strong><span>{chatBlockMessage || "ارسال پیام در فضاجو موقتاً غیرفعال است."}</span>{blockedByMe && <button type="button" className="chat-send-error__unblock" onClick={handleUnblockInsideChat} disabled={unblocking}>{unblocking ? "در حال رفع مسدودی..." : "رفع مسدودی این کاربر"}</button>}</div>}<div ref={endRef}/></div>
           <form className={`chat-form ${chatBlocked ? "chat-form--blocked" : ""}`} onSubmit={handleSubmit}><textarea value={messageText} onChange={(e)=>{ setMessageText(e.target.value); if (sendError) setSendError(""); }} placeholder={chatBlocked ? "ارسال پیام موقتاً غیرفعال است" : "پیام خود را بنویسید..."} maxLength={2000} disabled={chatBlocked}/><div className="chat-form__footer"><span>{messageText.length.toLocaleString("fa-IR")} / ۲۰۰۰</span><button type="submit" disabled={sending || !messageText.trim() || chatBlocked}>{sending ? "در حال ارسال..." : chatBlocked ? "ارسال موقتاً غیرفعال است" : "ارسال پیام"}</button></div></form>
         </section>
       </div></div></section>

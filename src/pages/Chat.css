@@ -1504,3 +1504,7 @@
 }
 .chat-send-error__unblock:hover{background:#fff7f1;border-color:#ef7d32}
 .chat-send-error__unblock:disabled{opacity:.6;cursor:wait}
+
+/* Delete for everyone */
+.chat-message__delete { display:block; margin:6px 0 0; padding:3px 7px; border:1px solid #d8b69d; border-radius:8px; background:transparent; color:#a6531d; font:inherit; font-size:0.72rem; cursor:pointer; }
+.chat-message__delete:disabled { opacity:.55; cursor:wait; }
