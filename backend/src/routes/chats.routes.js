@@ -20,6 +20,7 @@ router.post(
   sendMessageRateLimit,
   controller.send
 );
+router.delete("/:id/messages/:messageId", controller.deleteForAll);
 router.post("/:id/read", controller.markRead);
 
 module.exports = router;

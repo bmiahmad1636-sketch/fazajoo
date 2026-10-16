@@ -1,4 +1,4 @@
-function ChatMessage({ message, isMine, isRead = false }) {
+function ChatMessage({ message, isMine, isRead = false, onDelete, deleting = false }) {
   const formatTime = (createdAt) => {
     const date = createdAt ? new Date(createdAt) : null;
     if (!date || Number.isNaN(date.getTime())) return "";
@@ -8,7 +8,12 @@ function ChatMessage({ message, isMine, isRead = false }) {
   return (
     <div className={isMine ? "chat-message chat-message--mine" : "chat-message chat-message--other"}>
       <div className="chat-message__bubble">
-        <p>{message.text}</p>
+        <p>{message.deletedForAllAt ? "این پیام حذف شده است" : message.text}</p>
+        {isMine && !message.deletedForAllAt && onDelete && (
+          <button type="button" className="chat-message__delete" onClick={onDelete} disabled={deleting}>
+            {deleting ? "در حال حذف..." : "حذف برای همه"}
+          </button>
+        )}
         <div className="chat-message__meta">
           <span>{formatTime(message.createdAt)}</span>
           {isMine && (

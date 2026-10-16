@@ -52,6 +52,9 @@ export async function getChatLegalStatus(chatId) {
   return await request(`/chats/${chatId}/legal-status`);
 }
 export async function sendMessage(chatId, text) { return (await request(`/chats/${chatId}/messages`, { method: "POST", body: JSON.stringify({ text }) })).message; }
+export async function deleteMessageForAll(chatId, messageId) {
+  return request(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`, { method: "DELETE" });
+}
 export async function markChatRead(chatId) { return request(`/chats/${chatId}/read`, { method: "POST", body: "{}" }); }
 export async function getUnreadCount(chatType = "personal") {
   const type = chatType === "agency" ? "agency" : "personal";
@@ -67,15 +70,17 @@ export function subscribeInboxChanged(handler) {
   return () => s.off("inbox:changed", handler);
 }
 
-export function subscribeChat(chatId, { onMessage, onRead }) {
+export function subscribeChat(chatId, { onMessage, onRead, onDeleted }) {
   const s = getSocket();
   if (!s || !chatId) return () => {};
   s.emit("chat:join", chatId);
   if (onMessage) s.on("chat:message", onMessage);
   if (onRead) s.on("chat:read", onRead);
+  if (onDeleted) s.on("chat:deleted", onDeleted);
   return () => {
     if (onMessage) s.off("chat:message", onMessage);
     if (onRead) s.off("chat:read", onRead);
+    if (onDeleted) s.off("chat:deleted", onDeleted);
     s.emit("chat:leave", chatId);
   };
 }

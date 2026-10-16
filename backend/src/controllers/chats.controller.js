@@ -12,6 +12,16 @@ function ensureChatSchema() {
         ADD COLUMN IF NOT EXISTS chat_type VARCHAR(20) NOT NULL DEFAULT 'personal'
       `);
 
+      await query(`ALTER TABLE messages ADD COLUMN IF NOT EXISTS deleted_for_all_at TIMESTAMPTZ`);
+      await query(`CREATE TABLE IF NOT EXISTS message_deletion_audit (
+        id UUID PRIMARY KEY,
+        message_id UUID NOT NULL,
+        chat_id UUID NOT NULL,
+        actor_id UUID NOT NULL,
+        original_text TEXT NOT NULL,
+        original_read_at TIMESTAMPTZ,
+        deleted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )`);
       await query(`ALTER TABLE chats ADD COLUMN IF NOT EXISTS legal_mode VARCHAR(20) NOT NULL DEFAULT 'active'`);
       await query(`ALTER TABLE chats ADD COLUMN IF NOT EXISTS legal_hold BOOLEAN NOT NULL DEFAULT FALSE`);
       await query(`ALTER TABLE chats ADD COLUMN IF NOT EXISTS moderation_mode VARCHAR(20) NOT NULL DEFAULT 'active'`);
@@ -96,7 +106,7 @@ const CHAT_SELECT = `
     s.listing_type AS space_listing_type,
     ou.full_name AS owner_name, ou.phone AS owner_phone,
     ru.full_name AS requester_name, ru.phone AS requester_phone,
-    lm.text AS last_message,
+    CASE WHEN lm.deleted_for_all_at IS NOT NULL THEN 'این پیام حذف شده است' ELSE lm.text END AS last_message,
     lm.sender_id AS last_message_sender_id,
     lm.created_at AS last_message_at,
     COALESCE(uc.unread_count, 0) AS unread_count
@@ -105,7 +115,7 @@ const CHAT_SELECT = `
   JOIN users ou ON ou.id = c.owner_id
   JOIN users ru ON ru.id = c.requester_id
   LEFT JOIN LATERAL (
-    SELECT m.text, m.sender_id, m.created_at
+    SELECT m.text, m.sender_id, m.created_at, m.deleted_for_all_at
     FROM messages m
     WHERE m.chat_id = c.id
     ORDER BY m.created_at DESC
@@ -117,6 +127,7 @@ const CHAT_SELECT = `
     WHERE m.chat_id = c.id
       AND m.sender_id <> $1
       AND m.read_at IS NULL
+      AND m.deleted_for_all_at IS NULL
   ) uc ON TRUE
 `;
 
@@ -332,8 +343,9 @@ async function messages(req, res) {
     const chat = await getChatRow(req.params.id, req.user.id);
     if (!chat) return res.status(404).json({ ok: false, message: "گفتگو پیدا نشد." });
 
+    await ensureChatSchema();
     const result = await query(
-      `SELECT id, chat_id, sender_id, text, created_at, read_at
+      `SELECT id, chat_id, sender_id, text, created_at, read_at, deleted_for_all_at
        FROM messages
        WHERE chat_id = $1
        ORDER BY created_at ASC`,
@@ -346,7 +358,8 @@ async function messages(req, res) {
         id: row.id,
         chatId: row.chat_id,
         senderId: row.sender_id,
-        text: row.text,
+        text: row.deleted_for_all_at ? "این پیام حذف شده است" : row.text,
+        deletedForAllAt: row.deleted_for_all_at,
         createdAt: row.created_at,
     legalMode: row.legal_mode || 'active',
     legalHold: Boolean(row.legal_hold),
@@ -439,6 +452,70 @@ async function send(req, res) {
   }
 }
 
+async function deleteForAll(req, res) {
+  try {
+    await ensureChatSchema();
+    const chat = await getChatRow(req.params.id, req.user.id);
+    if (!chat) return res.status(404).json({ ok: false, message: "گفتگو پیدا نشد." });
+    // A transaction and row lock make read/delete races deterministic.
+    const { pool } = require("../db/pool");
+    const client = await pool.connect();
+    let deletedAt;
+    try {
+      await client.query("BEGIN");
+      // Lock the chat first: coordinate with read updates and legal-hold changes.
+      const chatLock = await client.query("SELECT legal_hold FROM chats WHERE id=$1 FOR UPDATE", [req.params.id]);
+      if (chatLock.rows[0]?.legal_hold) {
+        const err = new Error("به دلیل نگهداری حقوقی، حذف این پیام مجاز نیست."); err.status = 423; throw err;
+      }
+      const found = await client.query(
+        `SELECT id, chat_id, sender_id, text, created_at, read_at, deleted_for_all_at
+         FROM messages WHERE id=$1 AND chat_id=$2 FOR UPDATE`,
+        [req.params.messageId, req.params.id]
+      );
+      const m = found.rows[0];
+      if (!m) { const err = new Error("پیام پیدا نشد."); err.status = 404; throw err; }
+      if (String(m.sender_id) !== String(req.user.id)) {
+        const err = new Error("فقط فرستنده می‌تواند پیام را حذف کند."); err.status = 403; throw err;
+      }
+      if (m.deleted_for_all_at) {
+        const err = new Error("این پیام قبلاً حذف شده است."); err.status = 409; throw err;
+      }
+      const maxMinutes = m.read_at ? 15 : 1440;
+      if (Date.now() - new Date(m.created_at).getTime() > maxMinutes * 60000) {
+        const err = new Error("مهلت حذف این پیام برای همه به پایان رسیده است."); err.status = 409; throw err;
+      }
+      const auditId = crypto.randomUUID();
+      await client.query(
+        `INSERT INTO message_deletion_audit (id,message_id,chat_id,actor_id,original_text,original_read_at)
+         VALUES ($1,$2,$3,$4,$5,$6)`,
+        [auditId, m.id, m.chat_id, req.user.id, m.text, m.read_at]
+      );
+      const updated = await client.query(
+        `UPDATE messages SET text='این پیام حذف شده است', deleted_for_all_at=NOW()
+         WHERE id=$1 RETURNING deleted_for_all_at`, [m.id]
+      );
+      deletedAt = updated.rows[0].deleted_for_all_at;
+      await client.query("COMMIT");
+    } catch (e) {
+      await client.query("ROLLBACK");
+      throw e;
+    } finally { client.release(); }
+    const payload = { chatId: req.params.id, messageId: req.params.messageId, deletedAt };
+    const io = req.app.get("io");
+    if (io) {
+      io.to(`chat:${req.params.id}`).emit("chat:deleted", payload);
+      io.to(`user:${chat.owner_id}`).emit("inbox:changed", { chatId: req.params.id });
+      io.to(`user:${chat.requester_id}`).emit("inbox:changed", { chatId: req.params.id });
+    }
+    return res.json({ ok: true, ...payload });
+  } catch (error) {
+    if (error.status) return res.status(error.status).json({ ok: false, message: error.message });
+    console.error("Delete message error:", error);
+    return res.status(500).json({ ok: false, message: "حذف پیام انجام نشد." });
+  }
+}
+
 async function markRead(req, res) {
   try {
     const chat = await getChatRow(req.params.id, req.user.id);
@@ -451,6 +528,7 @@ async function markRead(req, res) {
        WHERE chat_id = $1
          AND sender_id <> $2
          AND read_at IS NULL
+         AND deleted_for_all_at IS NULL
        RETURNING id`,
       [req.params.id, req.user.id, readAt]
     );
@@ -512,7 +590,8 @@ async function unreadCount(req, res) {
        WHERE (c.owner_id = $1 OR c.requester_id = $1)
          AND ${typeCondition}
          AND m.sender_id <> $1
-         AND m.read_at IS NULL`,
+         AND m.read_at IS NULL
+      AND m.deleted_for_all_at IS NULL`,
       [req.user.id]
     );
 
@@ -529,4 +608,4 @@ async function unreadCount(req, res) {
   }
 }
 
-module.exports = { list, getOne, createOrGet, messages, send, markRead, unreadCount, legalStatus };
+module.exports = { list, getOne, createOrGet, messages, send, deleteForAll, markRead, unreadCount, legalStatus };
