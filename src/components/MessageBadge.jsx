@@ -22,7 +22,17 @@ function MessageBadge({ onNavigate, isApprovedAgent = false }) {
     };
     load();
     if (user) unsubscribeRealtime = subscribeInboxChanged(load);
-    return () => { active = false; unsubscribeRealtime(); };
+    // Refresh immediately when this tab marks messages as read, even if Socket.IO misses an event.
+    window.addEventListener("fazajoo:inbox-changed", load);
+    // Reconcile stale counts when returning to the tab.
+    const onVisibilityChange = () => { if (document.visibilityState === "visible") load(); };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      active = false;
+      unsubscribeRealtime();
+      window.removeEventListener("fazajoo:inbox-changed", load);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, [user, isApprovedAgent]);
 
   if (!user) return null;
