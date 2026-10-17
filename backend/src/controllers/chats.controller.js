@@ -13,6 +13,15 @@ function ensureChatSchema() {
       `);
 
       await query(`ALTER TABLE messages ADD COLUMN IF NOT EXISTS deleted_for_all_at TIMESTAMPTZ`);
+      // Per-user visibility only. Original messages remain untouched for legal records.
+      await query(`CREATE TABLE IF NOT EXISTS message_hidden_for_user (
+        message_id UUID NOT NULL,
+        chat_id UUID NOT NULL,
+        user_id UUID NOT NULL,
+        hidden_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        PRIMARY KEY (message_id, user_id)
+      )`);
+      await query(`CREATE INDEX IF NOT EXISTS idx_message_hidden_user_chat ON message_hidden_for_user (user_id, chat_id)`);
       await query(`CREATE TABLE IF NOT EXISTS message_deletion_audit (
         id UUID PRIMARY KEY,
         message_id UUID NOT NULL,
@@ -118,6 +127,7 @@ const CHAT_SELECT = `
     SELECT m.text, m.sender_id, m.created_at, m.deleted_for_all_at
     FROM messages m
     WHERE m.chat_id = c.id
+      AND NOT EXISTS (SELECT 1 FROM message_hidden_for_user h WHERE h.message_id=m.id AND h.user_id=$1)
     ORDER BY m.created_at DESC
     LIMIT 1
   ) lm ON TRUE
@@ -128,6 +138,7 @@ const CHAT_SELECT = `
       AND m.sender_id <> $1
       AND m.read_at IS NULL
       AND m.deleted_for_all_at IS NULL
+      AND NOT EXISTS (SELECT 1 FROM message_hidden_for_user h WHERE h.message_id=m.id AND h.user_id=$1)
   ) uc ON TRUE
 `;
 
@@ -348,8 +359,9 @@ async function messages(req, res) {
       `SELECT id, chat_id, sender_id, text, created_at, read_at, deleted_for_all_at
        FROM messages
        WHERE chat_id = $1
+         AND NOT EXISTS (SELECT 1 FROM message_hidden_for_user h WHERE h.message_id=messages.id AND h.user_id=$2)
        ORDER BY created_at ASC`,
-      [req.params.id]
+      [req.params.id, req.user.id]
     );
 
     return res.json({
@@ -452,6 +464,32 @@ async function send(req, res) {
   }
 }
 
+async function hideForMe(req, res) {
+  try {
+    await ensureChatSchema();
+    const chat = await getChatRow(req.params.id, req.user.id);
+    if (!chat) return res.status(404).json({ ok: false, message: "گفتگو پیدا نشد." });
+    const result = await query(
+      `INSERT INTO message_hidden_for_user (message_id, chat_id, user_id)
+       SELECT id, chat_id, $3 FROM messages WHERE id=$1 AND chat_id=$2
+       ON CONFLICT (message_id, user_id) DO NOTHING
+       RETURNING message_id`,
+      [req.params.messageId, req.params.id, req.user.id]
+    );
+    // Distinguish an already-hidden message from an invalid message.
+    if (!result.rowCount) {
+      const exists = await query(`SELECT 1 FROM messages WHERE id=$1 AND chat_id=$2`, [req.params.messageId, req.params.id]);
+      if (!exists.rowCount) return res.status(404).json({ ok: false, message: "پیام پیدا نشد." });
+    }
+    const io = req.app.get("io");
+    if (io) io.to(`user:${req.user.id}`).emit("inbox:changed", { chatId: req.params.id });
+    return res.json({ ok: true, messageId: req.params.messageId });
+  } catch (error) {
+    console.error("Hide message for user error:", error);
+    return res.status(500).json({ ok: false, message: "حذف پیام برای من انجام نشد." });
+  }
+}
+
 async function deleteForAll(req, res) {
   try {
     await ensureChatSchema();
@@ -529,6 +567,7 @@ async function markRead(req, res) {
          AND sender_id <> $2
          AND read_at IS NULL
          AND deleted_for_all_at IS NULL
+         AND NOT EXISTS (SELECT 1 FROM message_hidden_for_user h WHERE h.message_id=messages.id AND h.user_id=$2)
        RETURNING id`,
       [req.params.id, req.user.id, readAt]
     );
@@ -591,7 +630,8 @@ async function unreadCount(req, res) {
          AND ${typeCondition}
          AND m.sender_id <> $1
          AND m.read_at IS NULL
-      AND m.deleted_for_all_at IS NULL`,
+      AND m.deleted_for_all_at IS NULL
+      AND NOT EXISTS (SELECT 1 FROM message_hidden_for_user h WHERE h.message_id=m.id AND h.user_id=$1)`,
       [req.user.id]
     );
 
@@ -608,4 +648,4 @@ async function unreadCount(req, res) {
   }
 }
 
-module.exports = { list, getOne, createOrGet, messages, send, deleteForAll, markRead, unreadCount, legalStatus };
+module.exports = { list, getOne, createOrGet, messages, send, deleteForAll, hideForMe, markRead, unreadCount, legalStatus };

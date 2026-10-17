@@ -1508,3 +1508,20 @@
 /* Delete for everyone */
 .chat-message__delete { display:block; margin:6px 0 0; padding:3px 7px; border:1px solid #d8b69d; border-radius:8px; background:transparent; color:#a6531d; font:inherit; font-size:0.72rem; cursor:pointer; }
 .chat-message__delete:disabled { opacity:.55; cursor:wait; }
+
+/* Compact message actions menu: presentation only; delete behavior remains unchanged. */
+.chat-message__bubble { position: relative; }
+.chat-message__actions { position: relative; display: flex; justify-content: flex-end; margin-top: 5px; direction: rtl; }
+.chat-message__more { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 24px; padding: 0; border: 1px solid rgba(130, 105, 90, .25); border-radius: 8px; background: rgba(255,255,255,.15); color: inherit; font: inherit; font-size: 1.35rem; line-height: 1; cursor: pointer; }
+.chat-message--other .chat-message__more { background: #fff8f3; color: #a6531d; }
+.chat-message__more:hover, .chat-message__more[aria-expanded="true"] { background: rgba(255,255,255,.28); }
+.chat-message--other .chat-message__more:hover, .chat-message--other .chat-message__more[aria-expanded="true"] { background: #ffeadb; }
+.chat-message__more:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.chat-message__more:disabled { opacity: .55; cursor: wait; }
+.chat-message__menu { position: absolute; z-index: 30; top: calc(100% + 5px); right: 0; min-width: 145px; max-width: min(220px, 75vw); padding: 5px; border: 1px solid #e9d8ca; border-radius: 12px; background: #fff; box-shadow: 0 12px 28px rgba(32, 28, 24, .18); color: #49382f; direction: rtl; }
+.chat-message__menu button { display: block; width: 100%; padding: 9px 10px; border: 0; border-radius: 8px; background: transparent; color: #8c451b; font: inherit; font-size: .8rem; text-align: right; cursor: pointer; white-space: nowrap; }
+.chat-message__menu button:hover, .chat-message__menu button:focus-visible { background: #fff0e5; outline: none; }
+.chat-message__menu button:disabled { opacity: .55; cursor: wait; }
+
+/* Portal menu: fixed to the visible viewport, not clipped by chat scrolling. */
+.chat-message__menu { position: fixed; top: auto; right: auto; z-index: 9999; }
