@@ -55,7 +55,12 @@ export async function sendMessage(chatId, text) { return (await request(`/chats/
 export async function deleteMessageForAll(chatId, messageId) {
   return request(`/chats/${encodeURIComponent(chatId)}/messages/${encodeURIComponent(messageId)}`, { method: "DELETE" });
 }
-export async function markChatRead(chatId) { return request(`/chats/${chatId}/read`, { method: "POST", body: "{}" }); }
+export async function markChatRead(chatId) {
+  const result = await request(`/chats/${chatId}/read`, { method: "POST", body: "{}" });
+  // The header badge may miss the server socket event. Notify it locally after a confirmed read.
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("fazajoo:inbox-changed"));
+  return result;
+}
 export async function getUnreadCount(chatType = "personal") {
   const type = chatType === "agency" ? "agency" : "personal";
   return Number(
