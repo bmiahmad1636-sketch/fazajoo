@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { getCurrentSessionUser, subscribeToAuth } from "../services/authService";
-import { createOrGetChat, getChat, getMessages, getChatLegalStatus, markChatRead, sendMessage, deleteMessageForAll, subscribeChat } from "../services/chatService";
+import { createOrGetChat, getChat, getMessages, getChatLegalStatus, markChatRead, sendMessage, deleteMessageForAll, deleteMessageForMe, subscribeChat } from "../services/chatService";
 import ChatMessage from "../components/chat/ChatMessage";
 import TrustSafetyActions from "../components/TrustSafetyActions";
 import { unblockUser } from "../services/trustSafetyService";
@@ -166,6 +166,19 @@ function Chat({ parkings = [] }) {
     finally { setDeletingMessageId(null); }
   };
 
+  const handleDeleteForMe = async (message) => {
+    if (!chat?.id || deletingMessageId) return;
+    const accepted = await showInSiteConfirm("این پیام فقط از گفتگوی شما پنهان شود؟ طرف مقابل همچنان آن را می‌بیند.", "حذف برای من");
+    if (!accepted) return;
+    setDeletingMessageId(message.id);
+    try {
+      await deleteMessageForMe(chat.id, message.id);
+      setMessages((current) => current.filter((m) => m.id !== message.id));
+      window.dispatchEvent(new Event("fazajoo:inbox-changed"));
+    } catch (e) { showInSiteAlert(e.message || "حذف پیام برای من انجام نشد.", "حذف برای من"); }
+    finally { setDeletingMessageId(null); }
+  };
+
   const handleUnblockInsideChat = async () => {
     if (!chat?.otherUserId || unblocking) return;
     const accepted = await showInSiteConfirm(
@@ -224,6 +237,7 @@ function Chat({ parkings = [] }) {
         <section className="chat-box"><header className="chat-box__header"><div className="chat-box__avatar">{(chat?.otherUserName || "ف").slice(0,1)}</div><div className="chat-box__identity"><strong>{chat?.otherUserName || "کاربر فضاجو"}</strong><span>{chat?.otherUserRole || "طرف گفتگو"}</span></div><TrustSafetyActions compact targetType="chat" targetId={chat?.id} reportedUserId={chat?.otherUserId} allowBlock /></header>
           <div className={`chat-box__messages ${messages.length===0 ? "chat-box__messages--empty" : ""}`}>{messages.length===0 ? <div className="chat-box__empty"><span>💬</span><strong>شروع گفتگو</strong><p>اولین پیام را برای این آگهی ارسال کنید.</p></div> : messages.map((message,index)=><div key={message.id}>{(index===0 || !sameDay(messages[index-1]?.createdAt,message.createdAt)) && <div className="chat-date-separator"><span>{formatDate(message.createdAt)}</span></div>}<div className="chat-message-row"><ChatMessage message={message} isMine={message.senderId===userId} isRead={Boolean(message.readAt)}
   deleting={deletingMessageId===message.id}
+  onDeleteForMe={() => handleDeleteForMe(message)}
   onDelete={message.senderId===userId && !message.deletedForAllAt &&
     Date.now() - new Date(message.createdAt).getTime() <= (message.readAt ? 15 : 1440) * 60000
     ? () => handleDeleteMessage(message) : undefined}/></div></div>)}{chatBlocked && <div className="chat-send-error" role="alert"><strong>امکان ارسال پیام وجود ندارد</strong><span>{chatBlockMessage || "ارسال پیام در فضاجو موقتاً غیرفعال است."}</span>{blockedByMe && <button type="button" className="chat-send-error__unblock" onClick={handleUnblockInsideChat} disabled={unblocking}>{unblocking ? "در حال رفع مسدودی..." : "رفع مسدودی این کاربر"}</button>}</div>}<div ref={endRef}/></div>
