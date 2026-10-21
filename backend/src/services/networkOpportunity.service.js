@@ -325,6 +325,7 @@ async function grantPaidNetworkCredits(userId, amount) {
 }
 
 module.exports = {
+  ensureNetworkOpportunitySchema,
   getNetworkQuota,
   unlockNetworkOpportunity,
   getApprovedAgentNetworkCredits,

@@ -1,0 +1,36 @@
+"use strict";
+const assert = require("node:assert/strict");
+const crypto = require("node:crypto");
+const { pool } = require("../src/db/pool");
+const { settleVerifiedTopup } = require("../src/services/payments/walletPaymentVerification.service");
+const { createPendingIntent } = require("../src/services/payments/walletPaymentIntent.service");
+async function main() {
+  if (process.env.DB_NAME !== "fazajoo_restore_test") throw new Error("TEST_DB_REQUIRED");
+  await assert.rejects(settleVerifiedTopup({intentId:crypto.randomUUID(),testOnly:false,verifyWithProvider:async()=>({verified:true})}),/DISABLED/);
+  console.log("PASS: production guard");
+  const user = await pool.query("SELECT id FROM users LIMIT 1");
+  if (!user.rowCount) throw new Error("TEST_USER_REQUIRED");
+  const userId = user.rows[0].id;
+  const intent = (await createPendingIntent({userId,amountRial:"15001",idempotencyKey:"s08_"+crypto.randomUUID()})).intent;
+  let calls=0;
+  const verifier=async ({amountRial})=>{calls++;return {verified:true,provider:"zarinpal",amountRial,reference:"test_"+intent.id.replaceAll("-","")};};
+  const before=await pool.query("SELECT balance_rial FROM wallet_accounts WHERE user_id=$1",[userId]);
+  const beforeAmount=BigInt(before.rows[0]?.balance_rial??0);
+  await assert.rejects(settleVerifiedTopup({intentId:intent.id,testOnly:true,verifyWithProvider:async()=>({verified:true,provider:"zarinpal",amountRial:"1",reference:"bad"})}),/PAYMENT_NOT_VERIFIED/);
+  console.log("PASS: amount mismatch rejected");
+  const unchanged=await pool.query("SELECT status FROM wallet_payment_intents WHERE id=$1",[intent.id]);
+  assert.equal(unchanged.rows[0].status,"pending");
+  console.log("PASS: failed verification rolls back");
+  const [a,b]=await Promise.all([settleVerifiedTopup({intentId:intent.id,testOnly:true,verifyWithProvider:verifier}),settleVerifiedTopup({intentId:intent.id,testOnly:true,verifyWithProvider:verifier})]);
+  assert.equal([a,b].filter(x=>x.applied).length,1);
+  assert.equal(calls,1);
+  console.log("PASS: concurrent callbacks settle once");
+  const after=await pool.query("SELECT balance_rial FROM wallet_accounts WHERE user_id=$1",[userId]);
+  assert.equal(BigInt(after.rows[0].balance_rial)-beforeAmount,15001n);
+  console.log("PASS: balance credited exactly once");
+  const journal=await pool.query("SELECT count(*)::int AS n FROM wallet_transactions WHERE idempotency_key=$1",["topup:"+intent.id]);
+  assert.equal(journal.rows[0].n,1);
+  console.log("PASS: exactly one immutable journal entry");
+  console.log("Stage 08: 6/6 PASS (LOCAL TEST DB ONLY)");
+}
+main().catch(e=>{console.error("FAILED:",e.message);process.exitCode=1}).finally(()=>pool.end());

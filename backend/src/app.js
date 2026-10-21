@@ -18,6 +18,7 @@ const smartSearchRoutes = require("./routes/smartSearch.routes");
 const legalRoutes = require("./routes/legal.routes");
 const trustSafetyRoutes = require("./routes/trustSafety.routes");
 const adminDirectRoutes = require("./routes/adminDirect.routes");
+const walletRoutes = require("./routes/wallet.routes");
 
 const app = express();
 
@@ -443,6 +444,9 @@ app.use(
 );
 
 app.use("/api/admin/direct", adminDirectRoutes);
+
+// Authenticated read-only wallet endpoints (no credit/debit over HTTP).
+app.use("/api/wallet", walletRoutes);
 
 /*
 |--------------------------------------------------------------------------
