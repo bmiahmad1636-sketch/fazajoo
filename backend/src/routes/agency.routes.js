@@ -135,6 +135,27 @@ router.get("/public/:userId", async (req, res) => {
 router.use(requireAuth);
 
 // سهمیه فرصت‌های شبکه مشاور تأییدشده
+// Explicitly local-only wallet purchase of network credits. No real payment gateway.
+router.get("/network/purchase-config", (req, res) => {
+  const { getConfig } = require("../services/networkCreditPurchase.service");
+  return res.json({ ok: true, ...getConfig() });
+});
+router.post("/network/purchase-credits", async (req, res) => {
+  try {
+    const { purchaseNetworkCredits } = require("../services/networkCreditPurchase.service");
+    const result = await purchaseNetworkCredits({
+      userId: req.user.id,
+      quantity: req.body?.quantity,
+      idempotencyKey: req.body?.idempotencyKey,
+    });
+    return res.json({ ok: true, ...result });
+  } catch (error) {
+    const status = error.status || ({ INVALID_USER:400, INVALID_QUANTITY:400, INVALID_IDEMPOTENCY_KEY:400 }[error.message] || 500);
+    if (status === 500) console.error("network wallet purchase error:", error);
+    return res.status(status).json({ ok:false, message: status===500 ? "خطا در ثبت خرید سهمیه." : error.message });
+  }
+});
+
 router.get("/network/quota", async (req, res) => {
   try {
     const data = await getNetworkQuota(req.user.id);

@@ -29,6 +29,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import LegalCenterJalali from "./pages/LegalCenterJalali";
 import FindForMe from "./pages/FindForMe";
 import Account from "./pages/Account";
+import Wallet from "./pages/Wallet";
 import AgencyPublicProfile from "./pages/AgencyPublicProfile";
 import AdminModeration from "./pages/AdminModeration";
 import AdminDirectManagement from "./pages/AdminDirectManagement";
@@ -715,6 +716,15 @@ function App() {
           }
         />
 
+
+        <Route
+          path="/wallet"
+          element={
+            <ProtectedRoute user={user} authLoading={authLoading}>
+              <Wallet />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/account"

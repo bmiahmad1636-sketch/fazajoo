@@ -174,6 +174,7 @@ function Account({
           <div className="account-card__quick-links">
             <Link to="/my-parkings">آگهی‌های من</Link>
             <Link to="/favorites">علاقه‌مندی‌ها</Link>
+            <Link to="/wallet">💳 کیف پول من</Link>
           </div>
         </section>
 

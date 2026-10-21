@@ -244,6 +244,12 @@ function AgencyDashboard({ parkings = [], currentUser = null }) {
   const [networkQuota, setNetworkQuota] = useState(null);
   const [networkError, setNetworkError] = useState("");
   const [unlockingKey, setUnlockingKey] = useState("");
+  const [purchaseConfig, setPurchaseConfig] = useState(null);
+  const [purchaseQuantity, setPurchaseQuantity] = useState(1);
+  const [purchaseBusy, setPurchaseBusy] = useState(false);
+  const [purchaseMessage, setPurchaseMessage] = useState("");
+  const [walletBalance, setWalletBalance] = useState(null);
+  const [pendingPurchaseKey, setPendingPurchaseKey] = useState(null);
 
   const loadNetworkQuota = async () => {
     try {
@@ -262,6 +268,61 @@ function AgencyDashboard({ parkings = [], currentUser = null }) {
   useEffect(() => {
     loadNetworkQuota();
   }, []);
+
+  const loadPurchaseData = async () => {
+    try {
+      const token = getAuthToken();
+      if (!token) return;
+      const headers = { Authorization: `Bearer ${token}` };
+      const [configResponse, balanceResponse] = await Promise.all([
+        fetch(`${getApiBase()}/wallet/network-purchase/config`, { headers, cache: "no-store" }),
+        fetch(`${getApiBase()}/wallet/balance`, { headers, cache: "no-store" }),
+      ]);
+      const configData = await configResponse.json().catch(() => ({}));
+      const balanceData = await balanceResponse.json().catch(() => ({}));
+      setPurchaseConfig(configResponse.ok && configData.ok ? configData : { enabled: false });
+      setWalletBalance(balanceResponse.ok && balanceData.ok ? balanceData.balanceRial : null);
+    } catch {
+      setPurchaseConfig({ enabled: false });
+      setWalletBalance(null);
+    }
+  };
+
+  useEffect(() => { loadPurchaseData(); }, []);
+
+  const buyNetworkCredits = async () => {
+    if (purchaseBusy || !purchaseConfig?.enabled) return;
+    const unit = BigInt(purchaseConfig.unitPriceRial);
+    const total = unit * BigInt(purchaseQuantity);
+    if (walletBalance === null || BigInt(walletBalance) < total) {
+      setPurchaseMessage("موجودی کیف پول برای این خرید کافی نیست.");
+      return;
+    }
+    if (!window.confirm(`خرید آزمایشی ${faNumber(purchaseQuantity)} سهمیه با هزینه ${faNumber(total.toString())} ریال تأیید می‌شود؟`)) return;
+    const key = pendingPurchaseKey || `ui_${crypto.randomUUID()}`;
+    setPendingPurchaseKey(key);
+    setPurchaseBusy(true);
+    setPurchaseMessage("");
+    try {
+      const response = await fetch(`${getApiBase()}/wallet/network-purchase`, {
+        method: "POST", cache: "no-store",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${getAuthToken()}` },
+        body: JSON.stringify({ quantity: purchaseQuantity, idempotencyKey: key }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) {
+        if (response.status === 409) setPendingPurchaseKey(null);
+        throw new Error(data.message || "خرید آزمایشی انجام نشد.");
+      }
+      setPendingPurchaseKey(null);
+      setPurchaseMessage(data.alreadyPurchased ? "این خرید قبلاً ثبت شده بود؛ برداشت مجدد انجام نشد." : "خرید آزمایشی با موفقیت ثبت شد.");
+      await Promise.all([loadNetworkQuota(), loadPurchaseData()]);
+    } catch (error) {
+      setPurchaseMessage(error.message || "خطا در ثبت خرید. پیش از تلاش دوباره، سوابق کیف پول را بررسی کنید.");
+    } finally {
+      setPurchaseBusy(false);
+    }
+  };
 
   const unlockedKeys = useMemo(
     () =>
@@ -404,6 +465,29 @@ function AgencyDashboard({ parkings = [], currentUser = null }) {
                   <span className="agency-dashboard__quota-badge">
                     {networkQuota ? faNumber(networkQuota.totalRemaining) : "…"}
                   </span>
+                </div>
+              )}
+
+              {activeTab === "network" && (
+                <div className="agency-dashboard__quota-purchase">
+                  <strong>خرید سهمیه با کیف پول</strong>
+                  <p>خرید سهمیه فقط در محیط آزمایشی فعال می‌شود؛ پرداخت بانکی انجام نمی‌شود.</p>
+                  {purchaseConfig?.enabled ? (
+                    <div className="agency-dashboard__quota-purchase-controls">
+                      <label htmlFor="network-purchase-count">تعداد سهمیه</label>
+                      <select id="network-purchase-count" value={purchaseQuantity} onChange={(e) => { setPurchaseQuantity(Number(e.target.value)); setPendingPurchaseKey(null); setPurchaseMessage(""); }}>
+                        {[1, 3, 5, 10].map((n) => <option key={n} value={n}>{faNumber(n)}</option>)}
+                      </select>
+                      <span>قیمت هر سهمیه: {faNumber(purchaseConfig.unitPriceRial)} ریال</span>
+                      <span>جمع: {faNumber((BigInt(purchaseConfig.unitPriceRial) * BigInt(purchaseQuantity)).toString())} ریال</span>
+                      <span>موجودی کیف پول: {walletBalance === null ? "نامشخص" : `${faNumber(walletBalance)} ریال`}</span>
+                      <button type="button" disabled={purchaseBusy || walletBalance === null || BigInt(walletBalance) < BigInt(purchaseConfig.unitPriceRial) * BigInt(purchaseQuantity)} onClick={buyNetworkCredits}>
+                        {purchaseBusy ? "در حال ثبت..." : "خرید آزمایشی از کیف پول"}
+                      </button>
+                    </div>
+                  ) : <small>خرید تا تعیین قیمت آزمایشی و فعال‌سازی امن در لوکال غیرفعال است.</small>}
+                  {purchaseMessage && <p role="status">{purchaseMessage}</p>}
+                  <Link to="/wallet">مشاهده کیف پول و سوابق تراکنش‌ها</Link>
                 </div>
               )}
 
