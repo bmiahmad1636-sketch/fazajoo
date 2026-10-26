@@ -14,11 +14,7 @@ const {
   "../db/pool"
 );
 
-const {
-  createToken,
-} = require(
-  "../utils/token"
-);
+const { issueSessionToken, revokeSession, revokeAllSessions } = require("../services/session.service");
 
 
 function normalizePhone(
@@ -267,9 +263,7 @@ async function register(
       result.rows[0];
 
     const token =
-      createToken(
-        user
-      );
+      await issueSessionToken(user);
 
     return response
       .status(201)
@@ -513,9 +507,7 @@ async function login(
     }
 
     const token =
-      createToken(
-        user
-      );
+      await issueSessionToken(user);
 
     return response.json({
       ok: true,
@@ -564,63 +556,23 @@ async function me(
 }
 
 
-async function logout(
-  request,
-  response
-) {
+async function logout(request,response) {
   try {
-    const result =
-      await query(
-        `
-          UPDATE users
-          SET
-            auth_version =
-              auth_version + 1,
-            updated_at =
-              NOW()
-          WHERE id = $1
-          RETURNING
-            auth_version
-        `,
-        [
-          request.user.id,
-        ]
-      );
+    await revokeSession(request.user.id,request.sessionId);
+    return response.json({ok:true,message:"خروج از این دستگاه انجام شد."});
+  } catch(error) {
+    console.error("Logout error:",error);
+    return response.status(500).json({ok:false,message:"خروج امن انجام نشد."});
+  }
+}
 
-    if (
-      result.rowCount !== 1
-    ) {
-      return response
-        .status(401)
-        .json({
-          ok: false,
-
-          message:
-            "حساب کاربری معتبر نیست.",
-        });
-    }
-
-    return response.json({
-      ok: true,
-
-      message:
-        "خروج از حساب با موفقیت انجام شد.",
-    });
-
-  } catch (error) {
-    console.error(
-      "Logout error:",
-      error
-    );
-
-    return response
-      .status(500)
-      .json({
-        ok: false,
-
-        message:
-          "خروج امن از حساب انجام نشد.",
-      });
+async function logoutAll(request,response) {
+  try {
+    await revokeAllSessions(request.user.id);
+    return response.json({ok:true,message:"خروج از همه دستگاه‌ها انجام شد."});
+  } catch(error) {
+    console.error("Logout all error:",error);
+    return response.status(500).json({ok:false,message:"خروج امن انجام نشد."});
   }
 }
 
@@ -774,9 +726,7 @@ async function changePassword(
       updated.rows[0];
 
     const token =
-      createToken(
-        updatedUser
-      );
+      await issueSessionToken(updatedUser);
 
     return response.json({
       ok: true,
@@ -807,5 +757,6 @@ module.exports = {
   login,
   me,
   logout,
+  logoutAll,
   changePassword,
 };

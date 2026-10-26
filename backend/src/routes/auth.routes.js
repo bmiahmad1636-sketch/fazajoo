@@ -8,6 +8,7 @@ const {
   login,
   me,
   logout,
+  logoutAll,
   changePassword,
 } = require(
   "../controllers/auth.controller"
@@ -122,6 +123,8 @@ router.post(
   logout
 );
 
+
+router.post("/logout-all",requireAuth,logoutAll);
 
 module.exports =
   router;

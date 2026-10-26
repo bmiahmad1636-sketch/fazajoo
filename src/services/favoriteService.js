@@ -1,5 +1,5 @@
 import { API_BASE_URL } from "../config/api";
-import { getAuthToken } from "./authService";
+import { getAuthToken, invalidateRejectedSession } from "./authService";
 
 async function request(path, options = {}) {
   const token = getAuthToken();
@@ -20,6 +20,7 @@ async function request(path, options = {}) {
   });
 
   const data = await response.json().catch(() => null);
+  if (response.status === 401) invalidateRejectedSession(token);
 
   if (!response.ok || data?.ok === false) {
     const error = new Error(

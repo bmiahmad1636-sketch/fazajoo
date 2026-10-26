@@ -41,6 +41,7 @@ import { getSpaces } from "./services/spaceService";
 
 import {
   initializeAuthSession,
+  revalidateActiveSession,
   logoutUser,
   subscribeToAuth,
 } from "./services/authService";
@@ -299,6 +300,25 @@ function App() {
     return () => {
       active = false;
       unsubscribe();
+    };
+  }, []);
+
+  // Other browsers/devices do not share localStorage events.
+  // Re-check server-side session validity when returning to this tab.
+  useEffect(() => {
+    let lastCheckedAt = 0;
+    const checkOnReturn = () => {
+      if (document.visibilityState === "hidden") return;
+      const now = Date.now();
+      if (now - lastCheckedAt < 1500) return;
+      lastCheckedAt = now;
+      void revalidateActiveSession();
+    };
+    window.addEventListener("focus", checkOnReturn);
+    document.addEventListener("visibilitychange", checkOnReturn);
+    return () => {
+      window.removeEventListener("focus", checkOnReturn);
+      document.removeEventListener("visibilitychange", checkOnReturn);
     };
   }, []);
 
