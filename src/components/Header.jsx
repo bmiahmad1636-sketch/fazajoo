@@ -36,12 +36,12 @@ function Header({
     setLogoutError("");
   };
 
-  const handleLogout = async () => {
+  const handleLogout = async (allDevices = false) => {
     try {
       setLogoutError("");
 
       if (onLogout) {
-        await onLogout();
+        await onLogout(allDevices);
       }
 
       setLogoutModalOpen(false);
@@ -480,7 +480,7 @@ function Header({
                   lineHeight: 1.9,
                 }}
               >
-                آیا مطمئن هستید که می‌خواهید از حساب خود خارج شوید؟
+                «خروج از حساب» فقط این مرورگر را خارج می‌کند. «خروج از همه دستگاه‌ها» تمام نشست‌های شما را باطل می‌کند.
               </p>
 
               {logoutError && (
@@ -528,9 +528,13 @@ function Header({
                 انصراف
               </button>
 
+              <button type="button" onClick={() => handleLogout(true)}
+                style={{flex:1,minHeight:"44px",borderRadius:"12px",border:"1px solid #a33b3b",background:"#fff0f0",color:"#a33b3b",fontFamily:"inherit",fontWeight:800,cursor:"pointer"}}>
+                خروج از همه دستگاه‌ها
+              </button>
               <button
                 type="button"
-                onClick={handleLogout}
+                onClick={() => handleLogout(false)}
                 style={{
                   flex: 1,
                   minHeight: "44px",

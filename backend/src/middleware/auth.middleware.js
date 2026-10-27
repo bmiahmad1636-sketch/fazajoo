@@ -4,6 +4,8 @@ const {
   "../db/pool"
 );
 
+const { validSession } = require("../services/session.service");
+
 const {
   verifyToken,
 } = require(
@@ -116,6 +118,12 @@ async function requireAuth(
             "نشست کاربری منقضی یا باطل شده است. لطفاً دوباره وارد شوید.",
         });
     }
+
+    if (!(await validSession(user.id, payload.sid, currentAuthVersion))) {
+      return response.status(401).json({ok:false,code:"SESSION_REVOKED",message:"نشست باطل شده است. دوباره وارد شوید."});
+    }
+
+    request.sessionId = payload.sid;
 
     request.user =
       user;

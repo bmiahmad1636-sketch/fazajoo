@@ -13,7 +13,7 @@ function ensureSecret() {
   }
 }
 
-function createToken(user) {
+function createToken(user, sessionId) {
   ensureSecret();
 
   const authVersion =
@@ -41,6 +41,7 @@ function createToken(user) {
         user.account_type,
 
       authVersion,
+      sid: sessionId,
     },
 
     env.JWT_SECRET,

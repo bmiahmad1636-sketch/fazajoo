@@ -1,6 +1,6 @@
 import { API_BASE_URL } from "../config/api";
-import { getAuthToken } from "./authService";
-async function request(path, options={}) { const token=getAuthToken(); const response=await fetch(`${API_BASE_URL}${path}`,{...options,headers:{"Content-Type":"application/json",...(token?{Authorization:`Bearer ${token}`} : {}),...(options.headers||{})}}); const data=await response.json().catch(()=>null); if(!response.ok||data?.ok===false) throw new Error(data?.message||"ارتباط با سرور فضاجو ناموفق بود."); return data; }
+import { getAuthToken, invalidateRejectedSession } from "./authService";
+async function request(path, options={}) { const token=getAuthToken(); const response=await fetch(`${API_BASE_URL}${path}`,{...options,headers:{"Content-Type":"application/json",...(token?{Authorization:`Bearer ${token}`} : {}),...(options.headers||{})}}); const data=await response.json().catch(()=>null); if(response.status===401) invalidateRejectedSession(token); if(!response.ok||data?.ok===false) throw new Error(data?.message||"ارتباط با سرور فضاجو ناموفق بود."); return data; }
 function changed(){ window.dispatchEvent(new Event("fazajoo:spaces-changed")); }
 export async function getSpaces(){ return (await request("/spaces")).spaces||[]; }
 export async function getMySpaces(){ return (await request("/spaces/mine")).spaces||[]; }

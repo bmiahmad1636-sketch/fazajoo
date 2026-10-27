@@ -3,6 +3,7 @@ const { Server } = require("socket.io");
 const app = require("./app");
 const env = require("./config/env");
 const { verifyToken } = require("./utils/token");
+const { validSession } = require("./services/session.service");
 const { query } = require("./db/pool");
 
 const server = http.createServer(app);
@@ -143,6 +144,12 @@ io.use(
         );
       }
 
+      if (!(await validSession(user.id,payload.sid,currentAuthVersion))) {
+        throw new Error("Revoked session");
+      }
+      socket.sessionId=payload.sid;
+      socket.authVersion=currentAuthVersion;
+
       socket.userId =
         user.id;
 
@@ -168,6 +175,16 @@ io.use(
 io.on(
   "connection",
   (socket) => {
+    // Periodically close sockets whose sessions were revoked by an HTTP logout.
+    const sessionTimer=setInterval(async()=>{
+      try {
+        const state = await query("SELECT auth_version,is_active FROM users WHERE id=$1",[socket.userId]);
+        if (!state.rows[0]?.is_active || Number(state.rows[0].auth_version)!==socket.authVersion ||
+            !(await validSession(socket.userId,socket.sessionId,socket.authVersion))) socket.disconnect(true);
+      } catch { socket.disconnect(true); }
+    },10000);
+    sessionTimer.unref?.();
+    socket.on("disconnect",()=>clearInterval(sessionTimer));
     socket.join(
       `user:${socket.userId}`
     );
@@ -178,6 +195,10 @@ io.on(
         chatId
       ) => {
         try {
+          if (!(await validSession(socket.userId,socket.sessionId,socket.authVersion))) {
+            socket.disconnect(true);
+            return;
+          }
           if (
             !isValidUuid(
               chatId

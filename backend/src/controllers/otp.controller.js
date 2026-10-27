@@ -4,9 +4,7 @@ const {
   query,
 } = require("../db/pool");
 
-const {
-  createToken,
-} = require("../utils/token");
+const { issueSessionToken } = require("../services/session.service");
 
 const {
   generateOtpCode,
@@ -483,7 +481,7 @@ async function verifyOtp(
     }
 
     const token =
-      createToken(user);
+      await issueSessionToken(user);
 
     return response.json({
       ok: true,

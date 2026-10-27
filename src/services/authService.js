@@ -192,6 +192,15 @@ function clearStoredSession() {
 }
 
 
+// Invalidate only the exact token that received an authenticated 401.
+// A late response from an old request must never log out a newer login.
+export function invalidateRejectedSession(requestToken) {
+  if (!requestToken || getStoredToken() !== requestToken) return false;
+  clearStoredSession();
+  notifyAuthListeners(null);
+  return true;
+}
+
 // ======================================================
 // Auth listeners
 // ======================================================
@@ -371,6 +380,13 @@ async function apiRequest(
     );
   }
 
+  // Only a request carrying our current bearer token may revoke local UI state.
+  if (response.status === 401) {
+    const authHeader = options.headers?.Authorization || options.headers?.authorization || "";
+    const requestToken = /^Bearer\s+(.+)$/i.exec(authHeader)?.[1];
+    invalidateRejectedSession(requestToken);
+  }
+
   if (
     !response.ok ||
     data?.ok === false
@@ -491,13 +507,9 @@ export async function initializeAuthSession() {
         error
     );
 
-    clearStoredSession();
-
-    notifyAuthListeners(
-      null
-    );
-
-    return null;
+    // Do not clear a newer login when this /auth/me request finishes late.
+    invalidateRejectedSession(token);
+    return getStoredToken() === token ? null : getStoredUser();
   }
 }
 
@@ -926,40 +938,48 @@ export const changePassword =
   };
 
 
+// Check a session when a browser tab becomes active again.
+// Do not sign out on offline/network/server errors; only an authenticated 401.
+export async function revalidateActiveSession() {
+  const token = getStoredToken();
+  if (!token) return;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (response.status === 401) {
+      invalidateRejectedSession(token);
+    }
+  } catch {
+    // Transient connectivity problems must not log the user out.
+  }
+}
+
+
 // ======================================================
 // Logout
 // ======================================================
 
-export const logoutUser =
-  async () => {
-    const token =
-      getStoredToken();
+export const logoutUser = async (allDevices = false) => {
+  const token = getStoredToken();
+  if (token) {
+    // Do not claim logout succeeded if the server did not revoke the session.
+    await apiRequest(allDevices ? "/auth/logout-all" : "/auth/logout", {
+      method: "POST", headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+  clearStoredSession();
+  notifyAuthListeners(null);
+};
 
-    try {
-      if (token) {
-        await apiRequest(
-          "/auth/logout",
-          {
-            method: "POST",
-
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        );
-      }
-    } catch (error) {
-      console.warn(
-        "Backend logout warning:",
-        error?.message ||
-          error
-      );
-    } finally {
-      clearStoredSession();
-
-      notifyAuthListeners(
-        null
-      );
+// Keep tabs of the same browser synchronized after logout/login.
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (event) => {
+    if (event.key === TOKEN_STORAGE_KEY || event.key === USER_STORAGE_KEY) {
+      notifyAuthListeners(getStoredToken() ? getStoredUser() : null);
     }
-  };
+  });
+}
