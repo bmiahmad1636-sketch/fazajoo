@@ -199,6 +199,39 @@ export default function NeshanLocationPicker({
   }, [disabled]);
   // oxlint-enable react-hooks/exhaustive-deps
 
+  // The edit form receives its saved coordinates asynchronously. The map is
+  // mounted before that data arrives, so synchronize the marker and viewport
+  // without recreating the map or changing the saved value.
+  const savedLat = value?.lat;
+  const savedLng = value?.lng;
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const hasSavedPoint =
+      savedLat !== null && savedLat !== undefined && savedLat !== "" &&
+      savedLng !== null && savedLng !== undefined && savedLng !== "" &&
+      Number.isFinite(Number(savedLat)) && Number.isFinite(Number(savedLng));
+
+    if (!hasSavedPoint) {
+      if (markerRef.current) {
+        markerRef.current.remove();
+        markerRef.current = null;
+      }
+      return;
+    }
+
+    const lat = Number(savedLat);
+    const lng = Number(savedLng);
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return;
+
+    map.__fazajooDrawPoint?.(lat, lng);
+    const current = map.getCenter();
+    if (Math.abs(current.lat - lat) > 0.00001 || Math.abs(current.lng - lng) > 0.00001) {
+      map.jumpTo({ center: [lng, lat], zoom: Math.max(map.getZoom(), 15) });
+    }
+  }, [savedLat, savedLng]);
+
   const requestCurrentLocation = () => {
     if (
       disabled ||

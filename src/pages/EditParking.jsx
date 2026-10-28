@@ -237,7 +237,7 @@ function EditParking({
 
     if (!form.title.trim()) {
       nextErrors.title =
-        "عنوان آگهی را وارد کنید.";
+        isWanted ? "عنوان درخواست را وارد کنید." : "عنوان آگهی را وارد کنید.";
     } else if (
       form.title.trim().length < 5
     ) {
@@ -264,7 +264,7 @@ function EditParking({
         nextErrors.price = "حداقل مبلغ رهن یا اجاره را وارد کنید.";
       }
     } else if (form.priceType !== "negotiable" && !form.price.trim()) {
-      nextErrors.price = "قیمت را وارد کنید.";
+      nextErrors.price = isWanted ? "سقف بودجه را وارد کنید." : "قیمت را وارد کنید.";
     }
 
     const normalizedPhone =
@@ -517,10 +517,10 @@ function EditParking({
           <div className="edit-parking-hero__content">
             <div>
               <span className="edit-parking-eyebrow">
-                مدیریت آگهی
+                {isWanted ? "مدیریت درخواست" : "مدیریت آگهی"}
               </span>
 
-              <h1>ویرایش آگهی پارکینگ</h1>
+              <h1>{isWanted ? "ویرایش درخواست پارکینگ" : "ویرایش آگهی پارکینگ"}</h1>
 
               <p>
                 اطلاعات آگهی را دقیق‌تر کن
@@ -535,7 +535,7 @@ function EditParking({
               </span>
 
               <div>
-                <small>آگهی در حال ویرایش</small>
+                <small>{isWanted ? "درخواست در حال ویرایش" : "آگهی در حال ویرایش"}</small>
 
                 <strong>
                   {parking.title}
@@ -615,7 +615,7 @@ function EditParking({
                     </span>
 
                     <h2>
-                      مشخصات اصلی آگهی
+                      {isWanted ? "مشخصات اصلی درخواست" : "مشخصات اصلی آگهی"}
                     </h2>
 
                     <p>
@@ -628,7 +628,7 @@ function EditParking({
                 <div className="edit-parking-card__body">
                   <div className="edit-parking-field edit-parking-field--full">
                     <label htmlFor="title">
-                      عنوان آگهی
+                      {isWanted ? "عنوان درخواست" : "عنوان آگهی"}
                       <span>*</span>
                     </label>
 
@@ -767,7 +767,7 @@ function EditParking({
                   <div>
                     <span>موقعیت مکانی</span>
                     <h2>ویرایش موقعیت روی نقشه</h2>
-                    <p>نقطه فعلی آگهی را ببین و در صورت نیاز جای آن را تغییر بده.</p>
+                    <p>{isWanted ? "محدوده مطلوب ثبت‌شده را ببین و فقط در صورت نیاز تغییر بده." : "نقطه فعلی آگهی را ببین و در صورت نیاز جای آن را تغییر بده."}</p>
                   </div>
                 </div>
                 <div className="edit-parking-card__body">
@@ -883,7 +883,7 @@ function EditParking({
                     </span>
 
                     <h2>
-                      قیمت و اطلاعات تماس
+                      {isWanted ? "بودجه و اطلاعات تماس" : "قیمت و اطلاعات تماس"}
                     </h2>
 
                     <p>
@@ -899,7 +899,7 @@ function EditParking({
                     {parking?.category !== "residential" && (
 <div className="edit-parking-field" style={{ gridColumn: "1 / -1", display: "grid", gridTemplateColumns: form.priceType === "negotiable" ? "minmax(0, 1fr)" : "minmax(145px, 1fr) minmax(0, 2fr)", gap: "12px", alignItems: "end", direction: "rtl" }}>
                       <div className="edit-parking-field" style={{ margin: 0 }}>
-                        <label htmlFor="priceType">نوع قیمت <span>*</span></label>
+                        <label htmlFor="priceType">{isWanted ? "دوره بودجه" : "نوع قیمت"} <span>*</span></label>
                         <div className="edit-parking-input">
                           <select id="priceType" name="priceType" value={form.priceType} onChange={handleChange} disabled={loading}
                             style={{ width: "100%", border: "none", outline: "none", background: "transparent", font: "inherit", color: "inherit" }}>
@@ -909,7 +909,7 @@ function EditParking({
                       </div>
                       {form.priceType !== "negotiable" && (
                         <div className="edit-parking-field" style={{ margin: 0 }}>
-                          <label htmlFor="price">قیمت <span>*</span></label>
+                          <label htmlFor="price">{isWanted ? "سقف بودجه پیشنهادی" : "قیمت"} <span>*</span></label>
                           <div className={`edit-parking-input${errors.price ? " edit-parking-input--error" : ""}`}>
                             <span className="edit-parking-input__icon">﷼</span>
                             <input id="price" name="price" type="text" inputMode="numeric" value={form.price} onChange={handleChange} placeholder="مبلغ به ریال" autoComplete="off" disabled={loading} />
@@ -965,7 +965,7 @@ function EditParking({
 
                   <div className="edit-parking-field edit-parking-field--full">
                     <label htmlFor="description">
-                      توضیحات آگهی
+                      {isWanted ? "توضیحات درخواست" : "توضیحات آگهی"}
                       <span>*</span>
                     </label>
 

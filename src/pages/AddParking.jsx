@@ -767,6 +767,16 @@ function AddParking() {
                       </div>
                     </div>
 
+                    {isWantedAd && (
+                      <div className="add-parking-field" style={{ gridColumn: "1 / -1", padding: "14px 16px", border: "1px solid #f3d7c2", borderRadius: "14px", background: "#fff8f2", lineHeight: 1.9 }}>
+                        <strong style={{ color: "#a94c0c" }}>نیاز خودت را ثبت کن، نه مشخصات یک ملک موجود</strong>
+                        <p style={{ margin: "4px 0 0" }}>
+                          شهر و متراژ موردنیاز را مشخص کن. برای امکاناتی مثل آسانسور، پارکینگ، گرمایش یا سرمایش، فقط مواردی را انتخاب کن که واقعاً برایت مهم‌اند؛ جزئیات ضروری را هم در توضیحات بنویس.
+                        </p>
+                        <small>برای حفظ دقت «خبرم کن»، معیارهای اصلی تطبیق و درصدهای فعلی بدون تغییر می‌مانند.</small>
+                      </div>
+                    )}
+
                     {form.category === "residential" && (
                       <ResidentialFields
                         value={form.residentialDetails}
@@ -1109,9 +1119,11 @@ function AddParking() {
                         </strong>
 
                         <p>
-                          {form.category === "residential"
-                            ? "شماره تماس و توضیحات نهایی ملک را کامل کن."
-                            : "قیمت، شماره تماس و جزئیات آگهی را کامل کن."}
+                          {isWantedAd
+                            ? "بودجه، شماره تماس و اولویت‌های ضروری خودت را کامل کن."
+                            : form.category === "residential"
+                              ? "شماره تماس و توضیحات نهایی ملک را کامل کن."
+                              : "قیمت، شماره تماس و جزئیات آگهی را کامل کن."}
                         </p>
                       </div>
                     </div>
@@ -1134,7 +1146,7 @@ function AddParking() {
                         }}
                       >
                         <div className="add-parking-field add-parking-field--price-type" style={{ minWidth: 0, width: "100%" }}>
-                          <label htmlFor="priceType">نوع قیمت <span>*</span></label>
+                          <label htmlFor="priceType">{isWantedAd ? "دوره بودجه" : "نوع قیمت"} <span>*</span></label>
                           <select
                             id="priceType"
                             value={form.priceType}
@@ -1160,7 +1172,7 @@ function AddParking() {
                         </div>
                         {form.priceType !== "negotiable" && (
                           <div className="add-parking-field add-parking-field--amount" style={{ minWidth: 0, width: "100%" }}>
-                            <label htmlFor="price">{isWantedAd ? "بودجه" : "قیمت"} <span>*</span></label>
+                            <label htmlFor="price">{isWantedAd ? "سقف بودجه پیشنهادی" : "قیمت"} <span>*</span></label>
                             <div
                               className={`add-parking-input${errors.price ? " add-parking-input--error" : ""}`}
                               style={{ width: "100%", height: "48px", minHeight: "48px", boxSizing: "border-box" }}
