@@ -160,6 +160,7 @@ const PRIMARY_CATEGORY_RULES = [
   { category: "storage", words: ["انبار", "انباری"] },
   { category: "warehouse", words: ["سوله", "کارگاه", "صنعتی"] },
   { category: "shop", words: ["مغازه", "فروشگاه", "تجاری"] },
+  { category: "garden", words: ["باغ", "باغچه", "باغ میوه", "باغ کشاورزی"] },
   { category: "land", words: ["قطعه زمین", "زمین"] },
 ];
 

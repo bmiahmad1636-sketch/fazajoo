@@ -11,6 +11,10 @@ import "../components/IranCityAutocomplete.css";
 import ResidentialFields from "../components/ResidentialFields";
 import { emptyResidentialDetails } from "../components/residentialDetails";
 import VillaFields from "../components/VillaFields";
+import GardenFields from "../components/GardenFields";
+import ShopFields from "../components/ShopFields";
+import { emptyShopDetails } from "../components/shopDetails";
+import { emptyGardenDetails } from "../components/gardenDetails";
 import { emptyVillaDetails } from "../components/villaDetails";
 import "../components/ResidentialFields.css";
 
@@ -32,6 +36,8 @@ const INITIAL_FORM = {
   description: "",
   residentialDetails: { ...emptyResidentialDetails },
   villaDetails: { ...emptyVillaDetails },
+  gardenDetails: { ...emptyGardenDetails },
+  shopDetails: { ...emptyShopDetails },
   agencyNetworkConsent: false,
   location: { lat: null, lng: null },
 };
@@ -86,6 +92,11 @@ const SPACE_CATEGORIES = [
     icon: "🏪",
   },
   {
+    value: "garden",
+    label: "باغ",
+    icon: "🌳",
+  },
+  {
     value: "land",
     label: "زمین",
     icon: "🌱",
@@ -98,7 +109,8 @@ const SPACE_CATEGORIES = [
 ];
 
 const PRICE_TYPES = [
-  { value: "daily", label: "روزانه" },
+  { value: "daily", label: "روزانه / شبانه" },
+  { value: "weekly", label: "هفتگی" },
   { value: "monthly", label: "ماهانه" },
   { value: "yearly", label: "سالانه" },
   { value: "negotiable", label: "توافقی" },
@@ -227,7 +239,7 @@ function AddParking() {
             !String(form.residentialDetails?.monthlyRent || "").trim()) {
           newErrors.price = "حداقل مبلغ رهن یا اجاره را وارد کنید.";
         }
-      } else if (!form.price.trim()) {
+      } else if (form.priceType !== "negotiable" && !form.price.trim()) {
         newErrors.price = "قیمت را وارد کنید.";
       }
 
@@ -351,7 +363,7 @@ function AddParking() {
                   form.residentialDetails?.deposit ||
                   ""
                 )
-              : form.price.replace(/,/g, "").trim(),
+              : form.priceType === "negotiable" ? "" : form.price.replace(/,/g, "").trim(),
 
           priceType:
             form.category === "residential"
@@ -361,6 +373,8 @@ function AddParking() {
             form.category === "residential"
               ? form.residentialDetails
               : {},
+          gardenDetails: form.category === "garden" ? form.gardenDetails : {},
+          shopDetails: form.category === "shop" ? form.shopDetails : {},
           villaDetails:
             form.category === "villa"
               ? form.villaDetails
@@ -781,6 +795,10 @@ function AddParking() {
                       />
                     )}
 
+                    {form.category === "shop" && <ShopFields value={form.shopDetails} disabled={loading} onChange={(shopDetails) => setForm(current => ({ ...current, shopDetails }))} />}
+
+                    {form.category === "garden" && <GardenFields value={form.gardenDetails} disabled={loading} onChange={(gardenDetails) => setForm((current) => ({ ...current, gardenDetails }))} />}
+
                     {form.category === "other" && (
                       <div className="add-parking-field">
                         <label htmlFor="customCategory">
@@ -1101,88 +1119,72 @@ function AddParking() {
                     <div className="add-parking-fields-grid">
                       {form.category !== "residential" && (
                         <>
-                      <div className="add-parking-field add-parking-field--price-combo">
-                        <label htmlFor="price">
-                          {isWantedAd
-                            ? "بودجه"
-                            : "قیمت"}
-                          <span>*</span>
-                        </label>
-
-                        <div
-                          className={[
-                            "add-parking-input",
-                            errors.price
-                              ? "add-parking-input--error"
-                              : "",
-                          ]
-                            .filter(Boolean)
-                            .join(" ")}
-                        >
-                          <span className="add-parking-input__icon">
-                            ﷼
-                          </span>
-
-                          <input
-                            id="price"
-                            name="price"
-                            type="text"
-                            placeholder={
-                              form.category === "villa"
-                                ? isWantedAd
-                                  ? "مثلاً تا شبی ۵۰,۰۰۰,۰۰۰ ریال"
-                                  : "مثلاً شبی ۵۰,۰۰۰,۰۰۰ ریال"
-                                : isWantedAd
-                                  ? "مثلاً تا ماهانه ۳ میلیون"
-                                  : "مثلاً ماهانه ۳ میلیون"
-                            }
-                            value={form.price}
-                            onChange={
-                              handleChange
-                            }
-                            disabled={loading}
-                          />
-                        </div>
-
-                        <div className="add-parking-field add-parking-field--price-type">
-                          <label>
-                            نوع قیمت
-                            <span>*</span>
-                          </label>
-
+                      <div
+                        className={`add-parking-field add-parking-field--price-combo${form.priceType === "negotiable" ? " add-parking-field--negotiable" : ""}`}
+                        style={{
+                          gridColumn: "1 / -1",
+                          display: "grid",
+                          gridTemplateColumns: form.priceType === "negotiable"
+                            ? "minmax(0, 1fr)"
+                            : "minmax(125px, 0.9fr) minmax(0, 1.7fr)",
+                          alignItems: "start",
+                          gap: "12px",
+                          width: "100%",
+                          minWidth: 0,
+                        }}
+                      >
+                        <div className="add-parking-field add-parking-field--price-type" style={{ minWidth: 0, width: "100%" }}>
+                          <label htmlFor="priceType">نوع قیمت <span>*</span></label>
                           <select
+                            id="priceType"
                             value={form.priceType}
-                            onChange={(event) =>
-                              setForm((currentForm) => ({
-                                ...currentForm,
-                                priceType: event.target.value,
-                              }))
-                            }
                             disabled={loading}
+                            style={{ width: "100%", height: "48px", minHeight: "48px", boxSizing: "border-box" }}
+                            onChange={(event) => {
+                              const priceType = event.target.value;
+                              setForm((current) => ({
+                                ...current,
+                                priceType,
+                                price: priceType === "negotiable" ? "" : current.price,
+                              }));
+                              setErrors((current) => ({ ...current, price: "" }));
+                            }}
                           >
                             {(form.category === "villa"
-                              ? PRICE_TYPES.filter((item) =>
-                                  ["daily", "negotiable"].includes(item.value)
-                                )
+                              ? PRICE_TYPES.filter((item) => ["daily", "negotiable"].includes(item.value))
                               : PRICE_TYPES
                             ).map((item) => (
-                              <option key={item.value} value={item.value}>
-                                {item.label}
-                              </option>
+                              <option key={item.value} value={item.value}>{item.label}</option>
                             ))}
                           </select>
                         </div>
-
-                        {errors.price && (
-                          <span className="add-parking-error">
-                            {errors.price}
-                          </span>
+                        {form.priceType !== "negotiable" && (
+                          <div className="add-parking-field add-parking-field--amount" style={{ minWidth: 0, width: "100%" }}>
+                            <label htmlFor="price">{isWantedAd ? "بودجه" : "قیمت"} <span>*</span></label>
+                            <div
+                              className={`add-parking-input${errors.price ? " add-parking-input--error" : ""}`}
+                              style={{ width: "100%", height: "48px", minHeight: "48px", boxSizing: "border-box" }}
+                            >
+                              <span className="add-parking-input__icon">﷼</span>
+                              <input
+                                id="price"
+                                name="price"
+                                type="text"
+                                inputMode="numeric"
+                                placeholder={form.category === "villa" ? "مثلاً ۵۰,۰۰۰,۰۰۰" : "مبلغ به ریال"}
+                                value={form.price}
+                                onChange={handleChange}
+                                disabled={loading}
+                                style={{ minWidth: 0, width: "100%" }}
+                              />
+                            </div>
+                            {errors.price && <span className="add-parking-error">{errors.price}</span>}
+                          </div>
                         )}
                       </div>
 
                         </>
-                      )}
-
+                        )}
                       <div className="add-parking-field">
                         <label htmlFor="phone">
                           شماره تماس

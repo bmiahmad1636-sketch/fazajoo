@@ -1,5 +1,6 @@
 const PRICE_TYPE_LABELS = {
-  daily: "روزانه",
+  daily: "روزانه / شبانه",
+  weekly: "هفتگی",
   monthly: "ماهانه",
   yearly: "سالانه",
   negotiable: "توافقی",

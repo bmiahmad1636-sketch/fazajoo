@@ -24,6 +24,7 @@ const CATEGORY_RULES = [
   { category: "storage", label: "انبار", words: ["انبار", "انباری"] },
   { category: "warehouse", label: "سوله", words: ["سوله", "کارگاه", "صنعتی"] },
   { category: "shop", label: "مغازه", words: ["مغازه", "فروشگاه", "تجاری"] },
+  { category: "garden", label: "باغ", words: ["باغ", "باغچه", "باغ میوه", "باغ کشاورزی"] },
   { category: "land", label: "زمین", words: ["زمین", "قطعه زمین"] },
 ];
 

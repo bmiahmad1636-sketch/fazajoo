@@ -1911,3 +1911,53 @@
   border-color: #1f5b48 !important;
   background: #eaf7f0 !important;
 }
+
+/* Pricing controls: type first (right in RTL), amount next; no empty slot for negotiable. */
+.add-parking-step-content--final .add-parking-field--price-combo {
+  grid-column: 1 / -1;
+  display: grid !important;
+  grid-template-columns: minmax(145px, 1fr) minmax(0, 2fr) !important;
+  direction: rtl;
+  align-items: start !important;
+  gap: 10px !important;
+}
+.add-parking-step-content--final .add-parking-field--price-combo > .add-parking-field--price-type {
+  grid-column: 1 !important;
+  grid-row: auto !important;
+}
+.add-parking-step-content--final .add-parking-field--price-combo > .add-parking-field--amount {
+  grid-column: 2 !important;
+  grid-row: auto !important;
+  margin: 0 !important;
+}
+.add-parking-step-content--final .add-parking-field--price-combo.add-parking-field--negotiable {
+  grid-template-columns: minmax(145px, 1fr) !important;
+  grid-column: 1 / -1;
+  justify-content: stretch;
+}
+@media (max-width: 480px) {
+  .add-parking-step-content--final .add-parking-field--price-combo {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) !important;
+  }
+}
+
+/* Price controls: stable alignment on initial render and after changing type. */
+.add-parking-step-content--final .add-parking-field--price-combo {
+  align-items: start !important;
+}
+.add-parking-step-content--final .add-parking-field--price-combo > .add-parking-field {
+  align-self: start !important;
+  margin-top: 0 !important;
+}
+.add-parking-step-content--final .add-parking-field--price-combo > .add-parking-field > label {
+  min-height: 20px;
+  line-height: 20px;
+  margin-top: 0 !important;
+  margin-bottom: 8px !important;
+}
+.add-parking-step-content--final .add-parking-field--price-combo > .add-parking-field > select,
+.add-parking-step-content--final .add-parking-field--price-combo > .add-parking-field > .add-parking-input {
+  height: 48px !important;
+  min-height: 48px !important;
+  box-sizing: border-box;
+}

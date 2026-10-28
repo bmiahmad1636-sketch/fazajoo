@@ -45,6 +45,7 @@ const CATEGORY_INFO = {
     label: "مغازه",
     icon: "🏪",
   },
+  garden: { label: "باغ", icon: "🌳" },
   land: {
     label: "زمین",
     icon: "🌱",

@@ -1,0 +1,1 @@
+export const emptyGardenDetails = { waterSource: "", electricity: false, water: false, fenced: false, trees: "", building: false, cityGas: false, landline: false, furnished: false, irrigation: "", accessRoad: "", heatingSystems: [], coolingSystems: [] };

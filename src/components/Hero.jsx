@@ -7,6 +7,7 @@ const categories = [
   { title: "مسکونی", value: "residential", icon: "⌂" },
   { title: "مغازه", value: "shop", icon: "▤" },
   { title: "زمین", value: "land", icon: "◇" },
+  { title: "باغ", value: "garden", icon: "♣" },
   { title: "پارکینگ", value: "parking", icon: "P" },
   { title: "انبار", value: "storage", icon: "□" },
   { title: "سوله", value: "warehouse", icon: "⌁" },

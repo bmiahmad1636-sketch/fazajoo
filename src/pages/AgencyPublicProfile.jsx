@@ -11,6 +11,7 @@ const CATEGORY_LABELS = {
   storage: "انبار",
   warehouse: "سوله",
   shop: "مغازه",
+  garden: "باغ",
   land: "زمین",
   other: "سایر",
 };

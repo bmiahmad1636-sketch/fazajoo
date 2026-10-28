@@ -1,3 +1,4 @@
+import { climateLabels } from "../components/ClimateFields";
 import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -39,6 +40,7 @@ const CATEGORY_INFO = {
     label: "مغازه",
     icon: "🏪",
   },
+  garden: { label: "باغ", icon: "🌳" },
   land: {
     label: "زمین",
     icon: "🌱",
@@ -227,6 +229,8 @@ function ParkingDetails({
 
   const residential = parking?.residentialDetails || {};
   const villa = parking?.villaDetails || {};
+  const garden = parking?.gardenDetails || {};
+  const shop = parking?.shopDetails || {};
   const residentialTypeLabels = {
     apartment: "آپارتمان", house: "خانه", villa: "خانه ویلایی",
     suite: "سوئیت", penthouse: "پنت‌هاوس", other: "سایر مسکونی",
@@ -740,20 +744,61 @@ function ParkingDetails({
                     <span><small>رهن</small><strong>{Number(residential.deposit || 0).toLocaleString("fa-IR")} ریال</strong></span>
                     <span><small>اجاره ماهانه</small><strong>{Number(residential.monthlyRent || 0).toLocaleString("fa-IR")} ریال</strong></span>
                     <span><small>اتاق</small><strong>{Number(residential.bedrooms || 0).toLocaleString("fa-IR")}</strong></span>
-                    {residential.floor && <span><small>طبقه</small><strong>{residential.floor}</strong></span>}
+                    {residential.propertyType === "apartment" && residential.floor && <span><small>طبقه</small><strong>{residential.floor}</strong></span>}
                     {Number(residential.totalFloors || 0) > 0 && <span><small>تعداد طبقات ساختمان</small><strong>{Number(residential.totalFloors).toLocaleString("fa-IR")}</strong></span>}
-                    {Number(residential.unitsPerFloor || 0) > 0 && <span><small>واحد در هر طبقه</small><strong>{Number(residential.unitsPerFloor).toLocaleString("fa-IR")}</strong></span>}
+                    {residential.propertyType === "apartment" && Number(residential.unitsPerFloor || 0) > 0 && <span><small>واحد در هر طبقه</small><strong>{Number(residential.unitsPerFloor).toLocaleString("fa-IR")}</strong></span>}
                     {residential.buildYear > 0 && <span><small>سال ساخت</small><strong>{String(residential.buildYear).replace(/\D/g, "").replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)])}</strong></span>}
                   </div>
                   <div className="parking-details-residential__amenities">
-                    {residential.elevator && <b>✓ آسانسور</b>}
+                    {["apartment", "penthouse"].includes(residential.propertyType) && residential.elevator && <b>✓ آسانسور</b>}
                     {residential.parking && <b>✓ پارکینگ</b>}
                     {residential.storage && <b>✓ انباری</b>}
                     {residential.furnished && <b>✓ مبله</b>}
-                    {residential.balcony && <b>✓ بالکن</b>}
+                    {["apartment", "penthouse", "house"].includes(residential.propertyType) && residential.balcony && <b>✓ بالکن</b>}
+                    {residential.propertyType === "penthouse" && residential.roofGarden && <b>✓ روف‌گاردن / تراس اختصاصی</b>}
                     {residential.renovated && <b>✓ بازسازی‌شده</b>}
                     {residential.convertible && <b>✓ قابل تبدیل رهن و اجاره</b>}
                   </div>
+                  {residential.propertyType === "villa" && residential.buildingUse && <div className="parking-details-residential__grid"><span><small>نوع استفاده ساختمان</small><strong>{residential.buildingUse === "single" ? "مستقل و یکپارچه" : "دارای واحدهای مستقل"}</strong></span></div>}
+                  <div className="parking-details-residential__amenities">
+                    {Array.isArray(residential.heatingSystems) && residential.heatingSystems.map(key => climateLabels[key] && <b key={`heat-${key}`}>♨ {climateLabels[key]}</b>)}
+                    {Array.isArray(residential.coolingSystems) && residential.coolingSystems.map(key => climateLabels[key] && <b key={`cool-${key}`}>❄ {climateLabels[key]}</b>)}
+                  </div>
+                </div>
+              )}
+
+              {category === "shop" && (
+                <div className="parking-details-residential">
+                  <h3>🏪 امکانات مغازه</h3>
+                  <div className="parking-details-residential__grid">
+                    {[["waterSupply","آب"],["electricitySupply","برق"]].map(([key,title]) => shop[key] && <span key={key}><small>{title}</small><strong>{({independent:"مستقل",shared:"مشترک",none:"ندارد"})[shop[key]]}</strong></span>)}
+                  </div>
+                  <div className="parking-details-residential__amenities">
+                    {shop.threePhase && <b>✓ برق سه‌فاز</b>}{shop.cityGas && <b>✓ گاز شهری</b>}{shop.landline && <b>✓ تلفن ثابت</b>}{shop.restroom && <b>✓ سرویس بهداشتی</b>}
+                  </div>
+                  <div className="parking-details-residential__amenities">
+                    {Array.isArray(shop.heatingSystems) && shop.heatingSystems.map(key => climateLabels[key] && <b key={`heat-${key}`}>♨ {climateLabels[key]}</b>)}
+                    {Array.isArray(shop.coolingSystems) && shop.coolingSystems.map(key => climateLabels[key] && <b key={`cool-${key}`}>❄ {climateLabels[key]}</b>)}
+                  </div>
+                </div>
+              )}
+
+              {category === "garden" && (
+                <div className="parking-details-residential">
+                  <h3>🌳 مشخصات باغ</h3>
+                  <div className="parking-details-residential__grid">
+                    {garden.trees && <span><small>درختان و پوشش گیاهی</small><strong>{garden.trees}</strong></span>}
+                    {garden.waterSource && <span><small>منبع آب</small><strong>{({well:"چاه",canal:"قنات / کانال",network:"آب شبکه",share:"حقابه",none:"فاقد منبع مشخص"})[garden.waterSource] || garden.waterSource}</strong></span>}
+                    {garden.irrigation && <span><small>آبیاری</small><strong>{({drip:"قطره‌ای",flood:"غرقابی",sprinkler:"بارانی",other:"سایر"})[garden.irrigation] || garden.irrigation}</strong></span>}
+                    {garden.accessRoad && <span><small>راه دسترسی</small><strong>{garden.accessRoad}</strong></span>}
+                  </div>
+                  <div className="parking-details-residential__amenities">
+                    {garden.water && <b>✓ آب</b>}{garden.electricity && <b>✓ برق</b>}{garden.fenced && <b>✓ حصارکشی</b>}{garden.building && <b>✓ ساختمان / اتاقک</b>}{garden.cityGas && <b>✓ گاز شهری</b>}{garden.landline && <b>✓ تلفن ثابت</b>}{garden.furnished && <b>✓ مبله</b>}
+                  </div>
+                  {garden.building && <div className="parking-details-residential__amenities">
+                    {Array.isArray(garden.heatingSystems) && garden.heatingSystems.map(key => climateLabels[key] && <b key={`heat-${key}`}>♨ {climateLabels[key]}</b>)}
+                    {Array.isArray(garden.coolingSystems) && garden.coolingSystems.map(key => climateLabels[key] && <b key={`cool-${key}`}>❄ {climateLabels[key]}</b>)}
+                  </div>}
                 </div>
               )}
 
@@ -818,6 +863,10 @@ function ParkingDetails({
                     {villa.heating && <b>✓ گرمایش</b>}
                     {villa.wifi && <b>✓ وای‌فای</b>}
                     {villa.petFriendly && <b>✓ ورود حیوان خانگی</b>}
+                  </div>
+                  <div className="parking-details-residential__amenities">
+                    {Array.isArray(villa.heatingSystems) && villa.heatingSystems.map(key => climateLabels[key] && <b key={`heat-${key}`}>♨ {climateLabels[key]}</b>)}
+                    {Array.isArray(villa.coolingSystems) && villa.coolingSystems.map(key => climateLabels[key] && <b key={`cool-${key}`}>❄ {climateLabels[key]}</b>)}
                   </div>
 
                   {villa.houseRules && (

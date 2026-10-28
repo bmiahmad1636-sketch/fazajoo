@@ -153,6 +153,7 @@ function Parking({ parkings = [], initialListingType = "", showHero = true }) {
     { value: "storage", label: "انبار", icon: "📦" },
     { value: "warehouse", label: "سوله", icon: "🏭" },
     { value: "shop", label: "مغازه", icon: "🏪" },
+    { value: "garden", label: "باغ", icon: "🌳" },
     { value: "land", label: "زمین", icon: "🌱" },
     { value: "other", label: "سایر فضاها", icon: "✨" },
   ];

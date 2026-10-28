@@ -117,6 +117,7 @@ function AgencyApplicants({
     { value: "warehouse", label: "سوله" },
     { value: "shop", label: "مغازه" },
     { value: "land", label: "زمین" },
+    { value: "garden", label: "باغ" },
     { value: "other", label: "سایر فضاها" },
   ];
 

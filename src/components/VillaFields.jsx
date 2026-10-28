@@ -1,4 +1,5 @@
 import { emptyVillaDetails } from "./villaDetails";
+import ClimateFields from "./ClimateFields";
 
 const money = (value) => {
   const digits = String(value ?? "").replace(/\D/g, "");
@@ -29,8 +30,6 @@ export default function VillaFields({
     ["yard", "حیاط"],
     ["furnished", "مبله"],
     ["barbecue", "باربیکیو"],
-    ["airConditioning", "سرمایش"],
-    ["heating", "گرمایش"],
     ["wifi", "اینترنت / وای‌فای"],
     ["petFriendly", "امکان ورود حیوان خانگی"],
   ];
@@ -162,6 +161,7 @@ export default function VillaFields({
         ))}
       </div>
 
+      <ClimateFields value={form} onChange={onChange} disabled={disabled} />
       <label style={{ display: "grid", gap: "8px", marginTop: "14px" }}>
         قوانین و توضیحات اقامت
         <textarea

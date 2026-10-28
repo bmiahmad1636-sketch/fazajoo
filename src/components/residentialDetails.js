@@ -12,6 +12,10 @@ export const emptyResidentialDetails = {
   storage: false,
   furnished: false,
   balcony: false,
+  roofGarden: false,
   renovated: false,
   convertible: false,
+  buildingUse: "",
+  heatingSystems: [],
+  coolingSystems: [],
 };

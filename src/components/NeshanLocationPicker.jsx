@@ -224,6 +224,12 @@ export default function NeshanLocationPicker({
           position.coords.longitude.toFixed(6)
         );
 
+        // Reject coarse network-based geolocation instead of suggesting a false precise point.
+        if (!Number.isFinite(position.coords.accuracy) || position.coords.accuracy > 1000) {
+          setGeoStatus("inaccurate");
+          return;
+        }
+
         const map = mapRef.current;
 
         if (map) {
@@ -233,17 +239,10 @@ export default function NeshanLocationPicker({
             essential: true,
           });
 
-          map.__fazajooDrawPoint?.(
-            lat,
-            lng
-          );
         }
 
-        onChangeRef.current?.({
-          lat,
-          lng,
-        });
-
+        // Browser geolocation can be inaccurate on desktops/VPNs.
+        // Move the map only; user must explicitly select the actual property point.
         setGeoStatus("success");
       },
 
@@ -538,6 +537,16 @@ export default function NeshanLocationPicker({
                 ? "در حال پیدا کردن موقعیت…"
                 : "موقعیت فعلی من"}
             </button>
+
+            {geoStatus === "success" && (
+              <small>
+                موقعیت پیشنهادی دستگاه روی نقشه باز شد. این موقعیت ممکن است دقیق نباشد؛ برای ثبت محل ملک، روی نقطه صحیح نقشه کلیک کن.
+              </small>
+            )}
+
+            {geoStatus === "inaccurate" && (
+              <small>موقعیت گزارش‌شده توسط مرورگر دقیق نیست. برای جلوگیری از نمایش مکان اشتباه، از «رفتن به شهر آگهی» استفاده کن و نقطه ملک را روی نقشه انتخاب کن.</small>
+            )}
 
             {geoStatus === "denied" && (
               <small>

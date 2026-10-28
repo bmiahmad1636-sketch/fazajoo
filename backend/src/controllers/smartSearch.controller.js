@@ -16,7 +16,7 @@ function cleanCriteria(value, rawText = "") {
 
   const cleaned = {
     listingType: "wanted",
-    category: ["parking", "residential", "villa", "storage", "warehouse", "shop", "land", "other"].includes(criteria.category)
+    category: ["parking", "residential", "villa", "storage", "warehouse", "shop", "land", "garden", "other"].includes(criteria.category)
       ? criteria.category
       : "other",
     categoryLabel: String(criteria.categoryLabel || "").trim().slice(0, 80),

@@ -5,7 +5,12 @@ const { recordContactReveal } = require("../services/securityMonitoring.service"
 const storage = require("../services/storage.service");
 
 const MAX_IMAGES = 10;
-const FIELDS = `id, listing_type, category, custom_category, category_label, status, title, city, area, price, price_type, phone, image_url, image_urls, residential_details, villa_details, description, agency_network_consent, location_lat, location_lng, media_items, legal_hold, owner_id, created_at, updated_at`;
+const HEATING_SYSTEMS = ["gasHeater", "packageRadiator", "centralHeating", "floorHeating", "electricHeater", "splitHeating"];
+const COOLING_SYSTEMS = ["waterCooler", "split", "ductSplit", "centralCooling", "fan"];
+function cleanSystems(value, allowed) {
+  return Array.isArray(value) ? [...new Set(value.filter(item => typeof item === "string" && allowed.includes(item)))].slice(0, allowed.length) : [];
+}
+const FIELDS = `id, listing_type, category, custom_category, category_label, status, title, city, area, price, price_type, phone, image_url, image_urls, residential_details, villa_details, garden_details, shop_details, description, agency_network_consent, location_lat, location_lng, media_items, legal_hold, owner_id, created_at, updated_at`;
 
 let imageSchemaPromise = null;
 function ensureImageSchema() {
@@ -15,6 +20,8 @@ function ensureImageSchema() {
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS residential_details JSONB NOT NULL DEFAULT '{}'::jsonb`);
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS price_type VARCHAR(20) NOT NULL DEFAULT 'monthly'`);
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS villa_details JSONB NOT NULL DEFAULT '{}'::jsonb`);
+      await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS garden_details JSONB NOT NULL DEFAULT '{}'::jsonb`);
+      await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS shop_details JSONB NOT NULL DEFAULT '{}'::jsonb`);
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS agency_network_consent BOOLEAN NOT NULL DEFAULT FALSE`);
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS location_lat NUMERIC(9,6)`);
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS location_lng NUMERIC(9,6)`);
@@ -26,7 +33,7 @@ function ensureImageSchema() {
       await query(`
         ALTER TABLE spaces
         ADD CONSTRAINT spaces_category_check
-        CHECK (category IN ('parking','residential','villa','storage','warehouse','shop','land','other'))
+        CHECK (category IN ('parking','residential','villa','storage','warehouse','shop','land','garden','other'))
       `);
       await query(`
         UPDATE spaces
@@ -120,6 +127,8 @@ function mapSpace(row, { includePhone = false, includeExactLocation = false, inc
     videoModerationStatus: videoFromMedia(row.media_items)?.status || null,
     residentialDetails: row.residential_details || {},
     villaDetails: row.villa_details || {},
+    gardenDetails: row.garden_details || {},
+    shopDetails: row.shop_details || {},
     description: row.description || "",
     agencyNetworkConsent: Boolean(row.agency_network_consent),
     ...(row.location_lat != null && row.location_lng != null
@@ -146,7 +155,7 @@ function clean(body = {}) {
   const mediaItems = video ? [video] : [];
   return {
     listingType: body.listingType === "wanted" ? "wanted" : "offer",
-    category: ["parking", "residential", "villa", "storage", "warehouse", "shop", "land", "other"].includes(body.category) ? body.category : "parking",
+    category: ["parking", "residential", "villa", "storage", "warehouse", "shop", "land", "garden", "other"].includes(body.category) ? body.category : "parking",
     customCategory: String(body.customCategory || "").trim().slice(0, 80),
     categoryLabel: String(body.categoryLabel || "").trim().slice(0, 80),
     status: ["active", "inactive", "rented"].includes(body.status) ? body.status : "active",
@@ -154,7 +163,7 @@ function clean(body = {}) {
     city: String(body.city || "").trim().slice(0, 100),
     area: Math.max(0, Number(body.area) || 0),
     price: String(body.price || "").trim().slice(0, 100),
-    priceType: ["daily", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly",
+    priceType: ["daily", "weekly", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly",
     phone: String(body.phone || "").replace(/\s/g, "").slice(0, 20),
     imageUrl,
     imageUrls,
@@ -175,8 +184,12 @@ function clean(body = {}) {
           storage: Boolean(body.residentialDetails.storage),
           furnished: Boolean(body.residentialDetails.furnished),
           balcony: Boolean(body.residentialDetails.balcony),
+          roofGarden: Boolean(body.residentialDetails.roofGarden),
           renovated: Boolean(body.residentialDetails.renovated),
           convertible: Boolean(body.residentialDetails.convertible),
+          buildingUse: ["single", "multiple"].includes(body.residentialDetails.buildingUse) ? body.residentialDetails.buildingUse : "",
+          heatingSystems: cleanSystems(body.residentialDetails.heatingSystems, HEATING_SYSTEMS),
+          coolingSystems: cleanSystems(body.residentialDetails.coolingSystems, COOLING_SYSTEMS),
         }
       : {},
     villaDetails:
@@ -197,6 +210,8 @@ function clean(body = {}) {
             parking: Boolean(body.villaDetails.parking),
             yard: Boolean(body.villaDetails.yard),
             furnished: Boolean(body.villaDetails.furnished),
+            heatingSystems: cleanSystems(body.villaDetails.heatingSystems, HEATING_SYSTEMS),
+            coolingSystems: cleanSystems(body.villaDetails.coolingSystems, COOLING_SYSTEMS),
             barbecue: Boolean(body.villaDetails.barbecue),
             airConditioning: Boolean(body.villaDetails.airConditioning),
             heating: Boolean(body.villaDetails.heating),
@@ -204,6 +219,33 @@ function clean(body = {}) {
             petFriendly: Boolean(body.villaDetails.petFriendly),
           }
         : {},
+    gardenDetails: body.category === "garden" && body.gardenDetails && typeof body.gardenDetails === "object" && !Array.isArray(body.gardenDetails)
+      ? {
+          trees: String(body.gardenDetails.trees || "").trim().slice(0, 160),
+          waterSource: ["well", "canal", "network", "share", "none"].includes(body.gardenDetails.waterSource) ? body.gardenDetails.waterSource : "",
+          irrigation: ["drip", "flood", "sprinkler", "other"].includes(body.gardenDetails.irrigation) ? body.gardenDetails.irrigation : "",
+          accessRoad: String(body.gardenDetails.accessRoad || "").trim().slice(0, 120),
+          water: body.gardenDetails.water === true,
+          electricity: body.gardenDetails.electricity === true,
+          fenced: body.gardenDetails.fenced === true,
+          building: body.gardenDetails.building === true,
+          cityGas: body.gardenDetails.cityGas === true,
+          landline: body.gardenDetails.landline === true,
+          furnished: body.gardenDetails.building === true && body.gardenDetails.furnished === true,
+          heatingSystems: body.gardenDetails.building === true ? cleanSystems(body.gardenDetails.heatingSystems, HEATING_SYSTEMS) : [],
+          coolingSystems: body.gardenDetails.building === true ? cleanSystems(body.gardenDetails.coolingSystems, COOLING_SYSTEMS) : [],
+        } : {},
+    shopDetails: body.category === "shop" && body.shopDetails && typeof body.shopDetails === "object" && !Array.isArray(body.shopDetails)
+      ? {
+          waterSupply: ["independent", "shared", "none"].includes(body.shopDetails.waterSupply) ? body.shopDetails.waterSupply : "",
+          electricitySupply: ["independent", "shared", "none"].includes(body.shopDetails.electricitySupply) ? body.shopDetails.electricitySupply : "",
+          threePhase: body.shopDetails.threePhase === true,
+          cityGas: body.shopDetails.cityGas === true,
+          landline: body.shopDetails.landline === true,
+          restroom: body.shopDetails.restroom === true,
+          heatingSystems: cleanSystems(body.shopDetails.heatingSystems, HEATING_SYSTEMS),
+          coolingSystems: cleanSystems(body.shopDetails.coolingSystems, COOLING_SYSTEMS),
+        } : {},
     description: String(body.description || "").trim().slice(0, 5000),
     agencyNetworkConsent: body.agencyNetworkConsent === true,
     locationLat: Number.isFinite(Number(body.location?.lat)) && Number(body.location.lat) >= 24 && Number(body.location.lat) <= 40
@@ -218,7 +260,7 @@ function validate(space) {
   if (!space.city) return "شهر لازم است.";
   if (space.category === "residential") {
     if (!space.residentialDetails.deposit && !space.residentialDetails.monthlyRent) return "مبلغ رهن یا اجاره را وارد کنید.";
-  } else if (!space.price) return "قیمت لازم است.";
+  } else if (space.priceType !== "negotiable" && !space.price) return "قیمت لازم است.";
   if (!/^09\d{9}$/.test(space.phone)) return "شماره موبایل معتبر نیست.";
   if (space.description.length < 10) return "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
   if (space.imageUrls.length > MAX_IMAGES) return `حداکثر ${MAX_IMAGES} عکس برای هر آگهی مجاز است.`;
@@ -345,10 +387,10 @@ async function create(req, res) {
     if (error) return res.status(400).json({ ok: false, message: error });
     const id = crypto.randomUUID();
     const result = await query(
-      `INSERT INTO spaces (id,listing_type,category,custom_category,category_label,status,title,city,area,price,price_type,phone,image_url,image_urls,residential_details,villa_details,description,agency_network_consent,location_lat,location_lng,media_items,owner_id)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::jsonb,$15::jsonb,$16::jsonb,$17,$18,$19,$20,$21::jsonb,$22)
+      `INSERT INTO spaces (id,listing_type,category,custom_category,category_label,status,title,city,area,price,price_type,phone,image_url,image_urls,residential_details,villa_details,garden_details,description,agency_network_consent,location_lat,location_lng,media_items,owner_id,shop_details)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::jsonb,$15::jsonb,$16::jsonb,$17::jsonb,$18,$19,$20,$21,$22::jsonb,$23,$24::jsonb)
        RETURNING ${FIELDS}`,
-      [id, space.listingType, space.category, space.customCategory, space.categoryLabel, space.status, space.title, space.city, space.area, space.price, space.priceType, space.phone, space.imageUrl, JSON.stringify(space.imageUrls), JSON.stringify(space.residentialDetails), JSON.stringify(space.villaDetails), space.description, space.agencyNetworkConsent, space.locationLat, space.locationLng, JSON.stringify(space.mediaItems), req.user.id]
+      [id, space.listingType, space.category, space.customCategory, space.categoryLabel, space.status, space.title, space.city, space.area, space.price, space.priceType, space.phone, space.imageUrl, JSON.stringify(space.imageUrls), JSON.stringify(space.residentialDetails), JSON.stringify(space.villaDetails), JSON.stringify(space.gardenDetails), space.description, space.agencyNetworkConsent, space.locationLat, space.locationLng, JSON.stringify(space.mediaItems), req.user.id, JSON.stringify(space.shopDetails)]
     );
     const createdSpace = mapSpace(result.rows[0], { includePhone: true, includeExactLocation: true });
     createNotificationsForNewOffer(createdSpace, req.user.id);
@@ -384,9 +426,9 @@ async function update(req, res) {
     if (merged.video && req.user.system_role !== "admin" && !isVideoOwnedByUser(merged.video, req.user.id)) return res.status(403).json({ ok: false, message: "ویدئوی آگهی متعلق به این حساب نیست." });
     if (error) return res.status(400).json({ ok: false, message: error });
     const result = await query(
-      `UPDATE spaces SET listing_type=$2,category=$3,custom_category=$4,category_label=$5,status=$6,title=$7,city=$8,area=$9,price=$10,price_type=$11,phone=$12,image_url=$13,image_urls=$14::jsonb,residential_details=$15::jsonb,villa_details=$16::jsonb,description=$17,agency_network_consent=$18,location_lat=$19,location_lng=$20,media_items=$21::jsonb,updated_at=NOW()
+      `UPDATE spaces SET listing_type=$2,category=$3,custom_category=$4,category_label=$5,status=$6,title=$7,city=$8,area=$9,price=$10,price_type=$11,phone=$12,image_url=$13,image_urls=$14::jsonb,residential_details=$15::jsonb,villa_details=$16::jsonb,garden_details=$17::jsonb,description=$18,agency_network_consent=$19,location_lat=$20,location_lng=$21,media_items=$22::jsonb,shop_details=$23::jsonb,updated_at=NOW()
        WHERE id=$1 RETURNING ${FIELDS}`,
-      [req.params.id, merged.listingType, merged.category, merged.customCategory, merged.categoryLabel, merged.status, merged.title, merged.city, merged.area, merged.price, merged.priceType, merged.phone, merged.imageUrl, JSON.stringify(merged.imageUrls), JSON.stringify(merged.residentialDetails), JSON.stringify(merged.villaDetails), merged.description, merged.agencyNetworkConsent, merged.locationLat, merged.locationLng, JSON.stringify(merged.mediaItems)]
+      [req.params.id, merged.listingType, merged.category, merged.customCategory, merged.categoryLabel, merged.status, merged.title, merged.city, merged.area, merged.price, merged.priceType, merged.phone, merged.imageUrl, JSON.stringify(merged.imageUrls), JSON.stringify(merged.residentialDetails), JSON.stringify(merged.villaDetails), JSON.stringify(merged.gardenDetails), merged.description, merged.agencyNetworkConsent, merged.locationLat, merged.locationLng, JSON.stringify(merged.mediaItems), JSON.stringify(merged.shopDetails)]
     );
     if (existingVideo?.url && existingVideo.url !== merged.video?.url && existingVideo.status !== "blocked") {
       storage.deleteAdVideo({ url: existingVideo.url, userId: existing.rows[0].owner_id }).catch((cleanupError) => {
