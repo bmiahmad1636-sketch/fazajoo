@@ -18,6 +18,8 @@ import ParkingRequestUsageFields from "../components/ParkingRequestUsageFields";
 import { readParkingRequestUsage, writeParkingRequestUsage, parkingUsageLabel } from "../utils/parkingRequestUsage";
 import WarehouseRequestFields from "../components/WarehouseRequestFields";
 import { readWarehouseRequest, writeWarehouseRequest, warehouseRequestValidation } from "../utils/warehouseRequest";
+import ShedRequestFields from "../components/ShedRequestFields";
+import { readShedRequest, writeShedRequest, shedRequestValidation } from "../utils/shedRequest";
 import ResidentialFields from "../components/ResidentialFields";
 import { emptyResidentialDetails } from "../components/residentialDetails";
 import VillaFields from "../components/VillaFields";
@@ -35,6 +37,7 @@ const EMPTY_FORM = {
   parkingRequestUsage: "",
   parkingOtherUsage: "",
   warehouseRequest: readWarehouseRequest("").data,
+  shedRequest: readShedRequest("").data,
   city: "",
   area: "",
   price: "",
@@ -120,6 +123,7 @@ function createFormFromParking(parking) {
     parkingRequestUsage: readParkingRequestUsage(parking?.description).usage,
     parkingOtherUsage: readParkingRequestUsage(parking?.description).otherUsage,
     warehouseRequest: readWarehouseRequest(parking?.description).data,
+    shedRequest: readShedRequest(parking?.description).data,
     agencyNetworkConsent: Boolean(parking?.agencyNetworkConsent),
     location: {
       lat: parking?.location?.lat ?? null,
@@ -182,11 +186,11 @@ function EditParking({
       const fields = [
         form.title.trim(),
         form.city.trim(),
-        isWanted && parking?.category === "storage" ? (form.warehouseRequest?.minArea || form.warehouseRequest?.maxArea) : form.area,
+        isWanted && parking?.category === "warehouse" ? (form.shedRequest?.minArea || form.shedRequest?.maxArea || form.shedRequest?.spaceType) : isWanted && parking?.category === "storage" ? (form.warehouseRequest?.minArea || form.warehouseRequest?.maxArea) : form.area,
         form.priceType === "negotiable" ? true : form.price.trim(),
         form.phone.trim(),
         ...(!isWanted ? [form.imageUrl] : []),
-        ...(isWanted && parking?.category === "storage" ? [form.warehouseRequest?.purpose] : [form.description.trim()]),
+        ...(isWanted && parking?.category === "warehouse" ? [form.shedRequest?.activity] : isWanted && parking?.category === "storage" ? [form.warehouseRequest?.purpose] : [form.description.trim()]),
       ];
 
       const completedFields =
@@ -247,6 +251,10 @@ function EditParking({
 
   const validateForm = () => {
     const nextErrors = {};
+    if (isWanted && parking?.category === "warehouse") {
+      const shedError = shedRequestValidation(form.shedRequest);
+      if (shedError) nextErrors.shedRequest = shedError;
+    }
     if (isWanted && parking?.category === "storage") {
       const warehouseError = warehouseRequestValidation(form.warehouseRequest);
       if (warehouseError) nextErrors.warehouseRequest = warehouseError;
@@ -307,7 +315,7 @@ function EditParking({
     }
 
     if (
-      !(isWanted && parking?.category === "storage") && form.description.trim().length < 10
+      !(isWanted && ["storage", "warehouse"].includes(parking?.category)) && form.description.trim().length < 10
     ) {
       nextErrors.description =
         "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
@@ -381,7 +389,9 @@ function EditParking({
       title: form.title.trim(),
       city: form.city.trim(),
 
-      area: isWanted && parking?.category === "storage"
+      area: isWanted && parking?.category === "warehouse"
+        ? Number(form.shedRequest.minArea || form.shedRequest.maxArea || 0)
+        : isWanted && parking?.category === "storage"
         ? Number(form.warehouseRequest.minArea || form.warehouseRequest.maxArea || 0)
         : form.area ? Number(form.area) : 0,
 
@@ -408,14 +418,16 @@ function EditParking({
           ? form.villaDetails
           : {},
       phone: normalizedPhone,
-      imageUrl: isWanted && parking?.category === "storage" ? "" : form.imageUrl,
-      imageUrls: isWanted && parking?.category === "storage" ? [] : form.imageUrls,
-      video: isWanted && parking?.category === "storage" ? null : form.video,
+      imageUrl: isWanted && ["storage", "warehouse"].includes(parking?.category) ? "" : form.imageUrl,
+      imageUrls: isWanted && ["storage", "warehouse"].includes(parking?.category) ? [] : form.imageUrls,
+      video: isWanted && ["storage", "warehouse"].includes(parking?.category) ? null : form.video,
 
       description:
         isWanted && parking?.category === "parking"
           ? writeParkingRequestUsage(form.description, form.parkingRequestUsage, form.parkingOtherUsage)
-          : isWanted && parking?.category === "storage"
+          : isWanted && parking?.category === "warehouse"
+            ? writeShedRequest("", form.shedRequest)
+            : isWanted && parking?.category === "storage"
             ? writeWarehouseRequest("", form.warehouseRequest)
             : form.description.trim(),
       agencyNetworkConsent: Boolean(form.agencyNetworkConsent),
@@ -752,7 +764,7 @@ function EditParking({
                       )}
                     </div>
 
-                    {!(isWanted && parking?.category === "storage") && (
+                    {!(isWanted && ["storage", "warehouse"].includes(parking?.category)) && (
                     <div className="edit-parking-field">
                       <label htmlFor="area">
                         متراژ
@@ -796,6 +808,15 @@ function EditParking({
                     </div>
                     )}
                   </div>
+                  {isWanted && parking?.category === "warehouse" && (
+                    <>
+                      <div style={{ padding: 14, background: "#fff8f2", border: "1px solid #f3d7c2", borderRadius: 14 }}>
+                        <strong>سوله یا کارگاه موردنیازت را معرفی کن</strong>
+                        <p style={{ margin: "6px 0 0" }}>نوع فضا، فعالیت، متراژ و زیرساخت‌های ضروری را مشخص کن. شرایط خاص اختیاری است.</p>
+                      </div>
+                      <ShedRequestFields value={form.shedRequest} disabled={loading} error={errors.shedRequest} onChange={(shedRequest) => { setForm(current => ({ ...current, shedRequest })); setErrors(current => ({ ...current, shedRequest: "" })); }} />
+                    </>
+                  )}
                   {isWanted && parking?.category === "storage" && (
                     <>
                       <div style={{ padding: 14, background: "#fff8f2", border: "1px solid #f3d7c2", borderRadius: 14 }}>
@@ -1013,7 +1034,7 @@ function EditParking({
                     </div>
                   </div>
 
-                  {!(isWanted && parking?.category === "storage") && (
+                  {!(isWanted && ["storage", "warehouse"].includes(parking?.category)) && (
                   <div className="edit-parking-field edit-parking-field--full">
                     <label htmlFor="description">
                       {isWanted ? "توضیحات درخواست" : "توضیحات آگهی"}

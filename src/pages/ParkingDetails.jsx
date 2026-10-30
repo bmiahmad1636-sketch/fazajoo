@@ -1,3 +1,4 @@
+import { readShedRequest, shedOptionLabel, SHED_TYPES, SHED_ACTIVITIES, shedActivitiesFor, SHED_ALL_FEATURES, SHED_POWER, SHED_ACCESS, SHED_DURATIONS } from "../utils/shedRequest";
 import { readParkingRequestUsage, parkingUsageLabel } from "../utils/parkingRequestUsage";
 import { readWarehouseRequest, warehouseOptionLabel, WAREHOUSE_PURPOSES, WAREHOUSE_TYPES, WAREHOUSE_ACCESS, WAREHOUSE_DURATIONS, WAREHOUSE_FEATURES } from "../utils/warehouseRequest";
 import { climateLabels } from "../components/ClimateFields";
@@ -720,6 +721,28 @@ function ParkingDetails({
                 </div>
               </article>
 
+              {isWanted && category === "warehouse" && readShedRequest(parking.description).data.spaceType && (() => {
+                const data = readShedRequest(parking.description).data;
+                const details = [
+                  ["نوع فضا", shedOptionLabel(SHED_TYPES, data.spaceType)],
+                  ["فعالیت", data.activity === "other" ? data.otherActivity : shedOptionLabel([...shedActivitiesFor(data.spaceType), ...SHED_ACTIVITIES], data.activity)],
+                  ["متراژ موردنیاز", [data.minArea && `از ${data.minArea}`, data.maxArea && `تا ${data.maxArea}`].filter(Boolean).join(" ") ? `${[data.minArea && `از ${data.minArea}`, data.maxArea && `تا ${data.maxArea}`].filter(Boolean).join(" ")} مترمربع` : "تعیین نشده"],
+                  ["حداقل ارتفاع مفید", data.minHeight ? `${data.minHeight} متر` : "تعیین نشده"],
+                  ["برق", shedOptionLabel(SHED_POWER, data.power)],
+                  ...(data.power === "three" && data.powerCapacity ? [["توان برق", `${data.powerCapacity} کیلووات`]] : []),
+                  ["دسترسی", shedOptionLabel(SHED_ACCESS, data.access)],
+                  ["مدت اجاره", shedOptionLabel(SHED_DURATIONS, data.duration)],
+                  ["امکانات ضروری", (data.features || []).map(id => shedOptionLabel(SHED_ALL_FEATURES, id)).join("، ") || "مورد خاصی ثبت نشده"],
+                  ["شرایط خاص", data.requirements || "ثبت نشده"],
+                ];
+                return <article className="parking-details-section">
+                  <div className="parking-details-section__heading"><div className="parking-details-section__icon">🏭</div><div><span>درخواست اجاره سوله یا کارگاه</span><h2>مشخصات فضای موردنیاز</h2></div></div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, padding: "12px 0" }}>
+                    {details.map(([label, value]) => <div key={label} style={{ padding: 12, border: "1px solid #eee1d6", borderRadius: 12 }}><small style={{ display: "block", color: "#786b60" }}>{label}</small><strong style={{ whiteSpace: "pre-wrap" }}>{value}</strong></div>)}
+                  </div>
+                </article>;
+              })()}
+
               {isWanted && category === "storage" && readWarehouseRequest(parking.description).data.purpose && (() => {
                 const data = readWarehouseRequest(parking.description).data;
                 const details = [
@@ -748,7 +771,7 @@ function ParkingDetails({
                 </article>
               )}
 
-              {!(isWanted && category === "storage") && (
+              {!(isWanted && ["storage", "warehouse"].includes(category)) && (
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">

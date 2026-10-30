@@ -8,6 +8,8 @@ import VideoUploader from "../components/VideoUploader";
 import NeshanLocationPicker from "../components/NeshanLocationPicker";
 import ParkingRequestUsageFields from "../components/ParkingRequestUsageFields";
 import WarehouseRequestFields from "../components/WarehouseRequestFields";
+import ShedRequestFields from "../components/ShedRequestFields";
+import { EMPTY_SHED_REQUEST, shedRequestValidation, writeShedRequest } from "../utils/shedRequest";
 import { EMPTY_WAREHOUSE_REQUEST, warehouseRequestValidation, writeWarehouseRequest } from "../utils/warehouseRequest";
 import { writeParkingRequestUsage } from "../utils/parkingRequestUsage";
 import IranCityAutocomplete from "../components/IranCityAutocomplete";
@@ -29,6 +31,7 @@ const INITIAL_FORM = {
   parkingRequestUsage: "",
   parkingOtherUsage: "",
   warehouseRequest: { ...EMPTY_WAREHOUSE_REQUEST, features: [] },
+  shedRequest: { ...EMPTY_SHED_REQUEST, features: [] },
   category: "parking",
   customCategory: "",
   title: "",
@@ -202,6 +205,10 @@ function AddParking() {
     const newErrors = {};
 
     if (step === 1) {
+      if (isWantedAd && form.category === "warehouse") {
+        const shedError = shedRequestValidation(form.shedRequest);
+        if (shedError) newErrors.shedRequest = shedError;
+      }
       if (isWantedAd && form.category === "storage") {
         const warehouseError = warehouseRequestValidation(form.warehouseRequest);
         if (warehouseError) newErrors.warehouseRequest = warehouseError;
@@ -270,7 +277,7 @@ function AddParking() {
       }
 
       if (
-        !(isWantedAd && form.category === "storage") && form.description.trim().length <
+        !(isWantedAd && ["storage", "warehouse"].includes(form.category)) && form.description.trim().length <
         10
       ) {
         newErrors.description =
@@ -364,7 +371,9 @@ function AddParking() {
           title: form.title.trim(),
           city: form.city.trim(),
 
-          area: isWantedAd && form.category === "storage"
+          area: isWantedAd && form.category === "warehouse"
+            ? Number(form.shedRequest.minArea || form.shedRequest.maxArea || 0)
+            : isWantedAd && form.category === "storage"
             ? Number(form.warehouseRequest.minArea || form.warehouseRequest.maxArea || 0)
             : form.area ? Number(form.area) : 0,
 
@@ -395,13 +404,15 @@ function AddParking() {
             .replace(/\s/g, "")
             .trim(),
 
-          imageUrl: isWantedAd && form.category === "storage" ? "" : form.imageUrl,
-          imageUrls: isWantedAd && form.category === "storage" ? [] : form.imageUrls,
-          video: isWantedAd && form.category === "storage" ? null : form.video,
+          imageUrl: isWantedAd && ["storage", "warehouse"].includes(form.category) ? "" : form.imageUrl,
+          imageUrls: isWantedAd && ["storage", "warehouse"].includes(form.category) ? [] : form.imageUrls,
+          video: isWantedAd && ["storage", "warehouse"].includes(form.category) ? null : form.video,
 
           description:
             isWantedAd && form.category === "parking"
               ? writeParkingRequestUsage(form.description, form.parkingRequestUsage, form.parkingOtherUsage)
+              : isWantedAd && form.category === "warehouse"
+                ? writeShedRequest("", form.shedRequest)
               : isWantedAd && form.category === "storage"
                 ? writeWarehouseRequest("", form.warehouseRequest)
                 : form.description.trim(),
@@ -795,7 +806,7 @@ function AddParking() {
                       />
                     )}
 
-                    {isWantedAd && form.category !== "storage" && (
+                    {isWantedAd && !["storage", "warehouse"].includes(form.category) && (
                       <div className="add-parking-field" style={{ gridColumn: "1 / -1", padding: "14px 16px", border: "1px solid #f3d7c2", borderRadius: "14px", background: "#fff8f2", lineHeight: 1.9 }}>
                         <strong style={{ color: "#a94c0c" }}>
                           {form.category === "parking" ? "پارکینگ موردنیازت را ساده و دقیق معرفی کن" : "فضایی را که لازم داری توصیف کن"}
@@ -959,7 +970,7 @@ function AddParking() {
                         )}
                       </div>
 
-                      {!(isWantedAd && form.category === "storage") && (
+                      {!(isWantedAd && ["storage", "warehouse"].includes(form.category)) && (
                       <div className="add-parking-field">
                         <label htmlFor="area">
                           متراژ
@@ -1014,6 +1025,17 @@ function AddParking() {
                           <small style={{ color: "#8c6854" }}>تنها نیازهای واقعی‌ات را انتخاب کن؛ بخش «شرایط خاص» برای توضیح‌های تکمیلی اختیاری است.</small>
                         </div>
                         <WarehouseRequestFields value={form.warehouseRequest} disabled={loading} error={errors.warehouseRequest} onChange={(warehouseRequest) => { setForm(current => ({ ...current, warehouseRequest })); setErrors(current => ({ ...current, warehouseRequest: "" })); }} />
+                      </>
+                    )}
+
+                    {isWantedAd && form.category === "warehouse" && (
+                      <>
+                        <div className="add-parking-field" style={{ gridColumn: "1 / -1", padding: "14px 16px", border: "1px solid #f3d7c2", borderRadius: 14, background: "#fff8f2", lineHeight: 1.9 }}>
+                          <strong style={{ color: "#a94c0c" }}>سوله یا کارگاهی را که لازم داری معرفی کن</strong>
+                          <p style={{ margin: "4px 0 0" }}>ابتدا سوله صنعتی یا کارگاه را انتخاب کن؛ سپس فعالیت، متراژ، ارتفاع، زیرساخت‌ها و دسترسی ضروری را مشخص کن.</p>
+                          <small style={{ color: "#8c6854" }}>فقط نیازهای مهم را وارد کن؛ شرایط خاص اختیاری است.</small>
+                        </div>
+                        <ShedRequestFields value={form.shedRequest} disabled={loading} error={errors.shedRequest} onChange={(shedRequest) => { setForm(current => ({ ...current, shedRequest })); setErrors(current => ({ ...current, shedRequest: "" })); }} />
                       </>
                     )}
 
@@ -1286,7 +1308,7 @@ function AddParking() {
                       </div>
                     </div>
 
-                    {!(isWantedAd && form.category === "storage") && (
+                    {!(isWantedAd && ["storage", "warehouse"].includes(form.category)) && (
                     <div className="add-parking-field">
                       <label htmlFor="description">
                         توضیحات آگهی
