@@ -1,5 +1,6 @@
 import { readShedRequest, shedOptionLabel, SHED_TYPES, SHED_ACTIVITIES, shedActivitiesFor, SHED_ALL_FEATURES, SHED_POWER, SHED_ACCESS, SHED_DURATIONS } from "../utils/shedRequest";
 import { readParkingRequestUsage, parkingUsageLabel } from "../utils/parkingRequestUsage";
+import { readParkingRequestDetails, PARKING_COVERS, PARKING_ACCESS } from "../utils/parkingRequestDetails";
 import { readWarehouseRequest, warehouseOptionLabel, WAREHOUSE_PURPOSES, WAREHOUSE_TYPES, WAREHOUSE_ACCESS, WAREHOUSE_DURATIONS, WAREHOUSE_FEATURES } from "../utils/warehouseRequest";
 import { climateLabels } from "../components/ClimateFields";
 import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
@@ -762,6 +763,17 @@ function ParkingDetails({
                 </article>;
               })()}
 
+              {isWanted && category === "parking" && (() => {
+                const data = readParkingRequestDetails(parking.description).data;
+                const label = (options, id) => options.find(([key]) => key === id)?.[1] || "فرقی ندارد";
+                const rows = [
+                  ["متراژ موردنیاز", [data.minArea && `از ${data.minArea}`, data.maxArea && `تا ${data.maxArea}`].filter(Boolean).join(" ") ? `${[data.minArea && `از ${data.minArea}`, data.maxArea && `تا ${data.maxArea}`].filter(Boolean).join(" ")} مترمربع` : parking.area ? `${parking.area} مترمربع` : "تعیین نشده"],
+                  ["نوع پارکینگ", label(PARKING_COVERS, data.cover)],
+                  ["زمان دسترسی", label(PARKING_ACCESS, data.access)],
+                  ["شرایط خاص", data.requirements || "ثبت نشده"],
+                ];
+                return <article className="parking-details-section"><div className="parking-details-section__heading"><div className="parking-details-section__icon">🚘</div><div><span>درخواست پارکینگ</span><h2>مشخصات پارکینگ موردنیاز</h2></div></div><div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, padding: "12px 0" }}>{rows.map(([name, value]) => <div key={name} style={{ padding: 12, border: "1px solid #eee1d6", borderRadius: 12 }}><small style={{ display: "block", color: "#786b60" }}>{name}</small><strong style={{ whiteSpace: "pre-wrap" }}>{value}</strong></div>)}</div></article>;
+              })()}
               {isWanted && category === "parking" && readParkingRequestUsage(parking.description).usage && (
                 <article className="parking-details-section">
                   <div className="parking-details-section__heading">
@@ -771,7 +783,7 @@ function ParkingDetails({
                 </article>
               )}
 
-              {!(isWanted && ["storage", "warehouse"].includes(category)) && (
+              {!(isWanted && ["storage", "warehouse", "parking"].includes(category)) && (
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">

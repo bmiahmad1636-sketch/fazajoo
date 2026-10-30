@@ -7,6 +7,8 @@ import ImageUploader from "../components/ImageUploader";
 import VideoUploader from "../components/VideoUploader";
 import NeshanLocationPicker from "../components/NeshanLocationPicker";
 import ParkingRequestUsageFields from "../components/ParkingRequestUsageFields";
+import ParkingRequestDetailsFields from "../components/ParkingRequestDetailsFields";
+import { EMPTY_PARKING_REQUEST, parkingRequestDetailsValidation, writeParkingRequestDetails } from "../utils/parkingRequestDetails";
 import WarehouseRequestFields from "../components/WarehouseRequestFields";
 import ShedRequestFields from "../components/ShedRequestFields";
 import { EMPTY_SHED_REQUEST, shedRequestValidation, writeShedRequest } from "../utils/shedRequest";
@@ -30,6 +32,7 @@ const INITIAL_FORM = {
   listingType: "offer",
   parkingRequestUsage: "",
   parkingOtherUsage: "",
+  parkingRequestDetails: { ...EMPTY_PARKING_REQUEST },
   warehouseRequest: { ...EMPTY_WAREHOUSE_REQUEST, features: [] },
   shedRequest: { ...EMPTY_SHED_REQUEST, features: [] },
   category: "parking",
@@ -216,6 +219,8 @@ function AddParking() {
       if (isWantedAd && form.category === "parking") {
         if (!form.parkingRequestUsage) newErrors.parkingRequestUsage = "کاربری موردنظر را انتخاب کنید.";
         else if (form.parkingRequestUsage === "other" && form.parkingOtherUsage.trim().length < 5) newErrors.parkingRequestUsage = "برای سایر کاربری‌ها حداقل ۵ حرف توضیح بنویسید.";
+        const detailsError = parkingRequestDetailsValidation(form.parkingRequestDetails);
+        if (detailsError) newErrors.parkingRequestDetails = detailsError;
       }
       if (
         form.category === "other" &&
@@ -277,7 +282,7 @@ function AddParking() {
       }
 
       if (
-        !(isWantedAd && ["storage", "warehouse"].includes(form.category)) && form.description.trim().length <
+        !(isWantedAd && ["storage", "warehouse", "parking"].includes(form.category)) && form.description.trim().length <
         10
       ) {
         newErrors.description =
@@ -371,7 +376,9 @@ function AddParking() {
           title: form.title.trim(),
           city: form.city.trim(),
 
-          area: isWantedAd && form.category === "warehouse"
+          area: isWantedAd && form.category === "parking"
+            ? Number(form.parkingRequestDetails.minArea || form.parkingRequestDetails.maxArea || 0)
+            : isWantedAd && form.category === "warehouse"
             ? Number(form.shedRequest.minArea || form.shedRequest.maxArea || 0)
             : isWantedAd && form.category === "storage"
             ? Number(form.warehouseRequest.minArea || form.warehouseRequest.maxArea || 0)
@@ -410,7 +417,7 @@ function AddParking() {
 
           description:
             isWantedAd && form.category === "parking"
-              ? writeParkingRequestUsage(form.description, form.parkingRequestUsage, form.parkingOtherUsage)
+              ? writeParkingRequestDetails(form.parkingRequestDetails, form.parkingRequestUsage, form.parkingOtherUsage)
               : isWantedAd && form.category === "warehouse"
                 ? writeShedRequest("", form.shedRequest)
               : isWantedAd && form.category === "storage"
@@ -793,20 +800,7 @@ function AddParking() {
                       </div>
                     </div>
 
-                    {isWantedAd && form.category === "parking" && (
-                      <ParkingRequestUsageFields
-                        usage={form.parkingRequestUsage}
-                        otherUsage={form.parkingOtherUsage}
-                        disabled={loading}
-                        error={errors.parkingRequestUsage}
-                        onChange={({ usage, otherUsage }) => {
-                          setForm((current) => ({ ...current, parkingRequestUsage: usage, parkingOtherUsage: otherUsage }));
-                          setErrors((current) => ({ ...current, parkingRequestUsage: "" }));
-                        }}
-                      />
-                    )}
-
-                    {isWantedAd && !["storage", "warehouse"].includes(form.category) && (
+                    {isWantedAd && !["storage", "warehouse", "parking"].includes(form.category) && (
                       <div className="add-parking-field" style={{ gridColumn: "1 / -1", padding: "14px 16px", border: "1px solid #f3d7c2", borderRadius: "14px", background: "#fff8f2", lineHeight: 1.9 }}>
                         <strong style={{ color: "#a94c0c" }}>
                           {form.category === "parking" ? "پارکینگ موردنیازت را ساده و دقیق معرفی کن" : "فضایی را که لازم داری توصیف کن"}
@@ -970,7 +964,7 @@ function AddParking() {
                         )}
                       </div>
 
-                      {!(isWantedAd && ["storage", "warehouse"].includes(form.category)) && (
+                      {!(isWantedAd && ["storage", "warehouse", "parking"].includes(form.category)) && (
                       <div className="add-parking-field">
                         <label htmlFor="area">
                           متراژ
@@ -1016,6 +1010,28 @@ function AddParking() {
                       </div>
                       )}
                     </div>
+
+                    {isWantedAd && form.category === "parking" && (
+                      <>
+                        <div className="add-parking-field" style={{ gridColumn: "1 / -1", padding: "14px 16px", border: "1px solid #f3d7c2", borderRadius: 14, background: "#fff8f2", lineHeight: 1.9 }}>
+                          <strong style={{ color: "#a94c0c" }}>پارکینگ موردنیازت را معرفی کن</strong>
+                          <p style={{ margin: "4px 0 0" }}>کاربری، محدوده متراژ، مسقف یا روباز بودن و دسترسی را مشخص کن. شرایط خاص اختیاری است.</p>
+                        </div>
+                        {isWantedAd && form.category === "parking" && (
+                      <ParkingRequestUsageFields
+                        usage={form.parkingRequestUsage}
+                        otherUsage={form.parkingOtherUsage}
+                        disabled={loading}
+                        error={errors.parkingRequestUsage}
+                        onChange={({ usage, otherUsage }) => {
+                          setForm((current) => ({ ...current, parkingRequestUsage: usage, parkingOtherUsage: otherUsage }));
+                          setErrors((current) => ({ ...current, parkingRequestUsage: "" }));
+                        }}
+                      />
+                    )}
+                        <ParkingRequestDetailsFields value={form.parkingRequestDetails} disabled={loading} error={errors.parkingRequestDetails} onChange={(parkingRequestDetails) => { setForm(current => ({ ...current, parkingRequestDetails })); setErrors(current => ({ ...current, parkingRequestDetails: "" })); }} />
+                      </>
+                    )}
 
                     {isWantedAd && form.category === "storage" && (
                       <>
@@ -1308,7 +1324,7 @@ function AddParking() {
                       </div>
                     </div>
 
-                    {!(isWantedAd && ["storage", "warehouse"].includes(form.category)) && (
+                    {!(isWantedAd && ["storage", "warehouse", "parking"].includes(form.category)) && (
                     <div className="add-parking-field">
                       <label htmlFor="description">
                         توضیحات آگهی
