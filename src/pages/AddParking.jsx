@@ -21,6 +21,8 @@ import { emptyResidentialDetails } from "../components/residentialDetails";
 import VillaFields from "../components/VillaFields";
 import GardenFields from "../components/GardenFields";
 import ShopFields from "../components/ShopFields";
+import ShopRequestFields from "../components/ShopRequestFields";
+import { EMPTY_SHOP_REQUEST, shopRequestValidation, writeShopRequest } from "../utils/shopRequest";
 import { emptyShopDetails } from "../components/shopDetails";
 import { emptyGardenDetails } from "../components/gardenDetails";
 import { emptyVillaDetails } from "../components/villaDetails";
@@ -51,6 +53,7 @@ const INITIAL_FORM = {
   villaDetails: { ...emptyVillaDetails },
   gardenDetails: { ...emptyGardenDetails },
   shopDetails: { ...emptyShopDetails },
+  shopRequest: { ...EMPTY_SHOP_REQUEST, features: [] },
   agencyNetworkConsent: false,
   location: { lat: null, lng: null },
 };
@@ -208,6 +211,7 @@ function AddParking() {
     const newErrors = {};
 
     if (step === 1) {
+      if (isWantedAd && form.category === "shop") { const err = shopRequestValidation(form.shopRequest); if (err) newErrors.shopRequest = err; }
       if (isWantedAd && form.category === "warehouse") {
         const shedError = shedRequestValidation(form.shedRequest);
         if (shedError) newErrors.shedRequest = shedError;
@@ -265,7 +269,7 @@ function AddParking() {
             !String(form.residentialDetails?.monthlyRent || "").trim()) {
           newErrors.price = "حداقل مبلغ رهن یا اجاره را وارد کنید.";
         }
-      } else if (form.priceType !== "negotiable" && !form.price.trim()) {
+      } else if (!(isWantedAd && form.category === "shop") && form.priceType !== "negotiable" && !form.price.trim()) {
         newErrors.price = isWantedAd ? "سقف بودجه موردنظرت را وارد کن." : "قیمت را وارد کنید.";
       }
 
@@ -282,7 +286,7 @@ function AddParking() {
       }
 
       if (
-        !(isWantedAd && ["storage", "warehouse", "parking"].includes(form.category)) && form.description.trim().length <
+        !(isWantedAd && ["storage", "warehouse", "parking", "shop"].includes(form.category)) && form.description.trim().length <
         10
       ) {
         newErrors.description =
@@ -376,7 +380,9 @@ function AddParking() {
           title: form.title.trim(),
           city: form.city.trim(),
 
-          area: isWantedAd && form.category === "parking"
+          area: isWantedAd && form.category === "shop"
+            ? Number(form.shopRequest.minArea || form.shopRequest.maxArea || 0)
+            : isWantedAd && form.category === "parking"
             ? Number(form.parkingRequestDetails.minArea || form.parkingRequestDetails.maxArea || 0)
             : isWantedAd && form.category === "warehouse"
             ? Number(form.shedRequest.minArea || form.shedRequest.maxArea || 0)
@@ -385,7 +391,7 @@ function AddParking() {
             : form.area ? Number(form.area) : 0,
 
           price:
-            form.category === "residential"
+            isWantedAd && form.category === "shop" ? "" : form.category === "residential"
               ? String(
                   form.residentialDetails?.monthlyRent ||
                   form.residentialDetails?.deposit ||
@@ -394,7 +400,7 @@ function AddParking() {
               : form.priceType === "negotiable" ? "" : form.price.replace(/,/g, "").trim(),
 
           priceType:
-            form.category === "residential"
+            isWantedAd && form.category === "shop" ? "negotiable" : form.category === "residential"
               ? "monthly"
               : form.priceType,
           residentialDetails:
@@ -411,11 +417,12 @@ function AddParking() {
             .replace(/\s/g, "")
             .trim(),
 
-          imageUrl: isWantedAd && ["storage", "warehouse"].includes(form.category) ? "" : form.imageUrl,
-          imageUrls: isWantedAd && ["storage", "warehouse"].includes(form.category) ? [] : form.imageUrls,
-          video: isWantedAd && ["storage", "warehouse"].includes(form.category) ? null : form.video,
+          imageUrl: isWantedAd && ["storage", "warehouse", "shop"].includes(form.category) ? "" : form.imageUrl,
+          imageUrls: isWantedAd && ["storage", "warehouse", "shop"].includes(form.category) ? [] : form.imageUrls,
+          video: isWantedAd && ["storage", "warehouse", "shop"].includes(form.category) ? null : form.video,
 
           description:
+            isWantedAd && form.category === "shop" ? writeShopRequest(form.shopRequest) :
             isWantedAd && form.category === "parking"
               ? writeParkingRequestDetails(form.parkingRequestDetails, form.parkingRequestUsage, form.parkingOtherUsage)
               : isWantedAd && form.category === "warehouse"
@@ -800,7 +807,7 @@ function AddParking() {
                       </div>
                     </div>
 
-                    {isWantedAd && !["storage", "warehouse", "parking"].includes(form.category) && (
+                    {isWantedAd && !["storage", "warehouse", "parking", "shop"].includes(form.category) && (
                       <div className="add-parking-field" style={{ gridColumn: "1 / -1", padding: "14px 16px", border: "1px solid #f3d7c2", borderRadius: "14px", background: "#fff8f2", lineHeight: 1.9 }}>
                         <strong style={{ color: "#a94c0c" }}>
                           {form.category === "parking" ? "پارکینگ موردنیازت را ساده و دقیق معرفی کن" : "فضایی را که لازم داری توصیف کن"}
@@ -842,7 +849,7 @@ function AddParking() {
                       />
                     )}
 
-                    {form.category === "shop" && <ShopFields value={form.shopDetails} disabled={loading} onChange={(shopDetails) => setForm(current => ({ ...current, shopDetails }))} />}
+                    {form.category === "shop" && !isWantedAd && <ShopFields value={form.shopDetails} disabled={loading} onChange={(shopDetails) => setForm(current => ({ ...current, shopDetails }))} />}
 
                     {form.category === "garden" && <GardenFields value={form.gardenDetails} disabled={loading} onChange={(gardenDetails) => setForm((current) => ({ ...current, gardenDetails }))} />}
 
@@ -964,7 +971,7 @@ function AddParking() {
                         )}
                       </div>
 
-                      {!(isWantedAd && ["storage", "warehouse", "parking"].includes(form.category)) && (
+                      {!(isWantedAd && ["storage", "warehouse", "parking", "shop"].includes(form.category)) && (
                       <div className="add-parking-field">
                         <label htmlFor="area">
                           متراژ
@@ -1033,6 +1040,10 @@ function AddParking() {
                       </>
                     )}
 
+                    {isWantedAd && form.category === "shop" && (<>
+                      <div className="add-parking-field" style={{gridColumn:"1 / -1",padding:"14px 16px",border:"1px solid #f3d7c2",borderRadius:14,background:"#fff8f2"}}><strong style={{color:"#a94c0c"}}>فضای تجاری موردنیازت را معرفی کن</strong><p>نوع مغازه، موقعیت، طبقه، فعالیت و شرایط مالی موردنظرت را مشخص کن. شرایط خاص اختیاری است.</p></div>
+                      <ShopRequestFields value={form.shopRequest} disabled={loading} error={errors.shopRequest} onChange={shopRequest=>{setForm(current=>({...current,shopRequest}));setErrors(current=>({...current,shopRequest:""}));}}/>
+                    </>)}
                     {isWantedAd && form.category === "storage" && (
                       <>
                         <div className="add-parking-field" style={{ gridColumn: "1 / -1", padding: "14px 16px", border: "1px solid #f3d7c2", borderRadius: "14px", background: "#fff8f2", lineHeight: 1.9 }}>
@@ -1212,7 +1223,7 @@ function AddParking() {
                     </div>
 
                     <div className="add-parking-fields-grid">
-                      {form.category !== "residential" && (
+                      {form.category !== "residential" && !(isWantedAd && form.category === "shop") && (
                         <>
                       <div
                         className={`add-parking-field add-parking-field--price-combo${form.priceType === "negotiable" ? " add-parking-field--negotiable" : ""}`}
@@ -1324,7 +1335,7 @@ function AddParking() {
                       </div>
                     </div>
 
-                    {!(isWantedAd && ["storage", "warehouse", "parking"].includes(form.category)) && (
+                    {!(isWantedAd && ["storage", "warehouse", "parking", "shop"].includes(form.category)) && (
                     <div className="add-parking-field">
                       <label htmlFor="description">
                         توضیحات آگهی

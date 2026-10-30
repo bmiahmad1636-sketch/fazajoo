@@ -1,3 +1,4 @@
+import { readShopRequest, shopOptionLabel, SHOP_TYPES, SHOP_ACTIVITIES, SHOP_FLOORS, SHOP_LOCATIONS, SHOP_FEATURES, SHOP_TRANSFER } from "../utils/shopRequest";
 import { readShedRequest, shedOptionLabel, SHED_TYPES, SHED_ACTIVITIES, shedActivitiesFor, SHED_ALL_FEATURES, SHED_POWER, SHED_ACCESS, SHED_DURATIONS } from "../utils/shedRequest";
 import { readParkingRequestUsage, parkingUsageLabel } from "../utils/parkingRequestUsage";
 import { readParkingRequestDetails, PARKING_COVERS, PARKING_ACCESS } from "../utils/parkingRequestDetails";
@@ -783,7 +784,7 @@ function ParkingDetails({
                 </article>
               )}
 
-              {!(isWanted && ["storage", "warehouse", "parking"].includes(category)) && (
+              {!(isWanted && ["storage", "warehouse", "parking", "shop"].includes(category)) && (
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">
@@ -836,7 +837,18 @@ function ParkingDetails({
                 </div>
               )}
 
-              {category === "shop" && (
+              {category === "shop" && isWanted && (()=>{const d=readShopRequest(parking.description).data;const rows=[
+                ["نوع فضای تجاری",shopOptionLabel(SHOP_TYPES,d.spaceType)],["فعالیت",d.activity==="other"?d.otherActivity:shopOptionLabel(SHOP_ACTIVITIES,d.activity)],
+                ["متراژ موردنیاز",[d.minArea&&`از ${d.minArea}`,d.maxArea&&`تا ${d.maxArea}`].filter(Boolean).join(" ")||"تعیین نشده"],
+                ["طبقه",shopOptionLabel(SHOP_FLOORS,d.floor)],["موقعیت",shopOptionLabel(SHOP_LOCATIONS,d.locationPreference)],
+                ["حداقل بر مغازه",d.frontage?`${d.frontage} متر`:"تعیین نشده"],["نوع واگذاری",shopOptionLabel(SHOP_TRANSFER,d.transferType)],
+                ["حداکثر پول پیش",d.deposit?`${Number(d.deposit).toLocaleString("fa-IR")} ریال`:"تعیین نشده"],
+                ["حداکثر اجاره ماهانه",d.monthlyRent?`${Number(d.monthlyRent).toLocaleString("fa-IR")} ریال`:"تعیین نشده"],
+                ["بودجه واگذاری حق",d.keyMoney?`${Number(d.keyMoney).toLocaleString("fa-IR")} ریال`:"تعیین نشده"],
+                ["نوع حق",({key_money:"سرقفلی",business_right:"حق کسب یا پیشه یا تجارت",unsure:"نیازمند بررسی حقوقی"})[d.rightsType]||"تعیین نشده"],
+                ["امکانات",(d.features||[]).map(id=>shopOptionLabel(SHOP_FEATURES,id)).join("، ")||"مورد خاصی ثبت نشده"],["شرایط خاص",d.requirements||"ثبت نشده"]
+              ];return <article className="parking-details-section"><div className="parking-details-section__heading"><div className="parking-details-section__icon">🏪</div><div><span>درخواست فضای تجاری</span><h2>مشخصات مغازه موردنیاز</h2></div></div><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,padding:"12px 0"}}>{rows.map(([label,value])=><div key={label} style={{padding:12,border:"1px solid #eee1d6",borderRadius:12}}><small style={{display:"block",color:"#786b60"}}>{label}</small><strong style={{whiteSpace:"pre-wrap"}}>{value}</strong></div>)}</div></article>})()}
+              {category === "shop" && !isWanted && (
                 <div className="parking-details-residential">
                   <h3>🏪 امکانات مغازه</h3>
                   <div className="parking-details-residential__grid">
