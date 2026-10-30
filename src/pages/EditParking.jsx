@@ -14,6 +14,8 @@ import { updateSpace } from "../services/spaceService";
 import ImageUploader from "../components/ImageUploader";
 import VideoUploader from "../components/VideoUploader";
 import NeshanLocationPicker from "../components/NeshanLocationPicker";
+import ParkingRequestUsageFields from "../components/ParkingRequestUsageFields";
+import { readParkingRequestUsage, writeParkingRequestUsage, parkingUsageLabel } from "../utils/parkingRequestUsage";
 import ResidentialFields from "../components/ResidentialFields";
 import { emptyResidentialDetails } from "../components/residentialDetails";
 import VillaFields from "../components/VillaFields";
@@ -28,6 +30,8 @@ import "./EditParking.css";
 
 const EMPTY_FORM = {
   title: "",
+  parkingRequestUsage: "",
+  parkingOtherUsage: "",
   city: "",
   area: "",
   price: "",
@@ -107,7 +111,9 @@ function createFormFromParking(parking) {
     villaDetails: { ...emptyVillaDetails, ...(parking?.villaDetails || {}) },
     gardenDetails: { ...emptyGardenDetails, ...(parking?.gardenDetails || {}) },
     shopDetails: { ...emptyShopDetails, ...(parking?.shopDetails || {}) },
-    description: parking?.description || "",
+    description: readParkingRequestUsage(parking?.description).description,
+    parkingRequestUsage: readParkingRequestUsage(parking?.description).usage,
+    parkingOtherUsage: readParkingRequestUsage(parking?.description).otherUsage,
     agencyNetworkConsent: Boolean(parking?.agencyNetworkConsent),
     location: {
       lat: parking?.location?.lat ?? null,
@@ -166,13 +172,14 @@ function EditParking({
 
   const completionPercentage =
     useMemo(() => {
+      // Requests are complete without photos; negotiated budgets need no amount.
       const fields = [
         form.title.trim(),
         form.city.trim(),
         form.area,
-        form.price.trim(),
+        form.priceType === "negotiable" ? true : form.price.trim(),
         form.phone.trim(),
-        form.imageUrl,
+        ...(!isWanted ? [form.imageUrl] : []),
         form.description.trim(),
       ];
 
@@ -184,7 +191,7 @@ function EditParking({
           fields.length) *
           100
       );
-    }, [form]);
+    }, [form, isWanted]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -234,6 +241,10 @@ function EditParking({
 
   const validateForm = () => {
     const nextErrors = {};
+    if (isWanted && parking?.category === "parking") {
+      if (!form.parkingRequestUsage) nextErrors.parkingRequestUsage = "کاربری موردنظر را انتخاب کنید.";
+      else if (form.parkingRequestUsage === "other" && form.parkingOtherUsage.trim().length < 5) nextErrors.parkingRequestUsage = "کاربری دیگر را حداقل در ۵ حرف توضیح دهید.";
+    }
 
     if (!form.title.trim()) {
       nextErrors.title =
@@ -392,7 +403,9 @@ function EditParking({
       video: form.video,
 
       description:
-        form.description.trim(),
+        isWanted && parking?.category === "parking"
+          ? writeParkingRequestUsage(form.description, form.parkingRequestUsage, form.parkingOtherUsage)
+          : form.description.trim(),
       agencyNetworkConsent: Boolean(form.agencyNetworkConsent),
       location: form.location,
 
@@ -478,7 +491,7 @@ function EditParking({
   }
 
   return (
-    <main className="edit-parking-page">
+    <main className={`edit-parking-page${isWanted ? " edit-parking-page--wanted" : ""}`}>
       <div className="edit-parking-page__background">
         <span className="edit-parking-orb edit-parking-orb--one" />
         <span className="edit-parking-orb edit-parking-orb--two" />
@@ -523,9 +536,9 @@ function EditParking({
               <h1>{isWanted ? "ویرایش درخواست پارکینگ" : "ویرایش آگهی پارکینگ"}</h1>
 
               <p>
-                اطلاعات آگهی را دقیق‌تر کن
-                تا کاربران سریع‌تر فضای
-                مناسب خودشان را پیدا کنند.
+                {isWanted
+                  ? "شرایط و بودجه موردنیازت را دقیق‌تر کن تا تأمین‌کنندگان فضای مناسب‌تری پیشنهاد بدهند."
+                  : "اطلاعات آگهی را دقیق‌تر کن تا کاربران سریع‌تر فضای مناسب خودشان را پیدا کنند."}
               </p>
             </div>
 
@@ -558,8 +571,7 @@ function EditParking({
                 </strong>
 
                 <p>
-                  در حال انتقال به صفحه
-                  آگهی...
+                  {isWanted ? "در حال انتقال به صفحه درخواست..." : "در حال انتقال به صفحه آگهی..."}
                 </p>
               </div>
             </div>
@@ -626,6 +638,18 @@ function EditParking({
                 </div>
 
                 <div className="edit-parking-card__body">
+                  {isWanted && parking?.category === "parking" && (
+                    <ParkingRequestUsageFields
+                      usage={form.parkingRequestUsage}
+                      otherUsage={form.parkingOtherUsage}
+                      disabled={loading}
+                      error={errors.parkingRequestUsage}
+                      onChange={({ usage, otherUsage }) => {
+                        setForm((current) => ({ ...current, parkingRequestUsage: usage, parkingOtherUsage: otherUsage }));
+                        setErrors((current) => ({ ...current, parkingRequestUsage: "" }));
+                      }}
+                    />
+                  )}
                   <div className="edit-parking-field edit-parking-field--full">
                     <label htmlFor="title">
                       {isWanted ? "عنوان درخواست" : "عنوان آگهی"}
@@ -783,6 +807,7 @@ function EditParking({
                 </div>
               </section>
 
+              {!isWanted && (
               <section className="edit-parking-card">
                 <div className="edit-parking-card__header">
                   <div className="edit-parking-card__icon edit-parking-card__icon--cyan">
@@ -851,6 +876,8 @@ function EditParking({
                 </div>
               </section>
 
+              )}
+
               {!isWanted && (
                 <section className="edit-parking-card">
                   <div className="edit-parking-card__header">
@@ -874,7 +901,7 @@ function EditParking({
               <section className="edit-parking-card">
                 <div className="edit-parking-card__header">
                   <div className="edit-parking-card__icon edit-parking-card__icon--green">
-                    03
+                    {isWanted ? "02" : "03"}
                   </div>
 
                   <div>
@@ -1096,7 +1123,7 @@ function EditParking({
                     </span>
 
                     <strong>
-                      کارت آگهی شما
+                      {isWanted ? "کارت درخواست شما" : "کارت آگهی شما"}
                     </strong>
                   </div>
 
@@ -1107,7 +1134,12 @@ function EditParking({
                 </div>
 
                 <div className="edit-parking-preview__image">
-                  {form.imageUrl ? (
+                  {isWanted ? (
+                    <div className="edit-parking-preview__placeholder" role="img" aria-label="درخواست پارکینگ بدون نیاز به تصویر">
+                      <span>🔎</span>
+                      <p>{parkingUsageLabel(form.parkingRequestUsage, form.parkingOtherUsage)}</p>
+                    </div>
+                  ) : form.imageUrl ? (
                     <img
                       src={form.imageUrl}
                       alt={
@@ -1126,7 +1158,7 @@ function EditParking({
                   )}
 
                   <span className="edit-parking-preview__badge">
-                    آماده انتشار
+                    {isWanted ? "درخواست فعال" : "آماده انتشار"}
                   </span>
                 </div>
 
@@ -1135,17 +1167,17 @@ function EditParking({
                     <span>⌖</span>
 
                     {form.city ||
-                      "شهر پارکینگ"}
+                      (isWanted ? "شهر موردنظر" : "شهر پارکینگ")}
                   </div>
 
                   <h3>
                     {form.title ||
-                      "عنوان آگهی پارکینگ"}
+                      (isWanted ? "عنوان درخواست پارکینگ" : "عنوان آگهی پارکینگ")}
                   </h3>
 
                   <p>
                     {form.description ||
-                      "توضیحات آگهی پس از وارد کردن در این بخش نمایش داده می‌شود."}
+                      (isWanted ? "شرایط موردنیاز شما در این بخش نمایش داده می‌شود." : "توضیحات آگهی پس از وارد کردن در این بخش نمایش داده می‌شود.")}
                   </p>
 
                   <div className="edit-parking-preview__features">
@@ -1167,15 +1199,15 @@ function EditParking({
 
                   <div className="edit-parking-preview__price">
                     <span>
-                      هزینه استفاده
+                      {isWanted ? "بودجه پیشنهادی" : "هزینه استفاده"}
                     </span>
 
                     <strong>
-                      {form.price
-                        ? `${form.price} ریال - ${getPriceTypeLabel(
-                            form.priceType
-                          )}`
-                        : "قیمت ثبت نشده"}
+                      {form.priceType === "negotiable"
+                        ? "توافقی"
+                        : form.price
+                          ? `${form.price} ریال - ${getPriceTypeLabel(form.priceType)}`
+                          : (isWanted ? "بودجه ثبت نشده" : "قیمت ثبت نشده")}
                     </strong>
                   </div>
                 </div>
@@ -1185,7 +1217,7 @@ function EditParking({
                 <div className="edit-parking-completion__header">
                   <div>
                     <span>
-                      کامل بودن آگهی
+                      {isWanted ? "کامل بودن درخواست" : "کامل بودن آگهی"}
                     </span>
 
                     <strong>
@@ -1210,9 +1242,9 @@ function EditParking({
                 </div>
 
                 <p>
-                  آگهی‌های کامل‌تر اعتماد و
-                  بازدید بیشتری دریافت
-                  می‌کنند.
+                  {isWanted
+                    ? "درخواست‌های دقیق‌تر، پیدا کردن پارکینگ مناسب را آسان‌تر می‌کنند. عکس و فیلم برای درخواست لازم نیست."
+                    : "آگهی‌های کامل‌تر اعتماد و بازدید بیشتری دریافت می‌کنند."}
                 </p>
               </section>
 
@@ -1225,10 +1257,9 @@ function EditParking({
                   </strong>
 
                   <p>
-                    قیمت، شماره تماس و تصویر
-                    آگهی را دوباره بررسی کن
-                    تا کاربران اطلاعات
-                    اشتباه نبینند.
+                    {isWanted
+                      ? "شهر، محدوده روی نقشه، بودجه، شماره تماس و شرایط موردنیازت را دوباره بررسی کن."
+                      : "قیمت، شماره تماس و تصویر آگهی را دوباره بررسی کن تا کاربران اطلاعات اشتباه نبینند."}
                   </p>
                 </div>
               </section>

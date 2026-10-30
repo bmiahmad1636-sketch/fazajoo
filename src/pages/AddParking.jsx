@@ -1,11 +1,13 @@
 import { showInSiteAlert } from "../utils/inSiteDialog";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createSpace } from "../services/spaceService";
 import { getAuthToken } from "../services/authService";
 import ImageUploader from "../components/ImageUploader";
 import VideoUploader from "../components/VideoUploader";
 import NeshanLocationPicker from "../components/NeshanLocationPicker";
+import ParkingRequestUsageFields from "../components/ParkingRequestUsageFields";
+import { writeParkingRequestUsage } from "../utils/parkingRequestUsage";
 import IranCityAutocomplete from "../components/IranCityAutocomplete";
 import "../components/IranCityAutocomplete.css";
 import ResidentialFields from "../components/ResidentialFields";
@@ -22,6 +24,8 @@ import "./AddParking.css";
 
 const INITIAL_FORM = {
   listingType: "offer",
+  parkingRequestUsage: "",
+  parkingOtherUsage: "",
   category: "parking",
   customCategory: "",
   title: "",
@@ -128,11 +132,13 @@ function AddParking() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const publishingRef = useRef(false);
   const [errors, setErrors] = useState({});
 
-  const progress = useMemo(() => {
-    return (currentStep / STEPS.length) * 100;
-  }, [currentStep]);
+  const isWantedAd = form.listingType === "wanted";
+  const visibleSteps = isWantedAd ? STEPS.filter((step) => step.id !== 2) : STEPS;
+  const displayedStep = isWantedAd && currentStep === 3 ? 2 : currentStep;
+  const progress = (displayedStep / visibleSteps.length) * 100;
 
   const selectedCategory = useMemo(() => {
     return SPACE_CATEGORIES.find(
@@ -146,9 +152,6 @@ function AddParking() {
         "فضای دیگر"
       : selectedCategory?.label ||
         "فضا";
-
-  const isWantedAd =
-    form.listingType === "wanted";
 
   const listingTypeLabel = isWantedAd
     ? "دنبال فضا هستم"
@@ -196,6 +199,10 @@ function AddParking() {
     const newErrors = {};
 
     if (step === 1) {
+      if (isWantedAd && form.category === "parking") {
+        if (!form.parkingRequestUsage) newErrors.parkingRequestUsage = "کاربری موردنظر را انتخاب کنید.";
+        else if (form.parkingRequestUsage === "other" && form.parkingOtherUsage.trim().length < 5) newErrors.parkingRequestUsage = "برای سایر کاربری‌ها حداقل ۵ حرف توضیح بنویسید.";
+      }
       if (
         form.category === "other" &&
         !form.customCategory.trim()
@@ -240,7 +247,7 @@ function AddParking() {
           newErrors.price = "حداقل مبلغ رهن یا اجاره را وارد کنید.";
         }
       } else if (form.priceType !== "negotiable" && !form.price.trim()) {
-        newErrors.price = "قیمت را وارد کنید.";
+        newErrors.price = isWantedAd ? "سقف بودجه موردنظرت را وارد کن." : "قیمت را وارد کنید.";
       }
 
       if (!form.phone.trim()) {
@@ -277,7 +284,7 @@ function AddParking() {
     }
 
     setCurrentStep((step) =>
-      Math.min(step + 1, STEPS.length)
+      isWantedAd && step === 1 ? 3 : Math.min(step + 1, STEPS.length)
     );
 
     window.scrollTo({
@@ -290,7 +297,7 @@ function AddParking() {
     setErrors({});
 
     setCurrentStep((step) =>
-      Math.max(step - 1, 1)
+      isWantedAd && step === 3 ? 1 : Math.max(step - 1, 1)
     );
 
     window.scrollTo({
@@ -308,13 +315,10 @@ function AddParking() {
     setCurrentStep(step);
   };
 
-  const saveParking = async (event) => {
-    event.preventDefault();
-
-    if (currentStep !== STEPS.length) {
-      goToNextStep();
-      return;
-    }
+  // Publishing is deliberately disconnected from the form submit event.
+  // Only the final-step Publish button can call this function.
+  const saveParking = async () => {
+    if (currentStep !== STEPS.length || publishingRef.current || loading) return;
 
     if (!validateStep(3)) {
       return;
@@ -329,6 +333,7 @@ function AddParking() {
       return;
     }
 
+    publishingRef.current = true;
     setLoading(true);
 
     try {
@@ -388,7 +393,9 @@ function AddParking() {
           video: form.video,
 
           description:
-            form.description.trim(),
+            isWantedAd && form.category === "parking"
+              ? writeParkingRequestUsage(form.description, form.parkingRequestUsage, form.parkingOtherUsage)
+              : form.description.trim(),
 
           agencyNetworkConsent: Boolean(form.agencyNetworkConsent),
           location: form.location,
@@ -407,6 +414,7 @@ function AddParking() {
 
       showInSiteAlert("خطا در ثبت آگهی. دوباره تلاش کنید.", "ثبت آگهی");
     } finally {
+      publishingRef.current = false;
       setLoading(false);
     }
   };
@@ -445,12 +453,12 @@ function AddParking() {
 
               <p>
                 چه فضایی برای اجاره داشته باشی و چه دنبال فضای مناسب باشی،
-                اطلاعات را در سه مرحله کوتاه وارد کن و آگهی خودت را منتشر کن.
+                {isWantedAd ? "نیاز و بودجه‌ات را در دو مرحله کوتاه ثبت کن." : "اطلاعات را در سه مرحله کوتاه وارد کن و آگهی خودت را منتشر کن."}
               </p>
             </div>
 
             <div className="add-parking-hero__badge">
-              <span>۳</span>
+              <span>{isWantedAd ? "۲" : "۳"}</span>
 
               <div>
                 <strong>
@@ -478,8 +486,8 @@ function AddParking() {
                     </span>
 
                     <strong>
-                      مرحله {currentStep} از{" "}
-                      {STEPS.length}
+                      مرحله {displayedStep} از{" "}
+                      {visibleSteps.length}
                     </strong>
                   </div>
 
@@ -497,7 +505,7 @@ function AddParking() {
                 </div>
 
                 <div className="add-parking-steps">
-                  {STEPS.map((step) => {
+                  {visibleSteps.map((step) => {
                     const isActive =
                       step.id === currentStep;
 
@@ -526,16 +534,16 @@ function AddParking() {
                         <span className="add-parking-step__number">
                           {isCompleted
                             ? "✓"
-                            : step.id}
+                            : isWantedAd && step.id === 3 ? 2 : step.id}
                         </span>
 
                         <span className="add-parking-step__text">
                           <strong>
-                            {step.title}
+                            {isWantedAd && step.id === 3 ? "بودجه و راه ارتباط" : step.title}
                           </strong>
 
                           <small>
-                            {step.description}
+                            {isWantedAd && step.id === 3 ? "سقف بودجه، تماس و شرایط موردنیاز" : step.description}
                           </small>
                         </span>
                       </button>
@@ -551,15 +559,13 @@ function AddParking() {
 
                 <div>
                   <strong>
-                    آگهی کامل‌تر، بازدید
-                    بیشتر
+                    {isWantedAd ? "درخواست دقیق‌تر، نتیجه بهتر" : "آگهی کامل‌تر، بازدید بیشتر"}
                   </strong>
 
                   <p>
-                    تصویر واضح، عنوان دقیق
-                    و توضیحات کامل باعث
-                    اعتماد بیشتر کاربران
-                    می‌شود.
+                    {isWantedAd
+                      ? "شهر، محدوده مطلوب، سقف بودجه و شرایط ضروری را دقیق بنویس تا پیشنهادهای مناسب‌تری دریافت کنی."
+                      : "تصویر واضح، عنوان دقیق و توضیحات کامل باعث اعتماد بیشتر کاربران می‌شود."}
                   </p>
                 </div>
               </div>
@@ -567,12 +573,12 @@ function AddParking() {
 
             <div className="add-parking-form-card">
               <form
-                onSubmit={saveParking}
+                onSubmit={(event) => event.preventDefault()}
                 noValidate
               >
                 <div className="add-parking-form-header">
                   <span className="add-parking-form-header__step">
-                    مرحله {currentStep}
+                    مرحله {displayedStep}
                   </span>
 
                   <h2>
@@ -767,13 +773,30 @@ function AddParking() {
                       </div>
                     </div>
 
+                    {isWantedAd && form.category === "parking" && (
+                      <ParkingRequestUsageFields
+                        usage={form.parkingRequestUsage}
+                        otherUsage={form.parkingOtherUsage}
+                        disabled={loading}
+                        error={errors.parkingRequestUsage}
+                        onChange={({ usage, otherUsage }) => {
+                          setForm((current) => ({ ...current, parkingRequestUsage: usage, parkingOtherUsage: otherUsage }));
+                          setErrors((current) => ({ ...current, parkingRequestUsage: "" }));
+                        }}
+                      />
+                    )}
+
                     {isWantedAd && (
                       <div className="add-parking-field" style={{ gridColumn: "1 / -1", padding: "14px 16px", border: "1px solid #f3d7c2", borderRadius: "14px", background: "#fff8f2", lineHeight: 1.9 }}>
-                        <strong style={{ color: "#a94c0c" }}>نیاز خودت را ثبت کن، نه مشخصات یک ملک موجود</strong>
+                        <strong style={{ color: "#a94c0c" }}>
+                          {form.category === "parking" ? "پارکینگ موردنیازت را ساده و دقیق معرفی کن" : "فضایی را که لازم داری توصیف کن"}
+                        </strong>
                         <p style={{ margin: "4px 0 0" }}>
-                          شهر و متراژ موردنیاز را مشخص کن. برای امکاناتی مثل آسانسور، پارکینگ، گرمایش یا سرمایش، فقط مواردی را انتخاب کن که واقعاً برایت مهم‌اند؛ جزئیات ضروری را هم در توضیحات بنویس.
+                          {form.category === "parking"
+                            ? "کاربری موردنظر را انتخاب کن؛ بعد شهر، متراژ و محدوده دلخواه را بنویس. اگر مسقف بودن، ساعت دسترسی یا شرایط خاصی مهم است، در توضیحات ذکر کن."
+                            : "شهر، متراژ تقریبی و نیازهای اصلی‌ات را مشخص کن. فقط شرایطی را بنویس که واقعاً برای انتخاب فضای مناسب اهمیت دارند."}
                         </p>
-                        <small>برای حفظ دقت «خبرم کن»، معیارهای اصلی تطبیق و درصدهای فعلی بدون تغییر می‌مانند.</small>
+                        <small style={{ color: "#8c6854" }}>لازم نیست مشخصات یک ملک موجود را بدانی؛ فقط نیاز خودت را شرح بده.</small>
                       </div>
                     )}
 
@@ -1470,7 +1493,8 @@ function AddParking() {
                     </button>
                   ) : (
                     <button
-                      type="submit"
+                      type="button"
+                      onClick={saveParking}
                       className="add-parking-button add-parking-button--publish"
                       disabled={loading}
                     >

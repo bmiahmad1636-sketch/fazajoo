@@ -1,3 +1,4 @@
+import { readParkingRequestUsage, parkingUsageLabel } from "../utils/parkingRequestUsage";
 import { climateLabels } from "../components/ClimateFields";
 import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -504,6 +505,8 @@ function ParkingDetails({
         <div className="container">
           <div className="parking-details-layout">
             <div className="parking-details-main">
+              {!isWanted && (
+                <>
               <article
                 className={[
                   "parking-details-gallery",
@@ -549,11 +552,9 @@ function ParkingDetails({
                         ? `درخواست ${visibleCategory}`
                         : `تصویر ${visibleCategory}`}
                     </strong>
-                    <p>
-                      {isWanted
-                        ? "برای این درخواست تصویری ثبت نشده است."
-                        : "تصویری برای این آگهی ثبت نشده است."}
-                    </p>
+                    {!isWanted && (
+                      <p>تصویری برای این آگهی ثبت نشده است.</p>
+                    )}
                   </div>
                 )}
 
@@ -598,6 +599,9 @@ function ParkingDetails({
                     </button>
                   ))}
                 </div>
+              )}
+
+                </>
               )}
 
               {!isWanted && parking.video?.url && (
@@ -714,6 +718,15 @@ function ParkingDetails({
                   </div>
                 </div>
               </article>
+
+              {isWanted && category === "parking" && readParkingRequestUsage(parking.description).usage && (
+                <article className="parking-details-section">
+                  <div className="parking-details-section__heading">
+                    <div className="parking-details-section__icon">🚘</div>
+                    <div><span>کاربری درخواستی</span><h2>{parkingUsageLabel(readParkingRequestUsage(parking.description).usage, readParkingRequestUsage(parking.description).otherUsage)}</h2></div>
+                  </div>
+                </article>
+              )}
 
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
@@ -886,7 +899,7 @@ function ParkingDetails({
               )}
 
                 <p className="parking-details-description">
-                  {parking.description ||
+                  {(isWanted && category === "parking" ? readParkingRequestUsage(parking.description).description : parking.description) ||
                     "توضیحی برای این آگهی ثبت نشده است."}
                 </p>
               </article>

@@ -1618,3 +1618,36 @@
 .edit-parking-orb--one { background: rgba(176,207,187,.24); }
 .edit-parking-orb--two { background: rgba(247,127,35,.09); }
 .edit-parking-orb--three { background: rgba(176,207,187,.17); }
+
+/* Request edit hero: keep supporting text above overlapping form cards. */
+.edit-parking-hero { padding-bottom: 160px; }
+.edit-parking-hero__content { align-items: flex-start; }
+.edit-parking-hero__content > div:first-child { min-width: 0; }
+.edit-parking-hero__content p { max-width: 720px; }
+@media (max-width: 760px) {
+  .edit-parking-hero { padding-bottom: 130px; }
+}
+
+/* Request edit: keep the full heading and description visible above the form. */
+.edit-parking-page--wanted .edit-parking-hero {
+  padding-bottom: 32px;
+}
+.edit-parking-page--wanted .edit-parking-hero__content {
+  margin-top: 28px;
+  align-items: flex-start;
+}
+.edit-parking-page--wanted .edit-parking-hero__content > div:first-child {
+  min-width: 0;
+}
+.edit-parking-page--wanted .edit-parking-hero__content p {
+  max-width: 720px;
+  margin-bottom: 0;
+}
+.edit-parking-page--wanted .edit-parking-content {
+  margin-top: 22px;
+}
+@media (max-width: 760px) {
+  .edit-parking-page--wanted .edit-parking-hero { padding-bottom: 24px; }
+  .edit-parking-page--wanted .edit-parking-hero__content { gap: 16px; }
+  .edit-parking-page--wanted .edit-parking-content { margin-top: 16px; }
+}
