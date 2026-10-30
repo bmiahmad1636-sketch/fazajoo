@@ -1,4 +1,5 @@
 import { readParkingRequestUsage, parkingUsageLabel } from "../utils/parkingRequestUsage";
+import { readWarehouseRequest, warehouseOptionLabel, WAREHOUSE_PURPOSES, WAREHOUSE_TYPES, WAREHOUSE_ACCESS, WAREHOUSE_DURATIONS, WAREHOUSE_FEATURES } from "../utils/warehouseRequest";
 import { climateLabels } from "../components/ClimateFields";
 import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -719,6 +720,25 @@ function ParkingDetails({
                 </div>
               </article>
 
+              {isWanted && category === "storage" && readWarehouseRequest(parking.description).data.purpose && (() => {
+                const data = readWarehouseRequest(parking.description).data;
+                const details = [
+                  ["کاربری", data.purpose === "other" ? data.otherPurpose : warehouseOptionLabel(WAREHOUSE_PURPOSES, data.purpose)],
+                  ["نوع فضا", warehouseOptionLabel(WAREHOUSE_TYPES, data.spaceType)],
+                  ["متراژ موردنیاز", [data.minArea && `از ${data.minArea}`, data.maxArea && `تا ${data.maxArea}`].filter(Boolean).join(" ") ? `${[data.minArea && `از ${data.minArea}`, data.maxArea && `تا ${data.maxArea}`].filter(Boolean).join(" ")} مترمربع` : "تعیین نشده"],
+                  ["دسترسی", warehouseOptionLabel(WAREHOUSE_ACCESS, data.access)],
+                  ["مدت اجاره", warehouseOptionLabel(WAREHOUSE_DURATIONS, data.duration)],
+                  ["امکانات", (data.features || []).map(id => warehouseOptionLabel(WAREHOUSE_FEATURES, id)).join("، ") || "مورد خاصی ثبت نشده"],
+                  ["شرایط خاص", data.requirements || "ثبت نشده"],
+                ];
+                return <article className="parking-details-section">
+                  <div className="parking-details-section__heading"><div className="parking-details-section__icon">📦</div><div><span>درخواست اجاره انبار</span><h2>مشخصات انبار موردنیاز</h2></div></div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, padding: "12px 0" }}>
+                    {details.map(([label, value]) => <div key={label} style={{ padding: 12, border: "1px solid #eee1d6", borderRadius: 12 }}><small style={{ display: "block", color: "#786b60" }}>{label}</small><strong style={{ whiteSpace: "pre-wrap" }}>{value}</strong></div>)}
+                  </div>
+                </article>;
+              })()}
+
               {isWanted && category === "parking" && readParkingRequestUsage(parking.description).usage && (
                 <article className="parking-details-section">
                   <div className="parking-details-section__heading">
@@ -728,6 +748,7 @@ function ParkingDetails({
                 </article>
               )}
 
+              {!(isWanted && category === "storage") && (
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">
@@ -899,10 +920,11 @@ function ParkingDetails({
               )}
 
                 <p className="parking-details-description">
-                  {(isWanted && category === "parking" ? readParkingRequestUsage(parking.description).description : parking.description) ||
+                  {(isWanted && category === "parking" ? readParkingRequestUsage(parking.description).description : isWanted && category === "storage" ? readWarehouseRequest(parking.description).description : parking.description) ||
                     "توضیحی برای این آگهی ثبت نشده است."}
                 </p>
               </article>
+              )}
 
               <article className="parking-details-location">
                 <div>

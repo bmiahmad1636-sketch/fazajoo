@@ -7,6 +7,8 @@ import ImageUploader from "../components/ImageUploader";
 import VideoUploader from "../components/VideoUploader";
 import NeshanLocationPicker from "../components/NeshanLocationPicker";
 import ParkingRequestUsageFields from "../components/ParkingRequestUsageFields";
+import WarehouseRequestFields from "../components/WarehouseRequestFields";
+import { EMPTY_WAREHOUSE_REQUEST, warehouseRequestValidation, writeWarehouseRequest } from "../utils/warehouseRequest";
 import { writeParkingRequestUsage } from "../utils/parkingRequestUsage";
 import IranCityAutocomplete from "../components/IranCityAutocomplete";
 import "../components/IranCityAutocomplete.css";
@@ -26,6 +28,7 @@ const INITIAL_FORM = {
   listingType: "offer",
   parkingRequestUsage: "",
   parkingOtherUsage: "",
+  warehouseRequest: { ...EMPTY_WAREHOUSE_REQUEST, features: [] },
   category: "parking",
   customCategory: "",
   title: "",
@@ -199,6 +202,10 @@ function AddParking() {
     const newErrors = {};
 
     if (step === 1) {
+      if (isWantedAd && form.category === "storage") {
+        const warehouseError = warehouseRequestValidation(form.warehouseRequest);
+        if (warehouseError) newErrors.warehouseRequest = warehouseError;
+      }
       if (isWantedAd && form.category === "parking") {
         if (!form.parkingRequestUsage) newErrors.parkingRequestUsage = "کاربری موردنظر را انتخاب کنید.";
         else if (form.parkingRequestUsage === "other" && form.parkingOtherUsage.trim().length < 5) newErrors.parkingRequestUsage = "برای سایر کاربری‌ها حداقل ۵ حرف توضیح بنویسید.";
@@ -263,7 +270,7 @@ function AddParking() {
       }
 
       if (
-        form.description.trim().length <
+        !(isWantedAd && form.category === "storage") && form.description.trim().length <
         10
       ) {
         newErrors.description =
@@ -357,9 +364,9 @@ function AddParking() {
           title: form.title.trim(),
           city: form.city.trim(),
 
-          area: form.area
-            ? Number(form.area)
-            : 0,
+          area: isWantedAd && form.category === "storage"
+            ? Number(form.warehouseRequest.minArea || form.warehouseRequest.maxArea || 0)
+            : form.area ? Number(form.area) : 0,
 
           price:
             form.category === "residential"
@@ -388,14 +395,16 @@ function AddParking() {
             .replace(/\s/g, "")
             .trim(),
 
-          imageUrl: form.imageUrl,
-          imageUrls: form.imageUrls,
-          video: form.video,
+          imageUrl: isWantedAd && form.category === "storage" ? "" : form.imageUrl,
+          imageUrls: isWantedAd && form.category === "storage" ? [] : form.imageUrls,
+          video: isWantedAd && form.category === "storage" ? null : form.video,
 
           description:
             isWantedAd && form.category === "parking"
               ? writeParkingRequestUsage(form.description, form.parkingRequestUsage, form.parkingOtherUsage)
-              : form.description.trim(),
+              : isWantedAd && form.category === "storage"
+                ? writeWarehouseRequest("", form.warehouseRequest)
+                : form.description.trim(),
 
           agencyNetworkConsent: Boolean(form.agencyNetworkConsent),
           location: form.location,
@@ -786,7 +795,7 @@ function AddParking() {
                       />
                     )}
 
-                    {isWantedAd && (
+                    {isWantedAd && form.category !== "storage" && (
                       <div className="add-parking-field" style={{ gridColumn: "1 / -1", padding: "14px 16px", border: "1px solid #f3d7c2", borderRadius: "14px", background: "#fff8f2", lineHeight: 1.9 }}>
                         <strong style={{ color: "#a94c0c" }}>
                           {form.category === "parking" ? "پارکینگ موردنیازت را ساده و دقیق معرفی کن" : "فضایی را که لازم داری توصیف کن"}
@@ -950,6 +959,7 @@ function AddParking() {
                         )}
                       </div>
 
+                      {!(isWantedAd && form.category === "storage") && (
                       <div className="add-parking-field">
                         <label htmlFor="area">
                           متراژ
@@ -993,7 +1003,19 @@ function AddParking() {
                           </span>
                         )}
                       </div>
+                      )}
                     </div>
+
+                    {isWantedAd && form.category === "storage" && (
+                      <>
+                        <div className="add-parking-field" style={{ gridColumn: "1 / -1", padding: "14px 16px", border: "1px solid #f3d7c2", borderRadius: "14px", background: "#fff8f2", lineHeight: 1.9 }}>
+                          <strong style={{ color: "#a94c0c" }}>فضایی را که لازم داری توصیف کن</strong>
+                          <p style={{ margin: "4px 0 0" }}>در ادامه نوع کاربری، فضای مطلوب، حداقل و حداکثر متراژ، دسترسی، امکانات ضروری و شرایط خاص را مشخص کن.</p>
+                          <small style={{ color: "#8c6854" }}>تنها نیازهای واقعی‌ات را انتخاب کن؛ بخش «شرایط خاص» برای توضیح‌های تکمیلی اختیاری است.</small>
+                        </div>
+                        <WarehouseRequestFields value={form.warehouseRequest} disabled={loading} error={errors.warehouseRequest} onChange={(warehouseRequest) => { setForm(current => ({ ...current, warehouseRequest })); setErrors(current => ({ ...current, warehouseRequest: "" })); }} />
+                      </>
+                    )}
 
                     <NeshanLocationPicker
                       value={form.location}
@@ -1264,6 +1286,7 @@ function AddParking() {
                       </div>
                     </div>
 
+                    {!(isWantedAd && form.category === "storage") && (
                     <div className="add-parking-field">
                       <label htmlFor="description">
                         توضیحات آگهی
@@ -1324,6 +1347,7 @@ function AddParking() {
                         </span>
                       </div>
                     </div>
+                    )}
 
                     <label
                       className={`add-parking-network-consent add-parking-network-consent--fazajoo${form.agencyNetworkConsent ? " is-checked" : ""}`}
