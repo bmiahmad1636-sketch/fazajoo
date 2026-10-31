@@ -20,7 +20,8 @@ import {
   removeFavorite,
 } from "../services/favoriteService";
 
-import { formatRialPrice } from "../utils/priceFormatter";
+import { formatRialPrice, normalizePriceNumber } from "../utils/priceFormatter";
+import { readLandRental } from "../utils/landRental";
 
 import "./ParkingCard.css";
 
@@ -93,6 +94,42 @@ function ParkingCard({ parking }) {
 
   const isWanted =
     listingType === "wanted";
+
+  // Wanted land keeps its requirements in description metadata, not in
+  // the generic area/price fields. Read only for this listing type.
+  const landRequest = isWanted && category === "land"
+    ? readLandRental(parking.description || "")
+    : null;
+  const landData = landRequest?.hasMetadata ? landRequest.data : null;
+  const landAreaUnit = landData?.areaUnit === "hectare" ? "هکتار" : "مترمربع";
+  const landMinArea = normalizePriceNumber(landData?.minArea ?? parking.landRental?.minArea ?? parking.landRequest?.minArea);
+  const landMaxArea = normalizePriceNumber(landData?.maxArea ?? parking.landRental?.maxArea ?? parking.landRequest?.maxArea);
+  const landAreaText = landData && (landMinArea || landMaxArea)
+    ? landMinArea && landMaxArea
+      ? landMinArea === landMaxArea
+        ? `${landMinArea.toLocaleString("fa-IR")} ${landAreaUnit}`
+        : `${landMinArea.toLocaleString("fa-IR")} تا ${landMaxArea.toLocaleString("fa-IR")} ${landAreaUnit}`
+      : landMinArea
+        ? `از ${landMinArea.toLocaleString("fa-IR")} ${landAreaUnit}`
+        : `تا ${landMaxArea.toLocaleString("fa-IR")} ${landAreaUnit}`
+    : "";
+
+  const landRentPeriods = {
+    daily: "روزانه", monthly: "ماهانه", seasonal: "فصلی", yearly: "سالانه",
+  };
+  const landDeposit = normalizePriceNumber(landData?.deposit);
+  const landRent = normalizePriceNumber(landData?.rent);
+  const landPaymentType = landData?.paymentType;
+  const landBudgetParts = landData ? [
+    ...(["deposit", "both"].includes(landPaymentType) && landDeposit
+      ? [`پول پیش تا ${landDeposit.toLocaleString("fa-IR")} ریال`]
+      : []),
+    ...(["rent", "both"].includes(landPaymentType) && landRent
+      ? [`اجاره تا ${landRent.toLocaleString("fa-IR")} ریال / ${landRentPeriods[landData.rentPeriod] || "دوره نامشخص"}`]
+      : []),
+    ...(landPaymentType === "crop_share" ? ["مشارکت در محصول"] : []),
+  ] : [];
+  const landBudgetText = landBudgetParts.join(" • ");
 
   const categoryInfo =
     CATEGORY_INFO[category] ||
@@ -496,9 +533,9 @@ function ParkingCard({ parking }) {
               </span>
 
               <strong>
-                {area
-                  ? `${area} متر`
-                  : "ثبت نشده"}
+                {landAreaText || (area
+                  ? `${Number(area).toLocaleString("fa-IR")} متر`
+                  : "ثبت نشده")}
               </strong>
             </div>
           </div>
@@ -535,11 +572,13 @@ function ParkingCard({ parking }) {
             </span>
 
             <strong>
-              {residentialPrice ||
-                formatRialPrice(price, {
-                  priceType,
-                  fallback: "توافقی",
-                })}
+              {landData
+                ? (landBudgetText || "بودجه اعلام نشده")
+                : (residentialPrice ||
+                  formatRialPrice(price, {
+                    priceType,
+                    fallback: "توافقی",
+                  }))}
             </strong>
           </div>
 

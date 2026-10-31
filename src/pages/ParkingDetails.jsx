@@ -1,3 +1,4 @@
+import {readLandRental,landLabel,LAND_PURPOSES,LAND_LEGAL,LAND_LOCATION,LAND_DURATION,LAND_CROPS,LAND_WATER,LAND_IRRIGATION,LAND_FEATURES,LAND_PAYMENT} from "../utils/landRental";
 import { readShopRequest, shopOptionLabel, SHOP_TYPES, SHOP_ACTIVITIES, SHOP_FLOORS, SHOP_LOCATIONS, SHOP_FEATURES, SHOP_TRANSFER } from "../utils/shopRequest";
 import { readShedRequest, shedOptionLabel, SHED_TYPES, SHED_ACTIVITIES, shedActivitiesFor, SHED_ALL_FEATURES, SHED_POWER, SHED_ACCESS, SHED_DURATIONS } from "../utils/shedRequest";
 import { readParkingRequestUsage, parkingUsageLabel } from "../utils/parkingRequestUsage";
@@ -172,6 +173,27 @@ function ParkingDetails({
 
   const category =
     parking?.category || "parking";
+
+  // Wanted-land requirements are stored in description metadata.
+  const wantedLand = isWanted && category === "land"
+    ? readLandRental(parking?.description || "")
+    : null;
+  const landFields = wantedLand?.hasMetadata ? wantedLand.data : null;
+  const landUnit = landFields?.areaUnit === "hectare" ? "هکتار" : "مترمربع";
+  const landMin = Number(String(landFields?.minArea || "").replace(/[,٬\s]/g, "")) || 0;
+  const landMax = Number(String(landFields?.maxArea || "").replace(/[,٬\s]/g, "")) || 0;
+  const landAreaText = landMin && landMax
+    ? `${landMin.toLocaleString("fa-IR")} تا ${landMax.toLocaleString("fa-IR")} ${landUnit}`
+    : landMin ? `از ${landMin.toLocaleString("fa-IR")} ${landUnit}`
+    : landMax ? `تا ${landMax.toLocaleString("fa-IR")} ${landUnit}` : "";
+  const landPeriodLabels = { daily: "روزانه", monthly: "ماهانه", seasonal: "فصلی", yearly: "سالانه" };
+  const landBudget = landFields ? [
+    ...(["deposit", "both"].includes(landFields.paymentType) && Number(landFields.deposit) > 0
+      ? [`پول پیش تا ${Number(landFields.deposit).toLocaleString("fa-IR")} ریال`] : []),
+    ...(["rent", "both"].includes(landFields.paymentType) && Number(landFields.rent) > 0
+      ? [`اجاره تا ${Number(landFields.rent).toLocaleString("fa-IR")} ریال / ${landPeriodLabels[landFields.rentPeriod] || "دوره توافقی"}`] : []),
+    ...(landFields.paymentType === "crop_share" ? ["مشارکت در محصول"] : []),
+  ].join(" • ") : "";
 
   const categoryInfo =
     CATEGORY_INFO[category] ||
@@ -488,9 +510,8 @@ function ParkingDetails({
               </span>
 
               <strong>
-                {formatRialPrice(parking.price, {
-                  priceType:
-                    parking.priceType || "monthly",
+                {landBudget || formatRialPrice(parking.price, {
+                  priceType: parking.priceType || "monthly",
                   fallback: "توافقی",
                 })}
               </strong>
@@ -678,9 +699,9 @@ function ParkingDetails({
                       </span>
 
                       <strong>
-                        {parking.area
+                        {landAreaText || (parking.area
                           ? `${parking.area} متر`
-                          : "ثبت نشده"}
+                          : "ثبت نشده")}
                       </strong>
                     </div>
                   </div>
@@ -712,9 +733,8 @@ function ParkingDetails({
                       </span>
 
                       <strong>
-                        {formatRialPrice(parking.price, {
-                          priceType:
-                            parking.priceType || "monthly",
+                        {landBudget || formatRialPrice(parking.price, {
+                          priceType: parking.priceType || "monthly",
                           fallback: "توافقی",
                         })}
                       </strong>
@@ -784,7 +804,7 @@ function ParkingDetails({
                 </article>
               )}
 
-              {!(isWanted && ["storage", "warehouse", "parking", "shop"].includes(category)) && (
+              {!(isWanted && ["storage", "warehouse", "parking", "shop", "land"].includes(category)) && (
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">
@@ -837,6 +857,7 @@ function ParkingDetails({
                 </div>
               )}
 
+              {isWanted && category === "land" && readLandRental(parking.description).hasMetadata && (()=>{const d=readLandRental(parking.description).data;const rows=[["هدف اصلی",landLabel(LAND_PURPOSES,d.primaryPurpose)],["توضیح سایر موارد",d.primaryPurpose==="other"?d.otherPurpose:""],["سایر کاربردهای ثبت‌شده قبلی",(d.purposes||[]).filter(x=>x!==d.primaryPurpose).map(x=>landLabel(LAND_PURPOSES,x)).join("، ")],["کاربری قانونی",landLabel(LAND_LEGAL,d.legalUse)],["موقعیت",landLabel(LAND_LOCATION,d.locationType)],["مساحت",`${d.minArea||"؟"} تا ${d.maxArea||"؟"} ${d.areaUnit==="hectare"?"هکتار":"مترمربع"}`],["مدت",landLabel(LAND_DURATION,d.duration)],["قرارداد",landLabel(LAND_PAYMENT,d.paymentType)],["پول پیش",d.deposit?`${Number(d.deposit).toLocaleString("fa-IR")} ریال`:"تعیین نشده"],["اجاره",d.rent?`${Number(d.rent).toLocaleString("fa-IR")} ریال`:"تعیین نشده"],["ویژگی‌ها",(d.features||[]).map(x=>landLabel(LAND_FEATURES,x)).join("، ")],["نوع کشت",(d.crops||[]).map(x=>landLabel(LAND_CROPS,x)).join("، ")],["منابع آب",(d.waterSources||[]).map(x=>landLabel(LAND_WATER,x)).join("، ")],["روش آبیاری",landLabel(LAND_IRRIGATION,d.irrigation)],["حقابه و نوبت آب",d.waterRight],["فصل کشت",d.season],["مشارکت در محصول",d.cropShareNotes],["جزئیات کاربرد",Object.entries(d.purposeDetails?.[d.primaryPurpose]||{}).map(([k,v])=>Array.isArray(v)?v.join("، "):v).filter(Boolean).join("، ")],["شرایط خاص",d.requirements]];return <article className="parking-details-section"><div className="parking-details-section__heading"><div className="parking-details-section__icon">🌱</div><div><span>{isWanted?"درخواست زمین":"عرضه زمین"}</span><h2>مشخصات تخصصی اجاره زمین</h2></div></div><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,padding:"12px 0"}}>{rows.filter(([,v])=>v&&v!=="تعیین نشده").map(([name,v])=><div key={name} style={{padding:12,border:"1px solid #eee1d6",borderRadius:12}}><small style={{display:"block",color:"#786b60"}}>{name}</small><strong style={{whiteSpace:"pre-wrap"}}>{v}</strong></div>)}</div><p style={{fontSize:13}}>کاربرد پیشنهادی به معنی تأیید مجوز قانونی نیست.</p></article>})()}
               {category === "shop" && isWanted && (()=>{const d=readShopRequest(parking.description).data;const rows=[
                 ["نوع فضای تجاری",shopOptionLabel(SHOP_TYPES,d.spaceType)],["فعالیت",d.activity==="other"?d.otherActivity:shopOptionLabel(SHOP_ACTIVITIES,d.activity)],
                 ["متراژ موردنیاز",[d.minArea&&`از ${d.minArea}`,d.maxArea&&`تا ${d.maxArea}`].filter(Boolean).join(" ")||"تعیین نشده"],
@@ -967,7 +988,7 @@ function ParkingDetails({
               )}
 
                 <p className="parking-details-description">
-                  {(isWanted && category === "parking" ? readParkingRequestUsage(parking.description).description : isWanted && category === "storage" ? readWarehouseRequest(parking.description).description : parking.description) ||
+                  {(isWanted && category === "parking" ? readParkingRequestUsage(parking.description).description : isWanted && category === "storage" ? readWarehouseRequest(parking.description).description : category === "land" ? readLandRental(parking.description).description : parking.description) ||
                     "توضیحی برای این آگهی ثبت نشده است."}
                 </p>
               </article>

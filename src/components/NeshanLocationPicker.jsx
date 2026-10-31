@@ -233,71 +233,33 @@ export default function NeshanLocationPicker({
   }, [savedLat, savedLng]);
 
   const requestCurrentLocation = () => {
-    if (
-      disabled ||
-      geoStatus === "loading"
-    ) {
-      return;
-    }
-
-    if (!navigator.geolocation) {
-      setGeoStatus("unsupported");
-      return;
-    }
-
+    if (disabled || geoStatus === "loading") return;
+    if (!navigator.geolocation) { setGeoStatus("unsupported"); return; }
+    if (!window.isSecureContext) { setGeoStatus("insecure"); return; }
     setGeoStatus("loading");
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = Number(
-          position.coords.latitude.toFixed(6)
-        );
-
-        const lng = Number(
-          position.coords.longitude.toFixed(6)
-        );
-
-        // Reject coarse network-based geolocation instead of suggesting a false precise point.
-        if (!Number.isFinite(position.coords.accuracy) || position.coords.accuracy > 1000) {
-          setGeoStatus("inaccurate");
-          return;
-        }
-
-        const map = mapRef.current;
-
-        if (map) {
-          map.flyTo({
-            center: [lng, lat],
-            zoom: 16,
-            essential: true,
-          });
-
-        }
-
-        // Browser geolocation can be inaccurate on desktops/VPNs.
-        // Move the map only; user must explicitly select the actual property point.
-        setGeoStatus("success");
-      },
-
-      (error) => {
-        console.warn(
-          "Browser geolocation error:",
-          error
-        );
-
-        setGeoStatus(
-          error?.code === 1
-            ? "denied"
-            : "error"
-        );
-      },
-
-      {
-        enableHighAccuracy: true,
-        timeout: 12000,
-        maximumAge: 60000,
+    const onPosition = (position) => {
+      const lat = Number(position.coords.latitude);
+      const lng = Number(position.coords.longitude);
+      const accuracy = Number(position.coords.accuracy);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng) || !Number.isFinite(accuracy) || accuracy > 1000) {
+        setGeoStatus("inaccurate");
+        return;
       }
-    );
+      const map = mapRef.current;
+      if (map) map.flyTo({ center: [lng, lat], zoom: accuracy <= 100 ? 16 : 13, essential: true });
+      // This only pans the map; the user chooses the actual listing location manually.
+      setGeoStatus("success");
+    };
+    const onFallbackError = (error) => {
+      setGeoStatus(error?.code === 1 ? "denied" : error?.code === 3 ? "timeout" : "error");
+    };
+    navigator.geolocation.getCurrentPosition(onPosition, (error) => {
+      if (error?.code === 1) { setGeoStatus("denied"); return; }
+      // Desktop GPS is often unavailable. Retry once with network location.
+      navigator.geolocation.getCurrentPosition(onPosition, onFallbackError, {
+        enableHighAccuracy: false, timeout: 15000, maximumAge: 300000,
+      });
+    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
   };
 
   const jumpToCity = async () => {
@@ -589,6 +551,12 @@ export default function NeshanLocationPicker({
               </small>
             )}
 
+            {geoStatus === "insecure" && (
+              <small>برای موقعیت فعلی، صفحه باید با HTTPS یا localhost باز شود.</small>
+            )}
+            {geoStatus === "timeout" && (
+              <small>زمان دریافت موقعیت تمام شد. GPS یا سرویس موقعیت‌یابی دستگاه و اجازه مرورگر را بررسی کن؛ در غیر این صورت محل را دستی روی نقشه انتخاب کن.</small>
+            )}
             {geoStatus === "error" && (
               <small>
                 موقعیت فعلی دریافت نشد؛ محل
