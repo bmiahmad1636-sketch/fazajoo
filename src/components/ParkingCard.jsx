@@ -25,6 +25,7 @@ import { readLandRental } from "../utils/landRental";
 import { readResidentialRequest, residentialRequestAreaText, residentialRequestBudgetText } from "../utils/residentialRequest";
 import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText } from "../utils/villaRequest";
 import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText } from "../utils/gardenRequest";
+import { readOtherRequest, otherRequestAreaText, otherRequestBudgetText } from "../utils/otherRequest";
 
 import "./ParkingCard.css";
 
@@ -112,6 +113,10 @@ function ParkingCard({ parking }) {
   const gardenData = wantedGarden?.hasMetadata ? wantedGarden.data : null;
   const gardenAreaText = gardenData ? gardenRequestAreaText(gardenData) : "";
   const gardenBudgetText = gardenData ? gardenRequestBudgetText(gardenData) : "";
+  const wantedOther = isWanted && category === "other" ? readOtherRequest(parking.description || "", area, price, priceType) : null;
+  const otherData = wantedOther?.hasMetadata ? wantedOther.data : null;
+  const otherAreaText = otherData ? (otherRequestAreaText(otherData) || "توافقی / نامشخص") : "";
+  const otherBudgetText = otherData ? otherRequestBudgetText(otherData) : "";
   const landRequest = isWanted && category === "land"
     ? readLandRental(parking.description || "")
     : null;
@@ -548,7 +553,7 @@ function ParkingCard({ parking }) {
               </span>
 
               <strong>
-                {gardenAreaText || villaAreaText || residentialAreaText || landAreaText || (area
+                {otherAreaText || gardenAreaText || villaAreaText || residentialAreaText || landAreaText || (area
                   ? `${Number(area).toLocaleString("fa-IR")} متر`
                   : "ثبت نشده")}
               </strong>
@@ -589,7 +594,7 @@ function ParkingCard({ parking }) {
             <strong>
               {landData
                 ? (landBudgetText || "بودجه اعلام نشده")
-                : (gardenBudgetText || villaBudgetText || residentialBudgetText || residentialPrice ||
+                : (otherBudgetText || gardenBudgetText || villaBudgetText || residentialBudgetText || residentialPrice ||
                   formatRialPrice(price, {
                     priceType,
                     fallback: "توافقی",

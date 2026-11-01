@@ -8,6 +8,7 @@ import { readWarehouseRequest, warehouseOptionLabel, WAREHOUSE_PURPOSES, WAREHOU
 import { climateLabels } from "../components/ClimateFields";
 import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText, villaRequestLabel, VILLA_REQUEST_TYPES, VILLA_REQUEST_STAYS, VILLA_REQUEST_AMENITIES } from "../utils/villaRequest";
 import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText, gardenRequestLabel, GARDEN_REQUEST_PURPOSES, GARDEN_REQUEST_DURATIONS, GARDEN_REQUEST_FEATURES, GARDEN_REQUEST_WATER } from "../utils/gardenRequest";
+import { readOtherRequest, otherRequestAreaText, otherRequestBudgetText, otherRequestLabel, OTHER_REQUEST_DURATIONS, OTHER_REQUEST_FEATURES } from "../utils/otherRequest";
 import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -190,6 +191,10 @@ function ParkingDetails({
   const gardenWantedData = wantedGarden?.hasMetadata ? wantedGarden.data : null;
   const gardenAreaText = gardenWantedData ? gardenRequestAreaText(gardenWantedData) : "";
   const gardenBudgetText = gardenWantedData ? gardenRequestBudgetText(gardenWantedData) : "";
+  const wantedOther = isWanted && category === "other" ? readOtherRequest(parking?.description || "", parking?.area, parking?.price, parking?.priceType) : null;
+  const otherWantedData = wantedOther?.hasMetadata ? wantedOther.data : null;
+  const otherAreaText = otherWantedData ? (otherRequestAreaText(otherWantedData) || "توافقی / نامشخص") : "";
+  const otherBudgetText = otherWantedData ? otherRequestBudgetText(otherWantedData) : "";
   const wantedLand = isWanted && category === "land"
     ? readLandRental(parking?.description || "")
     : null;
@@ -525,7 +530,7 @@ function ParkingDetails({
               </span>
 
               <strong>
-                {gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
+                {otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
                   priceType: parking.priceType || "monthly",
                   fallback: "توافقی",
                 })}
@@ -714,7 +719,7 @@ function ParkingDetails({
                       </span>
 
                       <strong>
-                        {gardenAreaText || villaAreaText || residentialAreaText || landAreaText || (parking.area
+                        {otherAreaText || gardenAreaText || villaAreaText || residentialAreaText || landAreaText || (parking.area
                           ? `${parking.area} متر`
                           : "ثبت نشده")}
                       </strong>
@@ -748,7 +753,7 @@ function ParkingDetails({
                       </span>
 
                       <strong>
-                        {gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
+                        {otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
                           priceType: parking.priceType || "monthly",
                           fallback: "توافقی",
                         })}
@@ -810,6 +815,30 @@ function ParkingDetails({
                 ];
                 return <article className="parking-details-section"><div className="parking-details-section__heading"><div className="parking-details-section__icon">🚘</div><div><span>درخواست پارکینگ</span><h2>مشخصات پارکینگ موردنیاز</h2></div></div><div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, padding: "12px 0" }}>{rows.map(([name, value]) => <div key={name} style={{ padding: 12, border: "1px solid #eee1d6", borderRadius: 12 }}><small style={{ display: "block", color: "#786b60" }}>{name}</small><strong style={{ whiteSpace: "pre-wrap" }}>{value}</strong></div>)}</div></article>;
               })()}
+              {isWanted && category === "other" && otherWantedData && (
+                <article className="parking-details-section">
+                  <div className="parking-details-section__heading"><div className="parking-details-section__icon">✨</div>
+                    <div><span>درخواست فضای خاص</span><h2>فضای موردنیاز متقاضی</h2></div>
+                  </div>
+                  <div style={{padding:"12px 0",lineHeight:1.95}}>
+                    <strong style={{display:"block",marginBottom:8}}>چه فضایی و برای چه کاری؟</strong>
+                    <p style={{whiteSpace:"pre-wrap",overflowWrap:"anywhere",margin:0}}>{otherWantedData.requestText}</p>
+                    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,marginTop:16}}>
+                      {[
+                        ["نام فضا",parking.customCategory || parking.categoryLabel],
+                        ["مساحت",otherAreaText],["بودجه",otherBudgetText],
+                        ["مدت",otherWantedData.duration !== "flexible" ? otherRequestLabel(OTHER_REQUEST_DURATIONS,otherWantedData.duration) : ""],
+                        ["امکانات",(otherWantedData.features || []).map((x)=>otherRequestLabel(OTHER_REQUEST_FEATURES,x)).filter(Boolean).join("، ")],
+                        ["شرایط تکمیلی",otherWantedData.requirements],
+                        ["توضیحات قدیمی",wantedOther.description],
+                      ].filter(([,text])=>text).map(([name,text])=><div key={name} style={{padding:12,border:"1px solid #eee1d6",borderRadius:12}}>
+                        <small style={{display:"block",color:"#786b60"}}>{name}</small>
+                        <strong style={{whiteSpace:"pre-wrap",overflowWrap:"anywhere"}}>{text}</strong>
+                      </div>)}
+                    </div>
+                  </div>
+                </article>
+              )}
               {isWanted && category === "parking" && readParkingRequestUsage(parking.description).usage && (
                 <article className="parking-details-section">
                   <div className="parking-details-section__heading">
@@ -819,7 +848,7 @@ function ParkingDetails({
                 </article>
               )}
 
-              {!(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData))) && (
+              {!(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData) || (category === "other" && otherWantedData))) && (
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">

@@ -9,6 +9,7 @@ import {
 import { formatRialPrice } from "../utils/priceFormatter";
 import { readResidentialRequest, residentialRequestAreaText, residentialRequestBudgetText } from "../utils/residentialRequest";
 import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText, gardenRequestLabel, GARDEN_REQUEST_PURPOSES } from "../utils/gardenRequest";
+import { readOtherRequest, otherRequestAreaText, otherRequestBudgetText } from "../utils/otherRequest";
 
 import "./AgencyApplicants.css";
 
@@ -32,6 +33,16 @@ function gardenRequestSummary(request) {
     area: gardenRequestAreaText(data),
     budget: gardenRequestBudgetText(data),
     description: [data.purpose === "other" ? data.otherPurpose : gardenRequestLabel(GARDEN_REQUEST_PURPOSES, data.purpose), data.requirements, parsed.description].filter(Boolean).join(" • ") || "جزئیات بیشتر در صفحه درخواست",
+  };
+}
+function otherRequestSummary(request) {
+  if (request?.listingType !== "wanted" || request.category !== "other") return null;
+  const parsed = readOtherRequest(request.description, request.area, request.price, request.priceType);
+  if (!parsed.hasMetadata) return null;
+  return {
+    area: otherRequestAreaText(parsed.data) || "توافقی / نامشخص",
+    budget: otherRequestBudgetText(parsed.data),
+    description: [parsed.data.requestText, parsed.data.requirements, parsed.description].filter(Boolean).join(" • "),
   };
 }
 function AgencyApplicants({
@@ -332,10 +343,10 @@ function AgencyApplicants({
                           📍 {request.city || "شهر ثبت نشده"}
                         </span>
                         <span>
-                          ↔ {gardenRequestSummary(request)?.area || residentialRequestSummary(request)?.area || `${request.area || "—"} متر`}
+                          ↔ {otherRequestSummary(request)?.area || gardenRequestSummary(request)?.area || residentialRequestSummary(request)?.area || `${request.area || "—"} متر`}
                         </span>
                         <span>
-                          💰 {gardenRequestSummary(request)?.budget || residentialRequestSummary(request)?.budget || formatRialPrice(request.price, {
+                          💰 {otherRequestSummary(request)?.budget || gardenRequestSummary(request)?.budget || residentialRequestSummary(request)?.budget || formatRialPrice(request.price, {
                             priceType:
                               request.priceType ||
                               "monthly",
@@ -345,7 +356,7 @@ function AgencyApplicants({
                       </div>
 
                       <p>
-                        {gardenRequestSummary(request)?.description || residentialRequestSummary(request)?.description || request.description ||
+                        {otherRequestSummary(request)?.description || gardenRequestSummary(request)?.description || residentialRequestSummary(request)?.description || request.description ||
                           "توضیحی برای این درخواست ثبت نشده است."}
                       </p>
 
