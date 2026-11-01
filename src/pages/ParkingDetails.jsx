@@ -6,6 +6,7 @@ import { readParkingRequestUsage, parkingUsageLabel } from "../utils/parkingRequ
 import { readParkingRequestDetails, PARKING_COVERS, PARKING_ACCESS } from "../utils/parkingRequestDetails";
 import { readWarehouseRequest, warehouseOptionLabel, WAREHOUSE_PURPOSES, WAREHOUSE_TYPES, WAREHOUSE_ACCESS, WAREHOUSE_DURATIONS, WAREHOUSE_FEATURES } from "../utils/warehouseRequest";
 import { climateLabels } from "../components/ClimateFields";
+import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText, villaRequestLabel, VILLA_REQUEST_TYPES, VILLA_REQUEST_STAYS, VILLA_REQUEST_AMENITIES } from "../utils/villaRequest";
 import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -180,6 +181,10 @@ function ParkingDetails({
   const residentialWantedData = wantedResidential?.hasMetadata ? wantedResidential.data : null;
   const residentialAreaText = residentialWantedData ? residentialRequestAreaText(residentialWantedData) : "";
   const residentialBudgetText = residentialWantedData ? residentialRequestBudgetText(residentialWantedData) : "";
+  const wantedVilla = isWanted && category === "villa" ? readVillaRequest(parking?.description || "") : null;
+  const villaWantedData = wantedVilla?.hasMetadata ? wantedVilla.data : null;
+  const villaAreaText = villaWantedData ? villaRequestAreaText(villaWantedData) : "";
+  const villaBudgetText = villaWantedData ? villaRequestBudgetText(villaWantedData) : "";
   const wantedLand = isWanted && category === "land"
     ? readLandRental(parking?.description || "")
     : null;
@@ -515,7 +520,7 @@ function ParkingDetails({
               </span>
 
               <strong>
-                {landBudget || residentialBudgetText || formatRialPrice(parking.price, {
+                {villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
                   priceType: parking.priceType || "monthly",
                   fallback: "توافقی",
                 })}
@@ -704,7 +709,7 @@ function ParkingDetails({
                       </span>
 
                       <strong>
-                        {residentialAreaText || landAreaText || (parking.area
+                        {villaAreaText || residentialAreaText || landAreaText || (parking.area
                           ? `${parking.area} متر`
                           : "ثبت نشده")}
                       </strong>
@@ -738,7 +743,7 @@ function ParkingDetails({
                       </span>
 
                       <strong>
-                        {landBudget || residentialBudgetText || formatRialPrice(parking.price, {
+                        {villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
                           priceType: parking.priceType || "monthly",
                           fallback: "توافقی",
                         })}
@@ -809,7 +814,7 @@ function ParkingDetails({
                 </article>
               )}
 
-              {!(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData))) && (
+              {!(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData))) && (
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">
@@ -877,6 +882,27 @@ function ParkingDetails({
                 ];
                 return <article className="parking-details-section">
                   <div className="parking-details-section__heading"><div className="parking-details-section__icon">🏠</div><div><span>درخواست فضای مسکونی</span><h2>مشخصات خانه موردنیاز</h2></div></div>
+                  <div className="parking-details-residential__grid">
+                    {rows.filter(([, value]) => value).map(([label, value]) => <span key={label}><small>{label}</small><strong style={{whiteSpace:"pre-wrap"}}>{value}</strong></span>)}
+                  </div>
+                </article>;
+              })()}
+              {isWanted && category === "villa" && villaWantedData && (() => {
+                const d = villaWantedData;
+                const rows = [
+                  ["نوع اقامتگاه", d.accommodationType === "other" ? d.otherType : villaRequestLabel(VILLA_REQUEST_TYPES, d.accommodationType)],
+                  ["نوع اقامت", villaRequestLabel(VILLA_REQUEST_STAYS, d.stayType)],
+                  ["ظرفیت موردنیاز", d.guests ? `${Number(d.guests).toLocaleString("fa-IR")} نفر` : ""],
+                  ["حداقل اتاق‌خواب", d.minBedrooms !== "" ? `${Number(d.minBedrooms).toLocaleString("fa-IR")} اتاق` : ""],
+                  ["مساحت", d.minArea || d.maxArea ? villaAreaText : ""],
+                  ["بودجه", villaBudgetText],
+                  ["امکانات ضروری", (d.amenities || []).map((key) => villaRequestLabel(VILLA_REQUEST_AMENITIES, key)).filter(Boolean).join("، ")],
+                  ["حریم خصوصی", d.privacyRequired ? "ضروری است" : ""],
+                  ["شرایط خاص", d.requirements],
+                  ["توضیحات درخواست قدیمی", wantedVilla?.description],
+                ];
+                return <article className="parking-details-section">
+                  <div className="parking-details-section__heading"><div className="parking-details-section__icon">🏡</div><div><span>درخواست فضای تفریحی</span><h2>ویلا و اقامتگاه موردنیاز</h2></div></div>
                   <div className="parking-details-residential__grid">
                     {rows.filter(([, value]) => value).map(([label, value]) => <span key={label}><small>{label}</small><strong style={{whiteSpace:"pre-wrap"}}>{value}</strong></span>)}
                   </div>

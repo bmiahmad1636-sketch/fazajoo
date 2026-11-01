@@ -23,6 +23,7 @@ import {
 import { formatRialPrice, normalizePriceNumber } from "../utils/priceFormatter";
 import { readLandRental } from "../utils/landRental";
 import { readResidentialRequest, residentialRequestAreaText, residentialRequestBudgetText } from "../utils/residentialRequest";
+import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText } from "../utils/villaRequest";
 
 import "./ParkingCard.css";
 
@@ -102,6 +103,10 @@ function ParkingCard({ parking }) {
   const residentialRequest = wantedResidential?.hasMetadata ? wantedResidential.data : null;
   const residentialAreaText = residentialRequest ? residentialRequestAreaText(residentialRequest) : "";
   const residentialBudgetText = residentialRequest ? residentialRequestBudgetText(residentialRequest) : "";
+  const wantedVilla = isWanted && category === "villa" ? readVillaRequest(parking.description || "") : null;
+  const villaData = wantedVilla?.hasMetadata ? wantedVilla.data : null;
+  const villaAreaText = villaData ? villaRequestAreaText(villaData) : "";
+  const villaBudgetText = villaData ? villaRequestBudgetText(villaData) : "";
   const landRequest = isWanted && category === "land"
     ? readLandRental(parking.description || "")
     : null;
@@ -538,7 +543,7 @@ function ParkingCard({ parking }) {
               </span>
 
               <strong>
-                {residentialAreaText || landAreaText || (area
+                {villaAreaText || residentialAreaText || landAreaText || (area
                   ? `${Number(area).toLocaleString("fa-IR")} متر`
                   : "ثبت نشده")}
               </strong>
@@ -579,7 +584,7 @@ function ParkingCard({ parking }) {
             <strong>
               {landData
                 ? (landBudgetText || "بودجه اعلام نشده")
-                : (residentialBudgetText || residentialPrice ||
+                : (villaBudgetText || residentialBudgetText || residentialPrice ||
                   formatRialPrice(price, {
                     priceType,
                     fallback: "توافقی",
