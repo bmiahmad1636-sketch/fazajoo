@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "status": "foundation-not-active-in-production",
+  "currency": "IRR",
+  "areaUnit": "sqm",
+  "missingValue": null,
+  "sides": [
+    "offer",
+    "wanted"
+  ],
+  "categories": {
+    "parking": {
+      "label": "پارکینگ",
+      "offerFields": [
+        "vehicleUsage",
+        "cover",
+        "access",
+        "parkingStyle",
+        "entranceHeightCm",
+        "securityFeatures"
+      ],
+      "wantedFields": [
+        "vehicleUsage",
+        "cover",
+        "access",
+        "minAreaSqm",
+        "maxAreaSqm"
+      ],
+      "candidateMatchingFields": [
+        "vehicleUsage",
+        "cover",
+        "access",
+        "areaSqm"
+      ],
+      "offerPriority": "first-pilot"
+    },
+    "storage": {
+      "label": "انبار",
+      "offerFields": [
+        "spaceType",
+        "access",
+        "heightM",
+        "vehicleAccess",
+        "features",
+        "loadingMethod",
+        "allowedPurposes"
+      ],
+      "wantedFields": [
+        "spaceType",
+        "access",
+        "features",
+        "minAreaSqm",
+        "maxAreaSqm",
+        "purpose"
+      ],
+      "candidateMatchingFields": [
+        "spaceType",
+        "access",
+        "features",
+        "areaSqm"
+      ],
+      "offerPriority": "first-pilot"
+    },
+    "warehouse": {
+      "label": "سوله و کارگاه",
+      "offerFields": [
+        "spaceType",
+        "heightM",
+        "power",
+        "powerCapacity",
+        "vehicleAccess",
+        "features",
+        "allowedActivities"
+      ],
+      "wantedFields": [
+        "spaceType",
+        "minHeightM",
+        "power",
+        "vehicleAccess",
+        "features",
+        "minAreaSqm",
+        "maxAreaSqm",
+        "activity"
+      ],
+      "candidateMatchingFields": [
+        "spaceType",
+        "minHeightM",
+        "power",
+        "vehicleAccess",
+        "features",
+        "areaSqm"
+      ],
+      "offerPriority": "second-pilot"
+    },
+    "land": {
+      "label": "زمین",
+      "offerFields": [
+        "legalUse",
+        "locationType",
+        "features",
+        "waterSources",
+        "frontageM",
+        "accessRoad",
+        "allowedPurposes"
+      ],
+      "wantedFields": [
+        "primaryPurpose",
+        "features",
+        "minAreaSqm",
+        "maxAreaSqm",
+        "locationType",
+        "primaryPurpose"
+      ],
+      "candidateMatchingFields": [
+        "areaSqm",
+        "features"
+      ],
+      "offerPriority": "second-pilot"
+    },
+    "other": {
+      "label": "سایر فضاها",
+      "offerFields": [
+        "spaceKind",
+        "features",
+        "access",
+        "limitations"
+      ],
+      "wantedFields": [
+        "requestText",
+        "features",
+        "minAreaSqm",
+        "maxAreaSqm"
+      ],
+      "candidateMatchingFields": [
+        "areaSqm",
+        "features"
+      ],
+      "offerPriority": "second-pilot"
+    },
+    "shop": {
+      "label": "مغازه",
+      "offerFields": [
+        "spaceType",
+        "frontageM",
+        "floor",
+        "features",
+        "transferType"
+      ],
+      "wantedFields": [
+        "spaceType",
+        "features",
+        "transferType",
+        "minAreaSqm",
+        "maxAreaSqm"
+      ],
+      "candidateMatchingFields": [
+        "areaSqm",
+        "features"
+      ],
+      "offerPriority": "refinement"
+    },
+    "garden": {
+      "label": "باغ",
+      "offerFields": [
+        "waterSource",
+        "irrigation",
+        "features",
+        "eventCapacity",
+        "allowedPurposes"
+      ],
+      "wantedFields": [
+        "features",
+        "minAreaSqm",
+        "maxAreaSqm",
+        "pricePeriod",
+        "purpose"
+      ],
+      "candidateMatchingFields": [
+        "areaSqm",
+        "features"
+      ],
+      "offerPriority": "refinement"
+    },
+    "villa": {
+      "label": "ویلای تفریحی",
+      "offerFields": [
+        "accommodationType",
+        "bedrooms",
+        "capacity",
+        "features",
+        "privacy"
+      ],
+      "wantedFields": [
+        "accommodationType",
+        "minBedrooms",
+        "guests",
+        "features",
+        "pricePeriod"
+      ],
+      "candidateMatchingFields": [
+        "bedrooms",
+        "capacity",
+        "features",
+        "areaSqm"
+      ],
+      "offerPriority": "refinement"
+    },
+    "residential": {
+      "label": "مسکونی",
+      "offerFields": [
+        "propertyType",
+        "bedrooms",
+        "floor",
+        "features"
+      ],
+      "wantedFields": [
+        "propertyType",
+        "minBedrooms",
+        "floorPreference",
+        "features",
+        "minAreaSqm",
+        "maxAreaSqm"
+      ],
+      "candidateMatchingFields": [
+        "propertyType",
+        "bedrooms",
+        "features",
+        "areaSqm"
+      ],
+      "offerPriority": "refinement"
+    }
+  },
+  "rules": {
+    "unknownIsNotFalse": true,
+    "noAutomaticCurrencyConversion": true,
+    "noAutomaticPeriodConversion": true,
+    "depositAndRentAreSeparate": true,
+    "noAutomaticMatchingPercentage": true,
+    "doNotExposeContactOrPreciseLocation": true,
+    "adaptersAreReadOnlyUntilMigration": true
+  }
+}
