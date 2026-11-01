@@ -22,6 +22,7 @@ import {
 
 import { formatRialPrice, normalizePriceNumber } from "../utils/priceFormatter";
 import { readLandRental } from "../utils/landRental";
+import { readResidentialRequest, residentialRequestAreaText, residentialRequestBudgetText } from "../utils/residentialRequest";
 
 import "./ParkingCard.css";
 
@@ -97,6 +98,10 @@ function ParkingCard({ parking }) {
 
   // Wanted land keeps its requirements in description metadata, not in
   // the generic area/price fields. Read only for this listing type.
+  const wantedResidential = isWanted && category === "residential" ? readResidentialRequest(parking.description || "") : null;
+  const residentialRequest = wantedResidential?.hasMetadata ? wantedResidential.data : null;
+  const residentialAreaText = residentialRequest ? residentialRequestAreaText(residentialRequest) : "";
+  const residentialBudgetText = residentialRequest ? residentialRequestBudgetText(residentialRequest) : "";
   const landRequest = isWanted && category === "land"
     ? readLandRental(parking.description || "")
     : null;
@@ -533,7 +538,7 @@ function ParkingCard({ parking }) {
               </span>
 
               <strong>
-                {landAreaText || (area
+                {residentialAreaText || landAreaText || (area
                   ? `${Number(area).toLocaleString("fa-IR")} متر`
                   : "ثبت نشده")}
               </strong>
@@ -574,7 +579,7 @@ function ParkingCard({ parking }) {
             <strong>
               {landData
                 ? (landBudgetText || "بودجه اعلام نشده")
-                : (residentialPrice ||
+                : (residentialBudgetText || residentialPrice ||
                   formatRialPrice(price, {
                     priceType,
                     fallback: "توافقی",

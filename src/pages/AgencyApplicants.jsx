@@ -7,8 +7,20 @@ import {
 } from "../utils/matchingEngine";
 
 import { formatRialPrice } from "../utils/priceFormatter";
+import { readResidentialRequest, residentialRequestAreaText, residentialRequestBudgetText } from "../utils/residentialRequest";
 
 import "./AgencyApplicants.css";
+
+function residentialRequestSummary(request) {
+  if (request?.listingType !== "wanted" || request.category !== "residential") return null;
+  const parsed = readResidentialRequest(request.description);
+  if (!parsed.hasMetadata) return null;
+  return {
+    area: residentialRequestAreaText(parsed.data),
+    budget: residentialRequestBudgetText(parsed.data),
+    description: [parsed.data.requirements, parsed.description].filter(Boolean).join(" • ") || "جزئیات بیشتر در صفحه درخواست",
+  };
+}
 
 function AgencyApplicants({
   parkings = [],
@@ -308,10 +320,10 @@ function AgencyApplicants({
                           📍 {request.city || "شهر ثبت نشده"}
                         </span>
                         <span>
-                          ↔ {request.area || "—"} متر
+                          ↔ {residentialRequestSummary(request)?.area || `${request.area || "—"} متر`}
                         </span>
                         <span>
-                          💰 {formatRialPrice(request.price, {
+                          💰 {residentialRequestSummary(request)?.budget || formatRialPrice(request.price, {
                             priceType:
                               request.priceType ||
                               "monthly",
@@ -321,7 +333,7 @@ function AgencyApplicants({
                       </div>
 
                       <p>
-                        {request.description ||
+                        {residentialRequestSummary(request)?.description || request.description ||
                           "توضیحی برای این درخواست ثبت نشده است."}
                       </p>
 
