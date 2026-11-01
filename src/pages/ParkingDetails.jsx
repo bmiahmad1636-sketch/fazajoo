@@ -7,6 +7,7 @@ import { readParkingRequestDetails, PARKING_COVERS, PARKING_ACCESS } from "../ut
 import { readWarehouseRequest, warehouseOptionLabel, WAREHOUSE_PURPOSES, WAREHOUSE_TYPES, WAREHOUSE_ACCESS, WAREHOUSE_DURATIONS, WAREHOUSE_FEATURES } from "../utils/warehouseRequest";
 import { climateLabels } from "../components/ClimateFields";
 import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText, villaRequestLabel, VILLA_REQUEST_TYPES, VILLA_REQUEST_STAYS, VILLA_REQUEST_AMENITIES } from "../utils/villaRequest";
+import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText, gardenRequestLabel, GARDEN_REQUEST_PURPOSES, GARDEN_REQUEST_DURATIONS, GARDEN_REQUEST_FEATURES, GARDEN_REQUEST_WATER } from "../utils/gardenRequest";
 import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -185,6 +186,10 @@ function ParkingDetails({
   const villaWantedData = wantedVilla?.hasMetadata ? wantedVilla.data : null;
   const villaAreaText = villaWantedData ? villaRequestAreaText(villaWantedData) : "";
   const villaBudgetText = villaWantedData ? villaRequestBudgetText(villaWantedData) : "";
+  const wantedGarden = isWanted && category === "garden" ? readGardenRequest(parking?.description || "") : null;
+  const gardenWantedData = wantedGarden?.hasMetadata ? wantedGarden.data : null;
+  const gardenAreaText = gardenWantedData ? gardenRequestAreaText(gardenWantedData) : "";
+  const gardenBudgetText = gardenWantedData ? gardenRequestBudgetText(gardenWantedData) : "";
   const wantedLand = isWanted && category === "land"
     ? readLandRental(parking?.description || "")
     : null;
@@ -520,7 +525,7 @@ function ParkingDetails({
               </span>
 
               <strong>
-                {villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
+                {gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
                   priceType: parking.priceType || "monthly",
                   fallback: "توافقی",
                 })}
@@ -709,7 +714,7 @@ function ParkingDetails({
                       </span>
 
                       <strong>
-                        {villaAreaText || residentialAreaText || landAreaText || (parking.area
+                        {gardenAreaText || villaAreaText || residentialAreaText || landAreaText || (parking.area
                           ? `${parking.area} متر`
                           : "ثبت نشده")}
                       </strong>
@@ -743,7 +748,7 @@ function ParkingDetails({
                       </span>
 
                       <strong>
-                        {villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
+                        {gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
                           priceType: parking.priceType || "monthly",
                           fallback: "توافقی",
                         })}
@@ -814,7 +819,7 @@ function ParkingDetails({
                 </article>
               )}
 
-              {!(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData))) && (
+              {!(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData))) && (
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">
@@ -936,7 +941,29 @@ function ParkingDetails({
                 </div>
               )}
 
-              {category === "garden" && (
+              {isWanted && category === "garden" && gardenWantedData && (() => {
+                const d = gardenWantedData;
+                const rows = [
+                  ["هدف اجاره", d.purpose === "other" ? d.otherPurpose : gardenRequestLabel(GARDEN_REQUEST_PURPOSES, d.purpose)],
+                  ["مساحت", gardenAreaText], ["بودجه", gardenBudgetText],
+                  ["مدت", gardenRequestLabel(GARDEN_REQUEST_DURATIONS, d.duration)],
+                  ["ویژگی‌های ضروری", (d.features || []).map(id => gardenRequestLabel(GARDEN_REQUEST_FEATURES, id)).filter(Boolean).join("، ")],
+                  ["درختان یا نوع کشت", d.treesNote],
+                  ["ترجیح منبع آب", ["orchard", "gardening"].includes(d.purpose) && d.waterPreference !== "any" ? gardenRequestLabel(GARDEN_REQUEST_WATER, d.waterPreference) : ""],
+                  ["ظرفیت مهمان‌ها", d.eventGuests ? `${Number(d.eventGuests).toLocaleString("fa-IR")} نفر` : ""],
+                  ["حریم خصوصی", d.privacyRequired ? "ضروری است" : ""],
+                  ["شرایط خاص", d.requirements],
+                  ["یادداشت قبلی", wantedGarden.description],
+                ].filter(([, v]) => Boolean(v));
+                return <article className="parking-details-section">
+                  <div className="parking-details-section__heading"><div className="parking-details-section__icon">🌳</div><div><span>درخواست باغ</span><h2>مشخصات باغ موردنیاز</h2></div></div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 12, padding: "12px 0" }}>
+                    {rows.map(([label, val]) => <div key={label} style={{ border: "1px solid #eee1d6", borderRadius: 12, padding: 12 }}><small style={{ display: "block", color: "#786b60" }}>{label}</small><strong style={{ whiteSpace: "pre-wrap" }}>{val}</strong></div>)}
+                  </div>
+                  <p style={{ fontSize: 13 }}>نوع استفاده به معنی تأیید مجوز قانونی نیست.</p>
+                </article>;
+              })()}
+              {category === "garden" && (!isWanted || !gardenWantedData) && (
                 <div className="parking-details-residential">
                   <h3>🌳 مشخصات باغ</h3>
                   <div className="parking-details-residential__grid">

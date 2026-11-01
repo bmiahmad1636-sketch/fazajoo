@@ -24,6 +24,7 @@ import { formatRialPrice, normalizePriceNumber } from "../utils/priceFormatter";
 import { readLandRental } from "../utils/landRental";
 import { readResidentialRequest, residentialRequestAreaText, residentialRequestBudgetText } from "../utils/residentialRequest";
 import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText } from "../utils/villaRequest";
+import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText } from "../utils/gardenRequest";
 
 import "./ParkingCard.css";
 
@@ -107,6 +108,10 @@ function ParkingCard({ parking }) {
   const villaData = wantedVilla?.hasMetadata ? wantedVilla.data : null;
   const villaAreaText = villaData ? villaRequestAreaText(villaData) : "";
   const villaBudgetText = villaData ? villaRequestBudgetText(villaData) : "";
+  const wantedGarden = isWanted && category === "garden" ? readGardenRequest(parking.description || "") : null;
+  const gardenData = wantedGarden?.hasMetadata ? wantedGarden.data : null;
+  const gardenAreaText = gardenData ? gardenRequestAreaText(gardenData) : "";
+  const gardenBudgetText = gardenData ? gardenRequestBudgetText(gardenData) : "";
   const landRequest = isWanted && category === "land"
     ? readLandRental(parking.description || "")
     : null;
@@ -543,7 +548,7 @@ function ParkingCard({ parking }) {
               </span>
 
               <strong>
-                {villaAreaText || residentialAreaText || landAreaText || (area
+                {gardenAreaText || villaAreaText || residentialAreaText || landAreaText || (area
                   ? `${Number(area).toLocaleString("fa-IR")} متر`
                   : "ثبت نشده")}
               </strong>
@@ -584,7 +589,7 @@ function ParkingCard({ parking }) {
             <strong>
               {landData
                 ? (landBudgetText || "بودجه اعلام نشده")
-                : (villaBudgetText || residentialBudgetText || residentialPrice ||
+                : (gardenBudgetText || villaBudgetText || residentialBudgetText || residentialPrice ||
                   formatRialPrice(price, {
                     priceType,
                     fallback: "توافقی",

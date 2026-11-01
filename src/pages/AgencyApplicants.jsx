@@ -8,6 +8,7 @@ import {
 
 import { formatRialPrice } from "../utils/priceFormatter";
 import { readResidentialRequest, residentialRequestAreaText, residentialRequestBudgetText } from "../utils/residentialRequest";
+import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText, gardenRequestLabel, GARDEN_REQUEST_PURPOSES } from "../utils/gardenRequest";
 
 import "./AgencyApplicants.css";
 
@@ -22,6 +23,17 @@ function residentialRequestSummary(request) {
   };
 }
 
+function gardenRequestSummary(request) {
+  if (request?.listingType !== "wanted" || request.category !== "garden") return null;
+  const parsed = readGardenRequest(request.description);
+  if (!parsed.hasMetadata) return null;
+  const data = parsed.data;
+  return {
+    area: gardenRequestAreaText(data),
+    budget: gardenRequestBudgetText(data),
+    description: [data.purpose === "other" ? data.otherPurpose : gardenRequestLabel(GARDEN_REQUEST_PURPOSES, data.purpose), data.requirements, parsed.description].filter(Boolean).join(" • ") || "جزئیات بیشتر در صفحه درخواست",
+  };
+}
 function AgencyApplicants({
   parkings = [],
   currentUser = null,
@@ -320,10 +332,10 @@ function AgencyApplicants({
                           📍 {request.city || "شهر ثبت نشده"}
                         </span>
                         <span>
-                          ↔ {residentialRequestSummary(request)?.area || `${request.area || "—"} متر`}
+                          ↔ {gardenRequestSummary(request)?.area || residentialRequestSummary(request)?.area || `${request.area || "—"} متر`}
                         </span>
                         <span>
-                          💰 {residentialRequestSummary(request)?.budget || formatRialPrice(request.price, {
+                          💰 {gardenRequestSummary(request)?.budget || residentialRequestSummary(request)?.budget || formatRialPrice(request.price, {
                             priceType:
                               request.priceType ||
                               "monthly",
@@ -333,7 +345,7 @@ function AgencyApplicants({
                       </div>
 
                       <p>
-                        {residentialRequestSummary(request)?.description || request.description ||
+                        {gardenRequestSummary(request)?.description || residentialRequestSummary(request)?.description || request.description ||
                           "توضیحی برای این درخواست ثبت نشده است."}
                       </p>
 

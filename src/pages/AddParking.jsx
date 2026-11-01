@@ -24,6 +24,8 @@ import VillaFields from "../components/VillaFields";
 import VillaRequestFields from "../components/VillaRequestFields";
 import { EMPTY_VILLA_REQUEST, validateVillaRequest, writeVillaRequest, villaRequestAreaText, villaRequestBudgetText } from "../utils/villaRequest";
 import GardenFields from "../components/GardenFields";
+import GardenRequestFields from "../components/GardenRequestFields";
+import { EMPTY_GARDEN_REQUEST, validateGardenRequest, writeGardenRequest, gardenRequestBudgetText, gardenRequestAreaText } from "../utils/gardenRequest";
 import ShopFields from "../components/ShopFields";
 import LandRentalFields from "../components/LandRentalFields";
 import { EMPTY_LAND_RENTAL, landRentalValidation, writeLandRental } from "../utils/landRental";
@@ -60,6 +62,7 @@ const INITIAL_FORM = {
   villaDetails: { ...emptyVillaDetails },
   villaRequest: { ...EMPTY_VILLA_REQUEST, amenities: [] },
   gardenDetails: { ...emptyGardenDetails },
+  gardenRequest: { ...EMPTY_GARDEN_REQUEST, features: [] },
   shopDetails: { ...emptyShopDetails },
   shopRequest: { ...EMPTY_SHOP_REQUEST, features: [] },
   landRental: { ...EMPTY_LAND_RENTAL, purposes: [], features: [], crops: [], waterSources: [], agriFacilities: [] },
@@ -222,6 +225,7 @@ function AddParking() {
     if (step === 1) {
       if (isWantedAd && form.category === "residential") { const err = validateResidentialRequest(form.residentialRequest); if (err) newErrors.residentialRequest = err; }
       if (isWantedAd && form.category === "villa") { const err = validateVillaRequest(form.villaRequest); if (err) newErrors.villaRequest = err; }
+      if (isWantedAd && form.category === "garden") { const err = validateGardenRequest(form.gardenRequest); if (err) newErrors.gardenRequest = err; }
       if (isWantedAd && form.category === "land") { const err = landRentalValidation(form.landRental,isWantedAd); if (err) newErrors.landRental = err; }
       if (isWantedAd && form.category === "shop") { const err = shopRequestValidation(form.shopRequest); if (err) newErrors.shopRequest = err; }
       if (isWantedAd && form.category === "warehouse") {
@@ -281,7 +285,7 @@ function AddParking() {
             !String(form.residentialDetails?.monthlyRent || "").trim()) {
           newErrors.price = "حداقل مبلغ رهن یا اجاره را وارد کنید.";
         }
-      } else if (!(isWantedAd && ["land", "shop", "villa"].includes(form.category)) && form.priceType !== "negotiable" && !form.price.trim()) {
+      } else if (!(isWantedAd && ["land", "shop", "villa", "garden"].includes(form.category)) && form.priceType !== "negotiable" && !form.price.trim()) {
         newErrors.price = isWantedAd ? "سقف بودجه موردنظرت را وارد کن." : "قیمت را وارد کنید.";
       }
 
@@ -298,7 +302,7 @@ function AddParking() {
       }
 
       if (
-        !(isWantedAd && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa"].includes(form.category)) && form.description.trim().length <
+        !(isWantedAd && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden"].includes(form.category)) && form.description.trim().length <
         10
       ) {
         newErrors.description =
@@ -355,7 +359,7 @@ function AddParking() {
   const saveParking = async () => {
     if (currentStep !== STEPS.length || publishingRef.current || loading) return;
 
-    if (isWantedAd && ["residential", "villa"].includes(form.category) && !validateStep(1)) {
+    if (isWantedAd && ["residential", "villa", "garden"].includes(form.category) && !validateStep(1)) {
       setCurrentStep(1);
       return;
     }
@@ -409,10 +413,12 @@ function AddParking() {
             ? Number(form.residentialRequest.minArea || form.residentialRequest.maxArea || 0)
             : isWantedAd && form.category === "villa"
             ? Number(form.villaRequest.minArea || form.villaRequest.maxArea || 0)
+            : isWantedAd && form.category === "garden"
+            ? Number(form.gardenRequest.minArea || form.gardenRequest.maxArea || 0)
             : form.area ? Number(form.area) : 0,
 
           price:
-            isWantedAd && form.category === "land" ? "" : isWantedAd && form.category === "shop" ? "" : isWantedAd && form.category === "villa" ? String(form.villaRequest.maxBudget || "") : form.category === "residential"
+            isWantedAd && form.category === "land" ? "" : isWantedAd && form.category === "shop" ? "" : isWantedAd && form.category === "villa" ? String(form.villaRequest.maxBudget || "") : isWantedAd && form.category === "garden" ? String(form.gardenRequest.pricePeriod === "negotiable" ? "" : form.gardenRequest.maxBudget || "") : form.category === "residential"
               ? String(
                   isWantedAd ? (residentialRequestLegacyDetails(form.residentialRequest).monthlyRent || residentialRequestLegacyDetails(form.residentialRequest).deposit || "")
                     : (form.residentialDetails?.monthlyRent || form.residentialDetails?.deposit || "")
@@ -420,14 +426,14 @@ function AddParking() {
               : form.priceType === "negotiable" ? "" : form.price.replace(/,/g, "").trim(),
 
           priceType:
-            isWantedAd && form.category === "land" ? "negotiable" : isWantedAd && form.category === "shop" ? "negotiable" : isWantedAd && form.category === "villa" ? form.villaRequest.pricePeriod : form.category === "residential"
+            isWantedAd && form.category === "land" ? "negotiable" : isWantedAd && form.category === "shop" ? "negotiable" : isWantedAd && form.category === "villa" ? form.villaRequest.pricePeriod : isWantedAd && form.category === "garden" ? form.gardenRequest.pricePeriod : form.category === "residential"
               ? "monthly"
               : form.priceType,
           residentialDetails:
             form.category === "residential"
               ? (isWantedAd ? residentialRequestLegacyDetails(form.residentialRequest) : form.residentialDetails)
               : {},
-          gardenDetails: form.category === "garden" ? form.gardenDetails : {},
+          gardenDetails: form.category === "garden" && !isWantedAd ? form.gardenDetails : {},
           shopDetails: form.category === "shop" ? form.shopDetails : {},
           villaDetails:
             form.category === "villa" && !isWantedAd
@@ -437,13 +443,14 @@ function AddParking() {
             .replace(/\s/g, "")
             .trim(),
 
-          imageUrl: isWantedAd && ["storage", "warehouse", "shop", "land", "residential", "villa"].includes(form.category) ? "" : form.imageUrl,
-          imageUrls: isWantedAd && ["storage", "warehouse", "shop", "land", "residential", "villa"].includes(form.category) ? [] : form.imageUrls,
-          video: isWantedAd && ["storage", "warehouse", "shop", "land", "residential", "villa"].includes(form.category) ? null : form.video,
+          imageUrl: isWantedAd && ["storage", "warehouse", "shop", "land", "residential", "villa", "garden"].includes(form.category) ? "" : form.imageUrl,
+          imageUrls: isWantedAd && ["storage", "warehouse", "shop", "land", "residential", "villa", "garden"].includes(form.category) ? [] : form.imageUrls,
+          video: isWantedAd && ["storage", "warehouse", "shop", "land", "residential", "villa", "garden"].includes(form.category) ? null : form.video,
 
           description:
             isWantedAd && form.category === "residential" ? writeResidentialRequest(form.residentialRequest) :
             isWantedAd && form.category === "villa" ? writeVillaRequest(form.villaRequest) :
+            isWantedAd && form.category === "garden" ? writeGardenRequest(form.gardenRequest) :
             isWantedAd && form.category === "land" ? writeLandRental(form.landRental, isWantedAd ? "" : form.description) :
             isWantedAd && form.category === "shop" ? writeShopRequest(form.shopRequest) :
             isWantedAd && form.category === "parking"
@@ -830,7 +837,7 @@ function AddParking() {
                       </div>
                     </div>
 
-                    {isWantedAd && !["storage", "warehouse", "parking", "shop", "land", "residential", "villa"].includes(form.category) && (
+                    {isWantedAd && !["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden"].includes(form.category) && (
                       <div className="add-parking-field" style={{ gridColumn: "1 / -1", padding: "14px 16px", border: "1px solid #f3d7c2", borderRadius: "14px", background: "#fff8f2", lineHeight: 1.9 }}>
                         <strong style={{ color: "#a94c0c" }}>
                           {form.category === "parking" ? "پارکینگ موردنیازت را ساده و دقیق معرفی کن" : "فضایی را که لازم داری توصیف کن"}
@@ -874,7 +881,7 @@ function AddParking() {
 
                     {form.category === "shop" && !isWantedAd && <ShopFields value={form.shopDetails} disabled={loading} onChange={(shopDetails) => setForm(current => ({ ...current, shopDetails }))} />}
 
-                    {form.category === "garden" && <GardenFields value={form.gardenDetails} disabled={loading} onChange={(gardenDetails) => setForm((current) => ({ ...current, gardenDetails }))} />}
+                    {form.category === "garden" && !isWantedAd && <GardenFields value={form.gardenDetails} disabled={loading} onChange={(gardenDetails) => setForm((current) => ({ ...current, gardenDetails }))} />}
 
                     {form.category === "other" && (
                       <div className="add-parking-field">
@@ -994,7 +1001,7 @@ function AddParking() {
                         )}
                       </div>
 
-                      {!((isWantedAd && form.category === "land") || (isWantedAd && ["storage", "warehouse", "parking", "shop", "residential", "villa"].includes(form.category))) && (
+                      {!((isWantedAd && form.category === "land") || (isWantedAd && ["storage", "warehouse", "parking", "shop", "residential", "villa", "garden"].includes(form.category))) && (
                       <div className="add-parking-field">
                         <label htmlFor="area">
                           متراژ
@@ -1063,6 +1070,10 @@ function AddParking() {
                       </>
                     )}
 
+                    {isWantedAd && form.category === "garden" && (
+                      <GardenRequestFields value={form.gardenRequest} disabled={loading} error={errors.gardenRequest}
+                        onChange={(gardenRequest) => { setForm((current) => ({ ...current, gardenRequest })); setErrors((current) => ({ ...current, gardenRequest: "" })); }} />
+                    )}
                     {isWantedAd && form.category === "villa" && (
                       <VillaRequestFields value={form.villaRequest} disabled={loading} error={errors.villaRequest}
                         onChange={(villaRequest) => { setForm((current) => ({ ...current, villaRequest })); setErrors((current) => ({ ...current, villaRequest: "" })); }} />
@@ -1254,7 +1265,7 @@ function AddParking() {
                     </div>
 
                     <div className="add-parking-fields-grid">
-                      {form.category !== "residential" && !(isWantedAd && ["land", "shop", "villa"].includes(form.category)) && (
+                      {form.category !== "residential" && !(isWantedAd && ["land", "shop", "villa", "garden"].includes(form.category)) && (
                         <>
                       <div
                         className={`add-parking-field add-parking-field--price-combo${form.priceType === "negotiable" ? " add-parking-field--negotiable" : ""}`}
@@ -1366,7 +1377,7 @@ function AddParking() {
                       </div>
                     </div>
 
-                    {!(isWantedAd && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa"].includes(form.category)) && (
+                    {!(isWantedAd && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden"].includes(form.category)) && (
                     <div className="add-parking-field">
                       <label htmlFor="description">
                         توضیحات آگهی
@@ -1541,7 +1552,9 @@ function AddParking() {
 
                           <div>
                             <strong>
-                              {isWantedAd && form.category === "villa"
+                              {isWantedAd && form.category === "garden"
+                                ? (gardenRequestBudgetText(form.gardenRequest) || "بودجه وارد نشده")
+                                : isWantedAd && form.category === "villa"
                                 ? (villaRequestBudgetText(form.villaRequest) || "بودجه وارد نشده")
                                 : isWantedAd && form.category === "residential"
                                 ? (residentialRequestBudgetText(form.residentialRequest) || "بودجه وارد نشده")
@@ -1549,7 +1562,9 @@ function AddParking() {
                             </strong>
 
                             <small>
-                              {isWantedAd && form.category === "villa"
+                              {isWantedAd && form.category === "garden"
+                                ? (gardenRequestAreaText(form.gardenRequest) || "متراژ ثبت نشده")
+                                : isWantedAd && form.category === "villa"
                                 ? (villaRequestAreaText(form.villaRequest) || "ظرفیت نامشخص")
                                 : isWantedAd && form.category === "residential"
                                 ? (residentialRequestAreaText(form.residentialRequest) || "متراژ ثبت نشده")
