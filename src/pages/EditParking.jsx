@@ -15,6 +15,8 @@ import ImageUploader from "../components/ImageUploader";
 import VideoUploader from "../components/VideoUploader";
 import NeshanLocationPicker from "../components/NeshanLocationPicker";
 import ParkingRequestUsageFields from "../components/ParkingRequestUsageFields";
+import ParkingOfferFields from "../components/ParkingOfferFields";
+import { PARKING_OFFER_DEFAULT, parkingOfferFormFromAttributes, validateParkingOffer, makeParkingAttributes } from "../utils/parkingOffer";
 import ParkingRequestDetailsFields from "../components/ParkingRequestDetailsFields";
 import { EMPTY_PARKING_REQUEST, readParkingRequestDetails, writeParkingRequestDetails, parkingRequestDetailsValidation } from "../utils/parkingRequestDetails";
 import { readParkingRequestUsage, writeParkingRequestUsage, parkingUsageLabel } from "../utils/parkingRequestUsage";
@@ -48,6 +50,7 @@ import "./EditParking.css";
 
 const EMPTY_FORM = {
   title: "",
+  parkingOffer: { ...PARKING_OFFER_DEFAULT, securityFeatures: [] },
   parkingRequestUsage: "",
   parkingOtherUsage: "",
   parkingRequestDetails: { ...EMPTY_PARKING_REQUEST },
@@ -149,6 +152,7 @@ function createFormFromParking(parking) {
     description: parking?.listingType === "wanted" && parking?.category === "residential" ? readResidentialRequest(parking?.description, parking?.residentialDetails, parking?.area).description : parking?.listingType === "wanted" && parking?.category === "villa" ? readVillaRequest(parking?.description, parking?.villaDetails, parking?.price, parking?.priceType, parking?.area).description : parking?.listingType === "wanted" && parking?.category === "garden" ? readGardenRequest(parking?.description, parking?.gardenDetails, parking?.area, parking?.price, parking?.priceType).description : parking?.listingType === "wanted" && parking?.category === "other" ? readOtherRequest(parking?.description, parking?.area, parking?.price, parking?.priceType).description : parking?.category === "land" ? readLandRental(parking?.description).description : parking?.listingType === "wanted" && parking?.category === "storage"
       ? readWarehouseRequest(parking?.description).description
       : readParkingRequestUsage(parking?.description).description,
+    parkingOffer: parkingOfferFormFromAttributes(parking?.spaceAttributes),
     parkingRequestUsage: readParkingRequestUsage(parking?.description).usage,
     parkingOtherUsage: readParkingRequestUsage(parking?.description).otherUsage,
     parkingRequestDetails: readParkingRequestDetails(parking?.description).data,
@@ -220,7 +224,7 @@ function EditParking({
         form.priceType === "negotiable" ? true : form.price.trim(),
         form.phone.trim(),
         ...(!isWanted ? [form.imageUrl] : []),
-        ...(isWanted && parking?.category === "warehouse" ? [form.shedRequest?.activity] : isWanted && parking?.category === "storage" ? [form.warehouseRequest?.purpose] : [form.description.trim()]),
+        ...(parking?.category === "parking" && !isWanted ? [form.parkingOffer.vehicleUsage, form.parkingOffer.cover, form.parkingOffer.access] : isWanted && parking?.category === "warehouse" ? [form.shedRequest?.activity] : isWanted && parking?.category === "storage" ? [form.warehouseRequest?.purpose] : [form.description.trim()]),
       ];
 
       const completedFields =
@@ -305,6 +309,12 @@ function EditParking({
       if (detailsError) nextErrors.parkingRequestDetails = detailsError;
     }
 
+    if (!isWanted && parking?.category === "parking") {
+      const parkingError = validateParkingOffer(form.parkingOffer);
+      if (parkingError) nextErrors.parkingOffer = parkingError;
+      if (!form.area || Number(form.area) <= 0) nextErrors.area = "متراژ واقعی پارکینگ را وارد کنید.";
+    }
+
     if (!form.title.trim()) {
       nextErrors.title =
         isWanted ? "عنوان درخواست را وارد کنید." : "عنوان آگهی را وارد کنید.";
@@ -357,7 +367,7 @@ function EditParking({
     }
 
     if (
-      !(isWanted && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(parking?.category)) && form.description.trim().length < 10
+      !(parking?.category === "parking" && !isWanted) && !(isWanted && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(parking?.category)) && form.description.trim().length < 10
     ) {
       nextErrors.description =
         "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
@@ -464,6 +474,7 @@ function EditParking({
           ? (isWanted ? { ...form.residentialDetails, ...residentialRequestLegacyDetails(form.residentialRequest) } : form.residentialDetails)
           : {},
       gardenDetails: parking?.category === "garden" ? form.gardenDetails : {},
+      ...(parking?.category === "parking" && !isWanted ? { spaceAttributes: makeParkingAttributes(form.parkingOffer) } : {}),
       shopDetails: parking?.category === "shop" ? form.shopDetails : {},
       villaDetails: parking?.category === "villa" ? form.villaDetails : {},
       phone: normalizedPhone,
@@ -669,6 +680,11 @@ function EditParking({
                 </div>
               )}
 
+        {parking?.category === "parking" && !isWanted && (
+          <ParkingOfferFields value={form.parkingOffer} note={form.description} disabled={loading} error={errors.parkingOffer}
+            onNoteChange={(description) => { setForm(current=>({...current,description})); setShowSuccess(false); }}
+            onChange={(parkingOffer) => { setForm(current=>({...current,parkingOffer})); setErrors(current=>({...current,parkingOffer:""})); }} />
+        )}
         {parking?.category === "residential" && !isWanted && (
           <ResidentialFields
             value={form.residentialDetails}
@@ -949,7 +965,7 @@ function EditParking({
                   <div>
                     <span>موقعیت مکانی</span>
                     <h2>ویرایش موقعیت روی نقشه</h2>
-                    <p>{isWanted ? "محدوده مطلوب ثبت‌شده را ببین و فقط در صورت نیاز تغییر بده." : "نقطه فعلی آگهی را ببین و در صورت نیاز جای آن را تغییر بده."}</p>
+                    <p>{isWanted ? "محدوده مطلوب ثبت‌شده را ببین و فقط در صورت نیاز تغییر بده." : parking?.category === "parking" ? "اگر هنوز نقطه‌ای ثبت نشده، نقشه فقط مرکز شهر را نشان می‌دهد؛ برای ثبت محل پارکینگ روی نقشه کلیک کن." : "نقطه فعلی آگهی را ببین و در صورت نیاز جای آن را تغییر بده."}</p>
                   </div>
                 </div>
                 <div className="edit-parking-card__body">
@@ -1148,7 +1164,7 @@ function EditParking({
                     </div>
                   </div>
 
-                  {!(isWanted && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(parking?.category)) && (
+                  {!(parking?.category === "parking" && !isWanted) && !(isWanted && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(parking?.category)) && (
                   <div className="edit-parking-field edit-parking-field--full">
                     <label htmlFor="description">
                       {isWanted ? "توضیحات درخواست" : "توضیحات آگهی"}
@@ -1337,7 +1353,7 @@ function EditParking({
 
                   <p>
                     {(isWanted && parking?.category === "other" ? form.otherRequest.requestText : form.description) ||
-                      (isWanted ? "شرایط موردنیاز شما در این بخش نمایش داده می‌شود." : "توضیحات آگهی پس از وارد کردن در این بخش نمایش داده می‌شود.")}
+                      (isWanted ? "شرایط موردنیاز شما در این بخش نمایش داده می‌شود." : parking?.category === "parking" ? "ویژگی‌های واقعی پارکینگ در بخش مشخصات تخصصی نمایش داده می‌شوند." : "توضیحات آگهی پس از وارد کردن در این بخش نمایش داده می‌شود.")}
                   </p>
 
                   <div className="edit-parking-preview__features">

@@ -4,6 +4,7 @@ import { readShopRequest, shopOptionLabel, SHOP_TYPES, SHOP_ACTIVITIES, SHOP_FLO
 import { readShedRequest, shedOptionLabel, SHED_TYPES, SHED_ACTIVITIES, shedActivitiesFor, SHED_ALL_FEATURES, SHED_POWER, SHED_ACCESS, SHED_DURATIONS } from "../utils/shedRequest";
 import { readParkingRequestUsage, parkingUsageLabel } from "../utils/parkingRequestUsage";
 import { readParkingRequestDetails, PARKING_COVERS, PARKING_ACCESS } from "../utils/parkingRequestDetails";
+import { PARKING_OFFER_USAGE, PARKING_OFFER_COVER, PARKING_OFFER_ACCESS, PARKING_OFFER_STYLE, PARKING_OFFER_SECURITY, parkingOfferLabel } from "../utils/parkingOffer";
 import { readWarehouseRequest, warehouseOptionLabel, WAREHOUSE_PURPOSES, WAREHOUSE_TYPES, WAREHOUSE_ACCESS, WAREHOUSE_DURATIONS, WAREHOUSE_FEATURES } from "../utils/warehouseRequest";
 import { climateLabels } from "../components/ClimateFields";
 import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText, villaRequestLabel, VILLA_REQUEST_TYPES, VILLA_REQUEST_STAYS, VILLA_REQUEST_AMENITIES } from "../utils/villaRequest";
@@ -848,7 +849,25 @@ function ParkingDetails({
                 </article>
               )}
 
-              {!(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData) || (category === "other" && otherWantedData))) && (
+              {category === "parking" && !isWanted && parking?.spaceAttributes?.schemaVersion === 1 && parking.spaceAttributes.category === "parking" && (() => {
+                const d = parking.spaceAttributes.values || {};
+                const rows = [
+                  ["مناسب برای", parkingOfferLabel(PARKING_OFFER_USAGE,d.vehicleUsage)],
+                  ["نوع پارکینگ", parkingOfferLabel(PARKING_OFFER_COVER,d.cover)],
+                  ["زمان دسترسی", parkingOfferLabel(PARKING_OFFER_ACCESS,d.access)],
+                  ["نحوه پارک", parkingOfferLabel(PARKING_OFFER_STYLE,d.parkingStyle)],
+                  ["ارتفاع مفید ورودی", d.entranceHeightCm ? `${Number(d.entranceHeightCm).toLocaleString("fa-IR")} سانتی‌متر` : ""],
+                  ["کاربری خاص", d.vehicleUsage === "other" ? d.usageNotes : ""],
+                ].filter(([,v])=>Boolean(v));
+                const amenities = (Array.isArray(d.securityFeatures) ? d.securityFeatures : []).map(id=>parkingOfferLabel(PARKING_OFFER_SECURITY,id)).filter(Boolean);
+                return (rows.length || amenities.length) ? <article className="parking-details-section">
+                  <div className="parking-details-section__heading"><div className="parking-details-section__icon">🚘</div><div><span>اطلاعات واقعی عرضه</span><h2>ویژگی‌های پارکینگ</h2></div></div>
+                  <div className="parking-details-residential__grid">{rows.map(([k,v])=><span key={k}><small>{k}</small><strong>{v}</strong></span>)}</div>
+                  {amenities.length > 0 && <div className="parking-details-residential__amenities">{amenities.map(a=><b key={a}>✓ {a}</b>)}</div>}
+                </article> : null;
+              })()}
+
+              {!(category === "parking" && !isWanted && !String(parking.description || "").trim()) && !(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData) || (category === "other" && otherWantedData))) && (
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">
@@ -865,7 +884,7 @@ function ParkingDetails({
             <h2>
                       {isWanted
                         ? `توضیحات نیاز به ${visibleCategory}`
-                        : `توضیحات ${visibleCategory}`}
+                        : category === "parking" ? "نکات تکمیلی پارکینگ" : `توضیحات ${visibleCategory}`}
                     </h2>
                   </div>
                 </div>
@@ -1104,7 +1123,7 @@ function ParkingDetails({
               <article className="parking-details-location">
                 <div>
                   <span>
-                    موقعیت تقریبی
+                    {parking.location?.lat != null && parking.location?.lng != null ? "موقعیت تقریبی" : "محدوده مکانی"}
                   </span>
 
                   <h2>
@@ -1113,9 +1132,11 @@ function ParkingDetails({
                   </h2>
 
                   <p>
-                    {isWanted
-                      ? `محدوده دقیق موردنظر برای ${visibleCategory} را از طریق تماس با متقاضی دریافت کنید.`
-                      : `موقعیت دقیق ${visibleCategory} را از طریق تماس با آگهی‌دهنده دریافت کنید.`}
+                    {parking.location?.lat == null || parking.location?.lng == null
+                      ? `برای این ${visibleCategory} نقطه‌ای روی نقشه ثبت نشده است؛ برای اطلاع از محدوده دقیق با ${isWanted ? "متقاضی" : "آگهی‌دهنده"} تماس بگیرید.`
+                      : isWanted
+                        ? `محدوده دقیق موردنظر برای ${visibleCategory} را از طریق تماس با متقاضی دریافت کنید.`
+                        : `موقعیت دقیق ${visibleCategory} را از طریق تماس با آگهی‌دهنده دریافت کنید.`}
                   </p>
                 </div>
 

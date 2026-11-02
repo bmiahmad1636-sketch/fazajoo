@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import * as maplibregl from "maplibre-gl";
 import { FAZAJOO_MAP_STYLE } from "./FazajooMapConfig.js";
@@ -7,8 +7,9 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import "./NeshanLocationPicker.css";
 import iranCitiesWithCoordinates from "../data/iran-cities-with-coordinates.json";
+import { getKnownCityCenter } from "../utils/mapCityView.js";
 
-const DEFAULT_CENTER = [51.8668, 32.0089]; // Shahreza: [lng, lat]
+const DEFAULT_CENTER = [53.5, 32.4]; // Iran-wide fallback; never a property location
 
 
 
@@ -80,9 +81,10 @@ export default function NeshanLocationPicker({
       Number.isFinite(Number(rawLat)) &&
       Number.isFinite(Number(rawLng));
 
+    const cityCenter = getKnownCityCenter(city, iranCitiesWithCoordinates);
     const center = hasValue
       ? [Number(rawLng), Number(rawLat)]
-      : DEFAULT_CENTER;
+      : cityCenter || DEFAULT_CENTER;
 
     setStatus("loading");
 
@@ -91,7 +93,7 @@ export default function NeshanLocationPicker({
         container: mapElementRef.current,
         style: FAZAJOO_MAP_STYLE,
         center,
-        zoom: hasValue ? 15 : 12,
+        zoom: hasValue ? 15 : cityCenter ? 12 : 5,
         attributionControl: true,
       });
 
@@ -204,6 +206,18 @@ export default function NeshanLocationPicker({
   // without recreating the map or changing the saved value.
   const savedLat = value?.lat;
   const savedLng = value?.lng;
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const hasSavedPoint = savedLat !== null && savedLat !== undefined && savedLat !== "" &&
+      savedLng !== null && savedLng !== undefined && savedLng !== "" &&
+      Number.isFinite(Number(savedLat)) && Number.isFinite(Number(savedLng));
+    if (hasSavedPoint) return;
+    const cityCenter = getKnownCityCenter(city, iranCitiesWithCoordinates);
+    map.jumpTo({ center: cityCenter || DEFAULT_CENTER, zoom: cityCenter ? 12 : 5 });
+    // Viewport-only change: never invoke onChange or draw a marker.
+  }, [city, savedLat, savedLng]);
+
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -462,6 +476,11 @@ export default function NeshanLocationPicker({
         )}
       </div>
 
+      {!hasSelectedLocation && (
+        <p className="neshan-location-picker__unselected" role="status" style={{ margin: "6px 0 10px", fontSize: "0.84rem", color: "#735b49" }}>
+          هنوز نقطه‌ای ثبت نشده است. نمایش مرکز شهر فقط برای راهنمایی است و به معنی محل آگهی نیست؛ برای ثبت موقعیت روی نقشه کلیک کن.
+        </p>
+      )}
       {!disabled &&
         status !== "missing-key" && (
           <div className="neshan-location-picker__city-jump">

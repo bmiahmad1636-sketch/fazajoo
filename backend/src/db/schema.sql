@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS spaces (
   status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active','inactive','rented')),
   title VARCHAR(160) NOT NULL, city VARCHAR(100) NOT NULL,
   area NUMERIC(12,2) NOT NULL DEFAULT 0, price VARCHAR(100) NOT NULL,
-  phone VARCHAR(20) NOT NULL, image_url TEXT, image_urls JSONB NOT NULL DEFAULT '[]'::jsonb, residential_details JSONB NOT NULL DEFAULT '{}'::jsonb, villa_details JSONB NOT NULL DEFAULT '{}'::jsonb, garden_details JSONB NOT NULL DEFAULT '{}'::jsonb, shop_details JSONB NOT NULL DEFAULT '{}'::jsonb, description TEXT,
+  phone VARCHAR(20) NOT NULL, image_url TEXT, image_urls JSONB NOT NULL DEFAULT '[]'::jsonb, residential_details JSONB NOT NULL DEFAULT '{}'::jsonb, villa_details JSONB NOT NULL DEFAULT '{}'::jsonb, garden_details JSONB NOT NULL DEFAULT '{}'::jsonb, shop_details JSONB NOT NULL DEFAULT '{}'::jsonb, space_attributes JSONB NOT NULL DEFAULT '{}'::jsonb, description TEXT,
   agency_network_consent BOOLEAN NOT NULL DEFAULT FALSE,
   location_lat NUMERIC(9,6),
   location_lng NUMERIC(9,6),

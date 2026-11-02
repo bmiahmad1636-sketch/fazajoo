@@ -3,6 +3,7 @@ const { query } = require("../db/pool");
 const { createNotificationsForNewOffer } = require("../services/smartSearch.service");
 const { recordContactReveal } = require("../services/securityMonitoring.service");
 const storage = require("../services/storage.service");
+const { cleanParkingSpaceAttributes } = require("../utils/parkingSpaceAttributes");
 
 const MAX_IMAGES = 10;
 const HEATING_SYSTEMS = ["gasHeater", "packageRadiator", "centralHeating", "floorHeating", "electricHeater", "splitHeating"];
@@ -10,7 +11,7 @@ const COOLING_SYSTEMS = ["waterCooler", "split", "ductSplit", "centralCooling", 
 function cleanSystems(value, allowed) {
   return Array.isArray(value) ? [...new Set(value.filter(item => typeof item === "string" && allowed.includes(item)))].slice(0, allowed.length) : [];
 }
-const FIELDS = `id, listing_type, category, custom_category, category_label, status, title, city, area, price, price_type, phone, image_url, image_urls, residential_details, villa_details, garden_details, shop_details, description, agency_network_consent, location_lat, location_lng, media_items, legal_hold, owner_id, created_at, updated_at`;
+const FIELDS = `id, listing_type, category, custom_category, category_label, status, title, city, area, price, price_type, phone, image_url, image_urls, residential_details, villa_details, garden_details, shop_details, space_attributes, description, agency_network_consent, location_lat, location_lng, media_items, legal_hold, owner_id, created_at, updated_at`;
 
 let imageSchemaPromise = null;
 function ensureImageSchema() {
@@ -22,6 +23,7 @@ function ensureImageSchema() {
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS villa_details JSONB NOT NULL DEFAULT '{}'::jsonb`);
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS garden_details JSONB NOT NULL DEFAULT '{}'::jsonb`);
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS shop_details JSONB NOT NULL DEFAULT '{}'::jsonb`);
+      await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS space_attributes JSONB NOT NULL DEFAULT '{}'::jsonb`);
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS agency_network_consent BOOLEAN NOT NULL DEFAULT FALSE`);
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS location_lat NUMERIC(9,6)`);
       await query(`ALTER TABLE spaces ADD COLUMN IF NOT EXISTS location_lng NUMERIC(9,6)`);
@@ -129,6 +131,7 @@ function mapSpace(row, { includePhone = false, includeExactLocation = false, inc
     villaDetails: row.villa_details || {},
     gardenDetails: row.garden_details || {},
     shopDetails: row.shop_details || {},
+    spaceAttributes: row.space_attributes || {},
     description: row.description || "",
     agencyNetworkConsent: Boolean(row.agency_network_consent),
     ...(row.location_lat != null && row.location_lng != null
@@ -246,6 +249,7 @@ function clean(body = {}) {
           heatingSystems: cleanSystems(body.shopDetails.heatingSystems, HEATING_SYSTEMS),
           coolingSystems: cleanSystems(body.shopDetails.coolingSystems, COOLING_SYSTEMS),
         } : {},
+    spaceAttributes: cleanParkingSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer"),
     description: String(body.description || "").trim().slice(0, 5000),
     agencyNetworkConsent: body.agencyNetworkConsent === true,
     locationLat: Number.isFinite(Number(body.location?.lat)) && Number(body.location.lat) >= 24 && Number(body.location.lat) <= 40
@@ -256,13 +260,20 @@ function clean(body = {}) {
 }
 
 function validate(space) {
+  // Preserve legacy listings; validate the new typed contract whenever it is supplied.
+  if (space.listingType === "offer" && space.category === "parking" && space.spaceAttributes?.schemaVersion === 1) {
+    const data = space.spaceAttributes.values || {};
+    if (!data.vehicleUsage || !data.cover || !data.access) return "مشخصات ضروری پارکینگ کامل نیست.";
+    if (data.vehicleUsage === "other" && data.usageNotes.length < 5) return "نوع کاربری خاص پارکینگ را توضیح دهید.";
+    if (!space.area || !Number.isFinite(space.area)) return "متراژ واقعی پارکینگ را وارد کنید.";
+  }
   if (!space.title) return "عنوان آگهی لازم است.";
   if (!space.city) return "شهر لازم است.";
   if (space.category === "residential") {
     if (!space.residentialDetails.deposit && !space.residentialDetails.monthlyRent) return "مبلغ رهن یا اجاره را وارد کنید.";
   } else if (space.priceType !== "negotiable" && !space.price) return "قیمت لازم است.";
   if (!/^09\d{9}$/.test(space.phone)) return "شماره موبایل معتبر نیست.";
-  if (space.description.length < 10) return "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
+  if (!(space.listingType === "offer" && space.category === "parking") && space.description.length < 10) return "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
   if (space.imageUrls.length > MAX_IMAGES) return `حداکثر ${MAX_IMAGES} عکس برای هر آگهی مجاز است.`;
   if (space.listingType !== "wanted" && space.imageUrls.length === 0) return "حداقل یک تصویر برای آگهی لازم است.";
   if (space.video && (!space.video.duration || space.video.duration > 120.5)) return "مدت ویدئو باید حداکثر ۲ دقیقه باشد.";
@@ -387,10 +398,10 @@ async function create(req, res) {
     if (error) return res.status(400).json({ ok: false, message: error });
     const id = crypto.randomUUID();
     const result = await query(
-      `INSERT INTO spaces (id,listing_type,category,custom_category,category_label,status,title,city,area,price,price_type,phone,image_url,image_urls,residential_details,villa_details,garden_details,description,agency_network_consent,location_lat,location_lng,media_items,owner_id,shop_details)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::jsonb,$15::jsonb,$16::jsonb,$17::jsonb,$18,$19,$20,$21,$22::jsonb,$23,$24::jsonb)
+      `INSERT INTO spaces (id,listing_type,category,custom_category,category_label,status,title,city,area,price,price_type,phone,image_url,image_urls,residential_details,villa_details,garden_details,description,agency_network_consent,location_lat,location_lng,media_items,owner_id,shop_details,space_attributes)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::jsonb,$15::jsonb,$16::jsonb,$17::jsonb,$18,$19,$20,$21,$22::jsonb,$23,$24::jsonb,$25::jsonb)
        RETURNING ${FIELDS}`,
-      [id, space.listingType, space.category, space.customCategory, space.categoryLabel, space.status, space.title, space.city, space.area, space.price, space.priceType, space.phone, space.imageUrl, JSON.stringify(space.imageUrls), JSON.stringify(space.residentialDetails), JSON.stringify(space.villaDetails), JSON.stringify(space.gardenDetails), space.description, space.agencyNetworkConsent, space.locationLat, space.locationLng, JSON.stringify(space.mediaItems), req.user.id, JSON.stringify(space.shopDetails)]
+      [id, space.listingType, space.category, space.customCategory, space.categoryLabel, space.status, space.title, space.city, space.area, space.price, space.priceType, space.phone, space.imageUrl, JSON.stringify(space.imageUrls), JSON.stringify(space.residentialDetails), JSON.stringify(space.villaDetails), JSON.stringify(space.gardenDetails), space.description, space.agencyNetworkConsent, space.locationLat, space.locationLng, JSON.stringify(space.mediaItems), req.user.id, JSON.stringify(space.shopDetails), JSON.stringify(space.spaceAttributes)]
     );
     const createdSpace = mapSpace(result.rows[0], { includePhone: true, includeExactLocation: true });
     createNotificationsForNewOffer(createdSpace, req.user.id);
@@ -426,9 +437,9 @@ async function update(req, res) {
     if (merged.video && req.user.system_role !== "admin" && !isVideoOwnedByUser(merged.video, req.user.id)) return res.status(403).json({ ok: false, message: "ویدئوی آگهی متعلق به این حساب نیست." });
     if (error) return res.status(400).json({ ok: false, message: error });
     const result = await query(
-      `UPDATE spaces SET listing_type=$2,category=$3,custom_category=$4,category_label=$5,status=$6,title=$7,city=$8,area=$9,price=$10,price_type=$11,phone=$12,image_url=$13,image_urls=$14::jsonb,residential_details=$15::jsonb,villa_details=$16::jsonb,garden_details=$17::jsonb,description=$18,agency_network_consent=$19,location_lat=$20,location_lng=$21,media_items=$22::jsonb,shop_details=$23::jsonb,updated_at=NOW()
+      `UPDATE spaces SET listing_type=$2,category=$3,custom_category=$4,category_label=$5,status=$6,title=$7,city=$8,area=$9,price=$10,price_type=$11,phone=$12,image_url=$13,image_urls=$14::jsonb,residential_details=$15::jsonb,villa_details=$16::jsonb,garden_details=$17::jsonb,description=$18,agency_network_consent=$19,location_lat=$20,location_lng=$21,media_items=$22::jsonb,shop_details=$23::jsonb,space_attributes=$24::jsonb,updated_at=NOW()
        WHERE id=$1 RETURNING ${FIELDS}`,
-      [req.params.id, merged.listingType, merged.category, merged.customCategory, merged.categoryLabel, merged.status, merged.title, merged.city, merged.area, merged.price, merged.priceType, merged.phone, merged.imageUrl, JSON.stringify(merged.imageUrls), JSON.stringify(merged.residentialDetails), JSON.stringify(merged.villaDetails), JSON.stringify(merged.gardenDetails), merged.description, merged.agencyNetworkConsent, merged.locationLat, merged.locationLng, JSON.stringify(merged.mediaItems), JSON.stringify(merged.shopDetails)]
+      [req.params.id, merged.listingType, merged.category, merged.customCategory, merged.categoryLabel, merged.status, merged.title, merged.city, merged.area, merged.price, merged.priceType, merged.phone, merged.imageUrl, JSON.stringify(merged.imageUrls), JSON.stringify(merged.residentialDetails), JSON.stringify(merged.villaDetails), JSON.stringify(merged.gardenDetails), merged.description, merged.agencyNetworkConsent, merged.locationLat, merged.locationLng, JSON.stringify(merged.mediaItems), JSON.stringify(merged.shopDetails), JSON.stringify(merged.spaceAttributes)]
     );
     if (existingVideo?.url && existingVideo.url !== merged.video?.url && existingVideo.status !== "blocked") {
       storage.deleteAdVideo({ url: existingVideo.url, userId: existing.rows[0].owner_id }).catch((cleanupError) => {
