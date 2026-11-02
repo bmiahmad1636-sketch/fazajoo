@@ -1,5 +1,5 @@
 import { showInSiteAlert } from "../utils/inSiteDialog";
-import { useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createSpace } from "../services/spaceService";
 import { getAuthToken } from "../services/authService";
@@ -8,6 +8,8 @@ import VideoUploader from "../components/VideoUploader";
 import NeshanLocationPicker from "../components/NeshanLocationPicker";
 import ParkingRequestUsageFields from "../components/ParkingRequestUsageFields";
 import ParkingOfferFields from "../components/ParkingOfferFields";
+import StorageOfferFields from "../components/StorageOfferFields";
+import { STORAGE_OFFER_DEFAULT, validateStorageOffer, makeStorageAttributes, storageOfferLabel, STORAGE_TYPES, STORAGE_ACCESS } from "../utils/storageOffer";
 import { PARKING_OFFER_DEFAULT, validateParkingOffer, makeParkingAttributes, parkingOfferLabel, PARKING_OFFER_USAGE, PARKING_OFFER_COVER, PARKING_OFFER_ACCESS } from "../utils/parkingOffer";
 import ParkingRequestDetailsFields from "../components/ParkingRequestDetailsFields";
 import { EMPTY_PARKING_REQUEST, parkingRequestDetailsValidation, writeParkingRequestDetails } from "../utils/parkingRequestDetails";
@@ -45,6 +47,7 @@ import "./AddParking.css";
 const INITIAL_FORM = {
   listingType: "offer",
   parkingOffer: { ...PARKING_OFFER_DEFAULT, securityFeatures: [] },
+  storageOffer: { ...STORAGE_OFFER_DEFAULT, allowedPurposes: [], features: [] },
   parkingRequestUsage: "",
   parkingOtherUsage: "",
   parkingRequestDetails: { ...EMPTY_PARKING_REQUEST },
@@ -159,6 +162,13 @@ function formatPriceInput(value) {
 function AddParking() {
   const navigate = useNavigate();
 
+  // The title field sits below the first screen; avoid focusing it on mount.
+  // React Router may also preserve the previous page's scroll position.
+  // Reset only when entering this form, without altering in-form scrolling.
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, []);
+
   const [form, setForm] = useState(INITIAL_FORM);
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -233,6 +243,11 @@ function AddParking() {
         const error = validateParkingOffer(form.parkingOffer);
         if (error) newErrors.parkingOffer = error;
         if (!form.area || Number(form.area) <= 0) newErrors.area = "متراژ واقعی پارکینگ را وارد کنید.";
+      }
+      if (!isWantedAd && form.category === "storage") {
+        const error = validateStorageOffer(form.storageOffer);
+        if (error) newErrors.storageOffer = error;
+        if (!form.area || !Number.isFinite(Number(form.area)) || Number(form.area) <= 0) newErrors.area = "متراژ واقعی انبار را وارد کنید.";
       }
       if (isWantedAd && form.category === "residential") { const err = validateResidentialRequest(form.residentialRequest); if (err) newErrors.residentialRequest = err; }
       if (isWantedAd && form.category === "villa") { const err = validateVillaRequest(form.villaRequest); if (err) newErrors.villaRequest = err; }
@@ -314,7 +329,7 @@ function AddParking() {
       }
 
       if (
-        !(form.category === "parking" && !isWantedAd) && !(isWantedAd && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(form.category)) && form.description.trim().length <
+        !(["parking", "storage"].includes(form.category) && !isWantedAd) && !(isWantedAd && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(form.category)) && form.description.trim().length <
         10
       ) {
         newErrors.description =
@@ -448,7 +463,7 @@ function AddParking() {
               ? (isWantedAd ? residentialRequestLegacyDetails(form.residentialRequest) : form.residentialDetails)
               : {},
           gardenDetails: form.category === "garden" && !isWantedAd ? form.gardenDetails : {},
-          spaceAttributes: form.category === "parking" && !isWantedAd ? makeParkingAttributes(form.parkingOffer) : null,
+          spaceAttributes: !isWantedAd && form.category === "parking" ? makeParkingAttributes(form.parkingOffer) : !isWantedAd && form.category === "storage" ? makeStorageAttributes(form.storageOffer) : null,
           shopDetails: form.category === "shop" ? form.shopDetails : {},
           villaDetails:
             form.category === "villa" && !isWantedAd
@@ -623,7 +638,7 @@ function AddParking() {
                           </strong>
 
                           <small>
-                            {isWantedAd && step.id === 3 ? "سقف بودجه، تماس و شرایط موردنیاز" : !isWantedAd && form.category === "parking" && step.id === 3 ? "قیمت و راه ارتباطی" : step.description}
+                            {isWantedAd && step.id === 3 ? "سقف بودجه، تماس و شرایط موردنیاز" : !isWantedAd && ["parking", "storage"].includes(form.category) && step.id === 3 ? "قیمت و راه ارتباطی" : step.description}
                           </small>
                         </span>
                       </button>
@@ -872,6 +887,11 @@ function AddParking() {
                         onNoteChange={(description) => setForm(current => ({ ...current, description }))}
                         onChange={(parkingOffer) => { setForm(current=>({...current,parkingOffer})); setErrors(current=>({...current,parkingOffer:""})); }} />
                     )}
+                    {form.category === "storage" && !isWantedAd && (
+                      <StorageOfferFields value={form.storageOffer} note={form.description} disabled={loading} error={errors.storageOffer}
+                        onNoteChange={(description) => setForm(current => ({ ...current, description }))}
+                        onChange={(storageOffer) => { setForm(current=>({...current,storageOffer})); setErrors(current=>({...current,storageOffer:""})); }} />
+                    )}
                     {form.category === "residential" && !isWantedAd && (
                       <ResidentialFields
                         value={form.residentialDetails}
@@ -978,7 +998,6 @@ function AddParking() {
                           onChange={handleChange}
                           disabled={loading}
                           maxLength={80}
-                          autoFocus
                         />
                       </div>
 
@@ -1025,7 +1044,8 @@ function AddParking() {
                       {!((isWantedAd && form.category === "land") || (isWantedAd && ["storage", "warehouse", "parking", "shop", "residential", "villa", "garden", "other"].includes(form.category))) && (
                       <div className="add-parking-field">
                         <label htmlFor="area">
-                          متراژ
+                          {!isWantedAd && form.category === "storage" ? "متراژ واقعی انبار" : "متراژ"}
+                          {!isWantedAd && form.category === "storage" && <span>*</span>}
                         </label>
 
                         <div
@@ -1403,7 +1423,7 @@ function AddParking() {
                       </div>
                     </div>
 
-                    {!(form.category === "parking" && !isWantedAd) && !(isWantedAd && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(form.category)) && (
+                    {!(["parking", "storage"].includes(form.category) && !isWantedAd) && !(isWantedAd && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(form.category)) && (
                     <div className="add-parking-field">
                       <label htmlFor="description">
                         توضیحات آگهی
@@ -1579,6 +1599,11 @@ function AddParking() {
                           {form.category === "parking" && !isWantedAd && (
                             <p style={{fontSize:12,color:"#7c4c2e",margin:"4px 0 9px",lineHeight:1.9}}>
                               {[parkingOfferLabel(PARKING_OFFER_USAGE,form.parkingOffer.vehicleUsage), parkingOfferLabel(PARKING_OFFER_COVER,form.parkingOffer.cover), parkingOfferLabel(PARKING_OFFER_ACCESS,form.parkingOffer.access)].filter(Boolean).join(" • ")}
+                            </p>
+                          )}
+                          {form.category === "storage" && !isWantedAd && (
+                            <p style={{fontSize:12,color:"#7c4c2e",margin:"4px 0 9px",lineHeight:1.9}}>
+                              {[storageOfferLabel(STORAGE_TYPES,form.storageOffer.spaceType), storageOfferLabel(STORAGE_ACCESS,form.storageOffer.access)].filter(Boolean).join(" • ")}
                             </p>
                           )}
 

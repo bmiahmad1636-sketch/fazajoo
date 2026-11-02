@@ -45,7 +45,8 @@ export function compareSpaceProfiles(wanted, offer) {
     requireCheck("space-type", fields.spaceType, available.spaceType);
     if (wanted.category === "storage") {
       requireCheck("storage-access", fields.access, available.access, (need, actual) => actual === "24h" || actual === need);
-      requireCheck("storage-purpose", fields.purpose, available.allowedPurposes, (need, actual) => Array.isArray(actual) && actual.includes(need));
+      if (fields.purpose === "other") unknown.push("storage-other-purpose-review");
+      else requireCheck("storage-purpose", fields.purpose, available.allowedPurposes, (need, actual) => Array.isArray(actual) && actual.includes(need));
     }
     if (wanted.category === "shop") requireCheck("shop-transfer", fields.transferType, available.transferType);
     if (wanted.category === "warehouse") {

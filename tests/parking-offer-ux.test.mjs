@@ -27,8 +27,8 @@ test('changing the map viewport does not save coordinates or draw a marker',()=>
 test('final offer page hides description while supplementary box retains note',()=>{
   const add=file('src/pages/AddParking.jsx');
   const edit=file('src/pages/EditParking.jsx');
-  assert.match(add,/!\(form\.category === "parking" && !isWantedAd\) && !\(isWantedAd/);
-  assert.match(edit,/!\(parking\?\.category === "parking" && !isWanted\) && !\(isWanted/);
+  assert.match(add,/!\(\["parking", "storage"\]\.includes\(form\.category\) && !isWantedAd\) && !\(isWantedAd/);
+  assert.match(edit,/!\(\["parking", "storage"\]\.includes\(parking\?\.category\) && !isWanted\) && !\(isWanted/);
   assert.match(add,/<ParkingOfferFields[^>]*note=\{form\.description\}/);
   assert.match(edit,/<ParkingOfferFields[^>]*note=\{form\.description\}/);
   const comp=file('src/components/ParkingOfferFields.jsx');
@@ -44,11 +44,13 @@ test('backend validates a blank or very short parking offer note correctly',()=>
   const base={listingType:'offer',category:'parking',spaceAttributes:{schemaVersion:1,values:{vehicleUsage:'car',cover:'covered',access:'anytime',usageNotes:''}},area:15,title:'آگهی پارکینگ',city:'اصفهان',priceType:'monthly',price:100000,phone:'09120000000',description:'',imageUrls:['img'],video:null};
   assert.equal(validate(base),'');
   assert.equal(validate({...base,description:'کوتاه'}),'');
-  assert.match(validate({...base,category:'storage',spaceAttributes:{}}),/توضیحات/);
+  // Storage offers also have a typed, optional note; legacy storage offers remain editable.
+  assert.equal(validate({...base,category:'storage',spaceAttributes:{}}),'');
+  assert.match(validate({...base,category:'warehouse',spaceAttributes:{}}),/توضیحات/);
 });
 test('public details no-pin state hides map and empty description',()=>{
   const d=file('src/pages/ParkingDetails.jsx');
   assert.match(d,/parking\.location\?\.lat != null &&\s*parking\.location\?\.lng != null && \(/);
   assert.match(d,/نقطه‌ای روی نقشه ثبت نشده است/);
-  assert.match(d,/!\(category === "parking" && !isWanted && !String\(parking\.description \|\| ""\)\.trim\(\)\)/);
+  assert.match(d,/!\(\["parking", "storage"\]\.includes\(category\) && !isWanted && !String\(parking\.description \|\| ""\)\.trim\(\)\)/);
 });

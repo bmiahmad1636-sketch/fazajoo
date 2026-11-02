@@ -1,0 +1,8 @@
+.fj-so .fj-po-header>span{background:#fff0e2}.fj-so .fj-po-primary{gap:20px}.fj-so .fj-po-group .fj-po-field{margin-top:8px}.fj-so .fj-so-hint{font-size:.8rem;color:#7f6f63;line-height:1.8}.fj-so .fj-po-field textarea{width:100%;min-height:86px;resize:vertical;box-sizing:border-box;font:inherit;font-weight:400;line-height:1.8;border:1px solid #e2d3c6;background:#fff;border-radius:12px;padding:10px 12px;color:#342c27}.fj-so .fj-po-field textarea:focus-visible{outline:3px solid #f6ac6e;outline-offset:2px}.fj-so .fj-po-check:has(input:checked){background:#fff0e0;border-color:#de6e22;color:#943e0b}.fj-so .fj-po-check input{accent-color:#d96d21}
+
+.fj-so .fj-so-pair{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;align-items:start}
+.fj-so .fj-so-select-field{height:100%;align-content:start}
+.fj-so .fj-so-field-label{display:block;min-height:2.9em;line-height:1.7}
+.fj-so .fj-so-field-help{display:block;min-height:2.9em;line-height:1.7}
+.fj-so .fj-so-field-help--ghost{visibility:hidden}
+@media(max-width:640px){.fj-so .fj-so-pair{grid-template-columns:1fr}.fj-so .fj-so-field-label,.fj-so .fj-so-field-help{min-height:0}}

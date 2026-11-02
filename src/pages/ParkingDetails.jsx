@@ -5,6 +5,7 @@ import { readShedRequest, shedOptionLabel, SHED_TYPES, SHED_ACTIVITIES, shedActi
 import { readParkingRequestUsage, parkingUsageLabel } from "../utils/parkingRequestUsage";
 import { readParkingRequestDetails, PARKING_COVERS, PARKING_ACCESS } from "../utils/parkingRequestDetails";
 import { PARKING_OFFER_USAGE, PARKING_OFFER_COVER, PARKING_OFFER_ACCESS, PARKING_OFFER_STYLE, PARKING_OFFER_SECURITY, parkingOfferLabel } from "../utils/parkingOffer";
+import { STORAGE_TYPES, STORAGE_PURPOSES, STORAGE_ACCESS, STORAGE_VEHICLES, STORAGE_LOADING, STORAGE_FEATURES, storageOfferLabel } from "../utils/storageOffer";
 import { readWarehouseRequest, warehouseOptionLabel, WAREHOUSE_PURPOSES, WAREHOUSE_TYPES, WAREHOUSE_ACCESS, WAREHOUSE_DURATIONS, WAREHOUSE_FEATURES } from "../utils/warehouseRequest";
 import { climateLabels } from "../components/ClimateFields";
 import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText, villaRequestLabel, VILLA_REQUEST_TYPES, VILLA_REQUEST_STAYS, VILLA_REQUEST_AMENITIES } from "../utils/villaRequest";
@@ -867,7 +868,26 @@ function ParkingDetails({
                 </article> : null;
               })()}
 
-              {!(category === "parking" && !isWanted && !String(parking.description || "").trim()) && !(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData) || (category === "other" && otherWantedData))) && (
+              {category === "storage" && !isWanted && parking?.spaceAttributes?.schemaVersion === 1 && parking.spaceAttributes.category === "storage" && (() => {
+                const d = parking.spaceAttributes.values || {};
+                const rows = [
+                  ["نوع انبار", storageOfferLabel(STORAGE_TYPES,d.spaceType)],
+                  ["مناسب نگهداری", (Array.isArray(d.allowedPurposes)?d.allowedPurposes:[]).map(v=>storageOfferLabel(STORAGE_PURPOSES,v)).filter(Boolean).join("، ")],
+                  ["زمان دسترسی", storageOfferLabel(STORAGE_ACCESS,d.access)],
+                  ["ارتفاع مفید", d.spaceType !== "outdoor" && Number(d.heightM)>0 ? `${Number(d.heightM).toLocaleString("fa-IR")} متر` : ""],
+                  ["ورود خودرو", storageOfferLabel(STORAGE_VEHICLES,d.vehicleAccess)],
+                  ["نحوه بارگیری", storageOfferLabel(STORAGE_LOADING,d.loadingMethod)],
+                  ["نوع کالای خاص", (d.allowedPurposes||[]).includes("other") ? d.otherPurpose : ""],
+                ].filter(([,v])=>Boolean(v));
+                const amenities = (Array.isArray(d.features)?d.features:[]).filter(v=>v!=="truck"&&v!=="ground").map(v=>storageOfferLabel(STORAGE_FEATURES,v)).filter(Boolean);
+                return rows.length || amenities.length ? <article className="parking-details-section">
+                  <div className="parking-details-section__heading"><div className="parking-details-section__icon">📦</div><div><span>اطلاعات واقعی عرضه</span><h2>ویژگی‌های انبار</h2></div></div>
+                  <div className="parking-details-residential__grid">{rows.map(([name,text])=><span key={name}><small>{name}</small><strong>{text}</strong></span>)}</div>
+                  {amenities.length>0 && <div className="parking-details-residential__amenities">{amenities.map((text)=><b key={text}>✓ {text}</b>)}</div>}
+                </article> : null;
+              })()}
+
+              {!(["parking", "storage"].includes(category) && !isWanted && !String(parking.description || "").trim()) && !(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData) || (category === "other" && otherWantedData))) && (
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">
@@ -884,7 +904,7 @@ function ParkingDetails({
             <h2>
                       {isWanted
                         ? `توضیحات نیاز به ${visibleCategory}`
-                        : category === "parking" ? "نکات تکمیلی پارکینگ" : `توضیحات ${visibleCategory}`}
+                        : category === "parking" ? "نکات تکمیلی پارکینگ" : category === "storage" ? "نکات تکمیلی انبار" : `توضیحات ${visibleCategory}`}
                     </h2>
                   </div>
                 </div>

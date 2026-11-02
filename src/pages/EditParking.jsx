@@ -16,6 +16,8 @@ import VideoUploader from "../components/VideoUploader";
 import NeshanLocationPicker from "../components/NeshanLocationPicker";
 import ParkingRequestUsageFields from "../components/ParkingRequestUsageFields";
 import ParkingOfferFields from "../components/ParkingOfferFields";
+import StorageOfferFields from "../components/StorageOfferFields";
+import { STORAGE_OFFER_DEFAULT, storageOfferFromAttributes, validateStorageOffer, makeStorageAttributes, storageOfferLabel, STORAGE_TYPES, STORAGE_ACCESS } from "../utils/storageOffer";
 import { PARKING_OFFER_DEFAULT, parkingOfferFormFromAttributes, validateParkingOffer, makeParkingAttributes } from "../utils/parkingOffer";
 import ParkingRequestDetailsFields from "../components/ParkingRequestDetailsFields";
 import { EMPTY_PARKING_REQUEST, readParkingRequestDetails, writeParkingRequestDetails, parkingRequestDetailsValidation } from "../utils/parkingRequestDetails";
@@ -51,6 +53,7 @@ import "./EditParking.css";
 const EMPTY_FORM = {
   title: "",
   parkingOffer: { ...PARKING_OFFER_DEFAULT, securityFeatures: [] },
+  storageOffer: { ...STORAGE_OFFER_DEFAULT, allowedPurposes: [], features: [] },
   parkingRequestUsage: "",
   parkingOtherUsage: "",
   parkingRequestDetails: { ...EMPTY_PARKING_REQUEST },
@@ -153,6 +156,7 @@ function createFormFromParking(parking) {
       ? readWarehouseRequest(parking?.description).description
       : readParkingRequestUsage(parking?.description).description,
     parkingOffer: parkingOfferFormFromAttributes(parking?.spaceAttributes),
+    storageOffer: storageOfferFromAttributes(parking?.spaceAttributes),
     parkingRequestUsage: readParkingRequestUsage(parking?.description).usage,
     parkingOtherUsage: readParkingRequestUsage(parking?.description).otherUsage,
     parkingRequestDetails: readParkingRequestDetails(parking?.description).data,
@@ -224,7 +228,7 @@ function EditParking({
         form.priceType === "negotiable" ? true : form.price.trim(),
         form.phone.trim(),
         ...(!isWanted ? [form.imageUrl] : []),
-        ...(parking?.category === "parking" && !isWanted ? [form.parkingOffer.vehicleUsage, form.parkingOffer.cover, form.parkingOffer.access] : isWanted && parking?.category === "warehouse" ? [form.shedRequest?.activity] : isWanted && parking?.category === "storage" ? [form.warehouseRequest?.purpose] : [form.description.trim()]),
+        ...(parking?.category === "parking" && !isWanted ? [form.parkingOffer.vehicleUsage, form.parkingOffer.cover, form.parkingOffer.access] : parking?.category === "storage" && !isWanted ? [form.storageOffer.spaceType, form.storageOffer.access, form.storageOffer.allowedPurposes.length] : isWanted && parking?.category === "warehouse" ? [form.shedRequest?.activity] : isWanted && parking?.category === "storage" ? [form.warehouseRequest?.purpose] : [form.description.trim()]),
       ];
 
       const completedFields =
@@ -314,6 +318,11 @@ function EditParking({
       if (parkingError) nextErrors.parkingOffer = parkingError;
       if (!form.area || Number(form.area) <= 0) nextErrors.area = "متراژ واقعی پارکینگ را وارد کنید.";
     }
+    if (!isWanted && parking?.category === "storage") {
+      const storageError = validateStorageOffer(form.storageOffer);
+      if (storageError) nextErrors.storageOffer = storageError;
+      if (!form.area || !Number.isFinite(Number(form.area)) || Number(form.area) <= 0) nextErrors.area = "متراژ واقعی انبار را وارد کنید.";
+    }
 
     if (!form.title.trim()) {
       nextErrors.title =
@@ -367,7 +376,7 @@ function EditParking({
     }
 
     if (
-      !(parking?.category === "parking" && !isWanted) && !(isWanted && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(parking?.category)) && form.description.trim().length < 10
+      !(["parking", "storage"].includes(parking?.category) && !isWanted) && !(isWanted && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(parking?.category)) && form.description.trim().length < 10
     ) {
       nextErrors.description =
         "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
@@ -474,7 +483,7 @@ function EditParking({
           ? (isWanted ? { ...form.residentialDetails, ...residentialRequestLegacyDetails(form.residentialRequest) } : form.residentialDetails)
           : {},
       gardenDetails: parking?.category === "garden" ? form.gardenDetails : {},
-      ...(parking?.category === "parking" && !isWanted ? { spaceAttributes: makeParkingAttributes(form.parkingOffer) } : {}),
+      ...(parking?.category === "parking" && !isWanted ? { spaceAttributes: makeParkingAttributes(form.parkingOffer) } : parking?.category === "storage" && !isWanted ? { spaceAttributes: makeStorageAttributes(form.storageOffer) } : {}),
       shopDetails: parking?.category === "shop" ? form.shopDetails : {},
       villaDetails: parking?.category === "villa" ? form.villaDetails : {},
       phone: normalizedPhone,
@@ -685,6 +694,11 @@ function EditParking({
             onNoteChange={(description) => { setForm(current=>({...current,description})); setShowSuccess(false); }}
             onChange={(parkingOffer) => { setForm(current=>({...current,parkingOffer})); setErrors(current=>({...current,parkingOffer:""})); }} />
         )}
+        {parking?.category === "storage" && !isWanted && (
+          <StorageOfferFields value={form.storageOffer} note={form.description} disabled={loading} error={errors.storageOffer}
+            onNoteChange={(description) => { setForm(current=>({...current,description})); setShowSuccess(false); }}
+            onChange={(storageOffer) => { setForm(current=>({...current,storageOffer})); setErrors(current=>({...current,storageOffer:""})); setShowSuccess(false); }} />
+        )}
         {parking?.category === "residential" && !isWanted && (
           <ResidentialFields
             value={form.residentialDetails}
@@ -832,7 +846,8 @@ function EditParking({
                     {!((isWanted && parking?.category === "land") || (isWanted && ["storage", "warehouse", "parking", "shop", "residential", "garden", "other"].includes(parking?.category))) && (
                     <div className="edit-parking-field">
                       <label htmlFor="area">
-                        متراژ
+                        {!isWanted && parking?.category === "storage" ? "متراژ واقعی انبار" : "متراژ"}
+                          {!isWanted && parking?.category === "storage" && <span>*</span>}
                       </label>
 
                       <div
@@ -1164,7 +1179,7 @@ function EditParking({
                     </div>
                   </div>
 
-                  {!(parking?.category === "parking" && !isWanted) && !(isWanted && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(parking?.category)) && (
+                  {!(["parking", "storage"].includes(parking?.category) && !isWanted) && !(isWanted && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(parking?.category)) && (
                   <div className="edit-parking-field edit-parking-field--full">
                     <label htmlFor="description">
                       {isWanted ? "توضیحات درخواست" : "توضیحات آگهی"}
@@ -1353,7 +1368,7 @@ function EditParking({
 
                   <p>
                     {(isWanted && parking?.category === "other" ? form.otherRequest.requestText : form.description) ||
-                      (isWanted ? "شرایط موردنیاز شما در این بخش نمایش داده می‌شود." : parking?.category === "parking" ? "ویژگی‌های واقعی پارکینگ در بخش مشخصات تخصصی نمایش داده می‌شوند." : "توضیحات آگهی پس از وارد کردن در این بخش نمایش داده می‌شود.")}
+                      (isWanted ? "شرایط موردنیاز شما در این بخش نمایش داده می‌شود." : parking?.category === "parking" ? "ویژگی‌های واقعی پارکینگ در بخش مشخصات تخصصی نمایش داده می‌شوند." : parking?.category === "storage" ? [storageOfferLabel(STORAGE_TYPES,form.storageOffer.spaceType), storageOfferLabel(STORAGE_ACCESS,form.storageOffer.access)].filter(Boolean).join(" • ") || "ویژگی‌های واقعی انبار در بخش مشخصات تخصصی نمایش داده می‌شوند." : "توضیحات آگهی پس از وارد کردن در این بخش نمایش داده می‌شود.")}
                   </p>
 
                   <div className="edit-parking-preview__features">
