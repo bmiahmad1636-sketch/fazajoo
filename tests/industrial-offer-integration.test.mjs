@@ -18,8 +18,8 @@ test('typed industrial attributes persist and are displayed without compulsory f
  assert.match(add,/makeIndustrialAttributes\(form.industrialOffer\)/);
  assert.match(edit,/makeIndustrialAttributes\(form.industrialOffer\)/);
  assert.match(edit,/industrialOfferFromAttributes\(parking\?\.spaceAttributes\)/);
- assert.match(add,/\["parking", "storage", "warehouse", "land"\]\.includes\(form.category\)/);
- assert.match(edit,/\["parking", "storage", "warehouse", "land"\]\.includes\(parking\?\.category\)/);
+ assert.match(add,/\["parking", "storage", "warehouse", "land", "shop"\]\.includes\(form.category\)/);
+ assert.match(edit,/\["parking", "storage", "warehouse", "land", "shop"\]\.includes\(parking\?\.category\)/);
  assert.match(detail,/category === "warehouse" && !isWanted && parking\?\.spaceAttributes/);
  assert.match(detail,/ویژگی‌های سوله و کارگاه/);
  assert.match(read('src/components/IndustrialOfferFields.jsx'),/نکات خاص سوله یا کارگاه \(اختیاری\)/);

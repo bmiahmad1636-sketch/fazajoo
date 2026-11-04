@@ -159,10 +159,18 @@
       "label": "مغازه",
       "offerFields": [
         "spaceType",
-        "frontageM",
+        "otherSpaceType",
+        "allowedActivities",
+        "otherActivity",
+        "transferType",
         "floor",
+        "locationPreference",
+        "frontageM",
         "features",
-        "transferType"
+        "rightsType",
+        "depositRial",
+        "monthlyRentRial",
+        "keyMoneyRial"
       ],
       "wantedFields": [
         "spaceType",
@@ -173,7 +181,16 @@
       ],
       "candidateMatchingFields": [
         "areaSqm",
-        "features"
+        "spaceType",
+        "allowedActivities",
+        "transferType",
+        "floor",
+        "locationPreference",
+        "frontageM",
+        "features",
+        "depositRial",
+        "monthlyRentRial",
+        "keyMoneyRial"
       ],
       "offerPriority": "refinement"
     },

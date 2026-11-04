@@ -48,7 +48,20 @@ export function compareSpaceProfiles(wanted, offer) {
       if (fields.purpose === "other") unknown.push("storage-other-purpose-review");
       else requireCheck("storage-purpose", fields.purpose, available.allowedPurposes, (need, actual) => Array.isArray(actual) && actual.includes(need));
     }
-    if (wanted.category === "shop") requireCheck("shop-transfer", fields.transferType, available.transferType);
+    if (wanted.category === "shop") {
+      requireCheck("shop-transfer",fields.transferType,available.transferType);
+      if(fields.activity === "other") unknown.push("shop-other-activity-review");
+      else requireCheck("shop-activity",fields.activity,available.allowedActivities,(need,actual)=>Array.isArray(actual)&&actual.includes(need));
+      requireCheck("shop-floor",fields.shopFloor,available.floor);
+      requireCheck("shop-location",fields.shopLocation,available.locationPreference);
+      if(fields.shopFrontage != null) requireCheck("shop-frontage",fields.shopFrontage,available.frontageM,(need,actual)=>Number(actual)>=need);
+      if(fields.transferType==="key_money"){
+        requireCheck("shop-rights-kind",fields.rightsType,available.rightsType);
+        if(fields.keyMoneyRial!=null)requireCheck("shop-key-money-budget",fields.keyMoneyRial,available.keyMoneyRial,(need,actual)=>actual<=need);
+        unknown.push("shop-commercial-rights-legal-review");
+      }
+      if(fields.activity)unknown.push("shop-business-permit-review");
+    }
     if (wanted.category === "warehouse") {
       // Contract duration and prose constraints cannot be inferred from physical features.
       if (fields.leaseDuration) unknown.push("industrial-duration-review");

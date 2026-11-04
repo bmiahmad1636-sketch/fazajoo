@@ -115,6 +115,12 @@ export function toSpaceProfile(listing = {}) {
     profile.features = [...new Set([...profile.features, ...selectedFeatures(attrs.features)])];
     profile.hasStructuredDetails = Object.keys(attrs).length > 0;
     if (category === "land" && attrs.depositRial != null) profile.depositRial = numericOrNull(attrs.depositRial);
+    if (category === "shop" && attrs.transferType) {
+      profile.depositRial = numericOrNull(attrs.depositRial);
+      profile.rentRial = attrs.transferType === "rent" ? numericOrNull(attrs.monthlyRentRial) : null;
+      profile.pricePeriod = attrs.transferType === "rent" ? "monthly" : null;
+      profile.fields.keyMoneyRial = attrs.transferType === "key_money" ? numericOrNull(attrs.keyMoneyRial) : null;
+    }
     if (category === "parking" && attrs.securityFeatures) profile.fields.securityFeatures = selectedFeatures(attrs.securityFeatures);
     if (category === "villa" && attrs.capacity != null) profile.capacity = numericOrNull(attrs.capacity);
     if (attrs.heightM != null) profile.fields.heightM = numericOrNull(attrs.heightM);
@@ -144,6 +150,11 @@ export function toSpaceProfile(listing = {}) {
       leaseDuration: category === "warehouse" ? textOrNull(meta?.duration) : null,
       specialConditions: category === "warehouse" ? textOrNull(meta?.requirements) : null,
       transferType: textOrNull(meta?.transferType),
+      rightsType: category === "shop" ? textOrNull(meta?.rightsType) : null,
+      shopFloor: category === "shop" ? textOrNull(meta?.floor) : null,
+      shopLocation: category === "shop" ? textOrNull(meta?.locationPreference) : null,
+      shopFrontage: category === "shop" ? numericOrNull(meta?.frontage) : null,
+      keyMoneyRial: category === "shop" ? numericOrNull(meta?.keyMoney) : null,
       floorPreference: textOrNull(meta?.floorPreference), specialUsage: meta?.specialUsage === true,
       minHeightM: numericOrNull(meta?.minHeight),
     };

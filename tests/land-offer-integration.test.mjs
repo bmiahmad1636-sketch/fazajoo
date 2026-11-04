@@ -22,8 +22,8 @@ test('real land details survive registration, update and typed display',()=>{
 });
 test('land note is optional and confined to supplemental section, not final step',()=>{
  const a=file('src/pages/AddParking.jsx'),e=file('src/pages/EditParking.jsx'),f=file('src/components/LandOfferFields.jsx');
- assert.match(a,/!\(\["parking", "storage", "warehouse", "land"\]\.includes\(form.category\) && !isWantedAd\)/);
- assert.match(e,/!\(\["parking", "storage", "warehouse", "land"\]\.includes\(parking\?\.category\) && !isWanted\)/);
+ assert.match(a,/!\(\["parking", "storage", "warehouse", "land", "shop"\]\.includes\(form.category\) && !isWantedAd\)/);
+ assert.match(e,/!\(\["parking", "storage", "warehouse", "land", "shop"\]\.includes\(parking\?\.category\) && !isWanted\)/);
  assert.match(a,/<LandOfferFields[^>]*note=\{form.description\}/);
  assert.match(e,/<LandOfferFields[^>]*note=\{form.description\}/);
  assert.match(f,/جزئیات تکمیلی \(اختیاری\)/);
@@ -36,7 +36,7 @@ test('land backend accepts typed offer only, with no compulsory description',()=
  const src=file('backend/src/controllers/spaces.controller.js');
  assert.match(src,/cleanLandSpaceAttributes\(body.spaceAttributes/);
  assert.match(src,/space.listingType === "offer" && space.category === "land"/);
- assert.match(src,/\["parking","storage","warehouse","land"\]\.includes\(space.category\)/);
+ assert.match(src,/\["parking","storage","warehouse","land","shop"\]\.includes\(space.category\)/);
  const body=src.match(/function validate\(space\) \{[\s\S]*?\n\}\n\nasync function list\(/);
  assert.ok(body);
  const validate=new Function('MAX_IMAGES',`${body[0].replace(/\nasync function list\($/,'')}\nreturn validate;`)(8);

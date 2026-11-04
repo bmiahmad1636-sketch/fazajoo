@@ -2652,3 +2652,76 @@ body.parking-gallery-open{overflow:hidden}
   cursor: wait;
   opacity: .66;
 }
+
+/* Phase 05C: make combined deposit + monthly rent readable on shop details.
+   Other listing categories retain their existing price layout. */
+.parking-details-hero__price--shop {
+  flex: 0 1 420px !important;
+  width: min(420px, 100%);
+  max-width: 100%;
+  min-width: 0 !important;
+  box-sizing: border-box;
+}
+.parking-details-shop-money {
+  display: grid;
+  min-width: 0;
+  width: 100%;
+  gap: 7px;
+  margin: 7px 0;
+  direction: rtl;
+  text-align: right;
+}
+.parking-details-shop-money__row {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 12px;
+  padding-block: 5px;
+}
+.parking-details-shop-money__row + .parking-details-shop-money__row {
+  border-top: 1px solid rgba(182, 120, 32, .15);
+}
+.parking-details-hero__price .parking-details-shop-money__label {
+  color: #75695e;
+  font-size: .77rem;
+  font-weight: 700;
+}
+.parking-details-shop-money__amount {
+  min-width: 0;
+  color: #ad6418;
+  font-size: 1.02rem;
+  font-weight: 900;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  unicode-bidi: isolate;
+}
+.parking-details-feature--shop-money {
+  min-height: 84px;
+}
+.parking-details-feature--shop-money .parking-details-shop-money--compact {
+  margin: 1px 0 0;
+  gap: 1px;
+}
+.parking-details-feature--shop-money .parking-details-shop-money__row {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  padding-block: 1px;
+}
+.parking-details-feature--shop-money .parking-details-shop-money__label {
+  color: #84766c;
+  font-size: .68rem;
+  font-weight: 700;
+}
+.parking-details-feature--shop-money .parking-details-shop-money__amount {
+  color: #4d443e;
+  font-size: .81rem;
+  font-weight: 900;
+  white-space: normal;
+  overflow: visible;
+}
+@media (max-width: 760px) {
+  .parking-details-hero__price--shop { width: 100%; }
+}

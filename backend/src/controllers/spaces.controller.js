@@ -7,6 +7,7 @@ const { cleanParkingSpaceAttributes } = require("../utils/parkingSpaceAttributes
 const { cleanStorageSpaceAttributes } = require("../utils/storageSpaceAttributes");
 const { cleanIndustrialSpaceAttributes } = require("../utils/industrialSpaceAttributes");
 const { cleanLandSpaceAttributes } = require("../utils/landSpaceAttributes");
+const { cleanShopSpaceAttributes } = require("../utils/shopSpaceAttributes");
 
 const MAX_IMAGES = 10;
 const HEATING_SYSTEMS = ["gasHeater", "packageRadiator", "centralHeating", "floorHeating", "electricHeater", "splitHeating"];
@@ -159,6 +160,11 @@ function clean(body = {}) {
     : (imageUrls[0] || "");
   const video = normalizeVideo(body.video);
   const mediaItems = video ? [video] : [];
+  // A typed commercial offer has one authoritative financial interpretation.
+  // Do not permit a forged generic "monthly price" to represent key money/deposit.
+  const typedShop = body.category === "shop" && body.listingType !== "wanted"
+    ? cleanShopSpaceAttributes(body.spaceAttributes, "shop", "offer") : null;
+  const shopRent = typedShop?.values?.transferType === "rent" ? typedShop.values.monthlyRentRial : null;
   return {
     listingType: body.listingType === "wanted" ? "wanted" : "offer",
     category: ["parking", "residential", "villa", "storage", "warehouse", "shop", "land", "garden", "other"].includes(body.category) ? body.category : "parking",
@@ -168,8 +174,8 @@ function clean(body = {}) {
     title: String(body.title || "").trim().slice(0, 160),
     city: String(body.city || "").trim().slice(0, 100),
     area: Math.max(0, Number(body.area) || 0),
-    price: String(body.price || "").trim().slice(0, 100),
-    priceType: ["daily", "weekly", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly",
+    price: typedShop?.schemaVersion === 1 ? (shopRent ? String(shopRent) : "") : String(body.price || "").trim().slice(0, 100),
+    priceType: typedShop?.schemaVersion === 1 ? (shopRent ? "monthly" : "negotiable") : (["daily", "weekly", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly"),
     phone: String(body.phone || "").replace(/\s/g, "").slice(0, 20),
     imageUrl,
     imageUrls,
@@ -252,7 +258,7 @@ function clean(body = {}) {
           heatingSystems: cleanSystems(body.shopDetails.heatingSystems, HEATING_SYSTEMS),
           coolingSystems: cleanSystems(body.shopDetails.coolingSystems, COOLING_SYSTEMS),
         } : {},
-    spaceAttributes: body.category === "storage" ? cleanStorageSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "warehouse" ? cleanIndustrialSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "land" ? cleanLandSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : cleanParkingSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer"),
+    spaceAttributes: body.category === "storage" ? cleanStorageSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "warehouse" ? cleanIndustrialSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "land" ? cleanLandSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "shop" ? (typedShop || cleanShopSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : cleanParkingSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer"),
     description: String(body.description || "").trim().slice(0, 5000),
     agencyNetworkConsent: body.agencyNetworkConsent === true,
     locationLat: Number.isFinite(Number(body.location?.lat)) && Number(body.location.lat) >= 24 && Number(body.location.lat) <= 40
@@ -288,13 +294,21 @@ function validate(space) {
     if (v.allowedPurposes.includes("other") && v.otherPurpose.length < 5) return "کاربرد دیگر زمین را توضیح دهید.";
     if (!space.area || !Number.isFinite(space.area)) return "مساحت واقعی زمین را وارد کنید.";
   }
+  if (space.listingType === "offer" && space.category === "shop" && space.spaceAttributes?.schemaVersion === 1) {
+    const v=space.spaceAttributes.values||{};
+    if(!v.spaceType || !v.transferType || !Array.isArray(v.allowedActivities) || !v.allowedActivities.length) return "مشخصات ضروری مغازه کامل نیست.";
+    if(v.spaceType==="other" && String(v.otherSpaceType||"").length<4) return "نوع فضای تجاری دیگر را توضیح دهید.";
+    if(v.allowedActivities.includes("other") && String(v.otherActivity||"").length<4) return "فعالیت دیگر مغازه را توضیح دهید.";
+    if(v.transferType==="key_money" && !v.rightsType) return "عنوان حق مورد واگذاری را مشخص کنید.";
+    if(!space.area || !Number.isFinite(space.area)) return "متراژ واقعی مغازه را وارد کنید.";
+  }
   if (!space.title) return "عنوان آگهی لازم است.";
   if (!space.city) return "شهر لازم است.";
   if (space.category === "residential") {
     if (!space.residentialDetails.deposit && !space.residentialDetails.monthlyRent) return "مبلغ رهن یا اجاره را وارد کنید.";
   } else if (space.priceType !== "negotiable" && !space.price) return "قیمت لازم است.";
   if (!/^09\d{9}$/.test(space.phone)) return "شماره موبایل معتبر نیست.";
-  if (!(space.listingType === "offer" && ["parking","storage","warehouse","land"].includes(space.category)) && space.description.length < 10) return "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
+  if (!(space.listingType === "offer" && ["parking","storage","warehouse","land","shop"].includes(space.category)) && space.description.length < 10) return "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
   if (space.imageUrls.length > MAX_IMAGES) return `حداکثر ${MAX_IMAGES} عکس برای هر آگهی مجاز است.`;
   if (space.listingType !== "wanted" && space.imageUrls.length === 0) return "حداقل یک تصویر برای آگهی لازم است.";
   if (space.video && (!space.video.duration || space.video.duration > 120.5)) return "مدت ویدئو باید حداکثر ۲ دقیقه باشد.";

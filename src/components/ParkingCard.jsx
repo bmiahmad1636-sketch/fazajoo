@@ -26,6 +26,7 @@ import { readResidentialRequest, residentialRequestAreaText, residentialRequestB
 import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText } from "../utils/villaRequest";
 import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText } from "../utils/gardenRequest";
 import { readOtherRequest, otherRequestAreaText, otherRequestBudgetText } from "../utils/otherRequest";
+import { shopFinancialHeadline } from "../utils/shopOffer";
 
 import "./ParkingCard.css";
 
@@ -98,6 +99,7 @@ function ParkingCard({ parking }) {
 
   const isWanted =
     listingType === "wanted";
+  const shopPriceText=!isWanted&&category==="shop"?shopFinancialHeadline(parking?.spaceAttributes):"";
 
   // Wanted land keeps its requirements in description metadata, not in
   // the generic area/price fields. Read only for this listing type.
@@ -594,7 +596,7 @@ function ParkingCard({ parking }) {
             <strong>
               {landData
                 ? (landBudgetText || "بودجه اعلام نشده")
-                : (otherBudgetText || gardenBudgetText || villaBudgetText || residentialBudgetText || residentialPrice ||
+                : (shopPriceText || otherBudgetText || gardenBudgetText || villaBudgetText || residentialBudgetText || residentialPrice ||
                   formatRialPrice(price, {
                     priceType,
                     fallback: "توافقی",

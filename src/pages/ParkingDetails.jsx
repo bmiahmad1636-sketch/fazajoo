@@ -1,6 +1,7 @@
 import { readResidentialRequest, residentialRequestAreaText, residentialRequestBudgetText, residentialRequestLabel, RESIDENTIAL_REQUEST_TYPES, RESIDENTIAL_REQUEST_FEATURES, RESIDENTIAL_FLOOR_PREFERENCES } from "../utils/residentialRequest";
 import {readLandRental,landLabel,LAND_PURPOSES,LAND_LEGAL,LAND_LOCATION,LAND_DURATION,LAND_CROPS,LAND_WATER,LAND_IRRIGATION,LAND_FEATURES,LAND_PAYMENT} from "../utils/landRental";
 import { readShopRequest, shopOptionLabel, SHOP_TYPES, SHOP_ACTIVITIES, SHOP_FLOORS, SHOP_LOCATIONS, SHOP_FEATURES, SHOP_TRANSFER } from "../utils/shopRequest";
+import {SHOP_OFFER_TYPES,SHOP_OFFER_ACTIVITIES,SHOP_OFFER_TRANSFERS,SHOP_OFFER_FLOORS,SHOP_OFFER_LOCATIONS,SHOP_OFFER_FEATURES,SHOP_RIGHTS,shopOfferLabel,shopFinancialHeadline,shopFinancialRows} from "../utils/shopOffer";
 import { readShedRequest, shedOptionLabel, SHED_TYPES, SHED_ACTIVITIES, shedActivitiesFor, SHED_ALL_FEATURES, SHED_POWER, SHED_ACCESS, SHED_DURATIONS } from "../utils/shedRequest";
 import { readParkingRequestUsage, parkingUsageLabel } from "../utils/parkingRequestUsage";
 import { readParkingRequestDetails, PARKING_COVERS, PARKING_ACCESS } from "../utils/parkingRequestDetails";
@@ -65,6 +66,15 @@ const CATEGORY_INFO = {
     icon: "✨",
   },
 };
+
+function ShopMoneyRows({ items, compact = false }) {
+  return <div className={`parking-details-shop-money${compact ? " parking-details-shop-money--compact" : ""}`} aria-label="شرایط مالی فضای تجاری">
+    {items.map(({ label, amount }) => <div className="parking-details-shop-money__row" key={label}>
+      <span className="parking-details-shop-money__label">{label}</span>
+      <bdi className="parking-details-shop-money__amount">{amount}</bdi>
+    </div>)}
+  </div>;
+}
 
 function ParkingDetails({
   parkings = [],
@@ -250,6 +260,10 @@ function ParkingDetails({
   const category =
     parking?.category || "parking";
 
+  const shopPriceRows = !isWanted && category === "shop"
+    ? shopFinancialRows(parking?.spaceAttributes)
+    : [];
+
   // Wanted-land requirements are stored in description metadata.
   const wantedResidential = isWanted && category === "residential" ? readResidentialRequest(parking?.description || "") : null;
   const residentialWantedData = wantedResidential?.hasMetadata ? wantedResidential.data : null;
@@ -350,6 +364,7 @@ function ParkingDetails({
   const villa = parking?.villaDetails || {};
   const garden = parking?.gardenDetails || {};
   const shop = parking?.shopDetails || {};
+  const hasShopAmenities = Boolean(shop.waterSupply || shop.electricitySupply || shop.threePhase || shop.cityGas || shop.landline || shop.restroom || (shop.heatingSystems||[]).length || (shop.coolingSystems||[]).length);
   const residentialTypeLabels = {
     apartment: "آپارتمان", house: "خانه", villa: "خانه ویلایی",
     suite: "سوئیت", penthouse: "پنت‌هاوس", other: "سایر مسکونی",
@@ -600,17 +615,21 @@ function ParkingDetails({
               </p>
             </div>
 
-            <div className="parking-details-hero__price">
+            <div className={`parking-details-hero__price${shopPriceRows.length ? " parking-details-hero__price--shop" : ""}`}>
               <span>
                 {isWanted ? "بودجه" : "قیمت آگهی"}
               </span>
 
-              <strong>
-                {otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
-                  priceType: parking.priceType || "monthly",
-                  fallback: "توافقی",
-                })}
-              </strong>
+              {shopPriceRows.length ? (
+                <ShopMoneyRows items={shopPriceRows} />
+              ) : (
+                <strong>
+                  {(!isWanted && category === "shop" ? shopFinancialHeadline(parking?.spaceAttributes) : "") || otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
+                    priceType: parking.priceType || "monthly",
+                    fallback: "توافقی",
+                  })}
+                </strong>
+              )}
 
               <small>
                 {isWanted
@@ -818,7 +837,7 @@ function ParkingDetails({
                     </div>
                   </div>
 
-                  <div className="parking-details-feature">
+                  <div className={`parking-details-feature${shopPriceRows.length ? " parking-details-feature--shop-money" : ""}`}>
                     <span className="parking-details-feature__icon parking-details-feature__icon--orange">
                       💰
                     </span>
@@ -828,12 +847,16 @@ function ParkingDetails({
                         {isWanted ? "بودجه" : "قیمت"}
                       </span>
 
-                      <strong>
-                        {otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
-                          priceType: parking.priceType || "monthly",
-                          fallback: "توافقی",
-                        })}
-                      </strong>
+                      {shopPriceRows.length ? (
+                        <ShopMoneyRows items={shopPriceRows} compact />
+                      ) : (
+                        <strong>
+                          {otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
+                            priceType: parking.priceType || "monthly",
+                            fallback: "توافقی",
+                          })}
+                        </strong>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1010,7 +1033,7 @@ function ParkingDetails({
                 </article>:null;
               })()}
 
-              {!(["parking", "storage", "warehouse", "land"].includes(category) && !isWanted && !String(parking.description || "").trim()) && !(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData) || (category === "other" && otherWantedData))) && (
+              {!(["parking", "storage", "warehouse", "land", "shop"].includes(category) && !isWanted && !String(parking.description || "").trim()) && !(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData) || (category === "other" && otherWantedData))) && (
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">
@@ -1116,7 +1139,33 @@ function ParkingDetails({
                 ["نوع حق",({key_money:"سرقفلی",business_right:"حق کسب یا پیشه یا تجارت",unsure:"نیازمند بررسی حقوقی"})[d.rightsType]||"تعیین نشده"],
                 ["امکانات",(d.features||[]).map(id=>shopOptionLabel(SHOP_FEATURES,id)).join("، ")||"مورد خاصی ثبت نشده"],["شرایط خاص",d.requirements||"ثبت نشده"]
               ];return <article className="parking-details-section"><div className="parking-details-section__heading"><div className="parking-details-section__icon">🏪</div><div><span>درخواست فضای تجاری</span><h2>مشخصات مغازه موردنیاز</h2></div></div><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,padding:"12px 0"}}>{rows.map(([label,value])=><div key={label} style={{padding:12,border:"1px solid #eee1d6",borderRadius:12}}><small style={{display:"block",color:"#786b60"}}>{label}</small><strong style={{whiteSpace:"pre-wrap"}}>{value}</strong></div>)}</div></article>})()}
-              {category === "shop" && !isWanted && (
+              {category === "shop" && !isWanted && parking?.spaceAttributes?.schemaVersion===1 && parking.spaceAttributes.category==="shop" && (()=>{
+                const v=parking.spaceAttributes.values||{};
+                const txt=(list,id)=>shopOfferLabel(list,id);
+                const irr=n=>Number(n)>0?`${Number(n).toLocaleString("fa-IR")} ریال`:"";
+                const rows=[
+                  ["نوع فضای تجاری",txt(SHOP_OFFER_TYPES,v.spaceType)],
+                  ["نوع دیگر",v.spaceType==="other"?v.otherSpaceType:""],
+                  ["فعالیت‌های قابل ارائه",(v.allowedActivities||[]).map(id=>txt(SHOP_OFFER_ACTIVITIES,id)).filter(Boolean).join("، ")],
+                  ["فعالیت دیگر",(v.allowedActivities||[]).includes("other")?v.otherActivity:""],
+                  ["نوع واگذاری",txt(SHOP_OFFER_TRANSFERS,v.transferType)],
+                  ["طبقه",txt(SHOP_OFFER_FLOORS,v.floor)],
+                  ["موقعیت واحد",txt(SHOP_OFFER_LOCATIONS,v.locationPreference)],
+                  ["برِ مغازه",Number(v.frontageM)>0?`${Number(v.frontageM).toLocaleString("fa-IR")} متر`:""],
+                  ["نوع حق",v.transferType==="key_money"?txt(SHOP_RIGHTS,v.rightsType):""],
+                  ["مبلغ ودیعه / رهن",["rent","full_deposit"].includes(v.transferType)?irr(v.depositRial):""],
+                  ["اجاره ماهانه",v.transferType==="rent"?irr(v.monthlyRentRial):""],
+                  ["مبلغ واگذاری حق",v.transferType==="key_money"?irr(v.keyMoneyRial):""],
+                ].filter(([,label])=>Boolean(label));
+                const amenities=(v.features||[]).map(id=>txt(SHOP_OFFER_FEATURES,id)).filter(Boolean);
+                return rows.length||amenities.length?<article className="parking-details-section">
+                  <div className="parking-details-section__heading"><div className="parking-details-section__icon">🏪</div><div><span>مشخصات اعلام‌شده توسط مالک</span><h2>ویژگی‌های واقعی فضای تجاری</h2></div></div>
+                  <div className="parking-details-residential__grid">{rows.map(([label,text])=><span key={label}><small>{label}</small><strong>{text}</strong></span>)}</div>
+                  {amenities.length>0&&<div className="parking-details-residential__amenities">{amenities.map(text=><b key={text}>✓ {text}</b>)}</div>}
+                  <p style={{fontSize:12,lineHeight:1.9,color:"#786a60"}}>فعالیت‌های اعلام‌شده، مجوز صنفی یا اعتبار حق سرقفلی را تأیید نمی‌کند. اطلاعات مالی انواع واگذاری قابل جمع با یکدیگر نیستند.</p>
+                </article>:null;
+              })()}
+              {category === "shop" && !isWanted && hasShopAmenities && (
                 <div className="parking-details-residential">
                   <h3>🏪 امکانات مغازه</h3>
                   <div className="parking-details-residential__grid">
