@@ -14,21 +14,24 @@ test('city viewport never fabricates listing coordinates',()=>{
   assert.equal(getKnownCityCenter('ناشناخته',cities),null);
   assert.equal(normalizeMapCityName('كاشان'),'کاشان');
 });
-test('changing the map viewport does not save coordinates or draw a marker',()=>{
+test('city flight updates only the map viewport; it never saves a listing pin',()=>{
   const picker=file('src/components/NeshanLocationPicker.jsx');
-  const start=picker.indexOf('const cityCenter = getKnownCityCenter(city, iranCitiesWithCoordinates);',picker.indexOf('const savedLat = value?.lat'));
-  const end=picker.indexOf('}, [city, savedLat, savedLng]);',start);
-  assert.ok(start>0 && end>start);
-  const recenter=picker.slice(start,end);
-  assert.match(recenter,/map\.jumpTo/);
-  assert.doesNotMatch(recenter,/onChange\?\.|onChangeRef\.current|drawPoint\(/);
+  const afterSavedCoordinates=picker.indexOf('const savedLng = value?.lng;');
+  const start=picker.indexOf('useEffect(() => {',afterSavedCoordinates);
+  const end=picker.indexOf('}, [city, status, savedLat, savedLng]);',start);
+  assert.ok(afterSavedCoordinates>0 && start>afterSavedCoordinates && end>start, 'city-only map effect must be present');
+  const cityEffect=picker.slice(start,end);
+  assert.match(cityEffect,/getKnownCityCenter\(name, iranCitiesWithCoordinates\)/);
+  assert.match(cityEffect,/if \(hasSavedPoint\) return undefined;/);
+  assert.match(cityEffect,/flyToCity\(map, cityCenter, 12\)/);
+  assert.doesNotMatch(cityEffect,/onChangeRef\.current|onChange\?\.|drawPoint\(|__fazajooDrawPoint|new maplibregl\.Marker/);
   assert.match(picker,/!hasSelectedLocation &&/);
 });
 test('final offer page hides description while supplementary box retains note',()=>{
   const add=file('src/pages/AddParking.jsx');
   const edit=file('src/pages/EditParking.jsx');
-  assert.match(add,/!\(\["parking", "storage"\]\.includes\(form\.category\) && !isWantedAd\) && !\(isWantedAd/);
-  assert.match(edit,/!\(\["parking", "storage"\]\.includes\(parking\?\.category\) && !isWanted\) && !\(isWanted/);
+  assert.match(add,/!\(\["parking", "storage", "warehouse", "land"\]\.includes\(form\.category\) && !isWantedAd\) && !\(isWantedAd/);
+  assert.match(edit,/!\(\["parking", "storage", "warehouse", "land"\]\.includes\(parking\?\.category\) && !isWanted\) && !\(isWanted/);
   assert.match(add,/<ParkingOfferFields[^>]*note=\{form\.description\}/);
   assert.match(edit,/<ParkingOfferFields[^>]*note=\{form\.description\}/);
   const comp=file('src/components/ParkingOfferFields.jsx');
@@ -46,11 +49,11 @@ test('backend validates a blank or very short parking offer note correctly',()=>
   assert.equal(validate({...base,description:'کوتاه'}),'');
   // Storage offers also have a typed, optional note; legacy storage offers remain editable.
   assert.equal(validate({...base,category:'storage',spaceAttributes:{}}),'');
-  assert.match(validate({...base,category:'warehouse',spaceAttributes:{}}),/توضیحات/);
+  assert.equal(validate({...base,category:'warehouse',spaceAttributes:{}}),'');
 });
 test('public details no-pin state hides map and empty description',()=>{
   const d=file('src/pages/ParkingDetails.jsx');
   assert.match(d,/parking\.location\?\.lat != null &&\s*parking\.location\?\.lng != null && \(/);
   assert.match(d,/نقطه‌ای روی نقشه ثبت نشده است/);
-  assert.match(d,/!\(\["parking", "storage"\]\.includes\(category\) && !isWanted && !String\(parking\.description \|\| ""\)\.trim\(\)\)/);
+  assert.match(d,/!\(\["parking", "storage", "warehouse", "land"\]\.includes\(category\) && !isWanted && !String\(parking\.description \|\| ""\)\.trim\(\)\)/);
 });

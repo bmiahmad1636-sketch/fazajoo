@@ -50,14 +50,30 @@ export function compareSpaceProfiles(wanted, offer) {
     }
     if (wanted.category === "shop") requireCheck("shop-transfer", fields.transferType, available.transferType);
     if (wanted.category === "warehouse") {
-      requireCheck("industrial-activity", fields.activity, available.allowedActivities, (need, actual) => Array.isArray(actual) && actual.includes(need));
+      // Contract duration and prose constraints cannot be inferred from physical features.
+      if (fields.leaseDuration) unknown.push("industrial-duration-review");
+      if (fields.specialConditions) unknown.push("industrial-special-conditions-review");
+      // "other" means open-ended free text. Never declare it compatible by ID alone.
+      if (fields.activity === "other") unknown.push("industrial-other-activity-review");
+      else requireCheck("industrial-activity", fields.activity, available.allowedActivities, (need, actual) => Array.isArray(actual) && actual.includes(need));
       requireCheck("industrial-min-height", fields.minHeightM, available.heightM, (need, actual) => actual >= need);
-      requireCheck("industrial-power", fields.power, available.power, (need, actual) => need === actual || (need === "single" && actual === "three"));
+      requireCheck("industrial-power", fields.power, available.power, (need, actual) => need === actual || actual === "both");
+      if (fields.power === "three" && fields.powerCapacityKw != null) {
+        requireCheck("industrial-power-capacity", fields.powerCapacityKw, available.powerCapacityKw, (need, actual) => actual >= need);
+      }
       requireCheck("industrial-vehicle-access", fields.vehicleAccess, available.vehicleAccess, (need, actual) => ["van", "truck", "trailer"].indexOf(actual) >= ["van", "truck", "trailer"].indexOf(need));
     }
   }
   if (wanted.category === "garden") requireCheck("garden-purpose", fields.purpose, available.allowedPurposes, (need, actual) => Array.isArray(actual) && actual.includes(need));
-  if (wanted.category === "land") requireCheck("land-purpose", fields.primaryPurpose, available.allowedPurposes, (need, actual) => Array.isArray(actual) && actual.includes(need));
+  if (wanted.category === "land") {
+    // 'Other' is free text; checking the ID alone would be a false positive.
+    if (fields.primaryPurpose === "other") unknown.push("land-other-purpose-review");
+    else requireCheck("land-purpose", fields.primaryPurpose, available.allowedPurposes, (need, actual) => Array.isArray(actual) && actual.includes(need));
+    requireCheck("land-legal-use", fields.legalUse, available.legalUse === "other" ? null : available.legalUse);
+    requireCheck("land-location-type", fields.locationType, available.locationType);
+    // A landlord's advertised activity is never equivalent to a land-use permit.
+    if (fields.primaryPurpose) unknown.push("land-permit-review");
+  }
   if (wanted.category === "villa") requireCheck("villa-type", fields.accommodationType, available.accommodationType);
   if (wanted.category === "residential" && fields.floorPreference && fields.floorPreference !== "any") unknown.push("residential-floor-review");
   // Absence from a legacy checklist is NOT a verified negative.

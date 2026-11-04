@@ -5,6 +5,8 @@ const { recordContactReveal } = require("../services/securityMonitoring.service"
 const storage = require("../services/storage.service");
 const { cleanParkingSpaceAttributes } = require("../utils/parkingSpaceAttributes");
 const { cleanStorageSpaceAttributes } = require("../utils/storageSpaceAttributes");
+const { cleanIndustrialSpaceAttributes } = require("../utils/industrialSpaceAttributes");
+const { cleanLandSpaceAttributes } = require("../utils/landSpaceAttributes");
 
 const MAX_IMAGES = 10;
 const HEATING_SYSTEMS = ["gasHeater", "packageRadiator", "centralHeating", "floorHeating", "electricHeater", "splitHeating"];
@@ -250,7 +252,7 @@ function clean(body = {}) {
           heatingSystems: cleanSystems(body.shopDetails.heatingSystems, HEATING_SYSTEMS),
           coolingSystems: cleanSystems(body.shopDetails.coolingSystems, COOLING_SYSTEMS),
         } : {},
-    spaceAttributes: body.category === "storage" ? cleanStorageSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : cleanParkingSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer"),
+    spaceAttributes: body.category === "storage" ? cleanStorageSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "warehouse" ? cleanIndustrialSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "land" ? cleanLandSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : cleanParkingSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer"),
     description: String(body.description || "").trim().slice(0, 5000),
     agencyNetworkConsent: body.agencyNetworkConsent === true,
     locationLat: Number.isFinite(Number(body.location?.lat)) && Number(body.location.lat) >= 24 && Number(body.location.lat) <= 40
@@ -274,13 +276,25 @@ function validate(space) {
     if (v.allowedPurposes.includes("other") && v.otherPurpose.length < 5) return "نوع کالای خاص انبار را توضیح دهید.";
     if (!space.area || !Number.isFinite(space.area)) return "متراژ واقعی انبار را وارد کنید.";
   }
+  if (space.listingType === "offer" && space.category === "warehouse" && space.spaceAttributes?.schemaVersion === 1) {
+    const v = space.spaceAttributes.values || {};
+    if (!v.spaceType || !v.power || !Array.isArray(v.allowedActivities) || !v.allowedActivities.length) return "مشخصات ضروری سوله یا کارگاه کامل نیست.";
+    if (v.allowedActivities.includes("other") && v.otherActivity.length < 5) return "فعالیت خاص سوله یا کارگاه را توضیح دهید.";
+    if (!space.area || !Number.isFinite(space.area)) return "متراژ واقعی سوله یا کارگاه را وارد کنید.";
+  }
+  if (space.listingType === "offer" && space.category === "land" && space.spaceAttributes?.schemaVersion === 1) {
+    const v=space.spaceAttributes.values || {};
+    if (!v.landType || !v.accessRoad || !Array.isArray(v.allowedPurposes) || !v.allowedPurposes.length) return "مشخصات ضروری زمین کامل نیست.";
+    if (v.allowedPurposes.includes("other") && v.otherPurpose.length < 5) return "کاربرد دیگر زمین را توضیح دهید.";
+    if (!space.area || !Number.isFinite(space.area)) return "مساحت واقعی زمین را وارد کنید.";
+  }
   if (!space.title) return "عنوان آگهی لازم است.";
   if (!space.city) return "شهر لازم است.";
   if (space.category === "residential") {
     if (!space.residentialDetails.deposit && !space.residentialDetails.monthlyRent) return "مبلغ رهن یا اجاره را وارد کنید.";
   } else if (space.priceType !== "negotiable" && !space.price) return "قیمت لازم است.";
   if (!/^09\d{9}$/.test(space.phone)) return "شماره موبایل معتبر نیست.";
-  if (!(space.listingType === "offer" && ["parking","storage"].includes(space.category)) && space.description.length < 10) return "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
+  if (!(space.listingType === "offer" && ["parking","storage","warehouse","land"].includes(space.category)) && space.description.length < 10) return "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
   if (space.imageUrls.length > MAX_IMAGES) return `حداکثر ${MAX_IMAGES} عکس برای هر آگهی مجاز است.`;
   if (space.listingType !== "wanted" && space.imageUrls.length === 0) return "حداقل یک تصویر برای آگهی لازم است.";
   if (space.video && (!space.video.duration || space.video.duration > 120.5)) return "مدت ویدئو باید حداکثر ۲ دقیقه باشد.";

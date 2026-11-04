@@ -9,6 +9,10 @@ import NeshanLocationPicker from "../components/NeshanLocationPicker";
 import ParkingRequestUsageFields from "../components/ParkingRequestUsageFields";
 import ParkingOfferFields from "../components/ParkingOfferFields";
 import StorageOfferFields from "../components/StorageOfferFields";
+import IndustrialOfferFields from "../components/IndustrialOfferFields";
+import LandOfferFields from "../components/LandOfferFields";
+import {LAND_OFFER_DEFAULT,validateLandOffer,makeLandAttributes,landOfferLabel,LAND_OFFER_TYPES,LAND_OFFER_ROADS} from "../utils/landOffer";
+import { INDUSTRIAL_OFFER_DEFAULT, validateIndustrialOffer, makeIndustrialAttributes, industrialLabel, INDUSTRIAL_TYPES, INDUSTRIAL_POWER } from "../utils/industrialOffer";
 import { STORAGE_OFFER_DEFAULT, validateStorageOffer, makeStorageAttributes, storageOfferLabel, STORAGE_TYPES, STORAGE_ACCESS } from "../utils/storageOffer";
 import { PARKING_OFFER_DEFAULT, validateParkingOffer, makeParkingAttributes, parkingOfferLabel, PARKING_OFFER_USAGE, PARKING_OFFER_COVER, PARKING_OFFER_ACCESS } from "../utils/parkingOffer";
 import ParkingRequestDetailsFields from "../components/ParkingRequestDetailsFields";
@@ -48,6 +52,8 @@ const INITIAL_FORM = {
   listingType: "offer",
   parkingOffer: { ...PARKING_OFFER_DEFAULT, securityFeatures: [] },
   storageOffer: { ...STORAGE_OFFER_DEFAULT, allowedPurposes: [], features: [] },
+  industrialOffer: { ...INDUSTRIAL_OFFER_DEFAULT, allowedActivities: [], features: [] },
+  landOffer: {...LAND_OFFER_DEFAULT,allowedPurposes:[],features:[],waterSources:[]},
   parkingRequestUsage: "",
   parkingOtherUsage: "",
   parkingRequestDetails: { ...EMPTY_PARKING_REQUEST },
@@ -249,6 +255,16 @@ function AddParking() {
         if (error) newErrors.storageOffer = error;
         if (!form.area || !Number.isFinite(Number(form.area)) || Number(form.area) <= 0) newErrors.area = "متراژ واقعی انبار را وارد کنید.";
       }
+      if (!isWantedAd && form.category === "warehouse") {
+        const error = validateIndustrialOffer(form.industrialOffer);
+        if (error) newErrors.industrialOffer = error;
+        if (!form.area || !Number.isFinite(Number(form.area)) || Number(form.area) <= 0) newErrors.area = "متراژ واقعی سوله یا کارگاه را وارد کنید.";
+      }
+      if (!isWantedAd && form.category === "land") {
+        const error = validateLandOffer(form.landOffer);
+        if (error) newErrors.landOffer = error;
+        if (!form.area || !Number.isFinite(Number(form.area)) || Number(form.area) <= 0) newErrors.area = "مساحت واقعی زمین را وارد کنید.";
+      }
       if (isWantedAd && form.category === "residential") { const err = validateResidentialRequest(form.residentialRequest); if (err) newErrors.residentialRequest = err; }
       if (isWantedAd && form.category === "villa") { const err = validateVillaRequest(form.villaRequest); if (err) newErrors.villaRequest = err; }
       if (isWantedAd && form.category === "garden") { const err = validateGardenRequest(form.gardenRequest); if (err) newErrors.gardenRequest = err; }
@@ -329,7 +345,7 @@ function AddParking() {
       }
 
       if (
-        !(["parking", "storage"].includes(form.category) && !isWantedAd) && !(isWantedAd && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(form.category)) && form.description.trim().length <
+        !(["parking", "storage", "warehouse", "land"].includes(form.category) && !isWantedAd) && !(isWantedAd && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(form.category)) && form.description.trim().length <
         10
       ) {
         newErrors.description =
@@ -463,7 +479,7 @@ function AddParking() {
               ? (isWantedAd ? residentialRequestLegacyDetails(form.residentialRequest) : form.residentialDetails)
               : {},
           gardenDetails: form.category === "garden" && !isWantedAd ? form.gardenDetails : {},
-          spaceAttributes: !isWantedAd && form.category === "parking" ? makeParkingAttributes(form.parkingOffer) : !isWantedAd && form.category === "storage" ? makeStorageAttributes(form.storageOffer) : null,
+          spaceAttributes: !isWantedAd && form.category === "parking" ? makeParkingAttributes(form.parkingOffer) : !isWantedAd && form.category === "storage" ? makeStorageAttributes(form.storageOffer) : !isWantedAd && form.category === "warehouse" ? makeIndustrialAttributes(form.industrialOffer) : !isWantedAd && form.category === "land" ? makeLandAttributes(form.landOffer) : null,
           shopDetails: form.category === "shop" ? form.shopDetails : {},
           villaDetails:
             form.category === "villa" && !isWantedAd
@@ -892,6 +908,16 @@ function AddParking() {
                         onNoteChange={(description) => setForm(current => ({ ...current, description }))}
                         onChange={(storageOffer) => { setForm(current=>({...current,storageOffer})); setErrors(current=>({...current,storageOffer:""})); }} />
                     )}
+                    {form.category === "warehouse" && !isWantedAd && (
+                      <IndustrialOfferFields value={form.industrialOffer} note={form.description} disabled={loading} error={errors.industrialOffer}
+                        onNoteChange={(description) => setForm(current => ({ ...current, description }))}
+                        onChange={(industrialOffer) => { setForm(current=>({...current,industrialOffer})); setErrors(current=>({...current,industrialOffer:""})); }} />
+                    )}
+                    {form.category === "land" && !isWantedAd && (
+                      <LandOfferFields value={form.landOffer} note={form.description} disabled={loading} error={errors.landOffer}
+                        onNoteChange={(description)=>setForm(current=>({...current,description}))}
+                        onChange={(landOffer)=>{setForm(current=>({...current,landOffer}));setErrors(current=>({...current,landOffer:""}));}}/>
+                    )}
                     {form.category === "residential" && !isWantedAd && (
                       <ResidentialFields
                         value={form.residentialDetails}
@@ -1044,8 +1070,8 @@ function AddParking() {
                       {!((isWantedAd && form.category === "land") || (isWantedAd && ["storage", "warehouse", "parking", "shop", "residential", "villa", "garden", "other"].includes(form.category))) && (
                       <div className="add-parking-field">
                         <label htmlFor="area">
-                          {!isWantedAd && form.category === "storage" ? "متراژ واقعی انبار" : "متراژ"}
-                          {!isWantedAd && form.category === "storage" && <span>*</span>}
+                          {!isWantedAd && form.category === "storage" ? "متراژ واقعی انبار" : !isWantedAd && form.category === "warehouse" ? "متراژ واقعی سوله یا کارگاه" : !isWantedAd && form.category === "land" ? "مساحت واقعی زمین (مترمربع)" : "متراژ"}
+                          {!isWantedAd && ["storage", "warehouse", "land"].includes(form.category) && <span>*</span>}
                         </label>
 
                         <div
@@ -1304,7 +1330,7 @@ function AddParking() {
                             ? "بودجه، شماره تماس و اولویت‌های ضروری خودت را کامل کن."
                             : form.category === "residential"
                               ? "شماره تماس و توضیحات نهایی ملک را کامل کن."
-                              : form.category === "parking" ? "قیمت و شماره تماس را وارد کن؛ نکات خاص را در مرحله اول می‌توانی بنویسی."
+                              : ["parking", "storage", "warehouse", "land"].includes(form.category) ? "قیمت و شماره تماس را وارد کن؛ نکات خاص را در مرحله اول می‌توانی بنویسی."
                               : "قیمت، شماره تماس و جزئیات آگهی را کامل کن."}
                         </p>
                       </div>
@@ -1423,7 +1449,7 @@ function AddParking() {
                       </div>
                     </div>
 
-                    {!(["parking", "storage"].includes(form.category) && !isWantedAd) && !(isWantedAd && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(form.category)) && (
+                    {!(["parking", "storage", "warehouse", "land"].includes(form.category) && !isWantedAd) && !(isWantedAd && ["storage", "warehouse", "parking", "shop", "land", "residential", "villa", "garden", "other"].includes(form.category)) && (
                     <div className="add-parking-field">
                       <label htmlFor="description">
                         توضیحات آگهی
@@ -1604,6 +1630,16 @@ function AddParking() {
                           {form.category === "storage" && !isWantedAd && (
                             <p style={{fontSize:12,color:"#7c4c2e",margin:"4px 0 9px",lineHeight:1.9}}>
                               {[storageOfferLabel(STORAGE_TYPES,form.storageOffer.spaceType), storageOfferLabel(STORAGE_ACCESS,form.storageOffer.access)].filter(Boolean).join(" • ")}
+                            </p>
+                          )}
+                          {form.category === "land" && !isWantedAd && (
+                            <p style={{fontSize:12,color:"#7c4c2e",margin:"4px 0 9px",lineHeight:1.9}}>
+                              {[landOfferLabel(LAND_OFFER_TYPES,form.landOffer.landType),landOfferLabel(LAND_OFFER_ROADS,form.landOffer.accessRoad)].filter(Boolean).join(" • ")}
+                            </p>
+                          )}
+                          {form.category === "warehouse" && !isWantedAd && (
+                            <p style={{fontSize:12,color:"#7c4c2e",margin:"4px 0 9px",lineHeight:1.9}}>
+                              {[industrialLabel(INDUSTRIAL_TYPES,form.industrialOffer.spaceType), industrialLabel(INDUSTRIAL_POWER,form.industrialOffer.power)].filter(Boolean).join(" • ")}
                             </p>
                           )}
 

@@ -6,6 +6,8 @@ import { readParkingRequestUsage, parkingUsageLabel } from "../utils/parkingRequ
 import { readParkingRequestDetails, PARKING_COVERS, PARKING_ACCESS } from "../utils/parkingRequestDetails";
 import { PARKING_OFFER_USAGE, PARKING_OFFER_COVER, PARKING_OFFER_ACCESS, PARKING_OFFER_STYLE, PARKING_OFFER_SECURITY, parkingOfferLabel } from "../utils/parkingOffer";
 import { STORAGE_TYPES, STORAGE_PURPOSES, STORAGE_ACCESS, STORAGE_VEHICLES, STORAGE_LOADING, STORAGE_FEATURES, storageOfferLabel } from "../utils/storageOffer";
+import { INDUSTRIAL_TYPES, INDUSTRIAL_POWER, INDUSTRIAL_VEHICLES, INDUSTRIAL_FLOORS, INDUSTRIAL_HOURS, INDUSTRIAL_FEATURE_OPTIONS, industrialLabel } from "../utils/industrialOffer";
+import {LAND_OFFER_TYPES,LAND_OFFER_PURPOSES,LAND_OFFER_ROADS,LAND_OFFER_LEGAL,LAND_OFFER_LOCATION,LAND_OFFER_SLOPES,LAND_OFFER_VEHICLES,LAND_OFFER_WATER,LAND_OFFER_FEATURES,LAND_OFFER_CROPS,LAND_OFFER_IRRIGATION,landOfferLabel} from "../utils/landOffer";
 import { readWarehouseRequest, warehouseOptionLabel, WAREHOUSE_PURPOSES, WAREHOUSE_TYPES, WAREHOUSE_ACCESS, WAREHOUSE_DURATIONS, WAREHOUSE_FEATURES } from "../utils/warehouseRequest";
 import { climateLabels } from "../components/ClimateFields";
 import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText, villaRequestLabel, VILLA_REQUEST_TYPES, VILLA_REQUEST_STAYS, VILLA_REQUEST_AMENITIES } from "../utils/villaRequest";
@@ -20,6 +22,7 @@ import {
 } from "react-router-dom";
 import { getCurrentSessionUser, subscribeToAuth } from "../services/authService";
 import { deleteSpace, getSpaceContact } from "../services/spaceService";
+import { addFavorite, getFavoriteStatus, removeFavorite } from "../services/favoriteService";
 import { formatRialPrice } from "../utils/priceFormatter";
 
 import TrustSafetyActions from "../components/TrustSafetyActions";
@@ -85,6 +88,10 @@ function ParkingDetails({
   const [authLoading, setAuthLoading] =
     useState(true);
 
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(true);
+  const [favoriteChanging, setFavoriteChanging] = useState(false);
+
   const [deleting, setDeleting] =
     useState(false);
 
@@ -110,6 +117,69 @@ function ParkingDetails({
         String(item.id) === String(id)
     );
   }, [parkings, id]);
+
+  // Read the same server-side favorite state used on the homepage cards.
+  // Re-read when another card/page changes it, or authentication changes.
+  useEffect(() => {
+    let active = true;
+    const refresh = async (sessionUser = getCurrentSessionUser()) => {
+      if (!sessionUser || !id) {
+        if (active) {
+          setIsFavorite(false);
+          setFavoriteLoading(false);
+        }
+        return;
+      }
+      if (active) setFavoriteLoading(true);
+      try {
+        const next = await getFavoriteStatus(id);
+        if (active) setIsFavorite(next);
+      } catch (error) {
+        console.error("خطا در بررسی علاقه‌مندی:", error);
+        if (active && error?.status === 401) setIsFavorite(false);
+      } finally {
+        if (active) setFavoriteLoading(false);
+      }
+    };
+    refresh();
+    const unsubscribeAuth = subscribeToAuth((sessionUser) => refresh(sessionUser));
+    const handleFavoritesChanged = () => refresh();
+    window.addEventListener("fazajoo:favorites-changed", handleFavoritesChanged);
+    return () => {
+      active = false;
+      unsubscribeAuth();
+      window.removeEventListener("fazajoo:favorites-changed", handleFavoritesChanged);
+    };
+  }, [id]);
+
+  const handleFavorite = async () => {
+    if (favoriteLoading || favoriteChanging || !id) return;
+    if (!getCurrentSessionUser()) {
+      showInSiteAlert("برای ذخیره آگهی ابتدا وارد حساب شوید.");
+      navigate("/login");
+      return;
+    }
+    setFavoriteChanging(true);
+    try {
+      if (isFavorite) {
+        await removeFavorite(id);
+        setIsFavorite(false);
+      } else {
+        await addFavorite(id);
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      console.error("خطا در تغییر علاقه‌مندی:", error);
+      if (error?.status === 401) {
+        showInSiteAlert("نشست شما منقضی شده است. دوباره وارد شوید.");
+        navigate("/login");
+      } else {
+        showInSiteAlert(error?.message || "تغییر علاقه‌مندی انجام نشد. دوباره تلاش کنید.");
+      }
+    } finally {
+      setFavoriteChanging(false);
+    }
+  };
 
   const galleryImages = useMemo(() => {
     const images = Array.isArray(parking?.imageUrls)
@@ -478,10 +548,14 @@ function ParkingDetails({
 
               <button
                 type="button"
-                aria-label="افزودن به علاقه‌مندی‌ها"
+                onClick={handleFavorite}
+                disabled={favoriteLoading || favoriteChanging}
+                aria-pressed={isFavorite}
+                aria-label={isFavorite ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}
+                className={isFavorite ? "parking-details-favorite--active" : ""}
               >
-                <span>♡</span>
-                ذخیره آگهی
+                <span aria-hidden="true">{isFavorite ? "♥" : "♡"}</span>
+                {favoriteChanging ? "در حال ثبت..." : isFavorite ? "ذخیره‌شده" : "ذخیره آگهی"}
               </button>
             </div>
           </div>
@@ -887,7 +961,56 @@ function ParkingDetails({
                 </article> : null;
               })()}
 
-              {!(["parking", "storage"].includes(category) && !isWanted && !String(parking.description || "").trim()) && !(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData) || (category === "other" && otherWantedData))) && (
+              {category === "warehouse" && !isWanted && parking?.spaceAttributes?.schemaVersion === 1 && parking.spaceAttributes.category === "warehouse" && (() => {
+                const d = parking.spaceAttributes.values || {};
+                const rows = [
+                  ["نوع فضای موجود", industrialLabel(INDUSTRIAL_TYPES,d.spaceType)],
+                  ["فعالیت‌های قابل انجام", (Array.isArray(d.allowedActivities)?d.allowedActivities:[]).map(id=>shedOptionLabel(shedActivitiesFor(d.spaceType),id)).filter(v=>v!=="مشخص نشده").join("، ")],
+                  ["فعالیت خاص", (d.allowedActivities||[]).includes("other") ? d.otherActivity : ""],
+                  ["برق موجود", industrialLabel(INDUSTRIAL_POWER,d.power)],
+                  ["توان برق سه‌فاز", Number(d.powerCapacityKw)>0 && ["three","both"].includes(d.power) ? `${Number(d.powerCapacityKw).toLocaleString("fa-IR")} کیلووات` : ""],
+                  ["ارتفاع مفید", Number(d.heightM)>0 ? `${Number(d.heightM).toLocaleString("fa-IR")} متر` : ""],
+                  ["دسترسی باربری", industrialLabel(INDUSTRIAL_VEHICLES,d.vehicleAccess)],
+                  ["نوع کف", industrialLabel(INDUSTRIAL_FLOORS,d.flooring)],
+                  ["ساعت استفاده", industrialLabel(INDUSTRIAL_HOURS,d.operationHours)],
+                  ["ظرفیت جرثقیل", Number(d.craneCapacityTons)>0 && (d.features||[]).includes("crane") ? `${Number(d.craneCapacityTons).toLocaleString("fa-IR")} تن` : ""],
+                ].filter(([,text])=>Boolean(text));
+                const amenities = (Array.isArray(d.features)?d.features:[]).map(id=>industrialLabel(INDUSTRIAL_FEATURE_OPTIONS,id)).filter(Boolean);
+                return rows.length || amenities.length ? <article className="parking-details-section">
+                  <div className="parking-details-section__heading"><div className="parking-details-section__icon">🏭</div><div><span>اطلاعات واقعی عرضه</span><h2>ویژگی‌های سوله و کارگاه</h2></div></div>
+                  <div className="parking-details-residential__grid">{rows.map(([name,text])=><span key={name}><small>{name}</small><strong>{text}</strong></span>)}</div>
+                  {amenities.length>0 && <div className="parking-details-residential__amenities">{amenities.map(text=><b key={text}>✓ {text}</b>)}</div>}
+                </article> : null;
+              })()}
+
+              {category === "land" && !isWanted && parking?.spaceAttributes?.schemaVersion === 1 && parking.spaceAttributes.category === "land" && (()=>{
+                const v=parking.spaceAttributes.values || {};
+                const pick=(list,id)=>landOfferLabel(list,id);
+                const rows=[
+                  ["وضعیت زمین",pick(LAND_OFFER_TYPES,v.landType)],
+                  ["کاربردهای اعلام‌شده",(Array.isArray(v.allowedPurposes)?v.allowedPurposes:[]).map(x=>pick(LAND_OFFER_PURPOSES,x)).filter(Boolean).join("، ")],
+                  ["توضیح کاربرد دیگر",(v.allowedPurposes||[]).includes("other")?v.otherPurpose:""],
+                  ["راه دسترسی",pick(LAND_OFFER_ROADS,v.accessRoad)],
+                  ["کاربری طبق مدارک (اظهار مالک)",pick(LAND_OFFER_LEGAL,v.legalUse)],
+                  ["موقعیت بافت",pick(LAND_OFFER_LOCATION,v.locationType)],
+                  ["شیب زمین",pick(LAND_OFFER_SLOPES,v.slope)],
+                  ["ورود خودرو",pick(LAND_OFFER_VEHICLES,v.vehicleAccess)],
+                  ["بر زمین",Number(v.frontageM)>0?`${Number(v.frontageM).toLocaleString("fa-IR")} متر`:""],
+                  ["مبلغ پول پیش",Number(v.depositRial)>0?`${Number(v.depositRial).toLocaleString("fa-IR")} ریال`:""],
+                  ["منابع آب",(Array.isArray(v.waterSources)?v.waterSources:[]).map(x=>pick(LAND_OFFER_WATER,x)).filter(Boolean).join("، ")],
+                  ["روش آبیاری",pick(LAND_OFFER_IRRIGATION,v.irrigation)],
+                  ["نوع کشت",(Array.isArray(v.crops)?v.crops:[]).map(x=>pick(LAND_OFFER_CROPS,x)).filter(Boolean).join("، ")],
+                ].filter(([,text])=>Boolean(text));
+                const amenities=(Array.isArray(v.features)?v.features:[]).map(x=>pick(LAND_OFFER_FEATURES,x)).filter(Boolean);
+                return rows.length||amenities.length?<article className="parking-details-section">
+                  <div className="parking-details-section__heading"><div className="parking-details-section__icon">🌱</div><div><span>مشخصات اعلام‌شده توسط مالک</span><h2>ویژگی‌های واقعی زمین</h2></div></div>
+                  <div className="parking-details-residential__grid">{rows.map(([name,text])=><span key={name}><small>{name}</small><strong>{text}</strong></span>)}</div>
+                  {amenities.length>0&&<div className="parking-details-residential__amenities">{amenities.map(text=><b key={text}>✓ {text}</b>)}</div>}
+                  <p style={{fontSize:12,lineHeight:1.9,color:"#786a60"}}>کاربردهای اعلام‌شده، به معنی تأیید کاربری قانونی یا مجوز فعالیت نیست.</p>
+                </article>:null;
+              })()}
+
+              {!(["parking", "storage", "warehouse", "land"].includes(category) && !isWanted && !String(parking.description || "").trim()) && !(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData) || (category === "other" && otherWantedData))) && (
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">
@@ -904,7 +1027,7 @@ function ParkingDetails({
             <h2>
                       {isWanted
                         ? `توضیحات نیاز به ${visibleCategory}`
-                        : category === "parking" ? "نکات تکمیلی پارکینگ" : category === "storage" ? "نکات تکمیلی انبار" : `توضیحات ${visibleCategory}`}
+                        : category === "parking" ? "نکات تکمیلی پارکینگ" : category === "storage" ? "نکات تکمیلی انبار" : category === "warehouse" ? "نکات تکمیلی سوله یا کارگاه" : category === "land" ? "نکات تکمیلی زمین" : `توضیحات ${visibleCategory}`}
                     </h2>
                   </div>
                 </div>

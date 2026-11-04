@@ -8,12 +8,11 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "./NeshanLocationPicker.css";
 import iranCitiesWithCoordinates from "../data/iran-cities-with-coordinates.json";
 import { getKnownCityCenter } from "../utils/mapCityView.js";
+import { animateCityFlight } from "../utils/mapCityFlight.js";
 
 const DEFAULT_CENTER = [53.5, 32.4]; // Iran-wide fallback; never a property location
 
 
-
-const NESHAN_SEARCH_URL = "https://api.neshan.org/v1/search";
 
 function normalizeCityName(value = "") {
   return String(value)
@@ -37,6 +36,19 @@ export default function NeshanLocationPicker({
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const onChangeRef = useRef(onChange);
+  const lastFormCityRef = useRef(normalizeCityName(city));
+  const cancelCityFlightRef = useRef(null);
+
+  const stopCityFlight = () => {
+    cancelCityFlightRef.current?.();
+    cancelCityFlightRef.current = null;
+  };
+  const flyToCity = (map, center, zoom = 12) => {
+    stopCityFlight();
+    const reducedMotion = typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    cancelCityFlightRef.current = animateCityFlight(map, center, { zoom, reducedMotion });
+  };
 
   const [status, setStatus] = useState("loading");
   const [geoStatus, setGeoStatus] = useState("idle");
@@ -44,20 +56,10 @@ export default function NeshanLocationPicker({
   const [showLocationConsent, setShowLocationConsent] =
     useState(false);
 
-  const [cityQuery, setCityQuery] = useState(city || "");
-  const [cityMessage, setCityMessage] = useState("");
-  const [citySearchStatus, setCitySearchStatus] =
-    useState("idle");
 
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
-
-  useEffect(() => {
-    if (city) {
-      setCityQuery(city);
-    }
-  }, [city]);
 
   // Map lifecycle
   // oxlint-disable react-hooks/exhaustive-deps
@@ -148,6 +150,9 @@ export default function NeshanLocationPicker({
         }, 50);
       });
 
+      // A user's drag must interrupt the flight, not trigger its second phase.
+      map.on("dragstart", stopCityFlight);
+
       map.on("error", (event) => {
         if (!map.isStyleLoaded()) setStatus("error");
         console.error(
@@ -160,6 +165,7 @@ export default function NeshanLocationPicker({
         if (disabled) {
           return;
         }
+        stopCityFlight();
 
         const lat = Number(
           event.lngLat.lat.toFixed(6)
@@ -187,6 +193,7 @@ export default function NeshanLocationPicker({
 
     return () => {
       cancelled = true;
+      stopCityFlight();
 
       if (markerRef.current) {
         markerRef.current.remove();
@@ -206,17 +213,30 @@ export default function NeshanLocationPicker({
   // without recreating the map or changing the saved value.
   const savedLat = value?.lat;
   const savedLng = value?.lng;
+  // A city chosen in the form travels through a wide overview before zooming in.
+  // Ignore initial hydration, incomplete city names, and already-pinned listings.
+  // The timer prevents a separate flight for each keystroke in the city field.
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
+    if (status !== "ready") return undefined;
+    const name = normalizeCityName(city);
+    if (name === lastFormCityRef.current) return undefined;
+    lastFormCityRef.current = name;
+    stopCityFlight();
+
     const hasSavedPoint = savedLat !== null && savedLat !== undefined && savedLat !== "" &&
       savedLng !== null && savedLng !== undefined && savedLng !== "" &&
       Number.isFinite(Number(savedLat)) && Number.isFinite(Number(savedLng));
-    if (hasSavedPoint) return;
-    const cityCenter = getKnownCityCenter(city, iranCitiesWithCoordinates);
-    map.jumpTo({ center: cityCenter || DEFAULT_CENTER, zoom: cityCenter ? 12 : 5 });
-    // Viewport-only change: never invoke onChange or draw a marker.
-  }, [city, savedLat, savedLng]);
+    if (hasSavedPoint) return undefined;
+    const cityCenter = getKnownCityCenter(name, iranCitiesWithCoordinates);
+    if (!cityCenter) return undefined;
+
+    const delay = window.setTimeout(() => {
+      const map = mapRef.current;
+      if (map) flyToCity(map, cityCenter, 12);
+    }, 350);
+    return () => window.clearTimeout(delay);
+    // Viewport-only: no onChange, no stored coordinates and no auto-marker.
+  }, [city, status, savedLat, savedLng]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -239,6 +259,7 @@ export default function NeshanLocationPicker({
     const lng = Number(savedLng);
     if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return;
 
+    stopCityFlight();
     map.__fazajooDrawPoint?.(lat, lng);
     const current = map.getCenter();
     if (Math.abs(current.lat - lat) > 0.00001 || Math.abs(current.lng - lng) > 0.00001) {
@@ -260,6 +281,7 @@ export default function NeshanLocationPicker({
         return;
       }
       const map = mapRef.current;
+      stopCityFlight();
       if (map) map.flyTo({ center: [lng, lat], zoom: accuracy <= 100 ? 16 : 13, essential: true });
       // This only pans the map; the user chooses the actual listing location manually.
       setGeoStatus("success");
@@ -274,164 +296,6 @@ export default function NeshanLocationPicker({
         enableHighAccuracy: false, timeout: 15000, maximumAge: 300000,
       });
     }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
-  };
-
-  const jumpToCity = async () => {
-    const map = mapRef.current;
-    const name = normalizeCityName(cityQuery || city);
-
-    if (!map || !name) {
-      setCityMessage("نام شهر آگهی را وارد کن.");
-      return;
-    }
-
-    if (citySearchStatus === "loading") {
-      return;
-    }
-
-    setCitySearchStatus("loading");
-    setCityMessage(`در حال پیدا کردن ${name}…`);
-
-    const isInsideIran = (lat, lng) =>
-      Number.isFinite(lat) &&
-      Number.isFinite(lng) &&
-      lat >= 24 &&
-      lat <= 40 &&
-      lng >= 43 &&
-      lng <= 64;
-
-    const moveMap = (lat, lng) => {
-      map.resize();
-      map.flyTo({
-        center: [lng, lat],
-        zoom: 13,
-        essential: true,
-      });
-
-      window.setTimeout(() => {
-        map.resize();
-      }, 250);
-
-      setCityMessage(
-        `نقشه روی ${name} رفت؛ حالا نقطه دقیق آگهی را روی نقشه انتخاب کن.`
-      );
-      setCitySearchStatus("success");
-    };
-
-    try {
-      /*
-       * مرحله اول: دیتاست داخلی خود فضاجو.
-       * برای شهرهایی که مختصات معتبر دارند هیچ درخواست اینترنتی
-       * به Search نشان لازم نیست.
-       */
-      const localMatch = Array.isArray(iranCitiesWithCoordinates)
-        ? iranCitiesWithCoordinates.find((item) => {
-            const itemName = normalizeCityName(item?.cityName || "");
-            const lat = Number(item?.lat);
-            const lng = Number(item?.lng);
-
-            return (
-              itemName === name &&
-              isInsideIran(lat, lng)
-            );
-          })
-        : null;
-
-      if (localMatch) {
-        moveMap(
-          Number(localMatch.lat),
-          Number(localMatch.lng)
-        );
-        return;
-      }
-
-      /*
-       * مرحله دوم: فقط برای شهرهایی که در دیتاست داخلی مختصات ندارند.
-       * مهم: فقط خود نام شهر را می‌فرستیم. نسخه قبلی عبارت «شهر ...»
-       * را هم می‌فرستاد که سرویس نشان برای آن خطای 485 می‌داد.
-       */
-      const serviceKey = String(
-        import.meta.env.VITE_NESHAN_SERVICE_KEY || ""
-      ).trim();
-
-      if (!serviceKey) {
-        setCityMessage(
-          `مختصات داخلی برای «${name}» موجود نیست و کلید سرویس نشان نیز تنظیم نشده است؛ محل را دستی روی نقشه انتخاب کن.`
-        );
-        setCitySearchStatus("idle");
-        return;
-      }
-
-      const currentCenter = map.getCenter();
-
-      const params = new URLSearchParams({
-        term: name,
-        lat: String(Number(currentCenter.lat)),
-        lng: String(Number(currentCenter.lng)),
-      });
-
-      const response = await fetch(
-        `${NESHAN_SEARCH_URL}?${params.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            "Api-Key": serviceKey,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Neshan search failed: ${response.status}`
-        );
-      }
-
-      const data = await response.json();
-      const items = Array.isArray(data?.items)
-        ? data.items
-        : [];
-
-      const candidates = items
-        .map((item) => {
-          const lat = Number(item?.location?.y);
-          const lng = Number(item?.location?.x);
-          const title = normalizeCityName(item?.title || "");
-          const address = normalizeCityName(item?.address || "");
-          const type = String(item?.type || "").toLowerCase();
-
-          let score = 0;
-
-          if (title === name) score += 120;
-          if (type === "region") score += 80;
-          if (title.includes(name)) score += 40;
-          if (address.includes(name)) score += 25;
-
-          return { lat, lng, score };
-        })
-        .filter(
-          ({ lat, lng, score }) =>
-            isInsideIran(lat, lng) &&
-            score >= 40
-        )
-        .sort((a, b) => b.score - a.score);
-
-      if (!candidates.length) {
-        setCityMessage(
-          `موقعیت مطمئنی برای «${name}» پیدا نشد؛ لطفاً محل را دستی روی نقشه انتخاب کن.`
-        );
-        setCitySearchStatus("idle");
-        return;
-      }
-
-      moveMap(candidates[0].lat, candidates[0].lng);
-    } catch (error) {
-      console.error("Neshan city search error:", error);
-
-      setCityMessage(
-        `موقعیت خودکار «${name}» دریافت نشد؛ لطفاً محل را دستی روی نقشه انتخاب کن.`
-      );
-      setCitySearchStatus("error");
-    }
   };
 
   const panMap = (x, y) => {
@@ -483,53 +347,6 @@ export default function NeshanLocationPicker({
       )}
       {!disabled &&
         status !== "missing-key" && (
-          <div className="neshan-location-picker__city-jump">
-            <input
-              type="text"
-              value={cityQuery}
-              onChange={(event) => {
-                setCityQuery(
-                  event.target.value
-                );
-
-                setCityMessage("");
-              }}
-              onKeyDown={(event) => {
-                if (
-                  event.key === "Enter"
-                ) {
-                  event.preventDefault();
-                  jumpToCity();
-                }
-              }}
-              placeholder="مثلاً شهرضا، اصفهان، کاشان..."
-              aria-label="شهر مقصد روی نقشه"
-            />
-
-            <button
-              type="button"
-              onClick={jumpToCity}
-              disabled={
-                citySearchStatus ===
-                "loading"
-              }
-            >
-              {citySearchStatus ===
-              "loading"
-                ? "در حال جستجو…"
-                : "رفتن به شهر آگهی"}
-            </button>
-
-            {cityMessage && (
-              <small>
-                {cityMessage}
-              </small>
-            )}
-          </div>
-        )}
-
-      {!disabled &&
-        status !== "missing-key" && (
           <div className="neshan-location-picker__tools">
             <button
               type="button"
@@ -559,7 +376,7 @@ export default function NeshanLocationPicker({
             )}
 
             {geoStatus === "inaccurate" && (
-              <small>موقعیت گزارش‌شده توسط مرورگر دقیق نیست. برای جلوگیری از نمایش مکان اشتباه، از «رفتن به شهر آگهی» استفاده کن و نقطه ملک را روی نقشه انتخاب کن.</small>
+              <small>موقعیت گزارش‌شده توسط مرورگر دقیق نیست. می‌توانی شهر آگهی را در فرم انتخاب کنی و نقطه صحیح ملک را به‌صورت دستی روی نقشه مشخص کنی.</small>
             )}
 
             {geoStatus === "denied" && (

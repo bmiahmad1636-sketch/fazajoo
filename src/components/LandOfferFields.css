@@ -1,0 +1,18 @@
+.fj-lo{gap:18px}.fj-lo-group{display:grid;gap:9px;min-width:0}
+.fj-lo-group>strong{color:#352e2b;font-size:.95rem}.fj-lo-group b,.fj-lo-other b{color:#c94d12}
+.fj-lo-choices{display:flex;flex-wrap:wrap;gap:8px}.fj-lo-choice,.fj-lo-check{border:1px solid #e5d7cc;border-radius:12px;background:#fff;color:#55483f;font:inherit;padding:10px 14px}
+.fj-lo-choice{cursor:pointer}.fj-lo-choice.is-selected,.fj-lo-check:has(input:checked){border-color:#de6e22;background:#fff0e0;color:#943e0b}
+.fj-lo-choice:focus-visible,.fj-lo-check:focus-within{outline:3px solid #f6ac6e;outline-offset:2px}.fj-lo-choice:disabled{opacity:.65;cursor:not-allowed}
+.fj-lo-check{display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:.9rem}.fj-lo-check input{accent-color:#d96d21}
+.fj-lo-hint{color:#786a60;line-height:1.8;font-size:.83rem}.fj-lo-other{margin-top:8px;max-width:520px}
+.fj-lo-extra{border-top:1px solid #f1e5da;padding-top:18px;display:grid;gap:16px;min-width:0}.fj-lo-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.fj-lo-field{grid-template-rows:minmax(2.9em,auto) minmax(44px,auto) auto;align-content:start}.fj-lo .fj-lo-field>span{color:#352e2b;line-height:1.7;align-self:end}
+.fj-lo-field>small{min-height:3.2em;line-height:1.7}.fj-lo-wide{grid-column:1/-1}.fj-lo .fj-po-field textarea{min-height:86px;width:100%;box-sizing:border-box;border:1px solid #e2d3c6;border-radius:12px;padding:10px 12px;background:#fff;color:#342c27;resize:vertical;line-height:1.8;font:inherit;font-weight:400}
+.fj-lo .fj-po-field textarea:focus-visible{outline:3px solid #f6ac6e;outline-offset:2px}
+@media(max-width:640px){.fj-lo-row{grid-template-columns:minmax(0,1fr)}.fj-lo-field{grid-template-rows:auto minmax(44px,auto) auto}.fj-lo-field>small{min-height:0}.fj-lo-choice,.fj-lo-check{padding:9px 11px}}
+
+.fj-lo-agriculture{display:grid;gap:12px;background:#fffdf9;border:1px solid #efe2d4;border-radius:12px;padding:13px}.fj-lo-agriculture>strong{color:#75502c}
+
+/* Inline validation belongs to the exact unanswered land question. */
+.fj-lo-group--invalid { border:1px solid #eab0a1; background:#fff9f7; border-radius:12px; padding:12px; }
+.fj-lo .fj-lo-inline-error { margin:0; padding:9px 12px; border:1px solid #f2c9c1; background:#fff0ec; border-radius:10px; color:#a52d21; font-size:.89rem; font-weight:700; line-height:1.8; }

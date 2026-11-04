@@ -114,6 +114,7 @@ export function toSpaceProfile(listing = {}) {
     profile.fields = { ...profile.fields, ...attrs };
     profile.features = [...new Set([...profile.features, ...selectedFeatures(attrs.features)])];
     profile.hasStructuredDetails = Object.keys(attrs).length > 0;
+    if (category === "land" && attrs.depositRial != null) profile.depositRial = numericOrNull(attrs.depositRial);
     if (category === "parking" && attrs.securityFeatures) profile.fields.securityFeatures = selectedFeatures(attrs.securityFeatures);
     if (category === "villa" && attrs.capacity != null) profile.capacity = numericOrNull(attrs.capacity);
     if (attrs.heightM != null) profile.fields.heightM = numericOrNull(attrs.heightM);
@@ -135,9 +136,14 @@ export function toSpaceProfile(listing = {}) {
       vehicleUsage: textOrNull(meta?.vehicleUsage), cover: textOrNull(meta?.cover),
       access: textOrNull(meta?.access), spaceType: textOrNull(meta?.spaceType),
       propertyType: textOrNull(meta?.propertyType), accommodationType: textOrNull(meta?.accommodationType),
-      power: textOrNull(meta?.power), vehicleAccess: category === "warehouse" ? textOrNull(meta?.access) : null,
+      power: textOrNull(meta?.power), powerCapacityKw: category === "warehouse" ? numericOrNull(meta?.powerCapacity) : null, vehicleAccess: category === "warehouse" ? textOrNull(meta?.access) : null,
       purpose: textOrNull(meta?.purpose), primaryPurpose: textOrNull(meta?.primaryPurpose),
-      activity: textOrNull(meta?.activity), transferType: textOrNull(meta?.transferType),
+      legalUse: category === "land" && meta?.legalUse !== "other" ? textOrNull(meta?.legalUse) : null,
+      locationType: category === "land" ? textOrNull(meta?.locationType) : null,
+      activity: textOrNull(meta?.activity),
+      leaseDuration: category === "warehouse" ? textOrNull(meta?.duration) : null,
+      specialConditions: category === "warehouse" ? textOrNull(meta?.requirements) : null,
+      transferType: textOrNull(meta?.transferType),
       floorPreference: textOrNull(meta?.floorPreference), specialUsage: meta?.specialUsage === true,
       minHeightM: numericOrNull(meta?.minHeight),
     };

@@ -2641,3 +2641,14 @@ body.parking-gallery-open{overflow:hidden}
 
 
 .parking-details-video{border-radius:18px;overflow:hidden;background:#f7f7f2;border:1px solid rgba(28,76,59,.12);padding:10px}.parking-details-video video{display:block;width:100%;max-height:520px;border-radius:13px;background:#111}.parking-details-video p{margin:9px 4px 1px;color:#6b746e;font-size:12px;line-height:1.8}
+
+/* Shared favorites are persisted by the same API as homepage cards. */
+.parking-details-toolbar__actions button.parking-details-favorite--active {
+  color: #fff0e0;
+  border-color: rgba(255, 154, 105, .55);
+  background: rgba(196, 73, 42, .32);
+}
+.parking-details-toolbar__actions button:disabled {
+  cursor: wait;
+  opacity: .66;
+}

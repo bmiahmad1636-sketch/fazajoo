@@ -69,10 +69,14 @@
         "spaceType",
         "heightM",
         "power",
-        "powerCapacity",
         "vehicleAccess",
         "features",
-        "allowedActivities"
+        "allowedActivities",
+        "otherActivity",
+        "powerCapacityKw",
+        "flooring",
+        "craneCapacityTons",
+        "operationHours"
       ],
       "wantedFields": [
         "spaceType",
@@ -97,13 +101,20 @@
     "land": {
       "label": "زمین",
       "offerFields": [
+        "landType",
+        "allowedPurposes",
+        "otherPurpose",
+        "accessRoad",
         "legalUse",
         "locationType",
-        "features",
-        "waterSources",
+        "slope",
         "frontageM",
-        "accessRoad",
-        "allowedPurposes"
+        "vehicleAccess",
+        "waterSources",
+        "features",
+        "depositRial",
+        "crops",
+        "irrigation"
       ],
       "wantedFields": [
         "primaryPurpose",
@@ -111,11 +122,16 @@
         "minAreaSqm",
         "maxAreaSqm",
         "locationType",
-        "primaryPurpose"
+        "legalUse",
+        "waterSources"
       ],
       "candidateMatchingFields": [
         "areaSqm",
-        "features"
+        "allowedPurposes",
+        "legalUse",
+        "locationType",
+        "features",
+        "depositRial"
       ],
       "offerPriority": "second-pilot"
     },
