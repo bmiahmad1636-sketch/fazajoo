@@ -8,6 +8,7 @@ const { cleanStorageSpaceAttributes } = require("../utils/storageSpaceAttributes
 const { cleanIndustrialSpaceAttributes } = require("../utils/industrialSpaceAttributes");
 const { cleanLandSpaceAttributes } = require("../utils/landSpaceAttributes");
 const { cleanShopSpaceAttributes } = require("../utils/shopSpaceAttributes");
+const { cleanGardenSpaceAttributes } = require("../utils/gardenSpaceAttributes");
 
 const MAX_IMAGES = 10;
 const HEATING_SYSTEMS = ["gasHeater", "packageRadiator", "centralHeating", "floorHeating", "electricHeater", "splitHeating"];
@@ -165,6 +166,9 @@ function clean(body = {}) {
   const typedShop = body.category === "shop" && body.listingType !== "wanted"
     ? cleanShopSpaceAttributes(body.spaceAttributes, "shop", "offer") : null;
   const shopRent = typedShop?.values?.transferType === "rent" ? typedShop.values.monthlyRentRial : null;
+  const typedGarden = body.category === "garden" && body.listingType !== "wanted"
+    ? cleanGardenSpaceAttributes(body.spaceAttributes,"garden","offer") : null;
+  const fullDepositGarden = typedGarden?.values?.financialMode === "full_deposit";
   return {
     listingType: body.listingType === "wanted" ? "wanted" : "offer",
     category: ["parking", "residential", "villa", "storage", "warehouse", "shop", "land", "garden", "other"].includes(body.category) ? body.category : "parking",
@@ -174,8 +178,8 @@ function clean(body = {}) {
     title: String(body.title || "").trim().slice(0, 160),
     city: String(body.city || "").trim().slice(0, 100),
     area: Math.max(0, Number(body.area) || 0),
-    price: typedShop?.schemaVersion === 1 ? (shopRent ? String(shopRent) : "") : String(body.price || "").trim().slice(0, 100),
-    priceType: typedShop?.schemaVersion === 1 ? (shopRent ? "monthly" : "negotiable") : (["daily", "weekly", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly"),
+    price: typedShop?.schemaVersion === 1 ? (shopRent ? String(shopRent) : "") : fullDepositGarden ? "" : String(body.price || "").trim().slice(0, 100),
+    priceType: typedShop?.schemaVersion === 1 ? (shopRent ? "monthly" : "negotiable") : fullDepositGarden ? "negotiable" : (["daily", "weekly", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly"),
     phone: String(body.phone || "").replace(/\s/g, "").slice(0, 20),
     imageUrl,
     imageUrls,
@@ -258,7 +262,7 @@ function clean(body = {}) {
           heatingSystems: cleanSystems(body.shopDetails.heatingSystems, HEATING_SYSTEMS),
           coolingSystems: cleanSystems(body.shopDetails.coolingSystems, COOLING_SYSTEMS),
         } : {},
-    spaceAttributes: body.category === "storage" ? cleanStorageSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "warehouse" ? cleanIndustrialSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "land" ? cleanLandSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "shop" ? (typedShop || cleanShopSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : cleanParkingSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer"),
+    spaceAttributes: body.category === "storage" ? cleanStorageSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "warehouse" ? cleanIndustrialSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "land" ? cleanLandSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "shop" ? (typedShop || cleanShopSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : body.category === "garden" ? (typedGarden || cleanGardenSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : cleanParkingSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer"),
     description: String(body.description || "").trim().slice(0, 5000),
     agencyNetworkConsent: body.agencyNetworkConsent === true,
     locationLat: Number.isFinite(Number(body.location?.lat)) && Number(body.location.lat) >= 24 && Number(body.location.lat) <= 40
@@ -302,13 +306,25 @@ function validate(space) {
     if(v.transferType==="key_money" && !v.rightsType) return "عنوان حق مورد واگذاری را مشخص کنید.";
     if(!space.area || !Number.isFinite(space.area)) return "متراژ واقعی مغازه را وارد کنید.";
   }
+  if (space.listingType === "offer" && space.category === "garden" && space.spaceAttributes?.schemaVersion === 1) {
+    const v=space.spaceAttributes.values||{};
+    if(!v.gardenType || !v.accessRoad || !Array.isArray(v.allowedPurposes) || !v.allowedPurposes.length) return "مشخصات ضروری باغ کامل نیست.";
+    if(v.allowedPurposes.includes("other")&&String(v.otherPurpose||"").trim().length<5)return "کاربرد دیگر باغ را توضیح دهید.";
+    if(!space.area || !Number.isFinite(space.area))return "متراژ واقعی باغ را وارد کنید.";
+    if(v.financialMode){
+      if(!["rent_only","full_deposit","deposit_rent"].includes(v.financialMode)) return "نوع رهن و اجاره باغ معتبر نیست.";
+      if(v.financialMode!=="rent_only"&&!v.depositRial)return "مبلغ ودیعه باغ را وارد کنید.";
+      if(v.financialMode==="full_deposit" && (space.price || space.priceType!=="negotiable"))return "رهن کامل نمی‌تواند اجاره دوره‌ای داشته باشد.";
+      if(v.financialMode!=="full_deposit" && space.priceType!=="negotiable" && (!Number.isSafeInteger(Number(space.price))||Number(space.price)<=0))return "اجاره باغ معتبر نیست.";
+    }
+  }
   if (!space.title) return "عنوان آگهی لازم است.";
   if (!space.city) return "شهر لازم است.";
   if (space.category === "residential") {
     if (!space.residentialDetails.deposit && !space.residentialDetails.monthlyRent) return "مبلغ رهن یا اجاره را وارد کنید.";
   } else if (space.priceType !== "negotiable" && !space.price) return "قیمت لازم است.";
   if (!/^09\d{9}$/.test(space.phone)) return "شماره موبایل معتبر نیست.";
-  if (!(space.listingType === "offer" && ["parking","storage","warehouse","land","shop"].includes(space.category)) && space.description.length < 10) return "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
+  if (!(space.listingType === "offer" && ["parking","storage","warehouse","land","shop","garden"].includes(space.category)) && space.description.length < 10) return "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
   if (space.imageUrls.length > MAX_IMAGES) return `حداکثر ${MAX_IMAGES} عکس برای هر آگهی مجاز است.`;
   if (space.listingType !== "wanted" && space.imageUrls.length === 0) return "حداقل یک تصویر برای آگهی لازم است.";
   if (space.video && (!space.video.duration || space.video.duration > 120.5)) return "مدت ویدئو باید حداکثر ۲ دقیقه باشد.";

@@ -30,8 +30,8 @@ test('city flight updates only the map viewport; it never saves a listing pin',(
 test('final offer page hides description while supplementary box retains note',()=>{
   const add=file('src/pages/AddParking.jsx');
   const edit=file('src/pages/EditParking.jsx');
-  assert.match(add,/!\(\["parking", "storage", "warehouse", "land", "shop"\]\.includes\(form\.category\) && !isWantedAd\) && !\(isWantedAd/);
-  assert.match(edit,/!\(\["parking", "storage", "warehouse", "land", "shop"\]\.includes\(parking\?\.category\) && !isWanted\) && !\(isWanted/);
+  assert.match(add,/!\(\["parking", "storage", "warehouse", "land", "shop", "garden"\]\.includes\(form\.category\) && !isWantedAd\) && !\(isWantedAd/);
+  assert.match(edit,/!\(\["parking", "storage", "warehouse", "land", "shop", "garden"\]\.includes\(parking\?\.category\) && !isWanted\) && !\(isWanted/);
   assert.match(add,/<ParkingOfferFields[^>]*note=\{form\.description\}/);
   assert.match(edit,/<ParkingOfferFields[^>]*note=\{form\.description\}/);
   const comp=file('src/components/ParkingOfferFields.jsx');
@@ -55,5 +55,5 @@ test('public details no-pin state hides map and empty description',()=>{
   const d=file('src/pages/ParkingDetails.jsx');
   assert.match(d,/parking\.location\?\.lat != null &&\s*parking\.location\?\.lng != null && \(/);
   assert.match(d,/نقطه‌ای روی نقشه ثبت نشده است/);
-  assert.match(d,/!\(\["parking", "storage", "warehouse", "land", "shop"\]\.includes\(category\) && !isWanted && !String\(parking\.description \|\| ""\)\.trim\(\)\)/);
+  assert.match(d,/!\(\["parking", "storage", "warehouse", "land", "shop", "garden"\]\.includes\(category\) && !isWanted && !String\(parking\.description \|\| ""\)\.trim\(\)\)/);
 });

@@ -13,6 +13,7 @@ import { readWarehouseRequest, warehouseOptionLabel, WAREHOUSE_PURPOSES, WAREHOU
 import { climateLabels } from "../components/ClimateFields";
 import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText, villaRequestLabel, VILLA_REQUEST_TYPES, VILLA_REQUEST_STAYS, VILLA_REQUEST_AMENITIES } from "../utils/villaRequest";
 import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText, gardenRequestLabel, GARDEN_REQUEST_PURPOSES, GARDEN_REQUEST_DURATIONS, GARDEN_REQUEST_FEATURES, GARDEN_REQUEST_WATER } from "../utils/gardenRequest";
+import {gardenOfferLabel,gardenFinancialRows,GARDEN_OFFER_TYPES,GARDEN_OFFER_PURPOSES,GARDEN_OFFER_ROADS,GARDEN_OFFER_DURATIONS,GARDEN_OFFER_PRIVACY,GARDEN_OFFER_FEATURES} from "../utils/gardenOffer";
 import { readOtherRequest, otherRequestAreaText, otherRequestBudgetText, otherRequestLabel, OTHER_REQUEST_DURATIONS, OTHER_REQUEST_FEATURES } from "../utils/otherRequest";
 import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -68,7 +69,7 @@ const CATEGORY_INFO = {
 };
 
 function ShopMoneyRows({ items, compact = false }) {
-  return <div className={`parking-details-shop-money${compact ? " parking-details-shop-money--compact" : ""}`} aria-label="شرایط مالی فضای تجاری">
+  return <div className={`parking-details-shop-money${compact ? " parking-details-shop-money--compact" : ""}`} aria-label="شرایط مالی آگهی">
     {items.map(({ label, amount }) => <div className="parking-details-shop-money__row" key={label}>
       <span className="parking-details-shop-money__label">{label}</span>
       <bdi className="parking-details-shop-money__amount">{amount}</bdi>
@@ -262,6 +263,9 @@ function ParkingDetails({
 
   const shopPriceRows = !isWanted && category === "shop"
     ? shopFinancialRows(parking?.spaceAttributes)
+    : [];
+  const gardenPriceRows = !isWanted && category === "garden"
+    ? gardenFinancialRows(parking?.spaceAttributes,parking?.price,parking?.priceType)
     : [];
 
   // Wanted-land requirements are stored in description metadata.
@@ -615,13 +619,15 @@ function ParkingDetails({
               </p>
             </div>
 
-            <div className={`parking-details-hero__price${shopPriceRows.length ? " parking-details-hero__price--shop" : ""}`}>
+            <div className={`parking-details-hero__price${(shopPriceRows.length || gardenPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>
               <span>
                 {isWanted ? "بودجه" : "قیمت آگهی"}
               </span>
 
               {shopPriceRows.length ? (
                 <ShopMoneyRows items={shopPriceRows} />
+              ) : gardenPriceRows.length ? (
+                <ShopMoneyRows items={gardenPriceRows} />
               ) : (
                 <strong>
                   {(!isWanted && category === "shop" ? shopFinancialHeadline(parking?.spaceAttributes) : "") || otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
@@ -837,7 +843,7 @@ function ParkingDetails({
                     </div>
                   </div>
 
-                  <div className={`parking-details-feature${shopPriceRows.length ? " parking-details-feature--shop-money" : ""}`}>
+                  <div className={`parking-details-feature${(shopPriceRows.length || gardenPriceRows.length) ? " parking-details-feature--shop-money" : ""}`}>
                     <span className="parking-details-feature__icon parking-details-feature__icon--orange">
                       💰
                     </span>
@@ -849,6 +855,8 @@ function ParkingDetails({
 
                       {shopPriceRows.length ? (
                         <ShopMoneyRows items={shopPriceRows} compact />
+                      ) : gardenPriceRows.length ? (
+                        <ShopMoneyRows items={gardenPriceRows} compact />
                       ) : (
                         <strong>
                           {otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
@@ -1033,7 +1041,7 @@ function ParkingDetails({
                 </article>:null;
               })()}
 
-              {!(["parking", "storage", "warehouse", "land", "shop"].includes(category) && !isWanted && !String(parking.description || "").trim()) && !(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData) || (category === "other" && otherWantedData))) && (
+              {!(["parking", "storage", "warehouse", "land", "shop", "garden"].includes(category) && !isWanted && !String(parking.description || "").trim()) && !(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData) || (category === "other" && otherWantedData))) && (
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">
@@ -1050,7 +1058,7 @@ function ParkingDetails({
             <h2>
                       {isWanted
                         ? `توضیحات نیاز به ${visibleCategory}`
-                        : category === "parking" ? "نکات تکمیلی پارکینگ" : category === "storage" ? "نکات تکمیلی انبار" : category === "warehouse" ? "نکات تکمیلی سوله یا کارگاه" : category === "land" ? "نکات تکمیلی زمین" : `توضیحات ${visibleCategory}`}
+                        : category === "parking" ? "نکات تکمیلی پارکینگ" : category === "storage" ? "نکات تکمیلی انبار" : category === "warehouse" ? "نکات تکمیلی سوله یا کارگاه" : category === "land" ? "نکات تکمیلی زمین" : category === "garden" ? "نکات تکمیلی باغ" : `توضیحات ${visibleCategory}`}
                     </h2>
                   </div>
                 </div>
@@ -1203,6 +1211,25 @@ function ParkingDetails({
                   <p style={{ fontSize: 13 }}>نوع استفاده به معنی تأیید مجوز قانونی نیست.</p>
                 </article>;
               })()}
+              {!isWanted && category === "garden" && parking?.spaceAttributes?.schemaVersion === 1 && parking?.spaceAttributes?.category === "garden" && (() => {
+                const v=parking.spaceAttributes.values||{};
+                const label=(opts,x)=>gardenOfferLabel(opts,x);
+                const rows=[
+                  ["نوع واقعی باغ",label(GARDEN_OFFER_TYPES,v.gardenType)],
+                  ["استفاده‌های قابل واگذاری",(Array.isArray(v.allowedPurposes)?v.allowedPurposes:[]).map(x=>x==="other"&&v.otherPurpose?`سایر: ${v.otherPurpose}`:label(GARDEN_OFFER_PURPOSES,x)).filter(Boolean).join("، ")],
+                  ["نوع راه دسترسی",label(GARDEN_OFFER_ROADS,v.accessRoad)],
+                  ["مدت قابل واگذاری",label(GARDEN_OFFER_DURATIONS,v.rentalDuration)],
+                  ["حریم خصوصی",label(GARDEN_OFFER_PRIVACY,v.privacy)],
+                  ["ظرفیت مهمان",Array.isArray(v.allowedPurposes)&&v.allowedPurposes.includes("event")&&Number(v.eventCapacity)>0?`${Number(v.eventCapacity).toLocaleString("fa-IR")} نفر`:""],
+                ].filter(([,val])=>Boolean(val));
+                const amenities=(Array.isArray(v.features)?v.features:[]).map(x=>label(GARDEN_OFFER_FEATURES,x)).filter(Boolean);
+                return rows.length||amenities.length?<article className="parking-details-section">
+                  <div className="parking-details-section__heading"><div className="parking-details-section__icon">🌿</div><div><span>اطلاعات ثبت‌شده توسط مالک</span><h2>کاربردها و شرایط واگذاری باغ</h2></div></div>
+                  <div className="parking-details-residential__grid">{rows.map(([name,text])=><span key={name}><small>{name}</small><strong>{text}</strong></span>)}</div>
+                  {amenities.length>0&&<div className="parking-details-residential__amenities">{amenities.map(t=><b key={t}>✓ {t}</b>)}</div>}
+                  <p style={{fontSize:12,color:"#786a60",lineHeight:1.9}}>استفاده برای مراسم یا هر فعالیت دیگر، به معنی داشتن مجوز قانونی نیست.</p>
+                </article>:null;
+              })()}
               {category === "garden" && (!isWanted || !gardenWantedData) && (
                 <div className="parking-details-residential">
                   <h3>🌳 مشخصات باغ</h3>
@@ -1210,7 +1237,7 @@ function ParkingDetails({
                     {garden.trees && <span><small>درختان و پوشش گیاهی</small><strong>{garden.trees}</strong></span>}
                     {garden.waterSource && <span><small>منبع آب</small><strong>{({well:"چاه",canal:"قنات / کانال",network:"آب شبکه",share:"حقابه",none:"فاقد منبع مشخص"})[garden.waterSource] || garden.waterSource}</strong></span>}
                     {garden.irrigation && <span><small>آبیاری</small><strong>{({drip:"قطره‌ای",flood:"غرقابی",sprinkler:"بارانی",other:"سایر"})[garden.irrigation] || garden.irrigation}</strong></span>}
-                    {garden.accessRoad && <span><small>راه دسترسی</small><strong>{garden.accessRoad}</strong></span>}
+                    {garden.accessRoad && !(parking?.spaceAttributes?.schemaVersion===1 && parking?.spaceAttributes?.category==="garden" && parking?.spaceAttributes?.values?.accessRoad) && <span><small>راه دسترسی</small><strong>{garden.accessRoad}</strong></span>}
                   </div>
                   <div className="parking-details-residential__amenities">
                     {garden.water && <b>✓ آب</b>}{garden.electricity && <b>✓ برق</b>}{garden.fenced && <b>✓ حصارکشی</b>}{garden.building && <b>✓ ساختمان / اتاقک</b>}{garden.cityGas && <b>✓ گاز شهری</b>}{garden.landline && <b>✓ تلفن ثابت</b>}{garden.furnished && <b>✓ مبله</b>}

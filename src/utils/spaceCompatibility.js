@@ -77,7 +77,26 @@ export function compareSpaceProfiles(wanted, offer) {
       requireCheck("industrial-vehicle-access", fields.vehicleAccess, available.vehicleAccess, (need, actual) => ["van", "truck", "trailer"].indexOf(actual) >= ["van", "truck", "trailer"].indexOf(need));
     }
   }
-  if (wanted.category === "garden") requireCheck("garden-purpose", fields.purpose, available.allowedPurposes, (need, actual) => Array.isArray(actual) && actual.includes(need));
+  if (wanted.category === "garden") {
+    if (fields.purpose === "other") unknown.push("garden-other-purpose-review");
+    else requireCheck("garden-purpose", fields.purpose, available.allowedPurposes, (need, actual) => Array.isArray(actual) && actual.includes(need));
+    if (fields.purpose === "event") unknown.push("garden-event-legal-review");
+    if (fields.gardenDuration && fields.gardenDuration !== "flexible") {
+      if (fields.gardenDuration === "weekend" && available.rentalDuration === "daily") unknown.push("garden-weekend-review");
+      else requireCheck("garden-duration",fields.gardenDuration,available.rentalDuration,(need,actual)=>actual === "flexible" || actual === need);
+    }
+    if (fields.gardenPrivacyRequired) requireCheck("garden-privacy","private",available.privacy === "unknown" ? null : available.privacy);
+    if (fields.gardenWaterPreference && fields.gardenWaterPreference !== "any") {
+      const need=fields.gardenWaterPreference;
+      const actual=available.waterSource;
+      // Unknown water sources or broad preferences must not be turned into false exact matches.
+      if (need === "available") {
+        if (actual === null || actual === undefined) unknown.push("garden-water");
+        else if (actual === "none") conflicts.push("garden-water");
+        else matched.push("garden-water");
+      } else if (need === "well" || need === "right" || need === "network") requireCheck("garden-water",need,actual);
+    }
+  }
   if (wanted.category === "land") {
     // 'Other' is free text; checking the ID alone would be a false positive.
     if (fields.primaryPurpose === "other") unknown.push("land-other-purpose-review");

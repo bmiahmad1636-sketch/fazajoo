@@ -197,11 +197,16 @@
     "garden": {
       "label": "باغ",
       "offerFields": [
-        "waterSource",
-        "irrigation",
+        "gardenType",
+        "allowedPurposes",
+        "otherPurpose",
+        "accessRoad",
+        "rentalDuration",
+        "privacy",
         "features",
         "eventCapacity",
-        "allowedPurposes"
+        "financialMode",
+        "depositRial"
       ],
       "wantedFields": [
         "features",
@@ -212,7 +217,14 @@
       ],
       "candidateMatchingFields": [
         "areaSqm",
-        "features"
+        "allowedPurposes",
+        "features",
+        "eventCapacity",
+        "privacy",
+        "rentalDuration",
+        "financialMode",
+        "depositRial",
+        "waterSource"
       ],
       "offerPriority": "refinement"
     },

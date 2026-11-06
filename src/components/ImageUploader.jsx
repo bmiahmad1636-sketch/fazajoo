@@ -134,15 +134,22 @@ async function sha256Hex(blob) {
     .join("");
 }
 
+// Reading all existing photos is a best-effort duplicate check, NOT an upload dependency.
+// A slow remote image used to block a brand new photo for tens of seconds.
+const EXISTING_IMAGE_HASH_TIMEOUT_MS = 1500;
 async function hashExistingImage(url) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), EXISTING_IMAGE_HASH_TIMEOUT_MS);
   try {
-    const response = await fetch(url, { cache: "force-cache" });
+    const response = await fetch(url, { cache: "force-cache", signal: controller.signal });
     if (!response.ok) return null;
     return await sha256Hex(await response.blob());
   } catch {
-    // اگر مرورگر به هر دلیل اجازه خواندن تصویر قبلی را نداد،
-    // آپلود را متوقف نمی‌کنیم؛ تکراری‌های انتخاب جدید همچنان کنترل می‌شوند.
+    // Do not block uploads if an existing photo is temporarily slow or unavailable.
+    // New files selected together are still compared by their local hashes.
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
@@ -155,6 +162,7 @@ function ImageUploader({
 }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadStage, setUploadStage] = useState("");
   const [error, setError] = useState("");
 
   // ترتیب عکس‌ها را داخل خود کامپوننت هم نگه می‌داریم تا تغییر
@@ -241,9 +249,11 @@ function ImageUploader({
     }
 
     setUploading(true);
+    setUploadStage("در حال بررسی و بهینه‌سازی عکس‌ها...");
     setError("");
 
     const uploaded = [];
+    const timing = { startedAt: performance.now(), preparationMs: 0, transferMs: 0, imageCount: 0, bytes: 0 };
 
     try {
       // ابتدا همان نسخه‌ای را می‌سازیم که واقعاً آپلود می‌شود؛ در نتیجه
@@ -276,10 +286,16 @@ function ImageUploader({
         return;
       }
 
+      timing.preparationMs = Math.round(performance.now() - timing.startedAt);
+      timing.imageCount = optimizedFiles.length;
+      timing.bytes = optimizedFiles.reduce((sum, file) => sum + file.size, 0);
+      setUploadStage("در حال ارسال عکس‌ها به فضای ذخیره‌سازی...");
+      const transferStart = performance.now();
       for (const optimizedFile of optimizedFiles) {
         const result = await uploadAdImage(optimizedFile);
         uploaded.push(result.url);
       }
+      timing.transferMs = Math.round(performance.now() - transferStart);
 
       emit([...images, ...uploaded]);
 
@@ -300,6 +316,16 @@ function ImageUploader({
           "آپلود عکس انجام نشد. دوباره تلاش کنید."
       );
     } finally {
+      // Timing is for diagnosis only; no filenames, image URLs, or tokens are logged.
+      if (timing.imageCount > 0) {
+        console.info("[Fazajoo image upload timing]", {
+          preparationMs: timing.preparationMs,
+          transferMs: timing.transferMs || Math.round(performance.now() - timing.startedAt - timing.preparationMs),
+          imageCount: timing.imageCount,
+          totalKilobytes: Math.round(timing.bytes / 1024),
+        });
+      }
+      setUploadStage("");
       setUploading(false);
     }
   };
@@ -384,8 +410,7 @@ function ImageUploader({
       {uploading && (
         <div className="multi-image-uploader__message">
           <span className="multi-image-uploader__spinner" />
-          در حال بارگذاری عکس‌ها در فضای
-          ذخیره‌سازی فضاجو...
+          {uploadStage || "در حال بارگذاری عکس‌ها در فضای ذخیره‌سازی فضاجو..."}
         </div>
       )}
 

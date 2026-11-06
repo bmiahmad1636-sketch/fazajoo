@@ -8,7 +8,7 @@
   place-items:center;
   position:relative;
   background:conic-gradient(#1f5b45 var(--video-progress),rgba(31,91,69,.13) 0);
-  transition:background .16s linear;
+  transition: --video-progress .55s linear;
 }
 .fazajoo-video-uploader__progress-ring::before{
   content:"";
@@ -24,4 +24,50 @@
   font-size:12px;
   font-weight:800;
   color:#173f32;
+}
+
+.fazajoo-video-uploader__progress-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-top: 10px;
+  border: 1px solid rgba(31,91,69,.18);
+  border-radius: 14px;
+  background: #f7faf7;
+  direction: rtl;
+}
+.fazajoo-video-uploader__progress-panel .fazajoo-video-uploader__progress-ring {
+  flex: 0 0 54px;
+}
+.fazajoo-video-uploader__progress-copy { min-width:0; display:flex; flex-direction:column; gap:4px; }
+.fazajoo-video-uploader__progress-copy strong { font-size: 13px; color:#173f32; }
+.fazajoo-video-uploader__progress-copy small { font-size:11px; line-height:1.75; color:#6d776f; }
+@media (max-width:500px) {
+  .fazajoo-video-uploader__progress-panel { gap:8px; padding:9px; }
+  .fazajoo-video-uploader__progress-copy strong { font-size:12px; }
+}
+
+/* Animate only *measured* progress samples, rather than inventing upload bytes. */
+@property --video-progress {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* A waiting spinner after transfer reaches 100% is honest: storage ACK and
+   poster processing provide no byte-level progress to display. */
+.fazajoo-video-uploader__progress-ring--busy {
+  background: conic-gradient(#1f5b45 0 92deg, rgba(31,91,69,.12) 92deg 360deg);
+  animation: fazajoo-video-pending-rotate 1.15s linear infinite;
+}
+.fazajoo-video-uploader__progress-ring--busy span {
+  animation: fazajoo-video-pending-counter-rotate 1.15s linear infinite;
+}
+.fazajoo-video-uploader__phase { color: #17604a !important; font-weight: 600; }
+@keyframes fazajoo-video-pending-rotate { to { transform: rotate(360deg); } }
+@keyframes fazajoo-video-pending-counter-rotate { to { transform: rotate(-360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .fazajoo-video-uploader__progress-ring--busy,
+  .fazajoo-video-uploader__progress-ring--busy span { animation: none; }
 }

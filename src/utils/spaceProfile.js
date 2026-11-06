@@ -103,6 +103,7 @@ export function toSpaceProfile(listing = {}) {
         profile.features = positiveFlags(villa, { pool: "pool", heatedPool: "heated_pool", yard: "private_yard", furnished: "furnished", parking: "parking", barbecue: "barbecue", wifi: "wifi", petFriendly: "pet_friendly" });
       } else if (category === "garden") {
         profile.features = positiveFlags(garden, { water: "water", electricity: "electricity", fenced: "fenced", building: "building" });
+        if (garden.irrigation) profile.features.push("irrigation");
       } else if (category === "shop") {
         profile.features = positiveFlags(shop, { cityGas: "gas", threePhase: "threePhase", restroom: "restroom" });
         if (shop.waterSupply && shop.waterSupply !== "none") profile.features.push("water");
@@ -115,6 +116,11 @@ export function toSpaceProfile(listing = {}) {
     profile.features = [...new Set([...profile.features, ...selectedFeatures(attrs.features)])];
     profile.hasStructuredDetails = Object.keys(attrs).length > 0;
     if (category === "land" && attrs.depositRial != null) profile.depositRial = numericOrNull(attrs.depositRial);
+    if (category === "garden") {
+      profile.depositRial = numericOrNull(attrs.depositRial);
+      profile.capacity = attrs.allowedPurposes?.includes("event") ? numericOrNull(attrs.eventCapacity) : null;
+      if (garden.waterSource) profile.fields.waterSource = garden.waterSource === "share" ? "right" : garden.waterSource;
+    }
     if (category === "shop" && attrs.transferType) {
       profile.depositRial = numericOrNull(attrs.depositRial);
       profile.rentRial = attrs.transferType === "rent" ? numericOrNull(attrs.monthlyRentRial) : null;
@@ -136,7 +142,7 @@ export function toSpaceProfile(listing = {}) {
       if (profile.maxAreaSqm !== null) profile.maxAreaSqm *= 10000;
     }
     profile.minBedrooms = numericOrNull(meta?.minBedrooms);
-    profile.guests = numericOrNull(meta?.guests);
+    profile.guests = numericOrNull(category === "garden" && meta?.purpose === "event" ? meta?.eventGuests : meta?.guests);
     profile.features = selectedFeatures(meta?.features || meta?.amenities);
     profile.fields = {
       vehicleUsage: textOrNull(meta?.vehicleUsage), cover: textOrNull(meta?.cover),
@@ -144,6 +150,9 @@ export function toSpaceProfile(listing = {}) {
       propertyType: textOrNull(meta?.propertyType), accommodationType: textOrNull(meta?.accommodationType),
       power: textOrNull(meta?.power), powerCapacityKw: category === "warehouse" ? numericOrNull(meta?.powerCapacity) : null, vehicleAccess: category === "warehouse" ? textOrNull(meta?.access) : null,
       purpose: textOrNull(meta?.purpose), primaryPurpose: textOrNull(meta?.primaryPurpose),
+      gardenWaterPreference: category === "garden" ? textOrNull(meta?.waterPreference) : null,
+      gardenDuration: category === "garden" ? textOrNull(meta?.duration) : null,
+      gardenPrivacyRequired: category === "garden" && meta?.privacyRequired === true,
       legalUse: category === "land" && meta?.legalUse !== "other" ? textOrNull(meta?.legalUse) : null,
       locationType: category === "land" ? textOrNull(meta?.locationType) : null,
       activity: textOrNull(meta?.activity),

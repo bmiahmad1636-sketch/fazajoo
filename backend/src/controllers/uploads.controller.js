@@ -1,6 +1,7 @@
 const fs = require("fs");
 const { query } = require("../db/pool");
 const storage = require("../services/storage.service");
+const videoProgress = require("../utils/videoUploadProgress");
 
 const ALLOWED_IMAGE_TYPES = new Set([
   "image/jpeg",
@@ -283,6 +284,9 @@ function adVideoUrl(request, key) {
 
 async function uploadAdVideo(request, response) {
   const filePath = request.file?.path;
+  const uploadId = String(request.body?.uploadId || "");
+  const userId = request.user?.id;
+  let tracking = false;
   try {
     if (!request.file || !filePath) throw createValidationError("فایل ویدئو ارسال نشده است.");
     const allowed = new Set(["video/mp4", "video/quicktime", "video/webm"]);
@@ -305,13 +309,17 @@ async function uploadAdVideo(request, response) {
       throw createValidationError("نوع واقعی ویدئو با فرمت اعلام‌شده مطابقت ندارد.");
     }
 
+    // Optional telemetry for new clients; older clients can still upload unchanged.
+    tracking = videoProgress.start(uploadId, userId, request.file.size);
     const result = await storage.uploadAdVideo({
       body: fs.createReadStream(filePath),
       mimeType: request.file.mimetype,
       originalName: request.file.originalname,
-      userId: request.user.id,
+      userId,
       size: request.file.size,
+      onProgress: tracking ? (bytes) => videoProgress.update(uploadId, userId, bytes) : undefined,
     });
+    if (tracking) videoProgress.finish(uploadId, userId);
 
     return response.status(201).json({
       ok: true,
@@ -325,6 +333,7 @@ async function uploadAdVideo(request, response) {
       },
     });
   } catch (error) {
+    if (tracking) videoProgress.fail(uploadId, userId);
     console.error("Upload ad video error:", error);
     return response.status(error.statusCode || 500).json({
       ok: false,
@@ -333,6 +342,13 @@ async function uploadAdVideo(request, response) {
   } finally {
     if (filePath) fs.promises.unlink(filePath).catch(() => {});
   }
+}
+
+function getAdVideoProgress(request, response) {
+  response.setHeader("Cache-Control", "no-store, private");
+  const result = videoProgress.get(request.params.uploadId, request.user?.id);
+  if (!result) return response.status(404).json({ ok: false, message: "گزارش ارسال در دسترس نیست." });
+  return response.json({ ok: true, ...result });
 }
 
 async function getAdVideo(request, response) {
@@ -402,6 +418,7 @@ module.exports = {
   getAdImage,
   deleteAdImage,
   uploadAdVideo,
+  getAdVideoProgress,
   getAdVideo,
   deleteAdVideo,
   uploadAgencyDocument,

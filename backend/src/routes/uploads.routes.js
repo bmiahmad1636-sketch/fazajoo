@@ -70,6 +70,13 @@ router.delete(
   controller.deleteAdImage
 );
 
+// Authenticated polling for only the owner of this upload. No file metadata exposed.
+router.get(
+  "/ad-video-progress/:uploadId",
+  requireAuth,
+  controller.getAdVideoProgress
+);
+
 router.get(
   "/ad-video/:userId/:filename",
   controller.getAdVideo

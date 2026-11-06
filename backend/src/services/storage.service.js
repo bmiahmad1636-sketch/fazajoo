@@ -7,6 +7,7 @@ const {
 
 const crypto = require("crypto");
 const path = require("path");
+const { Transform } = require("stream");
 
 const env = require("../config/env");
 
@@ -425,17 +426,39 @@ function keyFromAdVideoApiUrl(url) {
   } catch { return null; }
 }
 
-async function uploadAdVideo({ body, mimeType, originalName, userId, size }) {
+async function uploadAdVideo({ body, mimeType, originalName, userId, size, onProgress }) {
   const key = `ad-videos/${userId}/${crypto.randomUUID()}${safeVideoExtension(originalName, mimeType)}`;
-  await client().send(new PutObjectCommand({
-    Bucket: env.STORAGE_BUCKET,
-    Key: key,
-    Body: body,
-    ContentType: mimeType,
-    ContentLength: size,
-    CacheControl: "public, max-age=31536000, immutable",
-  }));
-  return { key };
+  let uploadBody = body;
+  let meteredStream = null;
+  if (typeof onProgress === "function") {
+    let bytesRead = 0;
+    // Backpressure-aware counting of bytes actually read for the S3 request.
+    // Reading all bytes is NOT proof that S3 committed the object: only send() returning is.
+    meteredStream = new Transform({
+      transform(chunk, encoding, callback) {
+        bytesRead += chunk.length;
+        onProgress(Math.min(size, bytesRead));
+        callback(null, chunk);
+      },
+    });
+    body.once("error", (error) => meteredStream.destroy(error));
+    uploadBody = body.pipe(meteredStream);
+  }
+  try {
+    await client().send(new PutObjectCommand({
+      Bucket: env.STORAGE_BUCKET,
+      Key: key,
+      Body: uploadBody,
+      ContentType: mimeType,
+      ContentLength: size,
+      CacheControl: "public, max-age=31536000, immutable",
+    }));
+    return { key };
+  } catch (error) {
+    body.destroy?.();
+    meteredStream?.destroy();
+    throw error;
+  }
 }
 
 async function getAdVideo({ userId, filename, range }) {

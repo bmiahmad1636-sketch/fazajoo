@@ -1043,3 +1043,9 @@ span {
   color: #31453d;
   background: rgba(242,248,245,.96);
 }
+
+/* Typed garden financial terms: show every actual amount, never ellipsize deposit/rent. */
+.parking-card__garden-money {display:grid;gap:3px;min-width:0;line-height:1.45;direction:rtl}
+.parking-card__garden-money-row {display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 6px;font-size:.78rem}
+.parking-card__garden-money-row span {color:#806f60;font-weight:750}
+.parking-card__garden-money-row bdi {color:#cc650e;font-weight:900;font-size:.82rem;overflow-wrap:anywhere;unicode-bidi:isolate}

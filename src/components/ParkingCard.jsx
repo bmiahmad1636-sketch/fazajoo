@@ -27,6 +27,7 @@ import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText } from "
 import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText } from "../utils/gardenRequest";
 import { readOtherRequest, otherRequestAreaText, otherRequestBudgetText } from "../utils/otherRequest";
 import { shopFinancialHeadline } from "../utils/shopOffer";
+import { gardenFinancialHeadline, gardenFinancialRows } from "../utils/gardenOffer";
 
 import "./ParkingCard.css";
 
@@ -100,6 +101,8 @@ function ParkingCard({ parking }) {
   const isWanted =
     listingType === "wanted";
   const shopPriceText=!isWanted&&category==="shop"?shopFinancialHeadline(parking?.spaceAttributes):"";
+  const gardenPriceText=!isWanted&&category==="garden"?gardenFinancialHeadline(parking?.spaceAttributes,price,priceType):"";
+  const gardenPriceRows = gardenPriceText ? gardenFinancialRows(parking?.spaceAttributes,price,priceType) : [];
 
   // Wanted land keeps its requirements in description metadata, not in
   // the generic area/price fields. Read only for this listing type.
@@ -593,15 +596,19 @@ function ParkingCard({ parking }) {
                 : "قیمت"}
             </span>
 
-            <strong>
+            {gardenPriceRows.length ? (
+              <div className="parking-card__garden-money" aria-label="شرایط مالی باغ">
+                {gardenPriceRows.map(({label,amount})=><div key={label} className="parking-card__garden-money-row"><span>{label}</span><bdi>{amount}</bdi></div>)}
+              </div>
+            ) : <strong>
               {landData
                 ? (landBudgetText || "بودجه اعلام نشده")
-                : (shopPriceText || otherBudgetText || gardenBudgetText || villaBudgetText || residentialBudgetText || residentialPrice ||
+                : (shopPriceText || gardenPriceText || otherBudgetText || gardenBudgetText || villaBudgetText || residentialBudgetText || residentialPrice ||
                   formatRialPrice(price, {
                     priceType,
                     fallback: "توافقی",
                   }))}
-            </strong>
+            </strong>}
           </div>
 
           <Link
