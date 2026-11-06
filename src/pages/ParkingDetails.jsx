@@ -1,4 +1,5 @@
 import { readResidentialRequest, residentialRequestAreaText, residentialRequestBudgetText, residentialRequestLabel, RESIDENTIAL_REQUEST_TYPES, RESIDENTIAL_REQUEST_FEATURES, RESIDENTIAL_FLOOR_PREFERENCES } from "../utils/residentialRequest";
+import { residentialFinancialRows } from "../utils/residentialOffer";
 import {readLandRental,landLabel,LAND_PURPOSES,LAND_LEGAL,LAND_LOCATION,LAND_DURATION,LAND_CROPS,LAND_WATER,LAND_IRRIGATION,LAND_FEATURES,LAND_PAYMENT} from "../utils/landRental";
 import { readShopRequest, shopOptionLabel, SHOP_TYPES, SHOP_ACTIVITIES, SHOP_FLOORS, SHOP_LOCATIONS, SHOP_FEATURES, SHOP_TRANSFER } from "../utils/shopRequest";
 import {SHOP_OFFER_TYPES,SHOP_OFFER_ACTIVITIES,SHOP_OFFER_TRANSFERS,SHOP_OFFER_FLOORS,SHOP_OFFER_LOCATIONS,SHOP_OFFER_FEATURES,SHOP_RIGHTS,shopOfferLabel,shopFinancialHeadline,shopFinancialRows} from "../utils/shopOffer";
@@ -267,6 +268,8 @@ function ParkingDetails({
   const gardenPriceRows = !isWanted && category === "garden"
     ? gardenFinancialRows(parking?.spaceAttributes,parking?.price,parking?.priceType)
     : [];
+  const residentialPriceRows = !isWanted && category === "residential"
+    ? residentialFinancialRows(parking?.residentialDetails,parking?.spaceAttributes) : [];
 
   // Wanted-land requirements are stored in description metadata.
   const wantedResidential = isWanted && category === "residential" ? readResidentialRequest(parking?.description || "") : null;
@@ -371,7 +374,7 @@ function ParkingDetails({
   const hasShopAmenities = Boolean(shop.waterSupply || shop.electricitySupply || shop.threePhase || shop.cityGas || shop.landline || shop.restroom || (shop.heatingSystems||[]).length || (shop.coolingSystems||[]).length);
   const residentialTypeLabels = {
     apartment: "آپارتمان", house: "خانه", villa: "خانه ویلایی",
-    suite: "سوئیت", penthouse: "پنت‌هاوس", other: "سایر مسکونی",
+    suite: "سوئیت", penthouse: "پنت‌هاوس", room: "اتاق", other: "سایر مسکونی",
   };
 
   const handlePhoneToggle = async () => {
@@ -619,7 +622,7 @@ function ParkingDetails({
               </p>
             </div>
 
-            <div className={`parking-details-hero__price${(shopPriceRows.length || gardenPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>
+            <div className={`parking-details-hero__price${(shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>
               <span>
                 {isWanted ? "بودجه" : "قیمت آگهی"}
               </span>
@@ -628,6 +631,8 @@ function ParkingDetails({
                 <ShopMoneyRows items={shopPriceRows} />
               ) : gardenPriceRows.length ? (
                 <ShopMoneyRows items={gardenPriceRows} />
+              ) : residentialPriceRows.length ? (
+                <ShopMoneyRows items={residentialPriceRows} />
               ) : (
                 <strong>
                   {(!isWanted && category === "shop" ? shopFinancialHeadline(parking?.spaceAttributes) : "") || otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
@@ -843,7 +848,7 @@ function ParkingDetails({
                     </div>
                   </div>
 
-                  <div className={`parking-details-feature${(shopPriceRows.length || gardenPriceRows.length) ? " parking-details-feature--shop-money" : ""}`}>
+                  <div className={`parking-details-feature${(shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length) ? " parking-details-feature--shop-money" : ""}`}>
                     <span className="parking-details-feature__icon parking-details-feature__icon--orange">
                       💰
                     </span>
@@ -857,6 +862,8 @@ function ParkingDetails({
                         <ShopMoneyRows items={shopPriceRows} compact />
                       ) : gardenPriceRows.length ? (
                         <ShopMoneyRows items={gardenPriceRows} compact />
+                      ) : residentialPriceRows.length ? (
+                        <ShopMoneyRows items={residentialPriceRows} compact />
                       ) : (
                         <strong>
                           {otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
@@ -1041,7 +1048,7 @@ function ParkingDetails({
                 </article>:null;
               })()}
 
-              {!(["parking", "storage", "warehouse", "land", "shop", "garden"].includes(category) && !isWanted && !String(parking.description || "").trim()) && !(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData) || (category === "other" && otherWantedData))) && (
+              {!(["parking", "storage", "warehouse", "land", "shop", "garden", "residential"].includes(category) && !isWanted && !String(parking.description || "").trim()) && !(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData) || (category === "other" && otherWantedData))) && (
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">
@@ -1067,13 +1074,12 @@ function ParkingDetails({
                 <div className="parking-details-residential">
                   <h3>🏠 مشخصات ملک مسکونی</h3>
                   <div className="parking-details-residential__grid">
-                    <span><small>نوع ملک</small><strong>{residentialTypeLabels[residential.propertyType] || "مسکونی"}</strong></span>
-                    <span><small>رهن</small><strong>{Number(residential.deposit || 0).toLocaleString("fa-IR")} ریال</strong></span>
-                    <span><small>اجاره ماهانه</small><strong>{Number(residential.monthlyRent || 0).toLocaleString("fa-IR")} ریال</strong></span>
-                    <span><small>اتاق</small><strong>{Number(residential.bedrooms || 0).toLocaleString("fa-IR")}</strong></span>
-                    {residential.propertyType === "apartment" && residential.floor && <span><small>طبقه</small><strong>{residential.floor}</strong></span>}
+                    <span><small>نوع ملک</small><strong>{residential.propertyType === "other" && parking?.spaceAttributes?.category === "residential" && parking?.spaceAttributes?.values?.otherType ? parking.spaceAttributes.values.otherType : residentialTypeLabels[residential.propertyType] || "مسکونی"}</strong></span>
+                    {residentialPriceRows.map(({label,amount}) => <span key={label}><small>{label}</small><strong>{amount}</strong></span>)}
+                    {Number(residential.bedrooms || 0) > 0 && <span><small>اتاق</small><strong>{Number(residential.bedrooms).toLocaleString("fa-IR")}</strong></span>}
+                    {["apartment","penthouse"].includes(residential.propertyType) && residential.floor && <span><small>طبقه</small><strong>{residential.floor}</strong></span>}
                     {Number(residential.totalFloors || 0) > 0 && <span><small>تعداد طبقات ساختمان</small><strong>{Number(residential.totalFloors).toLocaleString("fa-IR")}</strong></span>}
-                    {residential.propertyType === "apartment" && Number(residential.unitsPerFloor || 0) > 0 && <span><small>واحد در هر طبقه</small><strong>{Number(residential.unitsPerFloor).toLocaleString("fa-IR")}</strong></span>}
+                    {["apartment","penthouse"].includes(residential.propertyType) && Number(residential.unitsPerFloor || 0) > 0 && <span><small>واحد در هر طبقه</small><strong>{Number(residential.unitsPerFloor).toLocaleString("fa-IR")}</strong></span>}
                     {residential.buildYear > 0 && <span><small>سال ساخت</small><strong>{String(residential.buildYear).replace(/\D/g, "").replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)])}</strong></span>}
                   </div>
                   <div className="parking-details-residential__amenities">
@@ -1083,6 +1089,7 @@ function ParkingDetails({
                     {residential.furnished && <b>✓ مبله</b>}
                     {["apartment", "penthouse", "house"].includes(residential.propertyType) && residential.balcony && <b>✓ بالکن</b>}
                     {residential.propertyType === "penthouse" && residential.roofGarden && <b>✓ روف‌گاردن / تراس اختصاصی</b>}
+                    {!isWanted && parking?.spaceAttributes?.category === "residential" && parking?.spaceAttributes?.values?.features?.includes("yard") && <b>✓ حیاط</b>}
                     {residential.renovated && <b>✓ بازسازی‌شده</b>}
                     {residential.convertible && <b>✓ قابل تبدیل رهن و اجاره</b>}
                   </div>

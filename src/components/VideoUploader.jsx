@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { deleteAdImage, deleteAdVideo, uploadAdImage, uploadAdVideo } from "../services/uploadService";
-import { videoTransferPercent, videoUploadStageLabel, videoUploadPhaseLabel } from "../utils/videoUploadProgress";
+import { videoTransferPercent, videoUploadStageLabel, videoUploadPhaseLabel, elapsedSecondsSince, formatUploadElapsedTime } from "../utils/videoUploadProgress";
 import "./VideoUploader.css";
 
 const ALLOWED_TYPES = ["video/mp4", "video/quicktime", "video/webm"];
@@ -90,9 +90,11 @@ export default function VideoUploader({ video = null, onChange, disabled = false
   useEffect(() => {
     if (!uploading || !uploadStage) return undefined;
     const stageStartedAt = Date.now();
+    setStageSeconds(0);
     const interval = setInterval(() => {
-      setStageSeconds(Math.floor((Date.now() - stageStartedAt) / 1000));
-      setTotalSeconds(Math.floor((Date.now() - uploadStartedAtRef.current) / 1000));
+      const now = Date.now();
+      setStageSeconds(elapsedSecondsSince(stageStartedAt, now));
+      setTotalSeconds(elapsedSecondsSince(uploadStartedAtRef.current, now));
     }, 1000);
     return () => clearInterval(interval);
   }, [uploading, uploadStage]);
@@ -254,7 +256,7 @@ export default function VideoUploader({ video = null, onChange, disabled = false
           </span>
           <div className="fazajoo-video-uploader__progress-copy">
             <strong>{progressText}</strong>
-            <small className="fazajoo-video-uploader__phase">{videoUploadPhaseLabel(uploadStage)} • {stageSeconds.toLocaleString("fa-IR")} ثانیه در این مرحله • {totalSeconds.toLocaleString("fa-IR")} ثانیه از شروع</small>
+            <small className="fazajoo-video-uploader__phase">{videoUploadPhaseLabel(uploadStage)} • زمان این مرحله: <bdi dir="ltr">{formatUploadElapsedTime(stageSeconds)}</bdi> • زمان کل از آغاز آپلود: <bdi dir="ltr">{formatUploadElapsedTime(totalSeconds)}</bdi></small>
             <small>{transferActive
               ? "این درصد فقط بایت‌های انتقال‌یافته را نشان می‌دهد؛ پایان انتقال به‌معنی تأیید ذخیره‌سازی نیست."
               : waitingForConfirmation

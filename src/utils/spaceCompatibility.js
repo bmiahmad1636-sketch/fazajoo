@@ -40,7 +40,9 @@ export function compareSpaceProfiles(wanted, offer) {
     requireCheck("parking-vehicle", fields.vehicleUsage, available.vehicleUsage, (need, actual) => actual === "both" || actual === need);
     requireCheck("parking-access", fields.access, available.access, (need, actual) => actual === "anytime" || actual === need);
   } else if (wanted.category === "residential") {
-    requireCheck("residential-type", fields.propertyType, available.propertyType);
+    // "other" is free text on both sides: identical IDs do not prove identical property types.
+    if (fields.propertyType === "other") unknown.push("residential-other-type-review");
+    else requireCheck("residential-type", fields.propertyType, available.propertyType);
   } else if (wanted.category === "storage" || wanted.category === "warehouse" || wanted.category === "shop") {
     requireCheck("space-type", fields.spaceType, available.spaceType);
     if (wanted.category === "storage") {

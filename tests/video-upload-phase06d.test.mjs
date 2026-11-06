@@ -54,7 +54,10 @@ test('Phase06D: preview preparation overlaps transfer, and progress labels expos
   assert.match(ui,/preparationMs: Date\.now\(\) - posterStartedAt/);
   assert.match(ui,/uploadStage === "ready" \? "progressbar" : "status"/);
   assert.match(ui,/videoUploadPhaseLabel\(uploadStage\)/);
-  assert.match(ui,/stageSeconds\.toLocaleString\("fa-IR"\)/);
+  assert.match(ui,/formatUploadElapsedTime\(stageSeconds\)/);
+  assert.match(ui,/formatUploadElapsedTime\(totalSeconds\)/);
+  assert.match(ui,/زمان این مرحله/);
+  assert.match(ui,/زمان کل از آغاز آپلود/);
   assert.match(css,/prefers-reduced-motion: reduce/);
   assert.match(css,/progress-ring--busy/);
 });

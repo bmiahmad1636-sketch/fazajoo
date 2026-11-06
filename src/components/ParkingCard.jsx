@@ -23,6 +23,7 @@ import {
 import { formatRialPrice, normalizePriceNumber } from "../utils/priceFormatter";
 import { readLandRental } from "../utils/landRental";
 import { readResidentialRequest, residentialRequestAreaText, residentialRequestBudgetText } from "../utils/residentialRequest";
+import { residentialFinancialHeadline, residentialFinancialRows } from "../utils/residentialOffer";
 import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText } from "../utils/villaRequest";
 import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText } from "../utils/gardenRequest";
 import { readOtherRequest, otherRequestAreaText, otherRequestBudgetText } from "../utils/otherRequest";
@@ -103,6 +104,7 @@ function ParkingCard({ parking }) {
   const shopPriceText=!isWanted&&category==="shop"?shopFinancialHeadline(parking?.spaceAttributes):"";
   const gardenPriceText=!isWanted&&category==="garden"?gardenFinancialHeadline(parking?.spaceAttributes,price,priceType):"";
   const gardenPriceRows = gardenPriceText ? gardenFinancialRows(parking?.spaceAttributes,price,priceType) : [];
+  const residentialPriceRows = !isWanted && category === "residential" ? residentialFinancialRows(residentialDetails,parking?.spaceAttributes) : [];
 
   // Wanted land keeps its requirements in description metadata, not in
   // the generic area/price fields. Read only for this listing type.
@@ -168,17 +170,9 @@ function ParkingCard({ parking }) {
       : categoryLabel?.trim() ||
         categoryInfo.label;
 
-  const residentialPrice =
-    category === "residential"
-      ? [
-          Number(residentialDetails.deposit) > 0
-            ? `رهن ${Number(residentialDetails.deposit).toLocaleString("fa-IR")} ریال`
-            : "",
-          Number(residentialDetails.monthlyRent) > 0
-            ? `اجاره ${Number(residentialDetails.monthlyRent).toLocaleString("fa-IR")} ریال`
-            : "",
-        ].filter(Boolean).join(" • ")
-      : "";
+  const residentialPrice = category === "residential" && !isWanted
+    ? residentialFinancialHeadline(residentialDetails, parking?.spaceAttributes)
+    : "";
 
   const typeInfo = isWanted
     ? {
@@ -596,9 +590,9 @@ function ParkingCard({ parking }) {
                 : "قیمت"}
             </span>
 
-            {gardenPriceRows.length ? (
-              <div className="parking-card__garden-money" aria-label="شرایط مالی باغ">
-                {gardenPriceRows.map(({label,amount})=><div key={label} className="parking-card__garden-money-row"><span>{label}</span><bdi>{amount}</bdi></div>)}
+            {(gardenPriceRows.length || residentialPriceRows.length) ? (
+              <div className="parking-card__garden-money" aria-label="شرایط مالی آگهی">
+                {(gardenPriceRows.length ? gardenPriceRows : residentialPriceRows).map(({label,amount})=><div key={label} className="parking-card__garden-money-row"><span>{label}</span><bdi>{amount}</bdi></div>)}
               </div>
             ) : <strong>
               {landData

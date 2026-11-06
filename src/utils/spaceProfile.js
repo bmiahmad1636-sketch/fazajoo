@@ -95,6 +95,8 @@ export function toSpaceProfile(listing = {}) {
       profile.bedrooms = numericOrNull(res.bedrooms);
       profile.fields.propertyType = textOrNull(res.propertyType);
       profile.features = positiveFlags(res, { parking: "parking", elevator: "elevator", storage: "storage", balcony: "balcony", furnished: "furnished" });
+      if (Array.isArray(res.heatingSystems) && res.heatingSystems.length) profile.features.push("heating");
+      if (Array.isArray(res.coolingSystems) && res.coolingSystems.length) profile.features.push("cooling");
     } else {
       if (profile.pricePeriod) profile.rentRial = numericOrNull(listing.price);
       if (category === "villa") {

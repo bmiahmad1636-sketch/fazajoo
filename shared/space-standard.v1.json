@@ -256,6 +256,8 @@
       "label": "مسکونی",
       "offerFields": [
         "propertyType",
+        "otherType",
+        "financialMode",
         "bedrooms",
         "floor",
         "features"

@@ -39,3 +39,25 @@ export function videoUploadPhaseLabel(stage) {
   if (stage === "ready") return "تکمیل موفق";
   return "در حال آماده‌سازی";
 }
+
+// Upload timing is measured in milliseconds, but displayed as an elapsed clock.
+// These two independent clocks are NOT an estimated time remaining:
+// phase = current step; total = everything since video transfer began.
+export function elapsedSecondsSince(startedAtMs, nowMs = Date.now()) {
+  const started = Number(startedAtMs);
+  const now = Number(nowMs);
+  if (!Number.isFinite(started) || started <= 0 || !Number.isFinite(now)) return 0;
+  return Math.max(0, Math.floor((now - started) / 1000));
+}
+
+export function formatUploadElapsedTime(seconds) {
+  const numeric = Number(seconds);
+  const total = Number.isFinite(numeric) ? Math.max(0, Math.floor(numeric)) : 0;
+  const digits = (value) => value.toLocaleString("fa-IR", { minimumIntegerDigits: 2, useGrouping: false });
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const remainder = total % 60;
+  return hours > 0
+    ? `${digits(hours)}:${digits(minutes)}:${digits(remainder)}`
+    : `${digits(Math.floor(total / 60))}:${digits(remainder)}`;
+}
