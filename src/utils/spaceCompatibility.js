@@ -26,8 +26,14 @@ export function compareSpaceProfiles(wanted, offer) {
   if (wanted.maxAreaSqm !== null) requireCheck("max-area", wanted.maxAreaSqm, offer.areaSqm, (need, actual) => actual <= need);
   if (wanted.minBedrooms !== null) requireCheck("bedrooms", wanted.minBedrooms, offer.bedrooms, (need, actual) => actual >= need);
   if (wanted.guests !== null) requireCheck("capacity", wanted.guests, offer.capacity, (need, actual) => actual >= need);
-  if (wanted.maxDepositRial !== null) requireCheck("deposit-irr", wanted.maxDepositRial, offer.depositRial, (need, actual) => actual <= need);
-  if (wanted.maxRentRial !== null) {
+  // A possible alternative term has no verified alternate pricing.
+  const villaOtherTermReview = wanted.category === "villa" &&
+    Boolean(wanted.fields?.villaRentalTerm && offer.fields?.rentalTerm) &&
+    wanted.fields.villaRentalTerm !== offer.fields.rentalTerm &&
+    offer.fields.canNegotiateOtherTerm === true;
+  if (villaOtherTermReview) unknown.push("villa-alternative-term-price-and-contract-review");
+  if (!villaOtherTermReview && wanted.maxDepositRial !== null) requireCheck("deposit-irr", wanted.maxDepositRial, offer.depositRial, (need, actual) => actual <= need);
+  if (!villaOtherTermReview && wanted.maxRentRial !== null) {
     // Comparing daily vs monthly amounts is forbidden without an explicit policy.
     if (!wanted.pricePeriod || !offer.pricePeriod || wanted.pricePeriod !== offer.pricePeriod) unknown.push("price-period");
     else requireCheck("rent-irr", wanted.maxRentRial, offer.rentRial, (need, actual) => actual <= need);
@@ -108,7 +114,22 @@ export function compareSpaceProfiles(wanted, offer) {
     // A landlord's advertised activity is never equivalent to a land-use permit.
     if (fields.primaryPurpose) unknown.push("land-permit-review");
   }
-  if (wanted.category === "villa") requireCheck("villa-type", fields.accommodationType, available.accommodationType);
+  if (wanted.category === "villa") {
+    // Do not compare an overnight holiday rate to a long-term monthly contract.
+    const offerTerm=available.rentalTerm||(Array.isArray(available.availableStays)&&available.availableStays.length?"short":null);
+    const wantedTerm=fields.villaRentalTerm||(fields.villaStayType?"short":null);
+    if(!villaOtherTermReview)requireCheck("villa-rental-term",wantedTerm,offerTerm);
+    if(wantedTerm==="long"&&offerTerm==="long")requireCheck("villa-contract-mode",fields.villaFinancialMode,available.financialMode);
+    if (fields.accommodationType === "other") unknown.push("villa-other-type-review");
+    else requireCheck("villa-type", fields.accommodationType, available.accommodationType);
+    if (fields.villaPrivacyRequired) requireCheck("villa-privacy","private",available.privacy);
+    if (!villaOtherTermReview && wantedTerm!=="long" && fields.villaStayType && fields.villaStayType !== "flexible") {
+      const stays = available.availableStays;
+      // Weekend vs daily is not automatically equivalent; needs owner confirmation.
+      if (fields.villaStayType === "weekend" && Array.isArray(stays) && stays.includes("daily") && !stays.includes("weekend") && !stays.includes("flexible")) unknown.push("villa-weekend-review");
+      else requireCheck("villa-stay",fields.villaStayType,stays,(need,actual)=>Array.isArray(actual)&&(actual.includes(need)||actual.includes("flexible")));
+    }
+  }
   if (wanted.category === "residential" && fields.floorPreference && fields.floorPreference !== "any") unknown.push("residential-floor-review");
   // Absence from a legacy checklist is NOT a verified negative.
   for (const feature of wanted.features || []) {

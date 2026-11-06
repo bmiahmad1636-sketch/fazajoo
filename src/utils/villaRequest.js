@@ -15,8 +15,10 @@ export const VILLA_REQUEST_AMENITIES = [
   ["wifi", "اینترنت"], ["air_conditioning", "سرمایش"],
   ["heating", "گرمایش"], ["pet_friendly", "پذیرش حیوان خانگی"],
 ];
+export const VILLA_REQUEST_TERMS=[["short","اقامت کوتاه‌مدت"],["long","اجاره بلندمدت"]];
+export const VILLA_REQUEST_LONG_MODES=[["full_deposit","رهن کامل"],["rent_only","فقط اجاره"],["deposit_rent","رهن و اجاره"]];
 export const EMPTY_VILLA_REQUEST = {
-  accommodationType: "villa", otherType: "", stayType: "daily", guests: "",
+  rentalTerm:"short",financialMode:"", accommodationType: "villa", otherType: "", stayType: "daily", guests: "",
   minBedrooms: "", minArea: "", maxArea: "", pricePeriod: "daily", maxBudget: "",
   maxDeposit: "", amenities: [], privacyRequired: false, requirements: "",
 };
@@ -76,20 +78,34 @@ export function writeVillaRequest(data = {}, notes = "") {
     otherType: String(data.otherType || "").trim().slice(0, 70),
     requirements: String(data.requirements || "").trim().slice(0, 240),
   };
+  if(safe.rentalTerm==="long"){
+   safe.pricePeriod="monthly";
+   if(safe.financialMode==="full_deposit")safe.maxBudget="";
+   if(safe.financialMode==="rent_only")safe.maxDeposit="";
+  } else {
+   safe.financialMode="";
+  }
   const tail = String(notes || "").trim();
   return `[FAZAJOO_VILLA_REQUEST:${encodeURIComponent(JSON.stringify(safe))}]${tail ? `\n${tail}` : ""}`;
 }
 export function validateVillaRequest(data = {}) {
   if (!VILLA_REQUEST_TYPES.some(([key]) => key === data.accommodationType)) return "نوع اقامتگاه را انتخاب کنید.";
   if (data.accommodationType === "other" && String(data.otherType || "").trim().length < 5) return "نوع اقامتگاه دیگر را حداقل در ۵ نویسه توضیح دهید.";
-  if (!VILLA_REQUEST_STAYS.some(([key]) => key === data.stayType)) return "مدت اقامت موردنظر را مشخص کنید.";
+  const term=data.rentalTerm||"short";
+  if(!["short","long"].includes(term))return "مدت قرارداد را مشخص کنید.";
+  if(term==="short"&&!VILLA_REQUEST_STAYS.some(([key]) => key === data.stayType))return "مدت اقامت موردنظر را مشخص کنید.";
+  if(term==="long"&&!VILLA_REQUEST_LONG_MODES.some(([key])=>key===data.financialMode))return "نوع قرارداد بلندمدت را انتخاب کنید.";
   const guests = Number(digits(data.guests) || 0);
-  if (guests < 1 || guests > 100) return "تعداد مهمان باید بین ۱ تا ۱۰۰ نفر باشد.";
+  if (guests < 1 || guests > 100) return term==="long" ? "تعداد ساکنان باید بین ۱ تا ۱۰۰ نفر باشد." : "تعداد مهمان باید بین ۱ تا ۱۰۰ نفر باشد.";
   if (Number(digits(data.minBedrooms) || 0) > 30) return "تعداد اتاق معتبر نیست.";
   const min = Number(digits(data.minArea) || 0), max = Number(digits(data.maxArea) || 0);
   if ((min && max && min > max) || min > 1000000 || max > 1000000) return "محدوده متراژ معتبر نیست.";
-  if (!["daily", "weekly", "monthly"].includes(data.pricePeriod)) return "دوره بودجه معتبر نیست.";
-  if (!Number(digits(data.maxBudget))) return "سقف بودجه اقامت را وارد کنید.";
+  if(term==="short"&&! ["daily","weekly","monthly"].includes(data.pricePeriod))return "دوره بودجه اقامت معتبر نیست.";
+  if(term==="long"&&data.pricePeriod!=="monthly")return "بودجه اجاره بلندمدت باید ماهانه باشد.";
+  if(term==="short" || (term==="long" && data.financialMode!=="full_deposit")){
+    if(!Number(digits(data.maxBudget)))return "سقف هزینه اجاره را وارد کنید.";
+  }
+  if(term==="long"&&data.financialMode!=="rent_only"&&!Number(digits(data.maxDeposit)))return "سقف رهن قابل پرداخت را مشخص کنید.";
   if (digits(data.maxBudget).length > 15 || digits(data.maxDeposit).length > 15) return "مبلغ واردشده بیش از حد مجاز است.";
   if (String(data.requirements || "").length > 240) return "شرایط خاص حداکثر ۲۴۰ نویسه باشد.";
   return "";
@@ -102,10 +118,17 @@ export function villaRequestAreaText(data = {}) {
   return Number(digits(data.guests) || 0) ? `مناسب ${formatNumber(data.guests)} نفر` : "";
 }
 export function villaRequestBudgetText(data = {}) {
+  const term=data.rentalTerm||"short";
   const period = { daily: "شبانه", weekly: "هفتگی", monthly: "ماهانه" }[data.pricePeriod] || "شبانه";
   const budget = Number(digits(data.maxBudget) || 0);
-  if (!budget) return "";
-  const parts = [`تا ${formatNumber(data.maxBudget)} ریال / ${period}`];
-  if (Number(digits(data.maxDeposit) || 0)) parts.push(`ودیعه تا ${formatNumber(data.maxDeposit)} ریال`);
+  if(!budget && !(term==="long"&&Number(digits(data.maxDeposit))))return "";
+  const parts=[];
+  if(term==="long"){
+   if(Number(digits(data.maxDeposit)))parts.push(`سقف رهن ${formatNumber(data.maxDeposit)} ریال`);
+   if(budget)parts.push(`اجاره ماهانه تا ${formatNumber(data.maxBudget)} ریال`);
+  } else {
+   if(budget)parts.push(`تا ${formatNumber(data.maxBudget)} ریال / ${period}`);
+   if(Number(digits(data.maxDeposit)))parts.push(`ضمانت خسارت تا ${formatNumber(data.maxDeposit)} ریال`);
+  }
   return parts.join(" • ");
 }

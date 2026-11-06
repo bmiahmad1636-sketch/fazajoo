@@ -10,6 +10,7 @@ const { cleanLandSpaceAttributes } = require("../utils/landSpaceAttributes");
 const { cleanShopSpaceAttributes } = require("../utils/shopSpaceAttributes");
 const { cleanGardenSpaceAttributes } = require("../utils/gardenSpaceAttributes");
 const { cleanResidentialSpaceAttributes } = require("../utils/residentialSpaceAttributes");
+const { cleanVillaSpaceAttributes } = require("../utils/villaSpaceAttributes");
 
 const MAX_IMAGES = 10;
 const HEATING_SYSTEMS = ["gasHeater", "packageRadiator", "centralHeating", "floorHeating", "electricHeater", "splitHeating"];
@@ -173,6 +174,11 @@ function clean(body = {}) {
   const typedResidential = body.category === "residential" && body.listingType !== "wanted"
     ? cleanResidentialSpaceAttributes(body.spaceAttributes, "residential", "offer") : null;
   const residentialMode = typedResidential?.values?.financialMode;
+  const typedVilla = body.category === "villa" && body.listingType !== "wanted"
+    ? cleanVillaSpaceAttributes(body.spaceAttributes,"villa","offer",body.villaDetails) : null;
+  const longVilla = typedVilla?.values?.rentalTerm === "long";
+  const longVillaRent = longVilla && typedVilla.values.financialMode !== "full_deposit"
+    ? typedVilla.values.longMonthlyRentRial : null;
   // Monthly rent and one-off deposit must never share a generic price.
   const cleanResidentialMoney = (v) => {
     if (v === null || v === undefined || v === "" || typeof v === "boolean") return 0;
@@ -193,8 +199,8 @@ function clean(body = {}) {
     title: String(body.title || "").trim().slice(0, 160),
     city: String(body.city || "").trim().slice(0, 100),
     area: Math.max(0, Number(body.area) || 0),
-    price: typedShop?.schemaVersion === 1 ? (shopRent ? String(shopRent) : "") : typedResidential?.schemaVersion === 1 ? (residentialRent ? String(residentialRent) : "") : fullDepositGarden ? "" : String(body.price || "").trim().slice(0, 100),
-    priceType: typedShop?.schemaVersion === 1 ? (shopRent ? "monthly" : "negotiable") : typedResidential?.schemaVersion === 1 ? (residentialRent ? "monthly" : "negotiable") : fullDepositGarden ? "negotiable" : (["daily", "weekly", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly"),
+    price: typedShop?.schemaVersion === 1 ? (shopRent ? String(shopRent) : "") : typedResidential?.schemaVersion === 1 ? (residentialRent ? String(residentialRent) : "") : longVilla ? (longVillaRent ? String(longVillaRent) : "") : fullDepositGarden ? "" : String(body.price || "").trim().slice(0, 100),
+    priceType: typedShop?.schemaVersion === 1 ? (shopRent ? "monthly" : "negotiable") : typedResidential?.schemaVersion === 1 ? (residentialRent ? "monthly" : "negotiable") : longVilla ? (longVillaRent ? "monthly" : "negotiable") : fullDepositGarden ? "negotiable" : (["daily", "weekly", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly"),
     phone: String(body.phone || "").replace(/\s/g, "").slice(0, 20),
     imageUrl,
     imageUrls,
@@ -230,11 +236,11 @@ function clean(body = {}) {
         ? {
             bedrooms: Math.max(0, Math.min(30, Number(body.villaDetails.bedrooms) || 0)),
             capacity: Math.max(0, Math.min(100, Number(body.villaDetails.capacity) || 0)),
-            extraGuestPrice: Math.max(0, Number(body.villaDetails.extraGuestPrice) || 0),
+            extraGuestPrice: longVilla ? 0 : Math.max(0, Number(body.villaDetails.extraGuestPrice) || 0),
             distanceToSea: String(body.villaDetails.distanceToSea || "").trim().slice(0, 120),
             distanceToForest: String(body.villaDetails.distanceToForest || "").trim().slice(0, 120),
-            checkInTime: String(body.villaDetails.checkInTime || "").trim().slice(0, 10),
-            checkOutTime: String(body.villaDetails.checkOutTime || "").trim().slice(0, 10),
+            checkInTime: longVilla ? "" : String(body.villaDetails.checkInTime || "").trim().slice(0, 10),
+            checkOutTime: longVilla ? "" : String(body.villaDetails.checkOutTime || "").trim().slice(0, 10),
             houseRules: String(body.villaDetails.houseRules || "").trim().slice(0, 2000),
             pool: Boolean(body.villaDetails.pool),
             heatedPool: Boolean(body.villaDetails.heatedPool),
@@ -277,7 +283,7 @@ function clean(body = {}) {
           heatingSystems: cleanSystems(body.shopDetails.heatingSystems, HEATING_SYSTEMS),
           coolingSystems: cleanSystems(body.shopDetails.coolingSystems, COOLING_SYSTEMS),
         } : {},
-    spaceAttributes: body.category === "residential" ? (typedResidential || cleanResidentialSpaceAttributes(body.spaceAttributes, "residential", "wanted")) : body.category === "storage" ? cleanStorageSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "warehouse" ? cleanIndustrialSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "land" ? cleanLandSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "shop" ? (typedShop || cleanShopSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : body.category === "garden" ? (typedGarden || cleanGardenSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : cleanParkingSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer"),
+    spaceAttributes: body.category === "residential" ? (typedResidential || cleanResidentialSpaceAttributes(body.spaceAttributes, "residential", "wanted")) : body.category === "villa" ? (typedVilla || cleanVillaSpaceAttributes(body.spaceAttributes,"villa","wanted",body.villaDetails)) : body.category === "storage" ? cleanStorageSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "warehouse" ? cleanIndustrialSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "land" ? cleanLandSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "shop" ? (typedShop || cleanShopSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : body.category === "garden" ? (typedGarden || cleanGardenSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : cleanParkingSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer"),
     description: String(body.description || "").trim().slice(0, 5000),
     agencyNetworkConsent: body.agencyNetworkConsent === true,
     locationLat: Number.isFinite(Number(body.location?.lat)) && Number(body.location.lat) >= 24 && Number(body.location.lat) <= 40
@@ -333,6 +339,27 @@ function validate(space) {
       if(v.financialMode!=="full_deposit" && space.priceType!=="negotiable" && (!Number.isSafeInteger(Number(space.price))||Number(space.price)<=0))return "اجاره باغ معتبر نیست.";
     }
   }
+  if (space.listingType === "offer" && space.category === "villa" && space.spaceAttributes?.schemaVersion === 1) {
+    const v=space.spaceAttributes.values||{}, d=space.villaDetails||{},term=v.rentalTerm||"short";
+    if(!v.accommodationType || !v.privacy) return "مشخصات ضروری اقامتگاه کامل نیست.";
+    if(v.accommodationType==="other" && v.otherType.length<5) return "نوع اقامتگاه دیگر را توضیح دهید.";
+    if(!space.area || !Number.isFinite(space.area)) return "متراژ واقعی اقامتگاه را وارد کنید.";
+    if(d.heatedPool && !d.pool) return "استخر آب‌گرم بدون استخر معتبر نیست.";
+    if(v.features.includes("indoor_pool")&&!d.pool) return "استخر سرپوشیده بدون استخر معتبر نیست.";
+    if(term==="long"){
+      if(!["rent_only","full_deposit","deposit_rent"].includes(v.financialMode))return "نوع قرارداد بلندمدت ویلا معتبر نیست.";
+      if(v.financialMode!=="rent_only"&&!v.longDepositRial)return "مبلغ رهن بلندمدت معتبر نیست.";
+      if(v.financialMode!=="full_deposit"&&!v.longMonthlyRentRial)return "اجاره ماهانه بلندمدت معتبر نیست.";
+      const expectedRent=v.financialMode==="full_deposit"?0:Number(v.longMonthlyRentRial);
+      if(space.priceType!==(expectedRent?"monthly":"negotiable") || (expectedRent?Number(space.price)!==expectedRent:Boolean(space.price)))return "مبلغ اجاره ویلا با قرارداد بلندمدت مطابقت ندارد.";
+    } else {
+      if(!Array.isArray(v.availableStays) || !v.availableStays.length)return "حداقل یک شیوه اقامت ضروری است.";
+      if(!d.capacity || !Number.isSafeInteger(d.capacity) || d.capacity>100)return "ظرفیت واقعی اقامتگاه را وارد کنید.";
+      if(!["daily","weekly","monthly","negotiable"].includes(space.priceType))return "دوره اقامت معتبر نیست.";
+      if(space.priceType==="negotiable" && space.price)return "قیمت توافقی نباید مبلغ قطعی داشته باشد.";
+      if(space.priceType!=="negotiable" && (!/^\d{1,15}$/.test(String(space.price))||!Number.isSafeInteger(Number(space.price))||Number(space.price)<=0))return "هزینه اقامت معتبر نیست.";
+    }
+  }
   if (space.listingType === "offer" && space.category === "residential" && space.spaceAttributes?.schemaVersion === 1) {
     const v = space.spaceAttributes.values || {};
     const d = space.residentialDetails || {};
@@ -351,7 +378,7 @@ function validate(space) {
     if (!space.residentialDetails.deposit && !space.residentialDetails.monthlyRent) return "مبلغ رهن یا اجاره را وارد کنید.";
   } else if (space.priceType !== "negotiable" && !space.price) return "قیمت لازم است.";
   if (!/^09\d{9}$/.test(space.phone)) return "شماره موبایل معتبر نیست.";
-  if (!(space.listingType === "offer" && ["parking","storage","warehouse","land","shop","garden","residential"].includes(space.category)) && space.description.length < 10) return "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
+  if (!(space.listingType === "offer" && ["parking","storage","warehouse","land","shop","garden","residential","villa"].includes(space.category)) && space.description.length < 10) return "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
   if (space.imageUrls.length > MAX_IMAGES) return `حداکثر ${MAX_IMAGES} عکس برای هر آگهی مجاز است.`;
   if (space.listingType !== "wanted" && space.imageUrls.length === 0) return "حداقل یک تصویر برای آگهی لازم است.";
   if (space.video && (!space.video.duration || space.video.duration > 120.5)) return "مدت ویدئو باید حداکثر ۲ دقیقه باشد.";

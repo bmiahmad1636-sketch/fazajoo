@@ -1,0 +1,26 @@
+.fj-vo{direction:rtl;border:1px solid #efdbce;background:#fffaf7;border-radius:22px;padding:18px;display:grid;gap:17px;color:#292927}
+.fj-vo__header{display:flex;align-items:flex-start;gap:12px}.fj-vo__header>span{font-size:27px}.fj-vo__header strong{font-size:18px}.fj-vo__header p,.fj-vo small{display:block;color:#796f67;font-size:12px;line-height:1.9;margin:5px 0}
+.fj-vo__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.fj-vo__grid label,.fj-vo__extra-body label{display:grid;gap:7px;min-width:0}
+.fj-vo b,.fj-vo__group>strong{font-size:14px}.fj-vo em{color:#df5b10;font-style:normal}
+.fj-vo select,.fj-vo input:not([type=checkbox]),.fj-vo textarea{border:1px solid #e9d7c9;border-radius:12px;padding:12px;background:white;width:100%;max-width:100%;box-sizing:border-box;color:#252525;font-family:inherit;font-size:14px;min-height:44px}
+.fj-vo__group,.fj-vo__extra-body{display:grid;gap:12px}.fj-vo__checks{display:flex;flex-wrap:wrap;gap:8px}.fj-vo__checks label{border:1px solid #e9d7c9;border-radius:12px;padding:10px 12px;background:white;display:inline-flex;gap:8px;align-items:center;cursor:pointer;min-height:38px;font-size:13px}.fj-vo__checks label.is-selected{border-color:#f07824;background:#fff1e8;color:#a04b13}.fj-vo__checks input{accent-color:#eb6e18}
+.fj-vo__extra{border:1px dashed #edc8b1;border-radius:12px;background:white;padding:13px}.fj-vo__extra summary{cursor:pointer;color:#a45018;font-weight:700}.fj-vo__extra summary span{font-size:12px;font-weight:400;margin-right:8px}.fj-vo__extra-body{padding:14px 0 2px}.fj-vo__error{color:#bd3333;background:#fff0f0;border:1px solid #edbbbb;border-radius:10px;padding:10px;line-height:1.8;margin:0}
+.fj-vo .residential-fields{background:white;max-width:100%;box-sizing:border-box}
+@media(max-width:700px){.fj-vo{padding:12px}.fj-vo__grid{grid-template-columns:minmax(0,1fr)}.fj-vo__checks label{font-size:12px}}
+
+.fj-vo-wrap{display:grid;gap:16px;min-width:0;direction:rtl}
+.fj-vo__term{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.fj-vo__term button{border:1px solid #e9d7c9;background:#fff;border-radius:12px;min-height:48px;color:#3c3530;font:inherit;font-weight:700;cursor:pointer}
+.fj-vo__term button.active{border-color:#e66a1d;background:#fff1e8;color:#a74b11}
+.fj-vo__grid{align-items:start}.fj-vo__grid>label{display:grid;grid-template-rows:auto 48px;gap:8px;min-width:0}.fj-vo__grid select{height:48px;min-height:48px}
+.fj-vo__grid>label small{grid-row:auto}.fj-vo__finance{background:#fff5eb;border:1px solid #f2d8ba;padding:14px;border-radius:14px;display:grid;gap:12px}
+.fj-vo__money{display:grid;gap:8px}.fj-vo__villa-fields>.residential-fields{border:none!important;padding:0!important;background:transparent!important}
+.fj-vo__notes{background:#fff;border:1px solid #e8dfd7}.fj-vo__checks input[type=radio]{accent-color:#ed721e}
+@media(max-width:700px){.fj-vo__term{grid-template-columns:1fr}.fj-vo__grid>label{grid-template-rows:auto 48px}}
+
+.fj-villa-inline{display:grid;gap:15px}.fj-villa-inline>.fj-vo__grid{margin-bottom:3px}.fj-villa-inline .fj-vo__extra-body textarea{width:100%}
+
+.fj-vo__conversion{padding:12px 14px;border:1px solid #d5e8dc;border-radius:14px;background:#f5faf6;display:grid;gap:5px}
+.fj-vo__conversion-check{display:flex;align-items:flex-start;gap:9px;cursor:pointer;font-size:13px;line-height:1.9;color:#254a37}
+.fj-vo__conversion-check input{flex:0 0 auto;margin-top:6px;accent-color:#168a50;width:17px;height:17px}
+.fj-vo__conversion small{margin:0;color:#64746a}

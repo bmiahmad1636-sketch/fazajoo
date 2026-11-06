@@ -11,9 +11,9 @@ test('old shop utilities survive as optional shop subform',()=>{
  assert.match(controller,/shopDetails: body.category === "shop"/);
 });
 test('new shop avoids compulsory empty final description',()=>{
- assert.match(add,/"land", "shop", "garden", "residential"\]\.includes\(form\.category\) && !isWantedAd/);
- assert.match(edit,/"land", "shop", "garden", "residential"\]\.includes\(parking\?\.category\) && !isWanted/);
- assert.match(details,/"land", "shop", "garden", "residential"\]\.includes\(category\) && !isWanted/);
+ assert.match(add,/"land", "shop", "garden", "residential", "villa"\]\.includes\(form\.category\) && !isWantedAd/);
+ assert.match(edit,/"land", "shop", "garden", "residential", "villa"\]\.includes\(parking\?\.category\) && !isWanted/);
+ assert.match(details,/"land", "shop", "garden", "residential", "villa"\]\.includes\(category\) && !isWanted/);
 });
 test('seller prices are derived from real finance, and generic public prices are not rights or deposit',()=>{
  assert.match(add,/shopListingPrice\(form\.shopOffer\)/);

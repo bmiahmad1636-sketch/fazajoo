@@ -29,6 +29,8 @@ import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText } fro
 import { readOtherRequest, otherRequestAreaText, otherRequestBudgetText } from "../utils/otherRequest";
 import { shopFinancialHeadline } from "../utils/shopOffer";
 import { gardenFinancialHeadline, gardenFinancialRows } from "../utils/gardenOffer";
+import { villaFinancialRows } from "../utils/villaOffer";
+import VillaRentalBadges from "./VillaRentalBadges";
 
 import "./ParkingCard.css";
 
@@ -104,6 +106,7 @@ function ParkingCard({ parking }) {
   const shopPriceText=!isWanted&&category==="shop"?shopFinancialHeadline(parking?.spaceAttributes):"";
   const gardenPriceText=!isWanted&&category==="garden"?gardenFinancialHeadline(parking?.spaceAttributes,price,priceType):"";
   const gardenPriceRows = gardenPriceText ? gardenFinancialRows(parking?.spaceAttributes,price,priceType) : [];
+  const villaPriceRows = !isWanted && category === "villa" ? villaFinancialRows(parking?.spaceAttributes,price,priceType) : [];
   const residentialPriceRows = !isWanted && category === "residential" ? residentialFinancialRows(residentialDetails,parking?.spaceAttributes) : [];
 
   // Wanted land keeps its requirements in description metadata, not in
@@ -503,6 +506,7 @@ function ParkingCard({ parking }) {
                   "شهر ثبت نشده"}
               </span>
             </div>
+            {!isWanted && category === "villa" && <VillaRentalBadges attributes={parking?.spaceAttributes} compact />}
           </div>
 
           <button
@@ -590,9 +594,9 @@ function ParkingCard({ parking }) {
                 : "قیمت"}
             </span>
 
-            {(gardenPriceRows.length || residentialPriceRows.length) ? (
+            {(gardenPriceRows.length || residentialPriceRows.length || villaPriceRows.length) ? (
               <div className="parking-card__garden-money" aria-label="شرایط مالی آگهی">
-                {(gardenPriceRows.length ? gardenPriceRows : residentialPriceRows).map(({label,amount})=><div key={label} className="parking-card__garden-money-row"><span>{label}</span><bdi>{amount}</bdi></div>)}
+                {(gardenPriceRows.length ? gardenPriceRows : villaPriceRows.length ? villaPriceRows : residentialPriceRows).map(({label,amount})=><div key={label} className="parking-card__garden-money-row"><span>{label}</span><bdi>{amount}</bdi></div>)}
               </div>
             ) : <strong>
               {landData

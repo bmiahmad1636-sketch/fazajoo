@@ -232,10 +232,16 @@
       "label": "ویلای تفریحی",
       "offerFields": [
         "accommodationType",
-        "bedrooms",
-        "capacity",
+        "otherType",
+        "rentalTerm",
+        "canNegotiateOtherTerm",
+        "availableStays",
+        "privacy",
         "features",
-        "privacy"
+        "depositRial",
+        "financialMode",
+        "longDepositRial",
+        "longMonthlyRentRial"
       ],
       "wantedFields": [
         "accommodationType",
@@ -245,10 +251,16 @@
         "pricePeriod"
       ],
       "candidateMatchingFields": [
+        "accommodationType",
+        "rentalTerm",
+        "financialMode",
+        "availableStays",
+        "privacy",
         "bedrooms",
         "capacity",
         "features",
-        "areaSqm"
+        "areaSqm",
+        "pricePeriod"
       ],
       "offerPriority": "refinement"
     },

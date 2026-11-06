@@ -15,6 +15,8 @@ import { climateLabels } from "../components/ClimateFields";
 import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText, villaRequestLabel, VILLA_REQUEST_TYPES, VILLA_REQUEST_STAYS, VILLA_REQUEST_AMENITIES } from "../utils/villaRequest";
 import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText, gardenRequestLabel, GARDEN_REQUEST_PURPOSES, GARDEN_REQUEST_DURATIONS, GARDEN_REQUEST_FEATURES, GARDEN_REQUEST_WATER } from "../utils/gardenRequest";
 import {gardenOfferLabel,gardenFinancialRows,GARDEN_OFFER_TYPES,GARDEN_OFFER_PURPOSES,GARDEN_OFFER_ROADS,GARDEN_OFFER_DURATIONS,GARDEN_OFFER_PRIVACY,GARDEN_OFFER_FEATURES} from "../utils/gardenOffer";
+import {villaFinancialRows,villaOfferLabel,VILLA_OFFER_TYPES,VILLA_OFFER_STAYS,VILLA_OFFER_PRIVACY,VILLA_OFFER_EXTRAS,VILLA_LONG_MODES} from "../utils/villaOffer";
+import VillaRentalBadges from "../components/VillaRentalBadges";
 import { readOtherRequest, otherRequestAreaText, otherRequestBudgetText, otherRequestLabel, OTHER_REQUEST_DURATIONS, OTHER_REQUEST_FEATURES } from "../utils/otherRequest";
 import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -268,6 +270,7 @@ function ParkingDetails({
   const gardenPriceRows = !isWanted && category === "garden"
     ? gardenFinancialRows(parking?.spaceAttributes,parking?.price,parking?.priceType)
     : [];
+  const villaPriceRows = !isWanted && category === "villa" ? villaFinancialRows(parking?.spaceAttributes,parking?.price,parking?.priceType) : [];
   const residentialPriceRows = !isWanted && category === "residential"
     ? residentialFinancialRows(parking?.residentialDetails,parking?.spaceAttributes) : [];
 
@@ -620,9 +623,10 @@ function ParkingDetails({
                 {parking.city ||
                   "شهر ثبت نشده"}
               </p>
+              {!isWanted && category === "villa" && <VillaRentalBadges attributes={parking?.spaceAttributes} />}
             </div>
 
-            <div className={`parking-details-hero__price${(shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>
+            <div className={`parking-details-hero__price${(shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || villaPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>
               <span>
                 {isWanted ? "بودجه" : "قیمت آگهی"}
               </span>
@@ -633,6 +637,8 @@ function ParkingDetails({
                 <ShopMoneyRows items={gardenPriceRows} />
               ) : residentialPriceRows.length ? (
                 <ShopMoneyRows items={residentialPriceRows} />
+              ) : villaPriceRows.length ? (
+                <ShopMoneyRows items={villaPriceRows} />
               ) : (
                 <strong>
                   {(!isWanted && category === "shop" ? shopFinancialHeadline(parking?.spaceAttributes) : "") || otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
@@ -848,7 +854,7 @@ function ParkingDetails({
                     </div>
                   </div>
 
-                  <div className={`parking-details-feature${(shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length) ? " parking-details-feature--shop-money" : ""}`}>
+                  <div className={`parking-details-feature${(shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || villaPriceRows.length) ? " parking-details-feature--shop-money" : ""}`}>
                     <span className="parking-details-feature__icon parking-details-feature__icon--orange">
                       💰
                     </span>
@@ -864,6 +870,8 @@ function ParkingDetails({
                         <ShopMoneyRows items={gardenPriceRows} compact />
                       ) : residentialPriceRows.length ? (
                         <ShopMoneyRows items={residentialPriceRows} compact />
+                      ) : villaPriceRows.length ? (
+                        <ShopMoneyRows items={villaPriceRows} compact />
                       ) : (
                         <strong>
                           {otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
@@ -1048,7 +1056,7 @@ function ParkingDetails({
                 </article>:null;
               })()}
 
-              {!(["parking", "storage", "warehouse", "land", "shop", "garden", "residential"].includes(category) && !isWanted && !String(parking.description || "").trim()) && !(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData) || (category === "other" && otherWantedData))) && (
+              {!(["parking", "storage", "warehouse", "land", "shop", "garden", "residential", "villa"].includes(category) && !isWanted && !String(parking.description || "").trim()) && !(isWanted && (["storage", "warehouse", "parking", "shop", "land"].includes(category) || (category === "residential" && residentialWantedData) || (category === "villa" && villaWantedData) || (category === "garden" && gardenWantedData) || (category === "other" && otherWantedData))) && (
               <article className="parking-details-section parking-details-section--description">
                 <div className="parking-details-section__heading">
                   <div className="parking-details-section__icon parking-details-section__icon--description">
@@ -1258,17 +1266,29 @@ function ParkingDetails({
 
               {category === "villa" && (
                 <div className="parking-details-residential">
-                  <h3>🏡 مشخصات ویلای تفریحی</h3>
+                  <h3>🏡 مشخصات ویلای تفریحی / مسکونی</h3>
 
+                  {!isWanted && parking?.spaceAttributes?.schemaVersion===1 && parking?.spaceAttributes?.category==="villa" && (()=>{
+                    const v=parking.spaceAttributes.values||{};
+                    const rows=[
+                      ["نوع اقامتگاه",v.accommodationType==="other"?v.otherType:villaOfferLabel(VILLA_OFFER_TYPES,v.accommodationType)],
+                      ["نوع واگذاری",v.rentalTerm==="long"?"اجاره بلندمدت":"اقامت کوتاه‌مدت"],
+                      ["نوع قرارداد",v.rentalTerm==="long"?villaOfferLabel(VILLA_LONG_MODES,v.financialMode):""],
+                      ["شیوه‌های اقامت",v.rentalTerm==="long"?"":(v.availableStays||[]).map(id=>villaOfferLabel(VILLA_OFFER_STAYS,id)).filter(Boolean).join("، ")],
+                      ["حریم خصوصی",villaOfferLabel(VILLA_OFFER_PRIVACY,v.privacy)],
+                    ].filter(([,txt])=>txt);
+                    return <><div className="parking-details-residential__grid">{rows.map(([label,txt])=><span key={label}><small>{label}</small><strong>{txt}</strong></span>)}</div>
+                     <div className="parking-details-residential__amenities">{(v.features||[]).filter(id=>["indoor_pool","gazebo"].includes(id)).map(id=><b key={id}>✓ {villaOfferLabel(VILLA_OFFER_EXTRAS,id)}</b>)}</div></>;
+                  })()}
                   <div className="parking-details-residential__grid">
                     <span>
                       <small>اتاق خواب</small>
                       <strong>{Number(villa.bedrooms || 0).toLocaleString("fa-IR")}</strong>
                     </span>
-                    <span>
+                    {Number(villa.capacity || 0)>0 && <span>
                       <small>ظرفیت</small>
                       <strong>{Number(villa.capacity || 0).toLocaleString("fa-IR")} نفر</strong>
-                    </span>
+                    </span>}
 
                     {Number(villa.extraGuestPrice || 0) > 0 && (
                       <span>

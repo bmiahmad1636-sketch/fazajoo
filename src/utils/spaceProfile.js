@@ -130,6 +130,16 @@ export function toSpaceProfile(listing = {}) {
       profile.fields.keyMoneyRial = attrs.transferType === "key_money" ? numericOrNull(attrs.keyMoneyRial) : null;
     }
     if (category === "parking" && attrs.securityFeatures) profile.fields.securityFeatures = selectedFeatures(attrs.securityFeatures);
+    if (category === "villa") {
+      profile.fields.canNegotiateOtherTerm = attrs.canNegotiateOtherTerm === true;
+      if (attrs.rentalTerm === "long") {
+        profile.depositRial = numericOrNull(attrs.longDepositRial);
+        profile.rentRial = numericOrNull(attrs.longMonthlyRentRial);
+        profile.pricePeriod = profile.rentRial ? "monthly" : null;
+      } else if (attrs.depositRial != null) profile.depositRial = numericOrNull(attrs.depositRial);
+      if (attrs.availableStays) profile.fields.availableStays = Array.isArray(attrs.availableStays) ? attrs.availableStays : null;
+      if (attrs.privacy === "unknown") profile.fields.privacy = null;
+    }
     if (category === "villa" && attrs.capacity != null) profile.capacity = numericOrNull(attrs.capacity);
     if (attrs.heightM != null) profile.fields.heightM = numericOrNull(attrs.heightM);
     if (attrs.entranceHeightCm != null) profile.fields.entranceHeightCm = numericOrNull(attrs.entranceHeightCm);
@@ -165,6 +175,10 @@ export function toSpaceProfile(listing = {}) {
       shopFloor: category === "shop" ? textOrNull(meta?.floor) : null,
       shopLocation: category === "shop" ? textOrNull(meta?.locationPreference) : null,
       shopFrontage: category === "shop" ? numericOrNull(meta?.frontage) : null,
+      villaStayType: category === "villa" && meta?.rentalTerm !== "long" ? textOrNull(meta?.stayType) : null,
+      villaRentalTerm: category === "villa" ? textOrNull(meta?.rentalTerm) : null,
+      villaFinancialMode: category === "villa" && meta?.rentalTerm === "long" ? textOrNull(meta?.financialMode) : null,
+      villaPrivacyRequired: category === "villa" && meta?.privacyRequired === true,
       keyMoneyRial: category === "shop" ? numericOrNull(meta?.keyMoney) : null,
       floorPreference: textOrNull(meta?.floorPreference), specialUsage: meta?.specialUsage === true,
       minHeightM: numericOrNull(meta?.minHeight),

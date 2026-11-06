@@ -18,18 +18,18 @@ test("residential supply is independent of demand across create/edit flows",()=>
   }
 });
 test("residential note is optional and entered only in supplementary section",()=>{
-  assert.match(add,/"garden", "residential"\].includes\(form.category\) && !isWantedAd/);
-  assert.match(edit,/"garden", "residential"\].includes\(parking\?\.category\) && !isWanted/);
+  assert.match(add,/"garden", "residential", "villa"\].includes\(form.category\) && !isWantedAd/);
+  assert.match(edit,/"garden", "residential", "villa"\].includes\(parking\?\.category\) && !isWanted/);
   assert.match(ui,/نکات خاص ملک \(اختیاری\)/);
   assert.match(ui,/onNoteChange\?\.\(e.target.value\)/);
-  assert.match(details,/"garden", "residential"\].includes\(category\) && !isWanted && !String\(parking.description/);
+  assert.match(details,/"garden", "residential", "villa"\].includes\(category\) && !isWanted && !String\(parking.description/);
 });
 test("server ignores forged generic rent and separates financial modes",()=>{
   assert.match(ctrl,/cleanResidentialSpaceAttributes\(body.spaceAttributes, "residential", "offer"\)/);
   assert.match(ctrl,/typedResidential\?\.schemaVersion === 1 \? \(residentialRent \? String\(residentialRent\) : ""\)/);
   assert.match(ctrl,/residentialMode === "full_deposit" \? 0 : requestedResidentialRent/);
   assert.match(ctrl,/full_deposit" && \(space.price \|\| space.priceType !== "negotiable"\)/);
-  assert.match(ctrl,/"garden","residential"\].includes\(space.category\)/);
+  assert.match(ctrl,/"garden","residential","villa"\].includes\(space.category\)/);
 });
 test("cards and both detail price locations use separate actual amounts",()=>{
   assert.match(card,/residentialFinancialRows\(residentialDetails,parking\?\.spaceAttributes\)/);

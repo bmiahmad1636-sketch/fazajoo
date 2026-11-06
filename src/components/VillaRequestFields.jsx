@@ -1,5 +1,5 @@
 import {
-  EMPTY_VILLA_REQUEST, VILLA_REQUEST_TYPES, VILLA_REQUEST_STAYS,
+  EMPTY_VILLA_REQUEST, VILLA_REQUEST_TYPES, VILLA_REQUEST_STAYS, VILLA_REQUEST_TERMS, VILLA_REQUEST_LONG_MODES,
   VILLA_REQUEST_AMENITIES, normalizeVillaDigits,
 } from "../utils/villaRequest";
 import "./ResidentialRequestFields.css";
@@ -13,6 +13,7 @@ const money = (value) => {
 export default function VillaRequestFields({ value = {}, onChange, disabled = false, error = "" }) {
   const form = { ...EMPTY_VILLA_REQUEST, ...value };
   const set = (key, next) => onChange({ ...form, [key]: next });
+  const long = form.rentalTerm === "long";
   const toggleAmenity = (key, checked) => set("amenities", checked
     ? [...new Set([...(form.amenities || []), key])]
     : (form.amenities || []).filter((item) => item !== key));
@@ -22,9 +23,11 @@ export default function VillaRequestFields({ value = {}, onChange, disabled = fa
       <header className="residential-request__heading">
         <span className="residential-request__icon" aria-hidden="true">🏡</span>
         <div><strong>چه ویلایی برای اقامت می‌خواهی؟</strong>
-          <p>فقط نوع اقامتگاه، تعداد مهمان‌ها و سقف بودجه را مشخص کن؛ جزئیات دیگر اختیاری‌اند.</p>
+          <p>نوع اقامت را مشخص کن؛ سؤال‌های مربوط به کوتاه‌مدت و بلندمدت متفاوت‌اند.</p>
         </div>
       </header>
+      <div className="residential-request__checks" role="group" aria-label="نوع قرارداد اقامت">{VILLA_REQUEST_TERMS.map(([id,label])=><label key={id} className="residential-request__check"><input type="radio" name="villaRequestTerm" checked={(form.rentalTerm||"short")===id} disabled={disabled} onChange={()=>onChange({...form,rentalTerm:id,pricePeriod:id==="long"?"monthly":form.pricePeriod})}/>{label}</label>)}</div>
+      {long&&<div className="residential-request__money"><strong>نوع قرارداد بلندمدت *</strong><div className="residential-request__checks">{VILLA_REQUEST_LONG_MODES.map(([id,label])=><label key={id} className="residential-request__check"><input name="villaRequestLongMode" type="radio" disabled={disabled} checked={form.financialMode===id} onChange={()=>set("financialMode",id)}/>{label}</label>)}</div></div>}
       <div className="residential-request__grid">
         <label className="residential-request__field">
           <span>نوع اقامتگاه <em>*</em></span>
@@ -36,7 +39,7 @@ export default function VillaRequestFields({ value = {}, onChange, disabled = fa
           <span>نوع اقامتگاه موردنظر <em>*</em></span>
           <input disabled={disabled} maxLength={70} value={form.otherType} onChange={(e) => set("otherType", e.target.value)} placeholder="حداقل ۵ نویسه" />
         </label>}
-        <label className="residential-request__field">
+        {!long&&<label className="residential-request__field">
           <span>نوع اقامت <em>*</em></span>
           <select disabled={disabled} value={form.stayType} onChange={(e) => {
             const stayType = e.target.value;
@@ -45,9 +48,9 @@ export default function VillaRequestFields({ value = {}, onChange, disabled = fa
           }}>
             {VILLA_REQUEST_STAYS.map(([id, label]) => <option key={id} value={id}>{label}</option>)}
           </select>
-        </label>
+        </label>}
         <label className="residential-request__field">
-          <span>تعداد مهمان (نفر) <em>*</em></span>
+          <span>{long?"تعداد ساکنان (نفر)":"تعداد مهمان (نفر)"} <em>*</em></span>
           <input inputMode="numeric" disabled={disabled} value={money(form.guests)}
             onChange={(e) => set("guests", digitOnly(e.target.value).slice(0, 3))} placeholder="مثلاً ۶" />
         </label>
@@ -60,22 +63,23 @@ export default function VillaRequestFields({ value = {}, onChange, disabled = fa
         </label>
       </div>
       <div className="residential-request__money">
-        <strong>💰 سقف بودجه اقامت</strong>
-        <p>مبلغ حداکثری برای هر دوره را مشخص کن. واحد همه مبالغ ریال است.</p>
+        <strong>💰 {long?"بودجه اجاره بلندمدت":"سقف بودجه اقامت"}</strong>
+        <p>{long?"رهن و اجاره ماهانه دو مبلغ مستقل‌اند.":"مبلغ حداکثری برای هر دوره را مشخص کن."} واحد مبالغ ریال است.</p>
         <div className="residential-request__grid">
-          <label className="residential-request__field">
+          {!long&&<label className="residential-request__field">
             <span>دوره محاسبه بودجه <em>*</em></span>
             <select disabled={disabled} value={form.pricePeriod} onChange={(e) => set("pricePeriod", e.target.value)}>
               <option value="daily">هر شب</option>
               <option value="weekly">هفتگی</option>
               <option value="monthly">ماهانه</option>
             </select>
-          </label>
-          <label className="residential-request__field">
-            <span>حداکثر هزینه اقامت (ریال) <em>*</em></span>
+          </label>}
+          {(!long||(form.financialMode&&form.financialMode!=="full_deposit"))&&<label className="residential-request__field">
+            <span>{long?"سقف اجاره ماهانه (ریال)":"حداکثر هزینه اقامت (ریال)"} <em>*</em></span>
             <input disabled={disabled} inputMode="numeric" value={money(form.maxBudget)}
               onChange={(e) => set("maxBudget", digitOnly(e.target.value).slice(0, 15))} placeholder="مثلاً ۳۰,۰۰۰,۰۰۰" />
-          </label>
+          </label>}
+          {long&&form.financialMode&&form.financialMode!=="rent_only"&&<label className="residential-request__field"><span>سقف رهن (ریال) <em>*</em></span><input disabled={disabled} inputMode="numeric" value={money(form.maxDeposit)} onChange={e=>set("maxDeposit",digitOnly(e.target.value).slice(0,15))} placeholder="مثلاً ۲,۰۰۰,۰۰۰,۰۰۰"/></label>}
         </div>
       </div>
       <details className="residential-request__fold">
@@ -104,9 +108,9 @@ export default function VillaRequestFields({ value = {}, onChange, disabled = fa
             <label className="residential-request__field"><span>حداکثر متراژ (مترمربع)</span>
               <input disabled={disabled} inputMode="numeric" value={money(form.maxArea)}
                 onChange={(e) => set("maxArea", digitOnly(e.target.value).slice(0, 7))} placeholder="مثلاً ۵۰۰" /></label>
-            <label className="residential-request__field"><span>حداکثر ودیعه یا ضمانت (ریال)</span>
+            {!long&&<label className="residential-request__field"><span>حداکثر ضمانت خسارت (ریال)</span>
               <input disabled={disabled} inputMode="numeric" value={money(form.maxDeposit)}
-                onChange={(e) => set("maxDeposit", digitOnly(e.target.value).slice(0, 15))} placeholder="اگر قابل پرداخت است" /></label>
+                onChange={(e) => set("maxDeposit", digitOnly(e.target.value).slice(0, 15))} placeholder="اگر قابل پرداخت است" /></label>}
           </div>
           <label className="residential-request__field" style={{marginTop:12}}>
             <span>شرایط خاص اقامت</span>

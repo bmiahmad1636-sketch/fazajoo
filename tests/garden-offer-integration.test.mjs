@@ -16,8 +16,8 @@ test('existing water, trees, house and climate are retained as gardenDetails',()
  for(const s of [add,edit,ctrl])assert.match(s,/gardenDetails/);
 });
 test('final page only holds price and contact and notes are optional in details',()=>{
- assert.match(add,/"shop", "garden", "residential"\].includes\(form.category\) && !isWantedAd/);
- assert.match(edit,/"shop", "garden", "residential"\].includes\(parking\?\.category\) && !isWanted/);
+ assert.match(add,/"shop", "garden", "residential", "villa"\].includes\(form.category\) && !isWantedAd/);
+ assert.match(edit,/"shop", "garden", "residential", "villa"\].includes\(parking\?\.category\) && !isWanted/);
  assert.match(ui,/نکات خاص باغ \(اختیاری\)/);
  assert.match(ui,/onNoteChange\?\.\(e.target.value\)/);
 });
@@ -29,5 +29,5 @@ test('server validates new garden offers and sanitizes only supply fields',()=>{
 test('garden public detail shows typed values and no empty notes section',()=>{
  assert.match(details,/کاربردها و شرایط واگذاری باغ/);
  assert.match(details,/استفاده برای مراسم/);
- assert.match(details,/"shop", "garden", "residential"\].includes\(category\)/);
+ assert.match(details,/"shop", "garden", "residential", "villa"\].includes\(category\)/);
 });

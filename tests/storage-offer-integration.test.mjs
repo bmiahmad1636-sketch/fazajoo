@@ -20,15 +20,15 @@ test('registration and edit save structured storage details without moving reque
 });
 test('storage offers no longer require an empty final description',()=>{
  const a=read('src/pages/AddParking.jsx');const e=read('src/pages/EditParking.jsx');
- assert.match(a,/!\(\["parking", "storage", "warehouse", "land", "shop", "garden", "residential"\]\.includes\(form\.category\) && !isWantedAd\)/);
- assert.match(e,/!\(\["parking", "storage", "warehouse", "land", "shop", "garden", "residential"\]\.includes\(parking\?\.category\) && !isWanted\)/);
+ assert.match(a,/!\(\["parking", "storage", "warehouse", "land", "shop", "garden", "residential", "villa"\]\.includes\(form\.category\) && !isWantedAd\)/);
+ assert.match(e,/!\(\["parking", "storage", "warehouse", "land", "shop", "garden", "residential", "villa"\]\.includes\(parking\?\.category\) && !isWanted\)/);
  assert.match(read('src/components/StorageOfferFields.jsx'),/نکات خاص انبار \(اختیاری\)/);
 });
 test('public storage detail section shows typed offers and no fake empty description',()=>{
  const p=read('src/pages/ParkingDetails.jsx');
  assert.match(p,/category === "storage" && !isWanted && parking\?\.spaceAttributes/);
  assert.match(p,/ویژگی‌های انبار/);
- assert.match(p,/!\(\["parking", "storage", "warehouse", "land", "shop", "garden", "residential"\]\.includes\(category\) && !isWanted/);
+ assert.match(p,/!\(\["parking", "storage", "warehouse", "land", "shop", "garden", "residential", "villa"\]\.includes\(category\) && !isWanted/);
 });
 test('server validates and sanitizes storage attributes on offer only',()=>{
  const b=read('backend/src/controllers/spaces.controller.js');
