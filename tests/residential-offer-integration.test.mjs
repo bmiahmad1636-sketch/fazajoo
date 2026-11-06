@@ -26,7 +26,9 @@ test("residential note is optional and entered only in supplementary section",()
 });
 test("server ignores forged generic rent and separates financial modes",()=>{
   assert.match(ctrl,/cleanResidentialSpaceAttributes\(body.spaceAttributes, "residential", "offer"\)/);
-  assert.match(ctrl,/typedResidential\?\.schemaVersion === 1 \? \(residentialRent \? String\(residentialRent\) : ""\)/);
+  assert.match(ctrl,/typedResidential\?\.schemaVersion === 1 \? \(shortResidential/);
+  assert.match(ctrl,/residentialShortRate/);
+  assert.match(ctrl,/residentialRent \? String\(residentialRent\) : ""/);
   assert.match(ctrl,/residentialMode === "full_deposit" \? 0 : requestedResidentialRent/);
   assert.match(ctrl,/full_deposit" && \(space.price \|\| space.priceType !== "negotiable"\)/);
   assert.match(ctrl,/"garden","residential","villa"\].includes\(space.category\)/);

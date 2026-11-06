@@ -25,3 +25,8 @@
 .residential-request__check:has(input:checked){background:#fff2e7;border-color:#e7a16e}
 .residential-request__error{margin:12px 0 0;padding:11px 13px;border-radius:10px;background:#fff1ee;border:1px solid #efb9b0;color:#a51d12;font-weight:700;line-height:1.9}
 @media(max-width:540px){.residential-request{padding:13px}.residential-request__grid{grid-template-columns:1fr}.residential-request__heading{align-items:flex-start}}
+
+.residential-request__term{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 20px}
+.residential-request__term button{flex:1 1 145px;min-height:46px;background:white;border:1px solid #e5d7ca;border-radius:12px;color:#554b43;font:inherit;font-weight:800;cursor:pointer}
+.residential-request__term button.is-selected{background:#fff0e3;border-color:#ec873c;color:#a44c19}
+.residential-request__term button:focus-visible{outline:2px solid #e87c29;outline-offset:2px}

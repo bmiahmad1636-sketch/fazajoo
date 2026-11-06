@@ -130,6 +130,18 @@ export function toSpaceProfile(listing = {}) {
       profile.fields.keyMoneyRial = attrs.transferType === "key_money" ? numericOrNull(attrs.keyMoneyRial) : null;
     }
     if (category === "parking" && attrs.securityFeatures) profile.fields.securityFeatures = selectedFeatures(attrs.securityFeatures);
+    if (category === "residential" && Object.keys(attrs).length) {
+      profile.fields.rentalTerm = ["short", "long"].includes(attrs.rentalTerm)
+        ? attrs.rentalTerm : ["full_deposit","deposit_rent","rent_only"].includes(attrs.financialMode) ? "long" : null;
+      profile.fields.canNegotiateOtherTerm = attrs.canNegotiateOtherTerm === true;
+      if (profile.fields.rentalTerm === "short") {
+        profile.rentRial = numericOrNull(attrs.shortRateRial);
+        profile.depositRial = null; // Short stay damage hold is NOT lease deposit.
+        profile.pricePeriod = {night:"daily",week:"weekly",month:"monthly"}[attrs.shortRateUnit] || null;
+        profile.fields.securityHoldRial = numericOrNull(attrs.securityHoldRial);
+        profile.fields.shortRateUnit = attrs.shortRateUnit || null;
+      }
+    }
     if (category === "villa") {
       profile.fields.canNegotiateOtherTerm = attrs.canNegotiateOtherTerm === true;
       if (attrs.rentalTerm === "long") {
@@ -177,6 +189,8 @@ export function toSpaceProfile(listing = {}) {
       shopFrontage: category === "shop" ? numericOrNull(meta?.frontage) : null,
       villaStayType: category === "villa" && meta?.rentalTerm !== "long" ? textOrNull(meta?.stayType) : null,
       villaRentalTerm: category === "villa" ? textOrNull(meta?.rentalTerm) : null,
+      residentialRentalTerm: category === "residential" ? (meta?.rentalTerm === "short" || meta?.rentalTerm === "long" ? meta.rentalTerm : null) : null,
+      residentialShortRateUnit: category === "residential" ? textOrNull(meta?.shortRateUnit) : null,
       villaFinancialMode: category === "villa" && meta?.rentalTerm === "long" ? textOrNull(meta?.financialMode) : null,
       villaPrivacyRequired: category === "villa" && meta?.privacyRequired === true,
       keyMoneyRial: category === "shop" ? numericOrNull(meta?.keyMoney) : null,
@@ -186,9 +200,15 @@ export function toSpaceProfile(listing = {}) {
     profile.pricePeriod = periodOrNull(meta?.pricePeriod || meta?.rentPeriod || listing.priceType);
     if (category === "residential" || category === "shop") {
       // Request budget ceilings are NOT owner asking prices.
-      profile.maxRentRial = numericOrNull(meta?.monthlyRent);
-      profile.maxDepositRial = numericOrNull(meta?.deposit);
-      profile.pricePeriod = "monthly";
+      if (category === "residential" && meta?.rentalTerm === "short") {
+        profile.maxRentRial = numericOrNull(meta?.shortMaxBudgetRial);
+        profile.maxDepositRial = null;
+        profile.pricePeriod = {night:"daily",week:"weekly",month:"monthly"}[meta?.shortRateUnit] || null;
+      } else {
+        profile.maxRentRial = numericOrNull(meta?.monthlyRent);
+        profile.maxDepositRial = numericOrNull(meta?.deposit);
+        profile.pricePeriod = "monthly";
+      }
     } else if (category === "land") {
       profile.maxRentRial = numericOrNull(meta?.rent);
       profile.maxDepositRial = numericOrNull(meta?.deposit);

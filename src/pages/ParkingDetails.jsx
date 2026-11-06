@@ -17,6 +17,7 @@ import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText, gard
 import {gardenOfferLabel,gardenFinancialRows,GARDEN_OFFER_TYPES,GARDEN_OFFER_PURPOSES,GARDEN_OFFER_ROADS,GARDEN_OFFER_DURATIONS,GARDEN_OFFER_PRIVACY,GARDEN_OFFER_FEATURES} from "../utils/gardenOffer";
 import {villaFinancialRows,villaOfferLabel,VILLA_OFFER_TYPES,VILLA_OFFER_STAYS,VILLA_OFFER_PRIVACY,VILLA_OFFER_EXTRAS,VILLA_LONG_MODES} from "../utils/villaOffer";
 import VillaRentalBadges from "../components/VillaRentalBadges";
+import ResidentialRentalBadges from "../components/ResidentialRentalBadges";
 import { readOtherRequest, otherRequestAreaText, otherRequestBudgetText, otherRequestLabel, OTHER_REQUEST_DURATIONS, OTHER_REQUEST_FEATURES } from "../utils/otherRequest";
 import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -624,6 +625,9 @@ function ParkingDetails({
                   "شهر ثبت نشده"}
               </p>
               {!isWanted && category === "villa" && <VillaRentalBadges attributes={parking?.spaceAttributes} />}
+              {!isWanted && category === "residential" && <ResidentialRentalBadges attributes={parking?.spaceAttributes} />}
+              {isWanted && category === "residential" && wantedResidential?.termDeclared &&
+                <span className="fj-vr-badge" aria-label="مدت درخواست مسکونی">درخواست {residentialWantedData.rentalTerm === "short" ? "کوتاه‌مدت" : "بلندمدت"}</span>}
             </div>
 
             <div className={`parking-details-hero__price${(shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || villaPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>

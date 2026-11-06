@@ -15,7 +15,8 @@ export const RESIDENTIAL_FLOOR_PREFERENCES = [
 ];
 export const EMPTY_RESIDENTIAL_REQUEST = {
   propertyType: "apartment", otherType: "", minArea: "", maxArea: "",
-  minBedrooms: "", paymentType: "both", deposit: "", monthlyRent: "",
+  minBedrooms: "", rentalTerm: "long", shortRateUnit: "night", shortMaxBudgetRial: "",
+  paymentType: "both", deposit: "", monthlyRent: "",
   floorPreference: "any", features: [], requirements: "",
 };
 const MARK = /^\[FAZAJOO_RESIDENTIAL_REQUEST:([^\]\n]+)\]\n?/;
@@ -34,10 +35,13 @@ export function readResidentialRequest(description = "", residentialDetails = {}
         return {
           data: {
             ...EMPTY_RESIDENTIAL_REQUEST, ...parsed,
+            // Older structured requests had long-term-only finance, but no explicit term.
+            rentalTerm: parsed.rentalTerm === "short" ? "short" : "long",
             features: Array.isArray(parsed.features) ? parsed.features : [],
           },
           description: text.slice(match[0].length).trim(),
           hasMetadata: true,
+          termDeclared: ["short", "long"].includes(parsed.rentalTerm),
         };
       }
     } catch { /* Leave corrupted metadata untouched instead of silently erasing it. */ }
@@ -63,6 +67,7 @@ export function readResidentialRequest(description = "", residentialDetails = {}
     },
     description: text,
     hasMetadata: false,
+    termDeclared: false,
   };
 }
 export function writeResidentialRequest(data, legacyDescription = "") {
@@ -70,7 +75,11 @@ export function writeResidentialRequest(data, legacyDescription = "") {
     ...EMPTY_RESIDENTIAL_REQUEST, ...data,
     minArea: digits(data?.minArea), maxArea: digits(data?.maxArea),
     minBedrooms: digits(data?.minBedrooms),
-    deposit: digits(data?.deposit), monthlyRent: digits(data?.monthlyRent),
+    rentalTerm: data?.rentalTerm === "short" ? "short" : "long",
+    shortRateUnit: ["night","week","month"].includes(data?.shortRateUnit) ? data.shortRateUnit : "night",
+    shortMaxBudgetRial: data?.rentalTerm === "short" ? digits(data?.shortMaxBudgetRial) : "",
+    deposit: data?.rentalTerm === "short" ? "" : digits(data?.deposit),
+    monthlyRent: data?.rentalTerm === "short" ? "" : digits(data?.monthlyRent),
     features: Array.isArray(data?.features) ? data.features : [],
     requirements: String(data?.requirements || "").trim().slice(0, 200),
   };
@@ -85,10 +94,16 @@ export function validateResidentialRequest(data = {}) {
   if (!min && !max) return "حداقل یا حداکثر متراژ موردنیاز را وارد کنید.";
   if ((min && max && min > max) || min > 1000000 || max > 1000000) return "بازه متراژ معتبر نیست.";
   if (Number(digits(data.minBedrooms) || 0) > 20) return "تعداد اتاق موردنیاز معتبر نیست.";
+  if (String(data.requirements || "").length > 200) return "شرایط خاص حداکثر ۲۰۰ نویسه باشد.";
+  if (!["short", "long"].includes(data.rentalTerm || "long")) return "مدت اجاره موردنظر را مشخص کنید.";
+  if (data.rentalTerm === "short") {
+    if (!["night", "week", "month"].includes(data.shortRateUnit)) return "دوره بودجه کوتاه‌مدت را مشخص کنید.";
+    if (!Number(digits(data.shortMaxBudgetRial))) return "سقف بودجه کوتاه‌مدت را وارد کنید.";
+    return "";
+  }
   if (!["deposit", "rent", "both"].includes(data.paymentType)) return "نوع بودجه را مشخص کنید.";
   if (["deposit", "both"].includes(data.paymentType) && !Number(digits(data.deposit))) return "سقف پول پیش را وارد کنید.";
   if (["rent", "both"].includes(data.paymentType) && !Number(digits(data.monthlyRent))) return "سقف اجاره ماهانه را وارد کنید.";
-  if (String(data.requirements || "").length > 200) return "شرایط خاص حداکثر ۲۰۰ نویسه باشد.";
   return "";
 }
 export const residentialRequestLabel = (options, key) => options.find(([v]) => v === key)?.[1] || "";
@@ -102,6 +117,11 @@ export function residentialRequestAreaText(d = {}) {
   return "";
 }
 export function residentialRequestBudgetText(d = {}) {
+  if (d.rentalTerm === "short") {
+    const rate = Number(digits(d.shortMaxBudgetRial));
+    const unit = {night:"شب",week:"هفته",month:"ماه (اقامت موقت)"}[d.shortRateUnit];
+    return rate && unit ? `بودجه تا ${moneyText(rate)} ریال / ${unit}` : "بودجه کوتاه‌مدت اعلام نشده";
+  }
   const items = [];
   if (["deposit", "both"].includes(d.paymentType) && Number(digits(d.deposit)) > 0)
     items.push(`پول پیش تا ${moneyText(d.deposit)} ریال`);
@@ -115,8 +135,8 @@ export function residentialRequestLegacyDetails(d = {}) {
   const accepted = ["apartment", "house", "villa", "suite", "penthouse", "other"];
   return {
     propertyType: accepted.includes(d.propertyType) ? d.propertyType : "other",
-    deposit: ["deposit", "both"].includes(d.paymentType) ? digits(d.deposit) : "",
-    monthlyRent: ["rent", "both"].includes(d.paymentType) ? digits(d.monthlyRent) : "",
+    deposit: d.rentalTerm === "short" ? "" : ["deposit", "both"].includes(d.paymentType) ? digits(d.deposit) : "",
+    monthlyRent: d.rentalTerm === "short" ? "" : (["rent", "both"].includes(d.paymentType) ? digits(d.monthlyRent) : ""),
     bedrooms: digits(d.minBedrooms),
   };
 }

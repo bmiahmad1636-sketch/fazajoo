@@ -31,6 +31,7 @@ import { shopFinancialHeadline } from "../utils/shopOffer";
 import { gardenFinancialHeadline, gardenFinancialRows } from "../utils/gardenOffer";
 import { villaFinancialRows } from "../utils/villaOffer";
 import VillaRentalBadges from "./VillaRentalBadges";
+import ResidentialRentalBadges from "./ResidentialRentalBadges";
 
 import "./ParkingCard.css";
 
@@ -507,6 +508,9 @@ function ParkingCard({ parking }) {
               </span>
             </div>
             {!isWanted && category === "villa" && <VillaRentalBadges attributes={parking?.spaceAttributes} compact />}
+            {!isWanted && category === "residential" && <ResidentialRentalBadges attributes={parking?.spaceAttributes} compact />}
+            {isWanted && category === "residential" && wantedResidential?.termDeclared &&
+              <span className="fj-vr-badge" aria-label="مدت درخواست مسکونی">درخواست {residentialRequest.rentalTerm === "short" ? "کوتاه‌مدت" : "بلندمدت"}</span>}
           </div>
 
           <button

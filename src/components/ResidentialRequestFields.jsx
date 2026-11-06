@@ -36,6 +36,11 @@ export default function ResidentialRequestFields({ value = {}, onChange, disable
           <p>فقط نیازهای اصلی و سقف بودجه‌ات را مشخص کن؛ جزئیات بیشتر اختیاری است.</p>
         </div>
       </header>
+      <div className="residential-request__term" role="group" aria-label="مدت اجاره موردنیاز">
+        {[["long","بلندمدت"],["short","کوتاه‌مدت / اقامت موقت"]].map(([id,label])=><button
+          type="button" key={id} disabled={disabled} className={f.rentalTerm === id ? "is-selected" : ""}
+          aria-pressed={f.rentalTerm === id} onClick={()=>set("rentalTerm",id)}>{label}</button>)}
+      </div>
       <div className="residential-request__grid">
         <label className="residential-request__field">
           <span>نوع فضای مسکونی <em>*</em></span>
@@ -72,9 +77,18 @@ export default function ResidentialRequestFields({ value = {}, onChange, disable
         </label>}
       </div>
       <div className="residential-request__money">
-        <strong>💰 سقف بودجه</strong>
+        <strong>💰 سقف بودجه {f.rentalTerm === "short" ? "اقامت کوتاه‌مدت" : "رهن و اجاره"}</strong>
         <p>مبلغ‌هایی را بنویس که حداکثر می‌توانی پرداخت کنی؛ واحد همه مبالغ ریال است.</p>
-        <div className="residential-request__grid">
+        {f.rentalTerm === "short" ? <div className="residential-request__grid">
+          <label className="residential-request__field"><span>دوره بودجه <em>*</em></span>
+            <select disabled={disabled} value={f.shortRateUnit || "night"} onChange={(e)=>set("shortRateUnit",e.target.value)}>
+              <option value="night">شبانه</option><option value="week">هفتگی</option><option value="month">ماهانه (اقامت موقت)</option>
+            </select></label>
+          <label className="residential-request__field"><span>حداکثر بودجه هر دوره (ریال) <em>*</em></span>
+            <input disabled={disabled} inputMode="numeric" value={money(f.shortMaxBudgetRial)}
+              onChange={(e)=>set("shortMaxBudgetRial",digitOnly(e.target.value).slice(0,15))} placeholder="مثلاً ۲۰,۰۰۰,۰۰۰" /></label>
+          <small>این مبلغ سقف بودجه متقاضی است، نه قیمت پیشنهادی مالک یا ودیعه قرارداد.</small>
+        </div> : <div className="residential-request__grid">
           <label className="residential-request__field">
             <span>روش پرداخت <em>*</em></span>
             <select disabled={disabled} value={f.paymentType} onChange={(e) => set("paymentType", e.target.value)}>
@@ -91,7 +105,7 @@ export default function ResidentialRequestFields({ value = {}, onChange, disable
             <span>حداکثر اجاره ماهانه (ریال) <em>*</em></span>
             <input disabled={disabled} inputMode="numeric" value={money(f.monthlyRent)} onChange={(e) => set("monthlyRent", digitOnly(e.target.value).slice(0, 15))} placeholder="مثلاً ۱۰۰,۰۰۰,۰۰۰" />
           </label>}
-        </div>
+        </div>}
       </div>
       <details className="residential-request__fold">
         <summary>🏢 طبقه و امکانات دلخواه <span>اختیاری</span></summary>

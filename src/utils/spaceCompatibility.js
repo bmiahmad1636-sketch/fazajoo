@@ -32,8 +32,22 @@ export function compareSpaceProfiles(wanted, offer) {
     wanted.fields.villaRentalTerm !== offer.fields.rentalTerm &&
     offer.fields.canNegotiateOtherTerm === true;
   if (villaOtherTermReview) unknown.push("villa-alternative-term-price-and-contract-review");
-  if (!villaOtherTermReview && wanted.maxDepositRial !== null) requireCheck("deposit-irr", wanted.maxDepositRial, offer.depositRial, (need, actual) => actual <= need);
-  if (!villaOtherTermReview && wanted.maxRentRial !== null) {
+  // Explicit residential term mismatches never become confirmed financial matches.
+  const residentialWantedTerm = wanted.category === "residential" ? wanted.fields?.residentialRentalTerm : null;
+  const residentialOfferTerm = wanted.category === "residential" ? offer.fields?.rentalTerm : null;
+  const residentialOtherTermReview = Boolean(residentialWantedTerm && residentialOfferTerm &&
+    residentialWantedTerm !== residentialOfferTerm && offer.fields?.canNegotiateOtherTerm === true);
+  if (residentialOtherTermReview) unknown.push("residential-alternative-term-price-and-contract-review");
+  if (wanted.category === "residential") {
+    if (!residentialWantedTerm || !residentialOfferTerm) unknown.push("residential-term-unknown");
+    else if (residentialWantedTerm !== residentialOfferTerm && !residentialOtherTermReview) conflicts.push("residential-rental-term");
+    else if (residentialWantedTerm === residentialOfferTerm) matched.push("residential-rental-term");
+  }
+  const deferContractMoney = villaOtherTermReview || residentialOtherTermReview ||
+    Boolean(residentialWantedTerm && residentialOfferTerm && residentialWantedTerm !== residentialOfferTerm);
+  // Two amounts with different periods (or unverified alternative conditions) cannot be compared.
+  if (!deferContractMoney && wanted.maxDepositRial !== null) requireCheck("deposit-irr", wanted.maxDepositRial, offer.depositRial, (need, actual) => actual <= need);
+  if (!deferContractMoney && wanted.maxRentRial !== null) {
     // Comparing daily vs monthly amounts is forbidden without an explicit policy.
     if (!wanted.pricePeriod || !offer.pricePeriod || wanted.pricePeriod !== offer.pricePeriod) unknown.push("price-period");
     else requireCheck("rent-irr", wanted.maxRentRial, offer.rentRial, (need, actual) => actual <= need);

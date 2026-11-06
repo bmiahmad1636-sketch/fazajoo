@@ -272,7 +272,12 @@
         "financialMode",
         "bedrooms",
         "floor",
-        "features"
+        "features",
+        "rentalTerm",
+        "canNegotiateOtherTerm",
+        "shortRateUnit",
+        "shortRateRial",
+        "securityHoldRial"
       ],
       "wantedFields": [
         "propertyType",

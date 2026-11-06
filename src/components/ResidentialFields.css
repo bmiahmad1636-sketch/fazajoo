@@ -16,3 +16,10 @@
 .residential-fields__amenities span{display:none}.residential-fields__error{padding:10px 12px;margin:11px 0 0;border:1px solid #e7b1a4;border-radius:10px;color:#b62c17;background:#fff3f0;font-weight:700;line-height:1.8}
 .climate-fields{margin-top:15px;padding:16px;border:1px solid #eadfd5;border-radius:16px;background:#fff}.climate-fields>strong,.climate-fields>small{display:block}.climate-fields__group{margin-top:15px}.climate-fields__group .residential-fields__amenities{margin-top:8px}
 @media(max-width:700px){.residential-fields{padding:14px}.residential-fields__grid{grid-template-columns:minmax(0,1fr)}.residential-fields__choice{flex:1 1 140px}}
+
+.residential-fields__term{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 12px}
+.residential-fields__term .residential-fields__choice{flex:1 1 160px}
+.residential-fields__conversion{display:flex;gap:10px;align-items:center;padding:12px;border:1px solid #dae8dc;border-radius:14px;background:#f7fbf7;cursor:pointer;line-height:1.9;font-size:13px}
+.residential-fields__conversion input{accent-color:#176447;width:18px;height:18px;flex-shrink:0}
+.residential-fields__conversion b{color:#15583d}
+.residential-fields__conversion-help{display:block;margin:5px 4px 16px}

@@ -68,12 +68,26 @@ export function readRentalTermSnapshot(listing = {}, policy = POLICY) {
         rateUnit = "month";
       }
     }
-  } else if (category === "residential" && side === "offer") {
+  } else if (category === "residential") {
+    if (side === "offer" && attrs.rentalTerm === "short") {
+      primaryTerm = "short";
+      source = "residential_typed_short_contract";
+      rateUnit = ["night","week","month"].includes(attrs.shortRateUnit) ? attrs.shortRateUnit : null;
+      rateAmountRial = rateUnit ? amount(attrs.shortRateRial) : null;
+      securityHoldRial = amount(attrs.securityHoldRial);
+      canNegotiateOtherTerm = attrs.canNegotiateOtherTerm === true;
+    } else if (side === "wanted" && ["short", "long"].includes(metadata.rentalTerm)) {
+      primaryTerm = metadata.rentalTerm;
+      source = "residential_wanted_metadata";
+      rateUnit = primaryTerm === "short" ? (["night","week","month"].includes(metadata.shortRateUnit) ? metadata.shortRateUnit : null) : "month";
+      // Budgets are not asking prices. No budget gets mapped into rateAmountRial.
+    } else if (side === "offer") {
     // The existing residential offer form explicitly records one of three
     // LONG-TERM contract types. Legacy/untyped listings stay unknown.
     if (["full_deposit", "rent_only", "deposit_rent"].includes(attrs.financialMode)) {
       primaryTerm = "long";
       source = "residential_typed_long_contract";
+      canNegotiateOtherTerm = attrs.canNegotiateOtherTerm === true;
       leaseDepositRial = amount(listing?.residentialDetails?.deposit);
       monthlyRentRial = amount(listing?.residentialDetails?.monthlyRent);
       if (attrs.financialMode === "full_deposit") monthlyRentRial = null;
@@ -82,6 +96,7 @@ export function readRentalTermSnapshot(listing = {}, policy = POLICY) {
         rateUnit = "month";
         rateAmountRial = monthlyRentRial;
       }
+    }
     }
   } else if (category === "garden" && side === "offer") {
     // Existing garden duration is a coarse, explicitly selected availability.
