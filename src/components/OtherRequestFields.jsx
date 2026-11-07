@@ -1,79 +1,46 @@
-import {
-  EMPTY_OTHER_REQUEST, OTHER_REQUEST_PERIODS, OTHER_REQUEST_DURATIONS,
-  OTHER_REQUEST_FEATURES, otherDigits,
-} from "../utils/otherRequest";
-
-const field = { width: "100%", minHeight: 46, padding: "10px 12px", border: "1px solid #eadbd0", borderRadius: 12, boxSizing: "border-box", background: "#fff", font: "inherit", color: "#302923" };
-const label = { display: "grid", gap: 7, minWidth: 0, fontWeight: 650, fontSize: 14 };
-const grid = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 12 };
-const section = { marginTop: 11, padding: "13px 16px", border: "1px solid #edddce", borderRadius: 14, background: "#fffaf6" };
-const money = (value) => { const digits = otherDigits(value); return digits ? digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""; };
-
-export default function OtherRequestFields({ value = EMPTY_OTHER_REQUEST, onChange, disabled = false, error = "" }) {
-  const data = { ...EMPTY_OTHER_REQUEST, ...value };
-  const change = (key, next) => onChange({ ...data, [key]: next });
-  const requestLength = String(data.requestText || "").trim().length;
-  const numeric = (name, key, hint, cash = false) => <label style={label} key={key}>
-    <span>{name}</span>
-    <input style={field} type="text" inputMode="numeric" disabled={disabled} placeholder={hint}
-      value={cash ? money(data[key]) : data[key] || ""}
-      onChange={(event) => change(key, otherDigits(event.target.value))}/>
-  </label>;
-  return <section dir="rtl" style={{ gridColumn: "1 / -1", width: "100%", boxSizing: "border-box", padding: 16, border: "1px solid #f0d8c2", borderRadius: 18, background: "#fffdfa" }}>
-    <div style={{ marginBottom: 14, lineHeight: 1.9 }}>
-      <strong style={{ color: "#9e4f20", fontSize: 17 }}>✨ فضای متفاوتی لازم داری؟ همین‌جا توضیح بده</strong>
-      <p style={{ color: "#75675e", margin: "3px 0" }}>اگر در دسته‌های دیگر نیست، نیازت را به زبان خودت بنویس؛ مثل استودیو، سالن تمرین، پشت‌بام، آشپزخانه یا فضای چندمنظوره.</p>
-      <small style={{ color: "#866e5d" }}>نیازی نیست مشخصات یک ملک موجود را بدانی؛ فقط بگو چه فضایی و برای چه کاری لازم داری.</small>
-    </div>
-    <label style={label}>
-      <span>دقیقاً چه فضایی می‌خواهی و چه استفاده‌ای از آن داری؟ <b style={{ color: "#d92d20" }}>*</b></span>
-      <textarea rows={3} style={{ ...field, minHeight: 96, resize: "vertical", lineHeight: 1.85 }}
-        maxLength={700} disabled={disabled} value={data.requestText || ""}
-        placeholder="مثلاً یک فضای آرام و عایق صدا برای ضبط پادکست می‌خواهم؛ دسترسی عصرها برایم مهم است..."
-        onChange={(event) => change("requestText", event.target.value)}/>
-      <small aria-live="polite" style={{ fontWeight: 500, color: requestLength >= 20 ? "#287a54" : "#b42318" }}>
-        {String(data.requestText || "").length} / ۷۰۰ نویسه {requestLength < 20 ? "— حداقل ۲۰ نویسه لازم است" : "— توضیح کافی است"}
-      </small>
-    </label>
-    <details style={section}>
-      <summary style={{ cursor: "pointer", fontWeight: 800, color: "#67432e" }}>↔ اندازه تقریبی فضا (اختیاری)</summary>
-      <div style={{ ...grid, marginTop: 12 }}>
-        {numeric("حداقل مساحت (مترمربع)", "minArea", "مثلاً ۵۰")}
-        {numeric("حداکثر مساحت (مترمربع)", "maxArea", "مثلاً ۱۵۰")}
-      </div>
-      <small style={{ color: "#8a7161" }}>اگر متراژ دقیقی نمی‌دانی، این بخش را خالی بگذار.</small>
-    </details>
-    <details style={section}>
-      <summary style={{ cursor: "pointer", fontWeight: 800, color: "#67432e" }}>💰 بودجه و مدت اجاره (اختیاری)</summary>
-      <div style={{ ...grid, marginTop: 12 }}>
-        <label style={label}><span>دوره بودجه</span>
-          <select style={field} disabled={disabled} value={data.pricePeriod} onChange={(event) => change("pricePeriod", event.target.value)}>
-            {OTHER_REQUEST_PERIODS.map(([id, text]) => <option key={id} value={id}>{text}</option>)}
-          </select>
-        </label>
-        {data.pricePeriod !== "negotiable" && numeric("حداکثر اجاره (ریال)", "maxBudget", "مثلاً ۵۰,۰۰۰,۰۰۰", true)}
-        <label style={label}><span>مدت موردنیاز</span>
-          <select style={field} disabled={disabled} value={data.duration} onChange={(event) => change("duration", event.target.value)}>
-            {OTHER_REQUEST_DURATIONS.map(([id, text]) => <option key={id} value={id}>{text}</option>)}
-          </select>
-        </label>
-      </div>
-    </details>
-    <details style={section}>
-      <summary style={{ cursor: "pointer", fontWeight: 800, color: "#67432e" }}>✨ امکانات و شرایط تکمیلی (اختیاری)</summary>
-      <div style={{ ...grid, marginTop: 12, gap: 10 }}>
-        {OTHER_REQUEST_FEATURES.map(([id, text]) => <label key={id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14 }}>
-          <input type="checkbox" disabled={disabled} checked={Array.isArray(data.features) && data.features.includes(id)}
-            onChange={(event) => change("features", event.target.checked ? [...(data.features || []), id] : (data.features || []).filter((key) => key !== id))}/>
-          {text}
-        </label>)}
-      </div>
-      <label style={{ ...label, marginTop: 12 }}><span>سایر شرایط (در صورت نیاز)</span>
-        <textarea rows={2} style={{ ...field, resize: "vertical", lineHeight: 1.8 }} maxLength={300} disabled={disabled}
-          value={data.requirements || ""} placeholder="مثلاً نزدیکی به مترو، طبقه همکف یا شرایط دسترسی..."
-          onChange={(event) => change("requirements", event.target.value)}/>
-      </label>
-    </details>
-    {error && <p role="alert" style={{ color: "#b42318", fontWeight: 700, marginTop: 12 }}>{error}</p>}
-  </section>;
+import {EMPTY_OTHER_REQUEST,OTHER_REQUEST_PERIODS,OTHER_REQUEST_LONG_MODES,OTHER_REQUEST_FEATURES,otherDigits} from "../utils/otherRequest";
+import "./OtherSpaceFields.css";
+export default function OtherRequestFields({value=EMPTY_OTHER_REQUEST,onChange,disabled=false,error=""}){
+ const d={...EMPTY_OTHER_REQUEST,...value,features:Array.isArray(value?.features)?value.features:[]};
+ const change=(key,next)=>onChange({...d,[key]:next});
+ const cash=(title,key,placeholder)=><label className="fj-other-field"><span>{title}</span><input inputMode="numeric" type="text" disabled={disabled}
+  placeholder={placeholder} value={otherDigits(d[key]).replace(/\B(?=(\d{3})+(?!\d))/g,",")}
+  onChange={e=>change(key,otherDigits(e.target.value))}/></label>;
+ return <section className="fj-other" dir="rtl">
+  <header className="fj-other__intro"><strong>✨ فضای موردنیازت را حرفه‌ای و ساده معرفی کن</strong>
+   <p>اگر فضایت در دسته‌های دیگر نیست، مثل استودیو، سالن تمرین، فضای کار اشتراکی یا پشت‌بام، توضیح بده تا عرضه‌کننده دقیق بداند چه می‌خواهی.</p></header>
+  <label className="fj-other-field"><span>چه فضایی می‌خواهی و برای چه کاری؟ <b>*</b></span>
+   <textarea rows={3} maxLength={700} disabled={disabled} value={d.requestText} placeholder="مثلاً فضای عایق صدا برای ضبط پادکست با دسترسی عصرها می‌خواهم..." onChange={e=>change("requestText",e.target.value)}/>
+   <small className="fj-other__note">{String(d.requestText||"").length} / ۷۰۰ نویسه — حداقل ۲۰ نویسه</small></label>
+  <div className="fj-other__panel"><strong>برای چه مدتی نیاز داری؟ <b>*</b></strong>
+   <div className="fj-other__terms">
+    {[["short","کوتاه‌مدت / مقطعی","روزانه، هفتگی یا ماهانه موقت"],["long","بلندمدت","قرارداد و بودجه رهن و اجاره"]].map(([id,name,hint])=><label className={`fj-other__term ${d.rentalTerm===id?"fj-other__term--active":""}`} key={id}>
+     <input type="radio" name="fj-other-request-term" checked={d.rentalTerm===id} disabled={disabled} onChange={()=>change("rentalTerm",id)}/><span><strong>{name}</strong><small>{hint}</small></span>
+    </label>)}
+   </div>
+   {d.rentalTerm==="short"&&<div className="fj-other__grid"><label className="fj-other-field"><span>دوره بودجه کوتاه‌مدت</span>
+    <select disabled={disabled} value={d.pricePeriod} onChange={e=>change("pricePeriod",e.target.value)}>
+     {OTHER_REQUEST_PERIODS.map(([id,text])=><option key={id} value={id}>{text}</option>)}
+    </select></label>
+    {d.pricePeriod!=="negotiable"&&cash("حداکثر اجاره (ریال)","maxBudget","مثلاً ۵۰,۰۰۰,۰۰۰")}
+    <small className="fj-other__note">دوره بودجه با مدت قرارداد فرق دارد؛ مبلغ روزانه را به‌جای اجاره ماهانه مقایسه نمی‌کنیم.</small></div>}
+   {d.rentalTerm==="long"&&<div className="fj-other__grid"><label className="fj-other-field"><span>نوع بودجه / قرارداد</span>
+    <select disabled={disabled} value={d.financialMode} onChange={e=>change("financialMode",e.target.value)}>
+     {OTHER_REQUEST_LONG_MODES.map(([id,text])=><option key={id} value={id}>{text}</option>)}
+    </select></label>
+    {["full_deposit","deposit_rent"].includes(d.financialMode)&&cash("حداکثر ودیعه قابل پرداخت (ریال)","maxDepositRial","اگر می‌دانی وارد کن")}
+    {["rent_only","deposit_rent"].includes(d.financialMode)&&cash("حداکثر اجاره ماهانه (ریال)","maxMonthlyRentRial","اگر می‌دانی وارد کن")}
+    <small className="fj-other__note">این ارقام سقف بودجه متقاضی هستند، نه قیمت قطعی مالک.</small></div>}
+  </div>
+  <details className="fj-other__extras"><summary>↔ متراژ موردنیاز (اختیاری)</summary>
+   <div className="fj-other__grid">{cash("حداقل مساحت (مترمربع)","minArea","مثلاً ۵۰")}{cash("حداکثر مساحت (مترمربع)","maxArea","مثلاً ۱۵۰")}</div>
+  </details>
+  <details className="fj-other__extras"><summary>✨ امکانات و شرایط تکمیلی (اختیاری)</summary>
+   <div className="fj-other__features">{OTHER_REQUEST_FEATURES.map(([id,name])=><label key={id}>
+     <input type="checkbox" checked={d.features.includes(id)} disabled={disabled}
+      onChange={e=>change("features",e.target.checked?[...new Set([...d.features,id])]:d.features.filter(x=>x!==id))}/>{name}</label>)}
+   </div><label className="fj-other-field"><span>شرایط یا محدودیت‌های ضروری</span><textarea rows={2} maxLength={300} disabled={disabled} value={d.requirements} onChange={e=>change("requirements",e.target.value)} placeholder="مثلاً دسترسی شبانه، عدم مزاحمت صوتی یا نیاز به مجوز خاص"/></label>
+  </details>
+  {error&&<p className="fj-other__error" role="alert">{error}</p>}
+ </section>;
 }

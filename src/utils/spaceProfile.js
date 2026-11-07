@@ -129,6 +129,20 @@ export function toSpaceProfile(listing = {}) {
       profile.pricePeriod = attrs.transferType === "rent" ? "monthly" : null;
       profile.fields.keyMoneyRial = attrs.transferType === "key_money" ? numericOrNull(attrs.keyMoneyRial) : null;
     }
+    if(category === "other" && Object.keys(attrs).length){
+      profile.fields.rentalTerm=["short","long"].includes(attrs.rentalTerm)?attrs.rentalTerm:null;
+      profile.fields.canNegotiateOtherTerm=attrs.canNegotiateOtherTerm===true;
+      if(attrs.rentalTerm==="short"){
+        profile.rentRial=numericOrNull(attrs.shortRateRial);
+        profile.pricePeriod=periodOrNull(attrs.shortRateUnit);
+        profile.depositRial=null; // Short-term refundable damage hold is never a lease deposit.
+        profile.fields.securityHoldRial=numericOrNull(attrs.securityHoldRial);
+      }else if(attrs.rentalTerm==="long"){
+        profile.depositRial=numericOrNull(attrs.longDepositRial);
+        profile.rentRial=attrs.financialMode==="full_deposit"?null:numericOrNull(attrs.longMonthlyRentRial);
+        profile.pricePeriod=profile.rentRial?"monthly":null;
+      }
+    }
     if (category === "parking" && attrs.securityFeatures) profile.fields.securityFeatures = selectedFeatures(attrs.securityFeatures);
     if (category === "residential" && Object.keys(attrs).length) {
       profile.fields.rentalTerm = ["short", "long"].includes(attrs.rentalTerm)
@@ -189,6 +203,7 @@ export function toSpaceProfile(listing = {}) {
       shopFrontage: category === "shop" ? numericOrNull(meta?.frontage) : null,
       villaStayType: category === "villa" && meta?.rentalTerm !== "long" ? textOrNull(meta?.stayType) : null,
       villaRentalTerm: category === "villa" ? textOrNull(meta?.rentalTerm) : null,
+      otherRentalTerm: category === "other" && ["short","long"].includes(meta?.rentalTerm) ? meta.rentalTerm : null,
       residentialRentalTerm: category === "residential" ? (meta?.rentalTerm === "short" || meta?.rentalTerm === "long" ? meta.rentalTerm : null) : null,
       residentialShortRateUnit: category === "residential" ? textOrNull(meta?.shortRateUnit) : null,
       villaFinancialMode: category === "villa" && meta?.rentalTerm === "long" ? textOrNull(meta?.financialMode) : null,
@@ -208,6 +223,20 @@ export function toSpaceProfile(listing = {}) {
         profile.maxRentRial = numericOrNull(meta?.monthlyRent);
         profile.maxDepositRial = numericOrNull(meta?.deposit);
         profile.pricePeriod = "monthly";
+      }
+    } else if(category === "other"){
+      // A demand's ceiling is never the asking rate. Deposit and monthly rent stay separate.
+      const term=meta?.rentalTerm;
+      if(term==="short"){
+        profile.pricePeriod=periodOrNull(meta?.pricePeriod);
+        profile.maxRentRial=profile.pricePeriod?numericOrNull(meta?.maxBudget):null;
+        profile.maxDepositRial=null;
+      }else if(term==="long"){
+        profile.pricePeriod="monthly";
+        profile.maxRentRial=["deposit_rent","rent_only"].includes(meta?.financialMode)?numericOrNull(meta?.maxMonthlyRentRial):null;
+        profile.maxDepositRial=["deposit_rent","full_deposit"].includes(meta?.financialMode)?numericOrNull(meta?.maxDepositRial):null;
+      }else{
+        profile.pricePeriod=null;profile.maxRentRial=null;profile.maxDepositRial=null;
       }
     } else if (category === "land") {
       profile.maxRentRial = numericOrNull(meta?.rent);

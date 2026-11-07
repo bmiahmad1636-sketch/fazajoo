@@ -11,6 +11,7 @@ const { cleanShopSpaceAttributes } = require("../utils/shopSpaceAttributes");
 const { cleanGardenSpaceAttributes } = require("../utils/gardenSpaceAttributes");
 const { cleanResidentialSpaceAttributes } = require("../utils/residentialSpaceAttributes");
 const { cleanVillaSpaceAttributes } = require("../utils/villaSpaceAttributes");
+const { cleanOtherSpaceAttributes } = require("../utils/otherSpaceAttributes");
 
 const MAX_IMAGES = 10;
 const HEATING_SYSTEMS = ["gasHeater", "packageRadiator", "centralHeating", "floorHeating", "electricHeater", "splitHeating"];
@@ -180,6 +181,11 @@ function clean(body = {}) {
     ? ({night:"daily",week:"weekly",month:"monthly"})[typedResidential.values.shortRateUnit] : null;
   const typedVilla = body.category === "villa" && body.listingType !== "wanted"
     ? cleanVillaSpaceAttributes(body.spaceAttributes,"villa","offer",body.villaDetails) : null;
+  const typedOther=body.category === "other" && body.listingType !== "wanted"
+    ? cleanOtherSpaceAttributes(body.spaceAttributes,"other","offer") : null;
+  const otherValues=typedOther?.schemaVersion===1 ? typedOther.values : null;
+  const otherLongRent=otherValues?.rentalTerm==="long"&&otherValues.financialMode!=="full_deposit" ? otherValues.longMonthlyRentRial : null;
+  const otherShortRent=otherValues?.rentalTerm==="short" ? otherValues.shortRateRial : null;
   const longVilla = typedVilla?.values?.rentalTerm === "long";
   const longVillaRent = longVilla && typedVilla.values.financialMode !== "full_deposit"
     ? typedVilla.values.longMonthlyRentRial : null;
@@ -203,8 +209,8 @@ function clean(body = {}) {
     title: String(body.title || "").trim().slice(0, 160),
     city: String(body.city || "").trim().slice(0, 100),
     area: Math.max(0, Number(body.area) || 0),
-    price: typedShop?.schemaVersion === 1 ? (shopRent ? String(shopRent) : "") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate ? String(residentialShortRate) : "") : (residentialRent ? String(residentialRent) : "")) : longVilla ? (longVillaRent ? String(longVillaRent) : "") : fullDepositGarden ? "" : String(body.price || "").trim().slice(0, 100),
-    priceType: typedShop?.schemaVersion === 1 ? (shopRent ? "monthly" : "negotiable") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate && residentialShortPriceType ? residentialShortPriceType : "negotiable") : (residentialRent ? "monthly" : "negotiable")) : longVilla ? (longVillaRent ? "monthly" : "negotiable") : fullDepositGarden ? "negotiable" : (["daily", "weekly", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly"),
+    price: typedShop?.schemaVersion === 1 ? (shopRent ? String(shopRent) : "") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate ? String(residentialShortRate) : "") : (residentialRent ? String(residentialRent) : "")) : otherValues ? (otherValues.rentalTerm==="short" ? (otherShortRent ? String(otherShortRent) : "") : (otherLongRent ? String(otherLongRent) : "")) : longVilla ? (longVillaRent ? String(longVillaRent) : "") : fullDepositGarden ? "" : String(body.price || "").trim().slice(0, 100),
+    priceType: typedShop?.schemaVersion === 1 ? (shopRent ? "monthly" : "negotiable") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate && residentialShortPriceType ? residentialShortPriceType : "negotiable") : (residentialRent ? "monthly" : "negotiable")) : otherValues ? (otherValues.rentalTerm==="short" ? (otherShortRent && ["daily","weekly","monthly"].includes(otherValues.shortRateUnit) ? otherValues.shortRateUnit : "negotiable") : (otherLongRent ? "monthly" : "negotiable")) : longVilla ? (longVillaRent ? "monthly" : "negotiable") : fullDepositGarden ? "negotiable" : (["daily", "weekly", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly"),
     phone: String(body.phone || "").replace(/\s/g, "").slice(0, 20),
     imageUrl,
     imageUrls,
@@ -287,7 +293,7 @@ function clean(body = {}) {
           heatingSystems: cleanSystems(body.shopDetails.heatingSystems, HEATING_SYSTEMS),
           coolingSystems: cleanSystems(body.shopDetails.coolingSystems, COOLING_SYSTEMS),
         } : {},
-    spaceAttributes: body.category === "residential" ? (typedResidential || cleanResidentialSpaceAttributes(body.spaceAttributes, "residential", "wanted")) : body.category === "villa" ? (typedVilla || cleanVillaSpaceAttributes(body.spaceAttributes,"villa","wanted",body.villaDetails)) : body.category === "storage" ? cleanStorageSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "warehouse" ? cleanIndustrialSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "land" ? cleanLandSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "shop" ? (typedShop || cleanShopSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : body.category === "garden" ? (typedGarden || cleanGardenSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : cleanParkingSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer"),
+    spaceAttributes: body.category === "residential" ? (typedResidential || cleanResidentialSpaceAttributes(body.spaceAttributes, "residential", "wanted")) : body.category === "villa" ? (typedVilla || cleanVillaSpaceAttributes(body.spaceAttributes,"villa","wanted",body.villaDetails)) : body.category === "storage" ? cleanStorageSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "warehouse" ? cleanIndustrialSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "land" ? cleanLandSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "shop" ? (typedShop || cleanShopSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : body.category === "garden" ? (typedGarden || cleanGardenSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : body.category === "other" ? (typedOther || cleanOtherSpaceAttributes(body.spaceAttributes,"other",body.listingType==="wanted"?"wanted":"offer")) : cleanParkingSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer"),
     description: String(body.description || "").trim().slice(0, 5000),
     agencyNetworkConsent: body.agencyNetworkConsent === true,
     locationLat: Number.isFinite(Number(body.location?.lat)) && Number(body.location.lat) >= 24 && Number(body.location.lat) <= 40
@@ -397,6 +403,17 @@ function validate(space) {
       if (v.financialMode !== "full_deposit" && (space.priceType !== "monthly" || Number(space.price) !== d.monthlyRent)) return "اجاره ماهانه با مبلغ واقعی ملک مطابقت ندارد.";
     }
   }
+  if(space.listingType==="offer"&&space.category==="other"&&space.spaceAttributes?.schemaVersion===1){
+    const v=space.spaceAttributes.values||{};
+    if(!space.customCategory||space.customCategory.length<3||!v.usage||v.usage.length<5||!v.layout||!space.area)return "نوع فضا، کاربرد و متراژ آن را مشخص کنید.";
+    if(!["short","long"].includes(v.rentalTerm))return "نوع مدت اصلی واگذاری سایر فضاها را مشخص کنید.";
+    const expected=v.rentalTerm==="short" ? {price:v.shortRateRial,priceType:v.shortRateUnit} :
+      {price:v.financialMode==="full_deposit"?null:v.longMonthlyRentRial,priceType:v.financialMode==="full_deposit"?"negotiable":"monthly"};
+    if(v.rentalTerm==="short" && (!["daily","weekly","monthly"].includes(v.shortRateUnit)||!v.shortRateRial||v.financialMode||v.longDepositRial||v.longMonthlyRentRial))return "هزینه کوتاه‌مدت سایر فضاها معتبر نیست.";
+    if(v.rentalTerm==="long"&&(!["deposit_rent","full_deposit","rent_only"].includes(v.financialMode) ||
+       (v.financialMode!=="rent_only"&&!v.longDepositRial) || (v.financialMode!=="full_deposit"&&!v.longMonthlyRentRial) || v.shortRateRial || v.securityHoldRial))return "رهن و اجاره بلندمدت سایر فضاها معتبر نیست.";
+    if(space.priceType!==expected.priceType || (expected.price?Number(space.price)!==Number(expected.price):Boolean(space.price)))return "قیمت عمومی با قرارداد تخصصی سایر فضاها مطابقت ندارد.";
+  }
   if (!space.title) return "عنوان آگهی لازم است.";
   if (!space.city) return "شهر لازم است.";
   if (space.category === "residential") {
@@ -412,7 +429,7 @@ function validate(space) {
       return "مبلغ رهن یا اجاره را وارد کنید.";
   } else if (space.priceType !== "negotiable" && !space.price) return "قیمت لازم است.";
   if (!/^09\d{9}$/.test(space.phone)) return "شماره موبایل معتبر نیست.";
-  if (!(space.listingType === "offer" && ["parking","storage","warehouse","land","shop","garden","residential","villa"].includes(space.category)) && space.description.length < 10) return "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
+  if (!(space.listingType === "offer" && (["parking","storage","warehouse","land","shop","garden","residential","villa"].includes(space.category) || space.category==="other")) && space.description.length < 10) return "توضیحات باید حداقل ۱۰ کاراکتر باشد.";
   if (space.imageUrls.length > MAX_IMAGES) return `حداکثر ${MAX_IMAGES} عکس برای هر آگهی مجاز است.`;
   if (space.listingType !== "wanted" && space.imageUrls.length === 0) return "حداقل یک تصویر برای آگهی لازم است.";
   if (space.video && (!space.video.duration || space.video.duration > 120.5)) return "مدت ویدئو باید حداکثر ۲ دقیقه باشد.";

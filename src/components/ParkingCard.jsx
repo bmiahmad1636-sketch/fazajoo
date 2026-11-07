@@ -32,6 +32,8 @@ import { gardenFinancialHeadline, gardenFinancialRows } from "../utils/gardenOff
 import { villaFinancialRows } from "../utils/villaOffer";
 import VillaRentalBadges from "./VillaRentalBadges";
 import ResidentialRentalBadges from "./ResidentialRentalBadges";
+import OtherRentalBadges from "./OtherRentalBadges";
+import {otherFinancialRows} from "../utils/otherOffer";
 
 import "./ParkingCard.css";
 
@@ -43,6 +45,10 @@ const CATEGORY_INFO = {
   residential: {
     label: "مسکونی",
     icon: "🏠",
+  },
+  villa: {
+    label: "ویلا",
+    icon: "🏡",
   },
   storage: {
     label: "انبار",
@@ -109,6 +115,7 @@ function ParkingCard({ parking }) {
   const gardenPriceRows = gardenPriceText ? gardenFinancialRows(parking?.spaceAttributes,price,priceType) : [];
   const villaPriceRows = !isWanted && category === "villa" ? villaFinancialRows(parking?.spaceAttributes,price,priceType) : [];
   const residentialPriceRows = !isWanted && category === "residential" ? residentialFinancialRows(residentialDetails,parking?.spaceAttributes) : [];
+  const otherPriceRows = !isWanted && category === "other" ? otherFinancialRows(parking?.spaceAttributes) : [];
 
   // Wanted land keeps its requirements in description metadata, not in
   // the generic area/price fields. Read only for this listing type.
@@ -509,6 +516,8 @@ function ParkingCard({ parking }) {
             </div>
             {!isWanted && category === "villa" && <VillaRentalBadges attributes={parking?.spaceAttributes} compact />}
             {!isWanted && category === "residential" && <ResidentialRentalBadges attributes={parking?.spaceAttributes} compact />}
+            {!isWanted && category === "other" && <OtherRentalBadges attributes={parking?.spaceAttributes} compact />}
+            {isWanted && category === "other" && ["short","long"].includes(otherData?.rentalTerm) && <span className="fj-vr-badge">درخواست {otherData.rentalTerm==="short"?"کوتاه‌مدت":"بلندمدت"}</span>}
             {isWanted && category === "residential" && wantedResidential?.termDeclared &&
               <span className="fj-vr-badge" aria-label="مدت درخواست مسکونی">درخواست {residentialRequest.rentalTerm === "short" ? "کوتاه‌مدت" : "بلندمدت"}</span>}
           </div>
@@ -598,9 +607,9 @@ function ParkingCard({ parking }) {
                 : "قیمت"}
             </span>
 
-            {(gardenPriceRows.length || residentialPriceRows.length || villaPriceRows.length) ? (
+            {(gardenPriceRows.length || residentialPriceRows.length || villaPriceRows.length || otherPriceRows.length) ? (
               <div className="parking-card__garden-money" aria-label="شرایط مالی آگهی">
-                {(gardenPriceRows.length ? gardenPriceRows : villaPriceRows.length ? villaPriceRows : residentialPriceRows).map(({label,amount})=><div key={label} className="parking-card__garden-money-row"><span>{label}</span><bdi>{amount}</bdi></div>)}
+                {(gardenPriceRows.length ? gardenPriceRows : villaPriceRows.length ? villaPriceRows : residentialPriceRows.length ? residentialPriceRows : otherPriceRows).map(({label,amount})=><div key={label} className="parking-card__garden-money-row"><span>{label}</span><bdi>{amount}</bdi></div>)}
               </div>
             ) : <strong>
               {landData

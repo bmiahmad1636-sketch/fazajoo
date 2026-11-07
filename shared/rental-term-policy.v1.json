@@ -3,7 +3,10 @@
   "status": "foundation-only-not-connected-to-live-forms",
   "currency": "IRR",
   "missingValue": null,
-  "sides": ["offer", "wanted"],
+  "sides": [
+    "offer",
+    "wanted"
+  ],
   "primaryTerms": {
     "short": "کوتاه‌مدت / مقطعی",
     "long": "بلندمدت",
@@ -26,48 +29,179 @@
   "categories": {
     "parking": {
       "label": "پارکینگ",
-      "terms": ["short", "long"],
-      "rateUnitsByTerm": {"short": ["hour", "day", "week"], "long": ["month", "year"]}
+      "terms": [
+        "short",
+        "long"
+      ],
+      "rateUnitsByTerm": {
+        "short": [
+          "hour",
+          "day",
+          "week"
+        ],
+        "long": [
+          "month",
+          "year"
+        ]
+      }
     },
     "storage": {
       "label": "انبار",
-      "terms": ["short", "long"],
-      "rateUnitsByTerm": {"short": ["day", "week"], "long": ["month", "year"]}
+      "terms": [
+        "short",
+        "long"
+      ],
+      "rateUnitsByTerm": {
+        "short": [
+          "day",
+          "week"
+        ],
+        "long": [
+          "month",
+          "year"
+        ]
+      }
     },
     "warehouse": {
       "label": "سوله / کارگاه",
-      "terms": ["short", "long"],
-      "rateUnitsByTerm": {"short": ["day", "week", "month"], "long": ["month", "year"]}
+      "terms": [
+        "short",
+        "long"
+      ],
+      "rateUnitsByTerm": {
+        "short": [
+          "day",
+          "week",
+          "month"
+        ],
+        "long": [
+          "month",
+          "year"
+        ]
+      }
     },
     "shop": {
       "label": "مغازه / تجاری",
-      "terms": ["short", "long"],
-      "rateUnitsByTerm": {"short": ["day", "week", "month"], "long": ["month", "year"]}
+      "terms": [
+        "short",
+        "long"
+      ],
+      "rateUnitsByTerm": {
+        "short": [
+          "day",
+          "week",
+          "month"
+        ],
+        "long": [
+          "month",
+          "year"
+        ]
+      }
     },
     "land": {
       "label": "زمین",
-      "terms": ["short", "seasonal", "long"],
-      "rateUnitsByTerm": {"short": ["day", "week"], "seasonal": ["season"], "long": ["month", "year"]}
+      "terms": [
+        "short",
+        "seasonal",
+        "long"
+      ],
+      "rateUnitsByTerm": {
+        "short": [
+          "day",
+          "week"
+        ],
+        "seasonal": [
+          "season"
+        ],
+        "long": [
+          "month",
+          "year"
+        ]
+      }
     },
     "residential": {
       "label": "مسکونی",
-      "terms": ["short", "long"],
-      "rateUnitsByTerm": {"short": ["night", "week", "month"], "long": ["month", "year"]}
+      "terms": [
+        "short",
+        "long"
+      ],
+      "rateUnitsByTerm": {
+        "short": [
+          "night",
+          "week",
+          "month"
+        ],
+        "long": [
+          "month",
+          "year"
+        ]
+      }
     },
     "villa": {
       "label": "ویلا / اقامتگاه تفریحی",
-      "terms": ["short", "long"],
-      "rateUnitsByTerm": {"short": ["night", "weekend_package", "week", "month"], "long": ["month", "year"]}
+      "terms": [
+        "short",
+        "long"
+      ],
+      "rateUnitsByTerm": {
+        "short": [
+          "night",
+          "weekend_package",
+          "week",
+          "month"
+        ],
+        "long": [
+          "month",
+          "year"
+        ]
+      }
     },
     "garden": {
       "label": "باغ",
-      "terms": ["short", "seasonal", "long"],
-      "rateUnitsByTerm": {"short": ["day", "weekend_package", "week"], "seasonal": ["season"], "long": ["month", "year"]}
+      "terms": [
+        "short",
+        "seasonal",
+        "long"
+      ],
+      "rateUnitsByTerm": {
+        "short": [
+          "day",
+          "weekend_package",
+          "week"
+        ],
+        "seasonal": [
+          "season"
+        ],
+        "long": [
+          "month",
+          "year"
+        ]
+      }
     },
     "other": {
       "label": "سایر فضاها",
-      "terms": ["short", "seasonal", "long"],
-      "rateUnitsByTerm": {"short": ["hour", "day", "night", "weekend_package", "week"], "seasonal": ["season"], "long": ["month", "year"]},
+      "terms": [
+        "short",
+        "seasonal",
+        "long"
+      ],
+      "rateUnitsByTerm": {
+        "short": [
+          "hour",
+          "day",
+          "night",
+          "weekend_package",
+          "week",
+          "month"
+        ],
+        "seasonal": [
+          "season"
+        ],
+        "long": [
+          "month",
+          "year"
+        ]
+      },
       "manualReviewRequired": true
     }
   },

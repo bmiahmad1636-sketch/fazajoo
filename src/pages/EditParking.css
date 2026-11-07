@@ -1651,3 +1651,52 @@
   .edit-parking-page--wanted .edit-parking-hero__content { gap: 16px; }
   .edit-parking-page--wanted .edit-parking-content { margin-top: 16px; }
 }
+
+
+/* RT-02 final polish: parking OFFER edit uses a true document flow.
+   The legacy -62px pull-up placed the form over the hero description.
+   Scope to parking offers; do not change wanted / other category layouts. */
+.edit-parking-page--parking-offer .edit-parking-hero {
+  padding-bottom: 30px;
+}
+.edit-parking-page--parking-offer .edit-parking-content {
+  margin-top: 22px;
+}
+@media (max-width: 760px) {
+  .edit-parking-page--parking-offer .edit-parking-hero {
+    padding-bottom: 22px;
+  }
+  .edit-parking-page--parking-offer .edit-parking-content {
+    margin-top: 16px;
+  }
+}
+
+
+/* Cross-category edit page correction, 2026-11-07.
+   All nine OFFER categories share EditParking, not just parking.
+   Keep the form below the hero text instead of pulling it over the heading. */
+.edit-parking-page--offer .edit-parking-hero {
+  padding-bottom: 30px;
+}
+.edit-parking-page--offer .edit-parking-content {
+  margin-top: 22px;
+}
+/* On the light hero the old white caption was almost invisible. */
+.edit-parking-hero .edit-parking-hero__meta {
+  background: rgba(255, 255, 255, .82);
+  border-color: rgba(26, 50, 42, .12);
+}
+.edit-parking-hero .edit-parking-hero__meta small {
+  color: #68736c;
+}
+.edit-parking-hero .edit-parking-hero__meta strong {
+  color: #20342d;
+}
+.edit-parking-hero__content {
+  flex-wrap: wrap;
+}
+@media (max-width: 760px) {
+  .edit-parking-page--offer .edit-parking-hero { padding-bottom: 22px; }
+  .edit-parking-page--offer .edit-parking-content { margin-top: 16px; }
+  .edit-parking-hero__meta { max-width: min(100%, 330px); }
+}

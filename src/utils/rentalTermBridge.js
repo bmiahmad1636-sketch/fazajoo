@@ -98,6 +98,25 @@ export function readRentalTermSnapshot(listing = {}, policy = POLICY) {
       }
     }
     }
+  } else if(category==="other"){
+    const term=side==="offer"?attrs.rentalTerm:metadata.rentalTerm;
+    if(term==="short"||term==="long"){
+      primaryTerm=term;
+      source=side==="offer"?"other_typed_offer":"other_wanted_metadata";
+      if(side==="offer"){
+        canNegotiateOtherTerm=attrs.canNegotiateOtherTerm===true;
+        if(term==="short"){
+          rateUnit=({daily:"day",weekly:"week",monthly:"month"})[attrs.shortRateUnit]||null;
+          rateAmountRial=rateUnit?amount(attrs.shortRateRial):null;
+          securityHoldRial=amount(attrs.securityHoldRial);
+        }else{
+          leaseDepositRial=amount(attrs.longDepositRial);
+          monthlyRentRial=amount(attrs.longMonthlyRentRial);
+          if(monthlyRentRial!==null){rateUnit="month";rateAmountRial=monthlyRentRial;}
+        }
+      }else if(term==="short")rateUnit=({daily:"day",weekly:"week",monthly:"month"})[metadata.pricePeriod]||null;
+      else rateUnit="month";
+    }
   } else if (category === "garden" && side === "offer") {
     // Existing garden duration is a coarse, explicitly selected availability.
     // Monthly / flexible may indicate either term: don't guess.

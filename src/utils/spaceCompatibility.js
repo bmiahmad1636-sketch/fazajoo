@@ -43,7 +43,17 @@ export function compareSpaceProfiles(wanted, offer) {
     else if (residentialWantedTerm !== residentialOfferTerm && !residentialOtherTermReview) conflicts.push("residential-rental-term");
     else if (residentialWantedTerm === residentialOfferTerm) matched.push("residential-rental-term");
   }
-  const deferContractMoney = villaOtherTermReview || residentialOtherTermReview ||
+  const otherWantedTerm=wanted.category==="other"?wanted.fields?.otherRentalTerm:null;
+  const otherOfferTerm=wanted.category==="other"?offer.fields?.rentalTerm:null;
+  const otherAlternativeReview=Boolean(otherWantedTerm&&otherOfferTerm&&otherWantedTerm!==otherOfferTerm&&offer.fields?.canNegotiateOtherTerm===true);
+  if(wanted.category==="other"){
+    if(!otherWantedTerm||!otherOfferTerm)unknown.push("other-term-unknown-or-negotiable");
+    else if(otherWantedTerm!==otherOfferTerm){
+      if(otherAlternativeReview)unknown.push("other-alternative-term-and-price-review");
+      else conflicts.push("other-rental-term");
+    } else matched.push("other-rental-term");
+  }
+  const deferContractMoney = otherAlternativeReview || Boolean(otherWantedTerm&&otherOfferTerm&&otherWantedTerm!==otherOfferTerm) || villaOtherTermReview || residentialOtherTermReview ||
     Boolean(residentialWantedTerm && residentialOfferTerm && residentialWantedTerm !== residentialOfferTerm);
   // Two amounts with different periods (or unverified alternative conditions) cannot be compared.
   if (!deferContractMoney && wanted.maxDepositRial !== null) requireCheck("deposit-irr", wanted.maxDepositRial, offer.depositRial, (need, actual) => actual <= need);

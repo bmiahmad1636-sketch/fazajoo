@@ -1,5 +1,7 @@
 import { readResidentialRequest, residentialRequestAreaText, residentialRequestBudgetText, residentialRequestLabel, RESIDENTIAL_REQUEST_TYPES, RESIDENTIAL_REQUEST_FEATURES, RESIDENTIAL_FLOOR_PREFERENCES } from "../utils/residentialRequest";
 import { residentialFinancialRows } from "../utils/residentialOffer";
+import {OTHER_LAYOUTS,OTHER_ACCESS,OTHER_FEATURES,OTHER_LONG_MODES,otherOfferLabel,otherFinancialRows} from "../utils/otherOffer";
+import OtherRentalBadges from "../components/OtherRentalBadges";
 import {readLandRental,landLabel,LAND_PURPOSES,LAND_LEGAL,LAND_LOCATION,LAND_DURATION,LAND_CROPS,LAND_WATER,LAND_IRRIGATION,LAND_FEATURES,LAND_PAYMENT} from "../utils/landRental";
 import { readShopRequest, shopOptionLabel, SHOP_TYPES, SHOP_ACTIVITIES, SHOP_FLOORS, SHOP_LOCATIONS, SHOP_FEATURES, SHOP_TRANSFER } from "../utils/shopRequest";
 import {SHOP_OFFER_TYPES,SHOP_OFFER_ACTIVITIES,SHOP_OFFER_TRANSFERS,SHOP_OFFER_FLOORS,SHOP_OFFER_LOCATIONS,SHOP_OFFER_FEATURES,SHOP_RIGHTS,shopOfferLabel,shopFinancialHeadline,shopFinancialRows} from "../utils/shopOffer";
@@ -18,7 +20,7 @@ import {gardenOfferLabel,gardenFinancialRows,GARDEN_OFFER_TYPES,GARDEN_OFFER_PUR
 import {villaFinancialRows,villaOfferLabel,VILLA_OFFER_TYPES,VILLA_OFFER_STAYS,VILLA_OFFER_PRIVACY,VILLA_OFFER_EXTRAS,VILLA_LONG_MODES} from "../utils/villaOffer";
 import VillaRentalBadges from "../components/VillaRentalBadges";
 import ResidentialRentalBadges from "../components/ResidentialRentalBadges";
-import { readOtherRequest, otherRequestAreaText, otherRequestBudgetText, otherRequestLabel, OTHER_REQUEST_DURATIONS, OTHER_REQUEST_FEATURES } from "../utils/otherRequest";
+import { readOtherRequest, otherRequestAreaText, otherRequestBudgetText, otherRequestBudgetRows, otherRequestLabel, OTHER_REQUEST_DURATIONS, OTHER_REQUEST_FEATURES } from "../utils/otherRequest";
 import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -72,8 +74,8 @@ const CATEGORY_INFO = {
   },
 };
 
-function ShopMoneyRows({ items, compact = false }) {
-  return <div className={`parking-details-shop-money${compact ? " parking-details-shop-money--compact" : ""}`} aria-label="شرایط مالی آگهی">
+function ShopMoneyRows({ items, compact = false, ariaLabel = "شرایط مالی آگهی" }) {
+  return <div className={`parking-details-shop-money${compact ? " parking-details-shop-money--compact" : ""}`} aria-label={ariaLabel}>
     {items.map(({ label, amount }) => <div className="parking-details-shop-money__row" key={label}>
       <span className="parking-details-shop-money__label">{label}</span>
       <bdi className="parking-details-shop-money__amount">{amount}</bdi>
@@ -274,6 +276,7 @@ function ParkingDetails({
   const villaPriceRows = !isWanted && category === "villa" ? villaFinancialRows(parking?.spaceAttributes,parking?.price,parking?.priceType) : [];
   const residentialPriceRows = !isWanted && category === "residential"
     ? residentialFinancialRows(parking?.residentialDetails,parking?.spaceAttributes) : [];
+  const otherPriceRows = !isWanted && category === "other" ? otherFinancialRows(parking?.spaceAttributes) : [];
 
   // Wanted-land requirements are stored in description metadata.
   const wantedResidential = isWanted && category === "residential" ? readResidentialRequest(parking?.description || "") : null;
@@ -292,6 +295,7 @@ function ParkingDetails({
   const otherWantedData = wantedOther?.hasMetadata ? wantedOther.data : null;
   const otherAreaText = otherWantedData ? (otherRequestAreaText(otherWantedData) || "توافقی / نامشخص") : "";
   const otherBudgetText = otherWantedData ? otherRequestBudgetText(otherWantedData) : "";
+  const otherWantedPriceRows = otherWantedData ? otherRequestBudgetRows(otherWantedData) : [];
   const wantedLand = isWanted && category === "land"
     ? readLandRental(parking?.description || "")
     : null;
@@ -626,11 +630,13 @@ function ParkingDetails({
               </p>
               {!isWanted && category === "villa" && <VillaRentalBadges attributes={parking?.spaceAttributes} />}
               {!isWanted && category === "residential" && <ResidentialRentalBadges attributes={parking?.spaceAttributes} />}
+              {!isWanted && category === "other" && <OtherRentalBadges attributes={parking?.spaceAttributes} />}
+              {isWanted && category === "other" && ["short","long"].includes(otherWantedData?.rentalTerm) && <span className="fj-vr-badge">درخواست {otherWantedData.rentalTerm==="short"?"کوتاه‌مدت":"بلندمدت"}</span>}
               {isWanted && category === "residential" && wantedResidential?.termDeclared &&
                 <span className="fj-vr-badge" aria-label="مدت درخواست مسکونی">درخواست {residentialWantedData.rentalTerm === "short" ? "کوتاه‌مدت" : "بلندمدت"}</span>}
             </div>
 
-            <div className={`parking-details-hero__price${(shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || villaPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>
+            <div className={`parking-details-hero__price${(shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || villaPriceRows.length || otherPriceRows.length || otherWantedPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>
               <span>
                 {isWanted ? "بودجه" : "قیمت آگهی"}
               </span>
@@ -643,6 +649,10 @@ function ParkingDetails({
                 <ShopMoneyRows items={residentialPriceRows} />
               ) : villaPriceRows.length ? (
                 <ShopMoneyRows items={villaPriceRows} />
+              ) : otherPriceRows.length ? (
+                <ShopMoneyRows items={otherPriceRows} />
+              ) : otherWantedPriceRows.length ? (
+                <ShopMoneyRows items={otherWantedPriceRows} ariaLabel="بودجه درخواست" />
               ) : (
                 <strong>
                   {(!isWanted && category === "shop" ? shopFinancialHeadline(parking?.spaceAttributes) : "") || otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
@@ -858,7 +868,7 @@ function ParkingDetails({
                     </div>
                   </div>
 
-                  <div className={`parking-details-feature${(shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || villaPriceRows.length) ? " parking-details-feature--shop-money" : ""}`}>
+                  <div className={`parking-details-feature${(shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || villaPriceRows.length || otherPriceRows.length || otherWantedPriceRows.length) ? " parking-details-feature--shop-money" : ""}`}>
                     <span className="parking-details-feature__icon parking-details-feature__icon--orange">
                       💰
                     </span>
@@ -876,6 +886,10 @@ function ParkingDetails({
                         <ShopMoneyRows items={residentialPriceRows} compact />
                       ) : villaPriceRows.length ? (
                         <ShopMoneyRows items={villaPriceRows} compact />
+                      ) : otherPriceRows.length ? (
+                        <ShopMoneyRows items={otherPriceRows} compact />
+                      ) : otherWantedPriceRows.length ? (
+                        <ShopMoneyRows items={otherWantedPriceRows} compact ariaLabel="بودجه درخواست" />
                       ) : (
                         <strong>
                           {otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
@@ -941,6 +955,25 @@ function ParkingDetails({
                 ];
                 return <article className="parking-details-section"><div className="parking-details-section__heading"><div className="parking-details-section__icon">🚘</div><div><span>درخواست پارکینگ</span><h2>مشخصات پارکینگ موردنیاز</h2></div></div><div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12, padding: "12px 0" }}>{rows.map(([name, value]) => <div key={name} style={{ padding: 12, border: "1px solid #eee1d6", borderRadius: 12 }}><small style={{ display: "block", color: "#786b60" }}>{name}</small><strong style={{ whiteSpace: "pre-wrap" }}>{value}</strong></div>)}</div></article>;
               })()}
+              {!isWanted && category === "other" && parking?.spaceAttributes?.schemaVersion===1 && parking?.spaceAttributes?.category==="other" && (()=>{
+                const v=parking.spaceAttributes.values||{};
+                const rows=[
+                  ["نام فضای عرضه‌شده", parking.customCategory || parking.categoryLabel],
+                  ["کاربردهای اعلام‌شده",v.usage],
+                  ["ساختار فضا",otherOfferLabel(OTHER_LAYOUTS,v.layout)],
+                  ["نحوه دسترسی",otherOfferLabel(OTHER_ACCESS,v.access)],
+                  ["مدت اصلی واگذاری",v.rentalTerm==="short"?"کوتاه‌مدت":v.rentalTerm==="long"?"بلندمدت":"نامشخص"],
+                  ["روش مالی بلندمدت",v.rentalTerm==="long"?otherOfferLabel(OTHER_LONG_MODES,v.financialMode):""],
+                  ["توضیح محدودیت‌ها",v.limitations],
+                ].filter(([,text])=>Boolean(text));
+                const features=(Array.isArray(v.features)?v.features:[]).map(id=>otherOfferLabel(OTHER_FEATURES,id)).filter(Boolean);
+                return <article className="parking-details-section"><div className="parking-details-section__heading"><div className="parking-details-section__icon">✨</div>
+                   <div><span>اطلاعات ثبت‌شده توسط عرضه‌کننده</span><h2>مشخصات تخصصی سایر فضاها</h2></div></div>
+                   <div className="parking-details-residential__grid">{rows.map(([title,text])=><span key={title}><small>{title}</small><strong style={{whiteSpace:"pre-wrap"}}>{text}</strong></span>)}</div>
+                   {features.length>0&&<div className="parking-details-residential__amenities">{features.map(text=><b key={text}>✓ {text}</b>)}</div>}
+                   <p style={{fontSize:12,color:"#856d5e"}}>موافقت با بررسی مدت جایگزین، به معنی تعیین قیمت یا قرارداد دوم نیست.</p>
+                  </article>;
+              })()}
               {isWanted && category === "other" && otherWantedData && (
                 <article className="parking-details-section">
                   <div className="parking-details-section__heading"><div className="parking-details-section__icon">✨</div>
@@ -952,8 +985,8 @@ function ParkingDetails({
                     <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:12,marginTop:16}}>
                       {[
                         ["نام فضا",parking.customCategory || parking.categoryLabel],
-                        ["مساحت",otherAreaText],["بودجه",otherBudgetText],
-                        ["مدت",otherWantedData.duration !== "flexible" ? otherRequestLabel(OTHER_REQUEST_DURATIONS,otherWantedData.duration) : ""],
+                        ["مساحت",otherAreaText],...(!otherWantedPriceRows.length ? [["بودجه",otherBudgetText]] : []),
+                        ["مدت قرارداد",otherWantedData.rentalTerm==="short"?"کوتاه‌مدت":otherWantedData.rentalTerm==="long"?"بلندمدت":otherWantedData.rentalTerm==="flexible"?"قابل مذاکره":(otherWantedData.duration !== "flexible" ? otherRequestLabel(OTHER_REQUEST_DURATIONS,otherWantedData.duration) : "مشخص نشده")],
                         ["امکانات",(otherWantedData.features || []).map((x)=>otherRequestLabel(OTHER_REQUEST_FEATURES,x)).filter(Boolean).join("، ")],
                         ["شرایط تکمیلی",otherWantedData.requirements],
                         ["توضیحات قدیمی",wantedOther.description],

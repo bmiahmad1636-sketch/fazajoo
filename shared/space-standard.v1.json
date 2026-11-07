@@ -138,20 +138,37 @@
     "other": {
       "label": "سایر فضاها",
       "offerFields": [
-        "spaceKind",
-        "features",
+        "usage",
+        "layout",
         "access",
-        "limitations"
+        "features",
+        "limitations",
+        "rentalTerm",
+        "canNegotiateOtherTerm",
+        "shortRateUnit",
+        "shortRateRial",
+        "securityHoldRial",
+        "financialMode",
+        "longDepositRial",
+        "longMonthlyRentRial"
       ],
       "wantedFields": [
         "requestText",
         "features",
         "minAreaSqm",
-        "maxAreaSqm"
+        "maxAreaSqm",
+        "rentalTerm",
+        "pricePeriod",
+        "maxBudget",
+        "financialMode",
+        "maxDepositRial",
+        "maxMonthlyRentRial"
       ],
       "candidateMatchingFields": [
         "areaSqm",
-        "features"
+        "rentalTerm",
+        "features",
+        "usage"
       ],
       "offerPriority": "second-pilot"
     },
