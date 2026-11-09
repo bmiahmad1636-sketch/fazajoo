@@ -31,6 +31,32 @@ const digits = (value) => normalizeVillaDigits(value).replace(/\D/g, "");
 const formatNumber = (value) => Number(digits(value) || 0).toLocaleString("fa-IR");
 export const villaRequestLabel = (options, key) => options.find(([id]) => id === key)?.[1] || "";
 
+export function changeVillaRequestTerm(form = {}, rentalTerm) {
+  if (rentalTerm === form.rentalTerm) return { ...form };
+  // A long-term rahn is not a short-stay security deposit. Never carry old
+  // financial amounts into a different contract category on term switching.
+  return {
+    ...form,
+    rentalTerm,
+    financialMode: "",
+    pricePeriod: rentalTerm === "long" ? "monthly" : (form.stayType === "weekly" ? "weekly" : form.stayType === "monthly" ? "monthly" : "daily"),
+    maxBudget: "",
+    maxDeposit: "",
+  };
+}
+
+export function changeVillaRequestFinancialMode(form = {}, financialMode) {
+  // Switching a long-term contract must update the working draft, not just
+  // its saved metadata; otherwise step two can display stale financial terms.
+  return {
+    ...form,
+    financialMode,
+    maxBudget: financialMode === "full_deposit" ? "" : (form.maxBudget || ""),
+    maxDeposit: financialMode === "rent_only" ? "" : (form.maxDeposit || ""),
+  };
+}
+
+
 export function readVillaRequest(description = "", oldVilla = {}, oldPrice = "", oldPeriod = "daily", oldArea = 0) {
   const text = String(description || "");
   const match = text.match(MARK);
@@ -115,20 +141,30 @@ export function villaRequestAreaText(data = {}) {
   if (min && max) return min === max ? `${formatNumber(min)} مترمربع` : `${formatNumber(min)} تا ${formatNumber(max)} مترمربع`;
   if (min) return `از ${formatNumber(min)} مترمربع`;
   if (max) return `تا ${formatNumber(max)} مترمربع`;
-  return Number(digits(data.guests) || 0) ? `مناسب ${formatNumber(data.guests)} نفر` : "";
+  // Guest capacity is not an area. Optional empty area must stay unspecified.
+  return "";
+}
+// The same contract-aware rows drive the registration preview, cards and details.
+// Inactive terms must never leak into the preview after changing financial mode.
+export function villaRequestBudgetRows(data = {}) {
+  const term = data.rentalTerm || "short";
+  const mode = data.financialMode;
+  const rent = Number(digits(data.maxBudget) || 0);
+  const deposit = Number(digits(data.maxDeposit) || 0);
+  const amount = (value) => `${formatNumber(value)} ریال`;
+  if (term === "long") {
+    if (!VILLA_REQUEST_LONG_MODES.some(([id]) => id === mode)) return [];
+    return [
+      ...(mode !== "rent_only" && deposit ? [{ label: mode === "full_deposit" ? "حداکثر رهن کامل" : "حداکثر رهن", amount: amount(deposit) }] : []),
+      ...(mode !== "full_deposit" && rent ? [{ label: "سقف اجاره ماهانه", amount: amount(rent) }] : []),
+    ];
+  }
+  const period = { daily: "شبانه", weekly: "هفتگی", monthly: "ماهانه" }[data.pricePeriod] || "شبانه";
+  return [
+    ...(rent ? [{ label: `سقف هزینه اقامت ${period}`, amount: amount(rent) }] : []),
+    ...(deposit ? [{ label: "حداکثر ضمانت خسارت / ودیعه", amount: amount(deposit) }] : []),
+  ];
 }
 export function villaRequestBudgetText(data = {}) {
-  const term=data.rentalTerm||"short";
-  const period = { daily: "شبانه", weekly: "هفتگی", monthly: "ماهانه" }[data.pricePeriod] || "شبانه";
-  const budget = Number(digits(data.maxBudget) || 0);
-  if(!budget && !(term==="long"&&Number(digits(data.maxDeposit))))return "";
-  const parts=[];
-  if(term==="long"){
-   if(Number(digits(data.maxDeposit)))parts.push(`سقف رهن ${formatNumber(data.maxDeposit)} ریال`);
-   if(budget)parts.push(`اجاره ماهانه تا ${formatNumber(data.maxBudget)} ریال`);
-  } else {
-   if(budget)parts.push(`تا ${formatNumber(data.maxBudget)} ریال / ${period}`);
-   if(Number(digits(data.maxDeposit)))parts.push(`ضمانت خسارت تا ${formatNumber(data.maxDeposit)} ریال`);
-  }
-  return parts.join(" • ");
+  return villaRequestBudgetRows(data).map(({ label, amount }) => `${label}: ${amount}`).join(" • ");
 }

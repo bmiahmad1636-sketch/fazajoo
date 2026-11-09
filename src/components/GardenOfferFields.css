@@ -21,3 +21,5 @@
 
 .fj-go-finance{padding:14px;border:1px solid #edd7c5;border-radius:14px;background:#fffbf7}
 .fj-go-price-note{grid-column:1/-1;border:1px solid #ecd7c6;border-radius:12px;background:#fff8f2;padding:12px 16px;font-weight:700;color:#7d451d;line-height:1.8}
+
+.fj-go-convert{line-height:1.9;background:#f7fcf8;border-color:#bedcc9;font-size:.88rem}.fj-go-wide{grid-column:1/-1}.fj-go-finance .fj-go-row{grid-template-columns:repeat(2,minmax(0,1fr))}@media(max-width:640px){.fj-go-finance .fj-go-row{grid-template-columns:1fr}}

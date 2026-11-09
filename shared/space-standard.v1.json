@@ -223,14 +223,27 @@
         "features",
         "eventCapacity",
         "financialMode",
-        "depositRial"
+        "depositRial",
+        "rentalTerm",
+        "canNegotiateOtherTerm",
+        "shortRateUnit",
+        "shortRateRial",
+        "securityHoldRial",
+        "seasonalRateRial",
+        "seasonalSecurityHoldRial",
+        "longMonthlyRentRial"
       ],
       "wantedFields": [
         "features",
         "minAreaSqm",
         "maxAreaSqm",
         "pricePeriod",
-        "purpose"
+        "purpose",
+        "rentalTerm",
+        "shortRateUnit",
+        "shortMaxBudgetRial",
+        "seasonalMaxBudgetRial",
+        "longFinancialMode"
       ],
       "candidateMatchingFields": [
         "areaSqm",
@@ -241,7 +254,12 @@
         "rentalDuration",
         "financialMode",
         "depositRial",
-        "waterSource"
+        "waterSource",
+        "rentalTerm",
+        "canNegotiateOtherTerm",
+        "shortRateUnit",
+        "shortRateRial",
+        "seasonalRateRial"
       ],
       "offerPriority": "refinement"
     },

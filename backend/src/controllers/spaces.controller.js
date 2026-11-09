@@ -171,7 +171,10 @@ function clean(body = {}) {
   const shopRent = typedShop?.values?.transferType === "rent" ? typedShop.values.monthlyRentRial : null;
   const typedGarden = body.category === "garden" && body.listingType !== "wanted"
     ? cleanGardenSpaceAttributes(body.spaceAttributes,"garden","offer") : null;
-  const fullDepositGarden = typedGarden?.values?.financialMode === "full_deposit";
+  const gardenValues=typedGarden?.schemaVersion===1?typedGarden.values:null;
+  const typedGardenRent=gardenValues?.rentalTerm==="short"?gardenValues.shortRateRial:gardenValues?.rentalTerm==="long"&&gardenValues.financialMode!=="full_deposit"?gardenValues.longMonthlyRentRial:null;
+  const typedGardenPeriod=gardenValues?.rentalTerm==="short"?gardenValues.shortRateUnit:gardenValues?.rentalTerm==="long"&&typedGardenRent?"monthly":null;
+  const fullDepositGarden = gardenValues?.financialMode === "full_deposit" && gardenValues.rentalTerm!=="short"&&gardenValues.rentalTerm!=="seasonal";
   const typedResidential = body.category === "residential" && body.listingType !== "wanted"
     ? cleanResidentialSpaceAttributes(body.spaceAttributes, "residential", "offer") : null;
   const residentialMode = typedResidential?.values?.financialMode;
@@ -209,8 +212,8 @@ function clean(body = {}) {
     title: String(body.title || "").trim().slice(0, 160),
     city: String(body.city || "").trim().slice(0, 100),
     area: Math.max(0, Number(body.area) || 0),
-    price: typedShop?.schemaVersion === 1 ? (shopRent ? String(shopRent) : "") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate ? String(residentialShortRate) : "") : (residentialRent ? String(residentialRent) : "")) : otherValues ? (otherValues.rentalTerm==="short" ? (otherShortRent ? String(otherShortRent) : "") : (otherLongRent ? String(otherLongRent) : "")) : longVilla ? (longVillaRent ? String(longVillaRent) : "") : fullDepositGarden ? "" : String(body.price || "").trim().slice(0, 100),
-    priceType: typedShop?.schemaVersion === 1 ? (shopRent ? "monthly" : "negotiable") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate && residentialShortPriceType ? residentialShortPriceType : "negotiable") : (residentialRent ? "monthly" : "negotiable")) : otherValues ? (otherValues.rentalTerm==="short" ? (otherShortRent && ["daily","weekly","monthly"].includes(otherValues.shortRateUnit) ? otherValues.shortRateUnit : "negotiable") : (otherLongRent ? "monthly" : "negotiable")) : longVilla ? (longVillaRent ? "monthly" : "negotiable") : fullDepositGarden ? "negotiable" : (["daily", "weekly", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly"),
+    price: typedShop?.schemaVersion === 1 ? (shopRent ? String(shopRent) : "") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate ? String(residentialShortRate) : "") : (residentialRent ? String(residentialRent) : "")) : otherValues ? (otherValues.rentalTerm==="short" ? (otherShortRent ? String(otherShortRent) : "") : (otherLongRent ? String(otherLongRent) : "")) : longVilla ? (longVillaRent ? String(longVillaRent) : "") : gardenValues?.rentalTerm ? (typedGardenRent ? String(typedGardenRent) : "") : fullDepositGarden ? "" : String(body.price || "").trim().slice(0, 100),
+    priceType: typedShop?.schemaVersion === 1 ? (shopRent ? "monthly" : "negotiable") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate && residentialShortPriceType ? residentialShortPriceType : "negotiable") : (residentialRent ? "monthly" : "negotiable")) : otherValues ? (otherValues.rentalTerm==="short" ? (otherShortRent && ["daily","weekly","monthly"].includes(otherValues.shortRateUnit) ? otherValues.shortRateUnit : "negotiable") : (otherLongRent ? "monthly" : "negotiable")) : longVilla ? (longVillaRent ? "monthly" : "negotiable") : gardenValues?.rentalTerm ? (typedGardenRent && typedGardenPeriod ? typedGardenPeriod : "negotiable") : fullDepositGarden ? "negotiable" : (["daily", "weekly", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly"),
     phone: String(body.phone || "").replace(/\s/g, "").slice(0, 20),
     imageUrl,
     imageUrls,
@@ -356,7 +359,21 @@ function validate(space) {
     if(!v.gardenType || !v.accessRoad || !Array.isArray(v.allowedPurposes) || !v.allowedPurposes.length) return "مشخصات ضروری باغ کامل نیست.";
     if(v.allowedPurposes.includes("other")&&String(v.otherPurpose||"").trim().length<5)return "کاربرد دیگر باغ را توضیح دهید.";
     if(!space.area || !Number.isFinite(space.area))return "متراژ واقعی باغ را وارد کنید.";
-    if(v.financialMode){
+    if(v.rentalTerm){
+      if(v.rentalTerm==="short"){
+        if(!["daily","weekly","monthly"].includes(v.shortRateUnit)||!v.shortRateRial)return "نرخ کوتاه‌مدت باغ کامل نیست.";
+        if(Number(space.price)!==v.shortRateRial||space.priceType!==v.shortRateUnit)return "مبلغ کوتاه‌مدت باغ با شرایط ثبت‌شده برابر نیست.";
+      } else if(v.rentalTerm==="seasonal"){
+        if(!v.seasonalRateRial)return "نرخ فصلی باغ را وارد کنید.";
+        if(space.price||space.priceType!=="negotiable")return "اجاره فصلی نباید به‌عنوان اجاره ماهانه ثبت شود.";
+      } else if(v.rentalTerm==="long"){
+        if(!["rent_only","full_deposit","deposit_rent"].includes(v.financialMode))return "شرایط مالی بلندمدت باغ را مشخص کنید.";
+        if(v.financialMode!=="rent_only"&&!v.depositRial)return "مبلغ رهن بلندمدت باغ را وارد کنید.";
+        if(v.financialMode!=="full_deposit"&&!v.longMonthlyRentRial)return "اجاره ماهانه بلندمدت باغ را وارد کنید.";
+        if(v.financialMode==="full_deposit"&&(space.price||space.priceType!=="negotiable"))return "رهن کامل نباید اجاره ماهانه داشته باشد.";
+        if(v.financialMode!=="full_deposit"&&(Number(space.price)!==v.longMonthlyRentRial||space.priceType!=="monthly"))return "مبلغ ماهانه باغ با قرارداد برابر نیست.";
+      } else return "مدت واگذاری باغ معتبر نیست.";
+    }else if(v.financialMode){
       if(!["rent_only","full_deposit","deposit_rent"].includes(v.financialMode)) return "نوع رهن و اجاره باغ معتبر نیست.";
       if(v.financialMode!=="rent_only"&&!v.depositRial)return "مبلغ ودیعه باغ را وارد کنید.";
       if(v.financialMode==="full_deposit" && (space.price || space.priceType!=="negotiable"))return "رهن کامل نمی‌تواند اجاره دوره‌ای داشته باشد.";

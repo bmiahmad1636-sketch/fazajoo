@@ -2725,3 +2725,38 @@ body.parking-gallery-open{overflow:hidden}
 @media (max-width: 760px) {
   .parking-details-hero__price--shop { width: 100%; }
 }
+
+/* Villa demand: financial ceilings in individually bounded, vertically stacked cards. */
+.parking-details-shop-money--villa-request {
+  gap: 8px;
+}
+.parking-details-shop-money--villa-request .parking-details-shop-money__row,
+.parking-details-feature--shop-money .parking-details-shop-money--villa-request .parking-details-shop-money__row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid rgba(214, 151, 86, .33);
+  border-radius: 12px;
+  background: #fffaf4;
+  min-width: 0;
+}
+.parking-details-shop-money--villa-request .parking-details-shop-money__row + .parking-details-shop-money__row {
+  border-top: 1px solid rgba(214, 151, 86, .33);
+}
+.parking-details-hero__price .parking-details-shop-money--villa-request .parking-details-shop-money__label,
+.parking-details-feature--shop-money .parking-details-shop-money--villa-request .parking-details-shop-money__label {
+  color: #705743;
+  font-size: .78rem;
+}
+.parking-details-hero__price .parking-details-shop-money--villa-request .parking-details-shop-money__amount,
+.parking-details-feature--shop-money .parking-details-shop-money--villa-request .parking-details-shop-money__amount {
+  display: block;
+  color: #ac5a16;
+  font-size: clamp(.85rem, 2.4vw, 1.05rem);
+  font-weight: 900;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}

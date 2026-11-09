@@ -117,21 +117,39 @@ export function readRentalTermSnapshot(listing = {}, policy = POLICY) {
       }else if(term==="short")rateUnit=({daily:"day",weekly:"week",monthly:"month"})[metadata.pricePeriod]||null;
       else rateUnit="month";
     }
-  } else if (category === "garden" && side === "offer") {
-    // Existing garden duration is a coarse, explicitly selected availability.
-    // Monthly / flexible may indicate either term: don't guess.
-    primaryTerm = GARDEN_DURATION[attrs.rentalDuration] || null;
-    if (primaryTerm) {
-      source = "garden_typed_duration";
-      // Daily rate is only comparable if both rental duration and unit are known.
-      const genericUnit = ({daily:"day",weekly:"week",monthly:"month",yearly:"year"})[listing.priceType] || null;
-      if (genericUnit && (policy.categories?.garden?.rateUnitsByTerm?.[primaryTerm] || []).includes(genericUnit)) {
-        rateUnit = genericUnit;
-        rateAmountRial = amount(listing.price);
+  } else if (category === "garden") {
+    const term=side==="offer"?attrs.rentalTerm:metadata.rentalTerm;
+    if(["short","seasonal","long"].includes(term)){
+      primaryTerm=term;
+      source=side==="offer"?"garden_typed_offer":"garden_wanted_metadata";
+      if(side==="offer"){
+        canNegotiateOtherTerm=term==="seasonal"?false:attrs.canNegotiateOtherTerm===true;
+        if(term==="short"){
+          rateUnit=({daily:"day",weekly:"week",monthly:"month"})[attrs.shortRateUnit]||null;
+          rateAmountRial=rateUnit?amount(attrs.shortRateRial):null;
+          securityHoldRial=amount(attrs.securityHoldRial);
+        }else if(term==="seasonal"){
+          rateUnit="season";rateAmountRial=amount(attrs.seasonalRateRial);
+          securityHoldRial=amount(attrs.seasonalSecurityHoldRial);
+        }else{
+          leaseDepositRial=attrs.financialMode==="rent_only"?null:amount(attrs.depositRial);
+          monthlyRentRial=attrs.financialMode==="full_deposit"?null:amount(attrs.longMonthlyRentRial);
+          if(monthlyRentRial!==null){rateUnit="month";rateAmountRial=monthlyRentRial;}
+        }
+      }else if(term==="short")rateUnit=({daily:"day",weekly:"week",monthly:"month"})[metadata.shortRateUnit]||null;
+      else if(term==="seasonal")rateUnit="season";
+      else rateUnit="month";
+    }else if(side==="offer"){
+      // Legacy explicit duration has no verified security/lease deposit kind.
+      primaryTerm = GARDEN_DURATION[attrs.rentalDuration] || null;
+      if (primaryTerm) {
+        source = "garden_typed_duration";
+        const genericUnit = ({daily:"day",weekly:"week",monthly:"month",yearly:"year"})[listing.priceType] || null;
+        if (genericUnit && (policy.categories?.garden?.rateUnitsByTerm?.[primaryTerm] || []).includes(genericUnit)) {
+          rateUnit = genericUnit;rateAmountRial=amount(listing.price);
+        }
+        if (attrs.depositRial != null) notes.push("garden_deposit_kind_requires_review");
       }
-      // Existing garden deposit can be ambiguous for short/flexible contracts;
-      // intentionally do NOT map it into either lease/security hold in RT-00.
-      if (attrs.depositRial != null) notes.push("garden_deposit_kind_requires_review");
     }
   }
 

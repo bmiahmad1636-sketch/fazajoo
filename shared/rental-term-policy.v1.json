@@ -167,7 +167,8 @@
         "short": [
           "day",
           "weekend_package",
-          "week"
+          "week",
+          "month"
         ],
         "seasonal": [
           "season"

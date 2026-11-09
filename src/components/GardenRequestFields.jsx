@@ -1,4 +1,4 @@
-import { GARDEN_REQUEST_PURPOSES, GARDEN_REQUEST_DURATIONS, GARDEN_REQUEST_PERIODS, GARDEN_REQUEST_FEATURES, GARDEN_REQUEST_WATER, EMPTY_GARDEN_REQUEST, gardenDigits } from "../utils/gardenRequest";
+import { GARDEN_REQUEST_PURPOSES, GARDEN_REQUEST_DURATIONS, GARDEN_REQUEST_PERIODS, GARDEN_REQUEST_FEATURES, GARDEN_REQUEST_WATER, EMPTY_GARDEN_REQUEST, GARDEN_REQUEST_TERMS, GARDEN_REQUEST_SHORT_UNITS, GARDEN_REQUEST_FINANCIAL_MODES, gardenDigits } from "../utils/gardenRequest";
 
 const fieldStyle = { width: "100%", minHeight: 44, border: "1px solid #eadad0", borderRadius: 12, background: "#fff", padding: "9px 12px", font: "inherit", boxSizing: "border-box" };
 const labelStyle = { display: "grid", gap: 6, fontWeight: 700, fontSize: 14, minWidth: 0 };
@@ -44,20 +44,22 @@ export default function GardenRequestFields({ value = EMPTY_GARDEN_REQUEST, onCh
           {String(data.otherPurpose || "").length} / ۱۲۰ نویسه {String(data.otherPurpose || "").trim().length < 15 ? "— حداقل ۱۵ نویسه لازم است" : "— کافی است"}
         </small>
       </label>}
+      {data.purpose === "event" && <div style={{ display: "grid", gap: 6 }}>
+        {numberField("ظرفیت تقریبی مهمان‌ها (اختیاری)", "eventGuests", "مثلاً ۳۰")}
+        <small style={{ color: "#926042", lineHeight: 1.8 }}>برگزاری مراسم فقط با رضایت مالک و رعایت مجوزهای لازم امکان‌پذیر است.</small>
+      </div>}
       {numberField("حداقل مساحت (مترمربع)", "minArea", "مثلاً ۵۰۰")}
       {numberField("حداکثر مساحت (مترمربع)", "maxArea", "مثلاً ۱۵۰۰")}
-      {selectField("دوره بودجه اجاره", "pricePeriod", GARDEN_REQUEST_PERIODS)}
-      {data.pricePeriod !== "negotiable" && numberField("حداکثر اجاره (ریال)", "maxBudget", "مثلاً ۱۰۰,۰۰۰,۰۰۰", true)}
     </div>
-    <details style={sectionStyle}>
-      <summary style={{ cursor: "pointer", fontWeight: 850, color: "#623d28" }}>⏳ مدت و شرایط استفاده (اختیاری)</summary>
-      <div style={{ ...gridStyle, marginTop: 14 }}>
-        {selectField("مدت موردنیاز", "duration", GARDEN_REQUEST_DURATIONS)}
-        {numberField("حداکثر ودیعه / پول پیش (ریال)", "maxDeposit", "در صورت نیاز", true)}
-        {data.purpose === "event" && numberField("ظرفیت تقریبی مهمان‌ها", "eventGuests", "مثلاً ۳۰")}
-        {data.purpose === "event" && <small style={{ gridColumn: "1 / -1", color: "#926042" }}>برگزاری رویداد یا مراسم باید با رضایت مالک و مجوزهای لازم مجاز باشد.</small>}
+    <div style={sectionStyle}>
+      <strong>مدت اصلی اجاره موردنیاز <b style={{color:"#d92d20"}}>*</b></strong>
+      <div style={{display:"flex",gap:9,flexWrap:"wrap",marginTop:10}}>{GARDEN_REQUEST_TERMS.map(([id,text])=><button type="button" key={id} disabled={disabled} aria-pressed={data.rentalTerm===id} onClick={()=>update("rentalTerm",id)} style={{font:"inherit",cursor:"pointer",minHeight:44,border:"1px solid #e4c6ad",borderRadius:12,padding:"9px 14px",background:data.rentalTerm===id?"#ffeddb":"white",fontWeight:750}}>{data.rentalTerm===id?"✓ ":""}{text}</button>)}</div>
+      <div style={{...gridStyle,marginTop:12}}>
+        {data.rentalTerm==="short"&&<>{selectField("دوره محاسبه بودجه", "shortRateUnit", GARDEN_REQUEST_SHORT_UNITS)}{numberField("حداکثر اجاره کوتاه‌مدت (ریال)","shortMaxBudgetRial","مثلاً ۱۰٬۰۰۰٬۰۰۰",true)}{numberField("حداکثر ودیعه / ضمانت خسارت (اختیاری)","shortMaxSecurityHoldRial","در صورت نیاز",true)}</>}
+        {data.rentalTerm==="seasonal"&&<>{numberField("حداکثر بودجه برای هر فصل (ریال)","seasonalMaxBudgetRial","مثلاً ۱۵۰٬۰۰۰٬۰۰۰",true)}{numberField("حداکثر ضمانت خسارت فصلی (اختیاری)","seasonalMaxSecurityHoldRial","در صورت نیاز",true)}</>}
+        {data.rentalTerm==="long"&&<>{selectField("شیوه مالی بلندمدت", "longFinancialMode", GARDEN_REQUEST_FINANCIAL_MODES)}{data.longFinancialMode!=="rent_only"&&numberField(data.longFinancialMode==="full_deposit"?"حداکثر رهن کامل (ریال)":"حداکثر ودیعه (ریال)","maxDeposit","مثلاً ۵۰۰٬۰۰۰٬۰۰۰",true)}{data.longFinancialMode!=="full_deposit"&&numberField("حداکثر اجاره ماهانه (ریال)","maxBudget","مثلاً ۵۰٬۰۰۰٬۰۰۰",true)}</>}
       </div>
-    </details>
+    </div>
     <details style={sectionStyle}>
       <summary style={{ cursor: "pointer", fontWeight: 850, color: "#623d28" }}>{isCultivation ? "🌿 درختان، آبیاری و امکانات موردنیاز" : "✨ امکانات دلخواه و ویژگی‌های باغ"} (اختیاری)</summary>
       <div style={{ marginTop: 14 }}>

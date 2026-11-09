@@ -5,6 +5,8 @@ const ROADS=["asphalt","gravel","dirt","pedestrian","unknown"];
 const DURATIONS=["flexible","daily","weekend","monthly","seasonal","yearly"];
 const PRIVACY=["private","shared","unknown"];
 const FEATURES=["parking","restroom","gazebo","barbecue","pool","lighting","security"];
+const TERMS=["short","seasonal","long"];
+const SHORT_UNITS=["daily","weekly","monthly"];
 const FINANCIAL_MODES=["rent_only","full_deposit","deposit_rent"];
 const allow=(a,x)=>a.includes(x)?x:null;
 const list=(opts,x)=>Array.isArray(x)?[...new Set(x.filter(v=>opts.includes(v)))].slice(0,opts.length):[];
@@ -24,8 +26,15 @@ function cleanGardenSpaceAttributes(a,category,side){
   accessRoad:allow(ROADS,v.accessRoad),rentalDuration:allow(DURATIONS,v.rentalDuration),
   privacy:allow(PRIVACY,v.privacy),features:list(FEATURES,v.features),
   eventCapacity:uses.includes("event")?number(v.eventCapacity,1,10000):null,
-  financialMode:allow(FINANCIAL_MODES,v.financialMode),
-  depositRial:v.financialMode==="rent_only"?null:number(v.depositRial,1,999999999999999),
+  rentalTerm:allow(TERMS,v.rentalTerm),canNegotiateOtherTerm:v.rentalTerm!=="seasonal"&&v.canNegotiateOtherTerm===true,
+  shortRateUnit:v.rentalTerm==="short"?allow(SHORT_UNITS,v.shortRateUnit):null,
+  shortRateRial:v.rentalTerm==="short"?number(v.shortRateRial,1,999999999999999):null,
+  securityHoldRial:v.rentalTerm==="short"?number(v.securityHoldRial,1,999999999999999):null,
+  seasonalRateRial:v.rentalTerm==="seasonal"?number(v.seasonalRateRial,1,999999999999999):null,
+  seasonalSecurityHoldRial:v.rentalTerm==="seasonal"?number(v.seasonalSecurityHoldRial,1,999999999999999):null,
+  longMonthlyRentRial:v.rentalTerm==="long"&&v.financialMode!=="full_deposit"?number(v.longMonthlyRentRial,1,999999999999999):null,
+  financialMode:v.rentalTerm==="short"||v.rentalTerm==="seasonal"?null:allow(FINANCIAL_MODES,v.financialMode),
+  depositRial:["short","seasonal"].includes(v.rentalTerm)||v.financialMode==="rent_only"?null:number(v.depositRial,1,999999999999999),
  }};
 }
 module.exports={cleanGardenSpaceAttributes};

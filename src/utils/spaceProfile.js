@@ -119,7 +119,21 @@ export function toSpaceProfile(listing = {}) {
     profile.hasStructuredDetails = Object.keys(attrs).length > 0;
     if (category === "land" && attrs.depositRial != null) profile.depositRial = numericOrNull(attrs.depositRial);
     if (category === "garden") {
-      profile.depositRial = numericOrNull(attrs.depositRial);
+      profile.depositRial = ["short","seasonal"].includes(attrs.rentalTerm)?null:numericOrNull(attrs.depositRial);
+      profile.fields.gardenRentalTerm=["short","seasonal","long"].includes(attrs.rentalTerm)?attrs.rentalTerm:null;
+      profile.fields.canNegotiateOtherTerm=attrs.canNegotiateOtherTerm===true;
+      if(attrs.rentalTerm==="short"){
+        profile.rentRial=numericOrNull(attrs.shortRateRial);
+        profile.pricePeriod=attrs.shortRateUnit||null;
+        profile.fields.securityHoldRial=numericOrNull(attrs.securityHoldRial);
+      }else if(attrs.rentalTerm==="seasonal"){
+        profile.rentRial=numericOrNull(attrs.seasonalRateRial);
+        profile.pricePeriod="seasonal";
+        profile.fields.securityHoldRial=numericOrNull(attrs.seasonalSecurityHoldRial);
+      }else if(attrs.rentalTerm==="long"){
+        profile.rentRial=attrs.financialMode==="full_deposit"?null:numericOrNull(attrs.longMonthlyRentRial);
+        profile.pricePeriod=profile.rentRial?"monthly":null;
+      }
       profile.capacity = attrs.allowedPurposes?.includes("event") ? numericOrNull(attrs.eventCapacity) : null;
       if (garden.waterSource) profile.fields.waterSource = garden.waterSource === "share" ? "right" : garden.waterSource;
     }
@@ -189,7 +203,8 @@ export function toSpaceProfile(listing = {}) {
       power: textOrNull(meta?.power), powerCapacityKw: category === "warehouse" ? numericOrNull(meta?.powerCapacity) : null, vehicleAccess: category === "warehouse" ? textOrNull(meta?.access) : null,
       purpose: textOrNull(meta?.purpose), primaryPurpose: textOrNull(meta?.primaryPurpose),
       gardenWaterPreference: category === "garden" ? textOrNull(meta?.waterPreference) : null,
-      gardenDuration: category === "garden" ? textOrNull(meta?.duration) : null,
+      gardenDuration: category === "garden" && !meta?.rentalTerm ? textOrNull(meta?.duration) : null,
+      gardenRentalTerm:category==="garden"&&["short","seasonal","long"].includes(meta?.rentalTerm)?meta.rentalTerm:null,
       gardenPrivacyRequired: category === "garden" && meta?.privacyRequired === true,
       legalUse: category === "land" && meta?.legalUse !== "other" ? textOrNull(meta?.legalUse) : null,
       locationType: category === "land" ? textOrNull(meta?.locationType) : null,
@@ -223,6 +238,22 @@ export function toSpaceProfile(listing = {}) {
         profile.maxRentRial = numericOrNull(meta?.monthlyRent);
         profile.maxDepositRial = numericOrNull(meta?.deposit);
         profile.pricePeriod = "monthly";
+      }
+    } else if (category === "garden" && ["short","seasonal","long"].includes(meta?.rentalTerm)) {
+      if(meta.rentalTerm==="short"){
+        profile.maxRentRial=numericOrNull(meta.shortMaxBudgetRial);
+        profile.maxDepositRial=null;
+        profile.pricePeriod=periodOrNull(meta.shortRateUnit);
+        profile.fields.shortSecurityHoldBudget=numericOrNull(meta.shortMaxSecurityHoldRial);
+      }else if(meta.rentalTerm==="seasonal"){
+        profile.maxRentRial=numericOrNull(meta.seasonalMaxBudgetRial);
+        profile.maxDepositRial=null;
+        profile.pricePeriod="seasonal";
+        profile.fields.shortSecurityHoldBudget=numericOrNull(meta.seasonalMaxSecurityHoldRial);
+      }else{
+        profile.maxRentRial=meta.longFinancialMode==="full_deposit"?null:numericOrNull(meta.maxBudget);
+        profile.maxDepositRial=meta.longFinancialMode==="rent_only"?null:numericOrNull(meta.maxDeposit);
+        profile.pricePeriod=profile.maxRentRial?"monthly":null;
       }
     } else if(category === "other"){
       // A demand's ceiling is never the asking rate. Deposit and monthly rent stay separate.

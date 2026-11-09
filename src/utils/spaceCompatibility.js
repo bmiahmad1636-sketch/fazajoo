@@ -53,7 +53,10 @@ export function compareSpaceProfiles(wanted, offer) {
       else conflicts.push("other-rental-term");
     } else matched.push("other-rental-term");
   }
-  const deferContractMoney = otherAlternativeReview || Boolean(otherWantedTerm&&otherOfferTerm&&otherWantedTerm!==otherOfferTerm) || villaOtherTermReview || residentialOtherTermReview ||
+  const gardenWantedContract=wanted.category==="garden"?wanted.fields?.gardenRentalTerm:null;
+  const gardenOfferContract=wanted.category==="garden"?offer.fields?.gardenRentalTerm:null;
+  const gardenFinancialReview=wanted.category==="garden"&&Boolean(gardenWantedContract||gardenOfferContract)&&(!gardenWantedContract||!gardenOfferContract||gardenWantedContract!==gardenOfferContract);
+  const deferContractMoney = gardenFinancialReview || otherAlternativeReview || Boolean(otherWantedTerm&&otherOfferTerm&&otherWantedTerm!==otherOfferTerm) || villaOtherTermReview || residentialOtherTermReview ||
     Boolean(residentialWantedTerm && residentialOfferTerm && residentialWantedTerm !== residentialOfferTerm);
   // Two amounts with different periods (or unverified alternative conditions) cannot be compared.
   if (!deferContractMoney && wanted.maxDepositRial !== null) requireCheck("deposit-irr", wanted.maxDepositRial, offer.depositRial, (need, actual) => actual <= need);
@@ -110,10 +113,18 @@ export function compareSpaceProfiles(wanted, offer) {
     }
   }
   if (wanted.category === "garden") {
+    const needTerm=fields.gardenRentalTerm;
+    const ownerTerm=available.gardenRentalTerm;
+    const alternative=needTerm&&ownerTerm&&needTerm!==ownerTerm&&
+       needTerm!=="seasonal"&&ownerTerm!=="seasonal"&&available.canNegotiateOtherTerm===true;
+    if(!needTerm||!ownerTerm)unknown.push("garden-term-unknown");
+    else if(needTerm!==ownerTerm){if(alternative)unknown.push("garden-alternative-term-and-pricing-review");else conflicts.push("garden-rental-term");}
+    else matched.push("garden-rental-term");
+    if(needTerm&&ownerTerm&&(alternative||needTerm!==ownerTerm))unknown.push("garden-contract-pricing-not-comparable");
     if (fields.purpose === "other") unknown.push("garden-other-purpose-review");
     else requireCheck("garden-purpose", fields.purpose, available.allowedPurposes, (need, actual) => Array.isArray(actual) && actual.includes(need));
     if (fields.purpose === "event") unknown.push("garden-event-legal-review");
-    if (fields.gardenDuration && fields.gardenDuration !== "flexible") {
+    if (!fields.gardenRentalTerm && fields.gardenDuration && fields.gardenDuration !== "flexible") {
       if (fields.gardenDuration === "weekend" && available.rentalDuration === "daily") unknown.push("garden-weekend-review");
       else requireCheck("garden-duration",fields.gardenDuration,available.rentalDuration,(need,actual)=>actual === "flexible" || actual === need);
     }

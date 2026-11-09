@@ -2,6 +2,7 @@ import { readResidentialRequest, residentialRequestAreaText, residentialRequestB
 import { residentialFinancialRows } from "../utils/residentialOffer";
 import {OTHER_LAYOUTS,OTHER_ACCESS,OTHER_FEATURES,OTHER_LONG_MODES,otherOfferLabel,otherFinancialRows} from "../utils/otherOffer";
 import OtherRentalBadges from "../components/OtherRentalBadges";
+import GardenRentalBadges from "../components/GardenRentalBadges";
 import {readLandRental,landLabel,LAND_PURPOSES,LAND_LEGAL,LAND_LOCATION,LAND_DURATION,LAND_CROPS,LAND_WATER,LAND_IRRIGATION,LAND_FEATURES,LAND_PAYMENT} from "../utils/landRental";
 import { readShopRequest, shopOptionLabel, SHOP_TYPES, SHOP_ACTIVITIES, SHOP_FLOORS, SHOP_LOCATIONS, SHOP_FEATURES, SHOP_TRANSFER } from "../utils/shopRequest";
 import {SHOP_OFFER_TYPES,SHOP_OFFER_ACTIVITIES,SHOP_OFFER_TRANSFERS,SHOP_OFFER_FLOORS,SHOP_OFFER_LOCATIONS,SHOP_OFFER_FEATURES,SHOP_RIGHTS,shopOfferLabel,shopFinancialHeadline,shopFinancialRows} from "../utils/shopOffer";
@@ -14,9 +15,9 @@ import { INDUSTRIAL_TYPES, INDUSTRIAL_POWER, INDUSTRIAL_VEHICLES, INDUSTRIAL_FLO
 import {LAND_OFFER_TYPES,LAND_OFFER_PURPOSES,LAND_OFFER_ROADS,LAND_OFFER_LEGAL,LAND_OFFER_LOCATION,LAND_OFFER_SLOPES,LAND_OFFER_VEHICLES,LAND_OFFER_WATER,LAND_OFFER_FEATURES,LAND_OFFER_CROPS,LAND_OFFER_IRRIGATION,landOfferLabel} from "../utils/landOffer";
 import { readWarehouseRequest, warehouseOptionLabel, WAREHOUSE_PURPOSES, WAREHOUSE_TYPES, WAREHOUSE_ACCESS, WAREHOUSE_DURATIONS, WAREHOUSE_FEATURES } from "../utils/warehouseRequest";
 import { climateLabels } from "../components/ClimateFields";
-import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText, villaRequestLabel, VILLA_REQUEST_TYPES, VILLA_REQUEST_STAYS, VILLA_REQUEST_AMENITIES } from "../utils/villaRequest";
-import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText, gardenRequestLabel, GARDEN_REQUEST_PURPOSES, GARDEN_REQUEST_DURATIONS, GARDEN_REQUEST_FEATURES, GARDEN_REQUEST_WATER } from "../utils/gardenRequest";
-import {gardenOfferLabel,gardenFinancialRows,GARDEN_OFFER_TYPES,GARDEN_OFFER_PURPOSES,GARDEN_OFFER_ROADS,GARDEN_OFFER_DURATIONS,GARDEN_OFFER_PRIVACY,GARDEN_OFFER_FEATURES} from "../utils/gardenOffer";
+import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText, villaRequestBudgetRows, villaRequestLabel, VILLA_REQUEST_TYPES, VILLA_REQUEST_STAYS, VILLA_REQUEST_LONG_MODES, VILLA_REQUEST_AMENITIES } from "../utils/villaRequest";
+import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText, gardenRequestBudgetRows, gardenRequestLabel, GARDEN_REQUEST_PURPOSES, GARDEN_REQUEST_DURATIONS, GARDEN_REQUEST_FEATURES, GARDEN_REQUEST_WATER } from "../utils/gardenRequest";
+import {gardenOfferLabel,gardenFinancialRows,GARDEN_RENTAL_TERMS,GARDEN_OFFER_TYPES,GARDEN_OFFER_PURPOSES,GARDEN_OFFER_ROADS,GARDEN_OFFER_DURATIONS,GARDEN_OFFER_PRIVACY,GARDEN_OFFER_FEATURES} from "../utils/gardenOffer";
 import {villaFinancialRows,villaOfferLabel,VILLA_OFFER_TYPES,VILLA_OFFER_STAYS,VILLA_OFFER_PRIVACY,VILLA_OFFER_EXTRAS,VILLA_LONG_MODES} from "../utils/villaOffer";
 import VillaRentalBadges from "../components/VillaRentalBadges";
 import ResidentialRentalBadges from "../components/ResidentialRentalBadges";
@@ -74,8 +75,8 @@ const CATEGORY_INFO = {
   },
 };
 
-function ShopMoneyRows({ items, compact = false, ariaLabel = "شرایط مالی آگهی" }) {
-  return <div className={`parking-details-shop-money${compact ? " parking-details-shop-money--compact" : ""}`} aria-label={ariaLabel}>
+function ShopMoneyRows({ items, compact = false, stacked = false, ariaLabel = "شرایط مالی آگهی" }) {
+  return <div className={`parking-details-shop-money${compact ? " parking-details-shop-money--compact" : ""}${stacked ? " parking-details-shop-money--villa-request" : ""}`} aria-label={ariaLabel}>
     {items.map(({ label, amount }) => <div className="parking-details-shop-money__row" key={label}>
       <span className="parking-details-shop-money__label">{label}</span>
       <bdi className="parking-details-shop-money__amount">{amount}</bdi>
@@ -287,10 +288,12 @@ function ParkingDetails({
   const villaWantedData = wantedVilla?.hasMetadata ? wantedVilla.data : null;
   const villaAreaText = villaWantedData ? villaRequestAreaText(villaWantedData) : "";
   const villaBudgetText = villaWantedData ? villaRequestBudgetText(villaWantedData) : "";
+  const villaWantedPriceRows = villaWantedData ? villaRequestBudgetRows(villaWantedData) : [];
   const wantedGarden = isWanted && category === "garden" ? readGardenRequest(parking?.description || "") : null;
   const gardenWantedData = wantedGarden?.hasMetadata ? wantedGarden.data : null;
   const gardenAreaText = gardenWantedData ? gardenRequestAreaText(gardenWantedData) : "";
   const gardenBudgetText = gardenWantedData ? gardenRequestBudgetText(gardenWantedData) : "";
+  const gardenWantedPriceRows=gardenWantedData?gardenRequestBudgetRows(gardenWantedData):[];
   const wantedOther = isWanted && category === "other" ? readOtherRequest(parking?.description || "", parking?.area, parking?.price, parking?.priceType) : null;
   const otherWantedData = wantedOther?.hasMetadata ? wantedOther.data : null;
   const otherAreaText = otherWantedData ? (otherRequestAreaText(otherWantedData) || "توافقی / نامشخص") : "";
@@ -630,13 +633,15 @@ function ParkingDetails({
               </p>
               {!isWanted && category === "villa" && <VillaRentalBadges attributes={parking?.spaceAttributes} />}
               {!isWanted && category === "residential" && <ResidentialRentalBadges attributes={parking?.spaceAttributes} />}
+              {!isWanted && category === "garden" && <GardenRentalBadges attributes={parking?.spaceAttributes} />}
+              {isWanted && category === "garden" && gardenWantedData?.rentalTerm && <span className="fj-vr-badge">درخواست {({short:"کوتاه‌مدت",seasonal:"فصلی",long:"بلندمدت"})[gardenWantedData.rentalTerm]}</span>}
               {!isWanted && category === "other" && <OtherRentalBadges attributes={parking?.spaceAttributes} />}
               {isWanted && category === "other" && ["short","long"].includes(otherWantedData?.rentalTerm) && <span className="fj-vr-badge">درخواست {otherWantedData.rentalTerm==="short"?"کوتاه‌مدت":"بلندمدت"}</span>}
               {isWanted && category === "residential" && wantedResidential?.termDeclared &&
                 <span className="fj-vr-badge" aria-label="مدت درخواست مسکونی">درخواست {residentialWantedData.rentalTerm === "short" ? "کوتاه‌مدت" : "بلندمدت"}</span>}
             </div>
 
-            <div className={`parking-details-hero__price${(shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || villaPriceRows.length || otherPriceRows.length || otherWantedPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>
+            <div className={`parking-details-hero__price${(shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || gardenWantedPriceRows.length || villaWantedPriceRows.length || villaPriceRows.length || otherPriceRows.length || otherWantedPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>
               <span>
                 {isWanted ? "بودجه" : "قیمت آگهی"}
               </span>
@@ -645,8 +650,12 @@ function ParkingDetails({
                 <ShopMoneyRows items={shopPriceRows} />
               ) : gardenPriceRows.length ? (
                 <ShopMoneyRows items={gardenPriceRows} />
+              ) : gardenWantedPriceRows.length ? (
+                <ShopMoneyRows items={gardenWantedPriceRows} ariaLabel="بودجه درخواست" />
               ) : residentialPriceRows.length ? (
                 <ShopMoneyRows items={residentialPriceRows} />
+              ) : villaWantedPriceRows.length ? (
+                <ShopMoneyRows items={villaWantedPriceRows} stacked ariaLabel="سقف مبالغ درخواست ویلا" />
               ) : villaPriceRows.length ? (
                 <ShopMoneyRows items={villaPriceRows} />
               ) : otherPriceRows.length ? (
@@ -845,7 +854,7 @@ function ParkingDetails({
                       </span>
 
                       <strong>
-                        {otherAreaText || gardenAreaText || villaAreaText || residentialAreaText || landAreaText || (parking.area
+                        {isWanted && category === "villa" && villaWantedData ? (villaAreaText || "متراژ مشخص نشده") : otherAreaText || gardenAreaText || residentialAreaText || landAreaText || (parking.area
                           ? `${parking.area} متر`
                           : "ثبت نشده")}
                       </strong>
@@ -868,7 +877,7 @@ function ParkingDetails({
                     </div>
                   </div>
 
-                  <div className={`parking-details-feature${(shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || villaPriceRows.length || otherPriceRows.length || otherWantedPriceRows.length) ? " parking-details-feature--shop-money" : ""}`}>
+                  <div className={`parking-details-feature${(shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || gardenWantedPriceRows.length || villaWantedPriceRows.length || villaPriceRows.length || otherPriceRows.length || otherWantedPriceRows.length) ? " parking-details-feature--shop-money" : ""}`}>
                     <span className="parking-details-feature__icon parking-details-feature__icon--orange">
                       💰
                     </span>
@@ -882,8 +891,12 @@ function ParkingDetails({
                         <ShopMoneyRows items={shopPriceRows} compact />
                       ) : gardenPriceRows.length ? (
                         <ShopMoneyRows items={gardenPriceRows} compact />
+                      ) : gardenWantedPriceRows.length ? (
+                        <ShopMoneyRows items={gardenWantedPriceRows} compact ariaLabel="بودجه درخواست" />
                       ) : residentialPriceRows.length ? (
                         <ShopMoneyRows items={residentialPriceRows} compact />
+                      ) : villaWantedPriceRows.length ? (
+                        <ShopMoneyRows items={villaWantedPriceRows} compact stacked ariaLabel="سقف مبالغ درخواست ویلا" />
                       ) : villaPriceRows.length ? (
                         <ShopMoneyRows items={villaPriceRows} compact />
                       ) : otherPriceRows.length ? (
@@ -1115,7 +1128,14 @@ function ParkingDetails({
                   </div>
                 </div>
 
-              {category === "residential" && (
+                <p className="parking-details-description">
+                  {(isWanted && category === "parking" ? readParkingRequestUsage(parking.description).description : isWanted && category === "storage" ? readWarehouseRequest(parking.description).description : category === "land" ? readLandRental(parking.description).description : parking.description) ||
+                    "توضیحی برای این آگهی ثبت نشده است."}
+                </p>
+              </article>
+              )}
+
+              {category === "residential" && (!isWanted || !residentialWantedData) && (
                 <div className="parking-details-residential">
                   <h3>🏠 مشخصات ملک مسکونی</h3>
                   <div className="parking-details-residential__grid">
@@ -1170,11 +1190,13 @@ function ParkingDetails({
                 const d = villaWantedData;
                 const rows = [
                   ["نوع اقامتگاه", d.accommodationType === "other" ? d.otherType : villaRequestLabel(VILLA_REQUEST_TYPES, d.accommodationType)],
-                  ["نوع اقامت", villaRequestLabel(VILLA_REQUEST_STAYS, d.stayType)],
+                  ["مدت اصلی درخواست", d.rentalTerm === "long" ? "بلندمدت" : "کوتاه‌مدت"],
+                  ["نوع قرارداد", d.rentalTerm === "long" ? villaRequestLabel(VILLA_REQUEST_LONG_MODES, d.financialMode) : ""],
+                  ["نوع اقامت", d.rentalTerm === "long" ? "" : villaRequestLabel(VILLA_REQUEST_STAYS, d.stayType)],
                   ["ظرفیت موردنیاز", d.guests ? `${Number(d.guests).toLocaleString("fa-IR")} نفر` : ""],
                   ["حداقل اتاق‌خواب", d.minBedrooms !== "" ? `${Number(d.minBedrooms).toLocaleString("fa-IR")} اتاق` : ""],
-                  ["مساحت", d.minArea || d.maxArea ? villaAreaText : ""],
-                  ["بودجه", villaBudgetText],
+                  ["بازه متراژ", villaAreaText || "متراژ مشخص نشده"],
+                  ...villaWantedPriceRows.map(({label, amount}) => [label, amount]),
                   ["امکانات ضروری", (d.amenities || []).map((key) => villaRequestLabel(VILLA_REQUEST_AMENITIES, key)).filter(Boolean).join("، ")],
                   ["حریم خصوصی", d.privacyRequired ? "ضروری است" : ""],
                   ["شرایط خاص", d.requirements],
@@ -1246,7 +1268,7 @@ function ParkingDetails({
                 const rows = [
                   ["هدف اجاره", d.purpose === "other" ? d.otherPurpose : gardenRequestLabel(GARDEN_REQUEST_PURPOSES, d.purpose)],
                   ["مساحت", gardenAreaText], ["بودجه", gardenBudgetText],
-                  ["مدت", gardenRequestLabel(GARDEN_REQUEST_DURATIONS, d.duration)],
+                  ["مدت",({short:"کوتاه‌مدت",seasonal:"فصلی",long:"بلندمدت"})[d.rentalTerm]||gardenRequestLabel(GARDEN_REQUEST_DURATIONS, d.duration)],
                   ["ویژگی‌های ضروری", (d.features || []).map(id => gardenRequestLabel(GARDEN_REQUEST_FEATURES, id)).filter(Boolean).join("، ")],
                   ["درختان یا نوع کشت", d.treesNote],
                   ["ترجیح منبع آب", ["orchard", "gardening"].includes(d.purpose) && d.waterPreference !== "any" ? gardenRequestLabel(GARDEN_REQUEST_WATER, d.waterPreference) : ""],
@@ -1270,7 +1292,7 @@ function ParkingDetails({
                   ["نوع واقعی باغ",label(GARDEN_OFFER_TYPES,v.gardenType)],
                   ["استفاده‌های قابل واگذاری",(Array.isArray(v.allowedPurposes)?v.allowedPurposes:[]).map(x=>x==="other"&&v.otherPurpose?`سایر: ${v.otherPurpose}`:label(GARDEN_OFFER_PURPOSES,x)).filter(Boolean).join("، ")],
                   ["نوع راه دسترسی",label(GARDEN_OFFER_ROADS,v.accessRoad)],
-                  ["مدت قابل واگذاری",label(GARDEN_OFFER_DURATIONS,v.rentalDuration)],
+                  ["مدت اصلی واگذاری",label(GARDEN_RENTAL_TERMS,v.rentalTerm)||label(GARDEN_OFFER_DURATIONS,v.rentalDuration)],
                   ["حریم خصوصی",label(GARDEN_OFFER_PRIVACY,v.privacy)],
                   ["ظرفیت مهمان",Array.isArray(v.allowedPurposes)&&v.allowedPurposes.includes("event")&&Number(v.eventCapacity)>0?`${Number(v.eventCapacity).toLocaleString("fa-IR")} نفر`:""],
                 ].filter(([,val])=>Boolean(val));
@@ -1301,7 +1323,7 @@ function ParkingDetails({
                 </div>
               )}
 
-              {category === "villa" && (
+              {category === "villa" && (!isWanted || !villaWantedData) && (
                 <div className="parking-details-residential">
                   <h3>🏡 مشخصات ویلای تفریحی / مسکونی</h3>
 
@@ -1396,12 +1418,6 @@ function ParkingDetails({
                 </div>
               )}
 
-                <p className="parking-details-description">
-                  {(isWanted && category === "parking" ? readParkingRequestUsage(parking.description).description : isWanted && category === "storage" ? readWarehouseRequest(parking.description).description : category === "land" ? readLandRental(parking.description).description : parking.description) ||
-                    "توضیحی برای این آگهی ثبت نشده است."}
-                </p>
-              </article>
-              )}
 
               <article className="parking-details-location">
                 <div>

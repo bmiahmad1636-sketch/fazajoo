@@ -16,6 +16,9 @@ export const GARDEN_REQUEST_PERIODS = [
   ["daily", "روزانه"], ["monthly", "ماهانه"],
   ["yearly", "سالانه"], ["negotiable", "توافقی"],
 ];
+export const GARDEN_REQUEST_TERMS=[["short","کوتاه‌مدت / مقطعی"],["seasonal","فصلی"],["long","بلندمدت"]];
+export const GARDEN_REQUEST_SHORT_UNITS=[["daily","روزانه"],["weekly","هفتگی"],["monthly","ماهانه"]];
+export const GARDEN_REQUEST_FINANCIAL_MODES=[["rent_only","فقط اجاره"],["full_deposit","رهن کامل"],["deposit_rent","رهن و اجاره"]];
 export const GARDEN_REQUEST_FEATURES = [
   ["water", "آب"], ["electricity", "برق"], ["fenced", "محصور"],
   ["building", "اتاقک / ساختمان"], ["parking", "پارکینگ"],
@@ -29,6 +32,8 @@ export const GARDEN_REQUEST_WATER = [
 export const EMPTY_GARDEN_REQUEST = {
   purpose: "", otherPurpose: "", minArea: "", maxArea: "",
   duration: "flexible", pricePeriod: "monthly", maxBudget: "", maxDeposit: "",
+  rentalTerm:"", shortRateUnit:"daily", shortMaxBudgetRial:"", shortMaxSecurityHoldRial:"",
+  seasonalMaxBudgetRial:"", seasonalMaxSecurityHoldRial:"",longFinancialMode:"deposit_rent",
   features: [], waterPreference: "any", treesNote: "", eventGuests: "",
   privacyRequired: false, requirements: "",
 };
@@ -78,6 +83,14 @@ export function writeGardenRequest(input = {}, notes = "") {
     otherPurpose: String(input.otherPurpose || "").trim().slice(0, 120),
     minArea: gardenDigits(input.minArea), maxArea: gardenDigits(input.maxArea),
     maxBudget: gardenDigits(input.maxBudget), maxDeposit: gardenDigits(input.maxDeposit),
+    rentalTerm:GARDEN_REQUEST_TERMS.some(([id])=>id===input.rentalTerm)?input.rentalTerm:"",
+    shortRateUnit:GARDEN_REQUEST_SHORT_UNITS.some(([id])=>id===input.shortRateUnit)?input.shortRateUnit:"daily",
+    shortMaxBudgetRial:input.rentalTerm==="short"?gardenDigits(input.shortMaxBudgetRial):"",
+    shortMaxSecurityHoldRial:input.rentalTerm==="short"?gardenDigits(input.shortMaxSecurityHoldRial):"",
+    seasonalMaxBudgetRial:input.rentalTerm==="seasonal"?gardenDigits(input.seasonalMaxBudgetRial):"",
+    seasonalMaxSecurityHoldRial:input.rentalTerm==="seasonal"?gardenDigits(input.seasonalMaxSecurityHoldRial):"",
+    longFinancialMode:input.rentalTerm==="long"&&GARDEN_REQUEST_FINANCIAL_MODES.some(([id])=>id===input.longFinancialMode)?input.longFinancialMode:"",
+    ...(input.rentalTerm==="short"||input.rentalTerm==="seasonal"?{maxBudget:"",maxDeposit:""}:input.rentalTerm==="long"?{maxBudget:input.longFinancialMode==="full_deposit"?"":gardenDigits(input.maxBudget),maxDeposit:input.longFinancialMode==="rent_only"?"":gardenDigits(input.maxDeposit)}:{}),
     treesNote: String(input.treesNote || "").trim().slice(0, 100),
     eventGuests: gardenDigits(input.eventGuests),
     features: Array.isArray(input.features) ? input.features.filter(v => GARDEN_REQUEST_FEATURES.some(([id]) => id === v)) : [],
@@ -93,6 +106,22 @@ export function validateGardenRequest(d = {}) {
   const min = number(d.minArea), max = number(d.maxArea);
   if (!min && !max) return "حداقل یا حداکثر متراژ موردنیاز را وارد کنید.";
   if (min > 10000000 || max > 10000000 || (min && max && min > max)) return "بازه متراژ معتبر نیست.";
+  if(GARDEN_REQUEST_TERMS.some(([id])=>id===d.rentalTerm)){
+    if(d.rentalTerm==="short"){
+      if(!GARDEN_REQUEST_SHORT_UNITS.some(([id])=>id===d.shortRateUnit))return "دوره محاسبه بودجه کوتاه‌مدت را مشخص کنید.";
+      if(!number(d.shortMaxBudgetRial))return "حداکثر بودجه کوتاه‌مدت باغ را وارد کنید.";
+    } else if(d.rentalTerm==="seasonal"){
+      if(!number(d.seasonalMaxBudgetRial))return "حداکثر بودجه اجاره فصلی باغ را وارد کنید.";
+    } else {
+      if(!GARDEN_REQUEST_FINANCIAL_MODES.some(([id])=>id===d.longFinancialMode))return "شیوه مالی بلندمدت را مشخص کنید.";
+      if(d.longFinancialMode!=="rent_only"&&!number(d.maxDeposit))return "حداکثر ودیعه / رهن باغ را وارد کنید.";
+      if(d.longFinancialMode!=="full_deposit"&&!number(d.maxBudget))return "حداکثر اجاره ماهانه باغ را وارد کنید.";
+    }
+    for(const k of ["maxBudget","maxDeposit","shortMaxBudgetRial","shortMaxSecurityHoldRial","seasonalMaxBudgetRial","seasonalMaxSecurityHoldRial"]){
+      if(gardenDigits(d[k]).length>15)return "مبلغ واردشده بیش از حد مجاز است.";
+    }
+    return String(d.requirements||"").length>240?"شرایط خاص حداکثر ۲۴۰ نویسه باشد.":"";
+  }
   if (!GARDEN_REQUEST_PERIODS.some(([id]) => id === d.pricePeriod)) return "دوره بودجه را انتخاب کنید.";
   if (d.pricePeriod !== "negotiable" && !number(d.maxBudget)) return "سقف بودجه اجاره را وارد کنید یا حالت توافقی را انتخاب کنید.";
   if (gardenDigits(d.maxBudget).length > 15 || gardenDigits(d.maxDeposit).length > 15) return "مبلغ واردشده بیش از حد مجاز است.";
@@ -105,7 +134,23 @@ export function gardenRequestAreaText(d = {}) {
   if (min && max) return min === max ? `${pretty(min)} مترمربع` : `${pretty(min)} تا ${pretty(max)} مترمربع`;
   return min ? `از ${pretty(min)} مترمربع` : max ? `تا ${pretty(max)} مترمربع` : "";
 }
+export function gardenRequestBudgetRows(d={}){
+ const n=(value)=>number(value)>0?`${pretty(value)} ریال`:"";
+ if(d.rentalTerm==="short")return [...(n(d.shortMaxBudgetRial)?[{label:`حداکثر اجاره ${gardenRequestLabel(GARDEN_REQUEST_SHORT_UNITS,d.shortRateUnit)||"کوتاه‌مدت"}`,amount:n(d.shortMaxBudgetRial)}]:[]),...(n(d.shortMaxSecurityHoldRial)?[{label:"حداکثر ودیعه / ضمانت خسارت",amount:n(d.shortMaxSecurityHoldRial)}]:[])];
+ if(d.rentalTerm==="seasonal")return [...(n(d.seasonalMaxBudgetRial)?[{label:"حداکثر اجاره هر فصل",amount:n(d.seasonalMaxBudgetRial)}]:[]),...(n(d.seasonalMaxSecurityHoldRial)?[{label:"حداکثر ضمانت خسارت",amount:n(d.seasonalMaxSecurityHoldRial)}]:[])];
+ if(d.rentalTerm==="long")return [...(d.longFinancialMode!=="rent_only"&&n(d.maxDeposit)?[{label:d.longFinancialMode==="full_deposit"?"حداکثر رهن کامل":"حداکثر ودیعه",amount:n(d.maxDeposit)}]:[]),...(d.longFinancialMode!=="full_deposit"&&n(d.maxBudget)?[{label:"حداکثر اجاره ماهانه",amount:n(d.maxBudget)}]:[])];
+ return [];
+}
+export function gardenWantedListingPrice(d={}){
+ if(d.rentalTerm==="short")return {price:gardenDigits(d.shortMaxBudgetRial),priceType:d.shortRateUnit||"negotiable"};
+ if(d.rentalTerm==="seasonal")return {price:"",priceType:"negotiable"};
+ if(d.rentalTerm==="long")return {price:d.longFinancialMode==="full_deposit"?"":gardenDigits(d.maxBudget),priceType:d.longFinancialMode==="full_deposit"?"negotiable":"monthly"};
+ return {price:d.pricePeriod==="negotiable"?"":gardenDigits(d.maxBudget),priceType:d.pricePeriod||"negotiable"};
+}
 export function gardenRequestBudgetText(d = {}) {
+ const typed=gardenRequestBudgetRows(d);
+ if(typed.length)return typed.map(row=>`${row.label} ${row.amount}`).join(" • ");
+ if(GARDEN_REQUEST_TERMS.some(([id])=>id===d.rentalTerm))return "";
   if (d.pricePeriod === "negotiable") return "توافقی";
   if (!number(d.maxBudget)) return "";
   const period = gardenRequestLabel(GARDEN_REQUEST_PERIODS, d.pricePeriod) || "ماهانه";

@@ -1,6 +1,6 @@
 import {
   EMPTY_VILLA_REQUEST, VILLA_REQUEST_TYPES, VILLA_REQUEST_STAYS, VILLA_REQUEST_TERMS, VILLA_REQUEST_LONG_MODES,
-  VILLA_REQUEST_AMENITIES, normalizeVillaDigits,
+  VILLA_REQUEST_AMENITIES, normalizeVillaDigits, changeVillaRequestFinancialMode, changeVillaRequestTerm,
 } from "../utils/villaRequest";
 import "./ResidentialRequestFields.css";
 
@@ -14,6 +14,8 @@ export default function VillaRequestFields({ value = {}, onChange, disabled = fa
   const form = { ...EMPTY_VILLA_REQUEST, ...value };
   const set = (key, next) => onChange({ ...form, [key]: next });
   const long = form.rentalTerm === "long";
+  const contractError = long && error.includes("نوع قرارداد بلندمدت");
+  const selectFinancialMode = (financialMode) => onChange(changeVillaRequestFinancialMode(form, financialMode));
   const toggleAmenity = (key, checked) => set("amenities", checked
     ? [...new Set([...(form.amenities || []), key])]
     : (form.amenities || []).filter((item) => item !== key));
@@ -26,8 +28,8 @@ export default function VillaRequestFields({ value = {}, onChange, disabled = fa
           <p>نوع اقامت را مشخص کن؛ سؤال‌های مربوط به کوتاه‌مدت و بلندمدت متفاوت‌اند.</p>
         </div>
       </header>
-      <div className="residential-request__checks" role="group" aria-label="نوع قرارداد اقامت">{VILLA_REQUEST_TERMS.map(([id,label])=><label key={id} className="residential-request__check"><input type="radio" name="villaRequestTerm" checked={(form.rentalTerm||"short")===id} disabled={disabled} onChange={()=>onChange({...form,rentalTerm:id,pricePeriod:id==="long"?"monthly":form.pricePeriod})}/>{label}</label>)}</div>
-      {long&&<div className="residential-request__money"><strong>نوع قرارداد بلندمدت *</strong><div className="residential-request__checks">{VILLA_REQUEST_LONG_MODES.map(([id,label])=><label key={id} className="residential-request__check"><input name="villaRequestLongMode" type="radio" disabled={disabled} checked={form.financialMode===id} onChange={()=>set("financialMode",id)}/>{label}</label>)}</div></div>}
+      <div className="residential-request__checks" role="group" aria-label="نوع قرارداد اقامت">{VILLA_REQUEST_TERMS.map(([id,label])=><label key={id} className="residential-request__check"><input type="radio" name="villaRequestTerm" checked={(form.rentalTerm||"short")===id} disabled={disabled} onChange={()=>onChange(changeVillaRequestTerm(form,id))}/>{label}</label>)}</div>
+      {long&&<div className="residential-request__money"><strong id="villa-request-contract-label">نوع قرارداد بلندمدت *</strong><div className="residential-request__checks" role="radiogroup" aria-labelledby="villa-request-contract-label" aria-invalid={Boolean(contractError)} aria-describedby={contractError ? "villa-request-contract-error" : undefined}>{VILLA_REQUEST_LONG_MODES.map(([id,label])=><label key={id} className="residential-request__check"><input name="villaRequestLongMode" type="radio" disabled={disabled} checked={form.financialMode===id} onChange={()=>selectFinancialMode(id)}/>{label}</label>)}</div>{contractError&&<p id="villa-request-contract-error" className="residential-request__error" role="alert">{error}</p>}</div>}
       <div className="residential-request__grid">
         <label className="residential-request__field">
           <span>نوع اقامتگاه <em>*</em></span>
@@ -108,7 +110,7 @@ export default function VillaRequestFields({ value = {}, onChange, disabled = fa
             <label className="residential-request__field"><span>حداکثر متراژ (مترمربع)</span>
               <input disabled={disabled} inputMode="numeric" value={money(form.maxArea)}
                 onChange={(e) => set("maxArea", digitOnly(e.target.value).slice(0, 7))} placeholder="مثلاً ۵۰۰" /></label>
-            {!long&&<label className="residential-request__field"><span>حداکثر ضمانت خسارت (ریال)</span>
+            {!long&&<label className="residential-request__field"><span>حداکثر ضمانت خسارت / ودیعه (ریال)</span>
               <input disabled={disabled} inputMode="numeric" value={money(form.maxDeposit)}
                 onChange={(e) => set("maxDeposit", digitOnly(e.target.value).slice(0, 15))} placeholder="اگر قابل پرداخت است" /></label>}
           </div>
@@ -121,7 +123,7 @@ export default function VillaRequestFields({ value = {}, onChange, disabled = fa
           </label>
         </div>
       </details>
-      {error && <p className="residential-request__error" role="alert">{error}</p>}
+      {error && !contractError && <p className="residential-request__error" role="alert">{error}</p>}
     </section>
   );
 }
