@@ -117,6 +117,58 @@ export function readRentalTermSnapshot(listing = {}, policy = POLICY) {
       }else if(term==="short")rateUnit=({daily:"day",weekly:"week",monthly:"month"})[metadata.pricePeriod]||null;
       else rateUnit="month";
     }
+  } else if (["parking", "storage", "warehouse", "shop", "land"].includes(category)) {
+    // Five-category adapter to the EXACT SAME RT-00 validator used above.
+    // Existing listings do not have these typed term fields; they remain unknown.
+    // Do not infer a term from an old monthly price or a legacy "duration".
+    const data = side === "offer" ? attrs : metadata;
+    const special = category === "shop" && data.transferType === "key_money" ||
+      category === "land" && (data.paymentType === "crop_share" || data.transactionKind === "crop_share");
+    if (special) {
+      source = "special_transaction_manual_review";
+      notes.push(category === "shop" ? "shop_rights_transfer_requires_legal_review" : "land_crop_share_requires_manual_review");
+    } else if (["short", "seasonal", "long"].includes(data.rentalTerm)) {
+      primaryTerm = data.rentalTerm;
+      source = side === "offer" ? "typed_five_category_offer" : "typed_five_category_wanted";
+      const unitMap = { hourly: "hour", hour: "hour", daily: "day", day: "day",
+        nightly: "night", night: "night", weekly: "week", week: "week",
+        monthly: "month", month: "month", yearly: "year", year: "year",
+        seasonal: "season", season: "season" };
+      const convertUnit = value => unitMap[value] || null;
+      if (side === "offer") {
+        canNegotiateOtherTerm = data.canNegotiateOtherTerm === true;
+        if (primaryTerm === "short") {
+          rateUnit = convertUnit(data.shortRateUnit);
+          rateAmountRial = rateUnit ? amount(data.shortRateRial) : null;
+          securityHoldRial = amount(data.securityHoldRial);
+        } else if (primaryTerm === "seasonal") {
+          rateUnit = "season";
+          rateAmountRial = amount(data.seasonalRateRial);
+          securityHoldRial = amount(data.seasonalSecurityHoldRial);
+        } else {
+          const mode = data.financialMode;
+          leaseDepositRial = mode === "rent_only" ? null : amount(data.longDepositRial);
+          if (mode !== "full_deposit") {
+            if (convertUnit(data.longRateUnit) === "year") {
+              rateUnit = "year";
+              rateAmountRial = amount(data.longYearlyRentRial);
+            } else {
+              monthlyRentRial = amount(data.longMonthlyRentRial);
+              if (monthlyRentRial !== null) {
+                rateUnit = "month";
+                rateAmountRial = monthlyRentRial;
+              }
+            }
+          }
+        }
+      } else if (primaryTerm === "short") {
+        rateUnit = convertUnit(data.shortRateUnit || data.pricePeriod);
+      } else if (primaryTerm === "seasonal") {
+        rateUnit = "season";
+      } else {
+        rateUnit = convertUnit(data.longRateUnit) || "month";
+      }
+    }
   } else if (category === "garden") {
     const term=side==="offer"?attrs.rentalTerm:metadata.rentalTerm;
     if(["short","seasonal","long"].includes(term)){
@@ -169,6 +221,12 @@ export function readRentalTermSnapshot(listing = {}, policy = POLICY) {
 export function inspectListingRentalAlignment(offerListing, wantedListing, policy = POLICY) {
   const offer = readRentalTermSnapshot(offerListing, policy);
   const wanted = readRentalTermSnapshot(wantedListing, policy);
+  // A malformed typed contract is never an eligible match, even if its term
+  // strings happen to agree. Prevent false positives before any live wiring.
+  if (!offer.ok || !wanted.ok) return {
+    status: "needs_review", reason: "invalid_term_profile", scope: "term_only",
+    provenance: [offer.source, wanted.source], liveMatchingUpdated: false,
+  };
   const result = assessRentalTermAlignment(offer.profile, wanted.profile, policy);
   return { ...result, provenance: [offer.source, wanted.source], liveMatchingUpdated: false };
 }

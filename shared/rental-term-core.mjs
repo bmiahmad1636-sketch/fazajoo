@@ -86,7 +86,15 @@ export function validateRentalTermProfile(raw, policy, { requireTerm = false } =
   // Contract deposit is only a long-term concept. A damage/security hold is not a mortgage/deposit.
   if (amounts.leaseDepositRial !== null && term !== TERM_LONG) errors.push('lease_deposit_requires_long_term');
   if (amounts.monthlyRentRial !== null && term !== TERM_LONG) errors.push('monthly_rent_requires_long_term');
-  if (amounts.securityHoldRial !== null && term !== TERM_SHORT) errors.push('security_hold_requires_short_term');
+  // A seasonal damage/security hold is a supported explicit contract concept
+  // for categories that permit seasonal rentals (e.g. garden and land). It is
+  // NEVER a long-term lease deposit and must not be inferred from legacy data.
+  const seasonalHoldAllowed = term === TERM_SEASONAL &&
+    available?.terms.includes(TERM_SEASONAL) &&
+    available?.rateUnitsByTerm?.[TERM_SEASONAL]?.includes('season');
+  if (amounts.securityHoldRial !== null && term !== TERM_SHORT && !seasonalHoldAllowed) {
+    errors.push('security_hold_requires_short_term');
+  }
   if (amounts.rateAmountRial !== null && !unit) errors.push('rate_unit_required_for_rate_amount');
 
   return {
