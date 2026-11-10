@@ -1,4 +1,5 @@
 "use strict";
+const {cleanParkingFinance} = require("./parkingRentalFinance");
 const CATS = ["car","motorcycle","both","other"];
 const COVER = ["covered","open"];
 const ACCESS = ["anytime","daytime","scheduled"];
@@ -10,6 +11,7 @@ function cleanParkingSpaceAttributes(raw, category, side) {
   const safe=(list,v)=>list.includes(v)?v:null;
   const height=Number(x.entranceHeightCm);
   return {schemaVersion:1,category:"parking",values:{
+    ...cleanParkingFinance(x, false),
     vehicleUsage:safe(CATS,x.vehicleUsage), cover:safe(COVER,x.cover), access:safe(ACCESS,x.access),
     parkingStyle:safe(STYLE,x.parkingStyle),
     entranceHeightCm:x.cover === "covered" && x.entranceHeightCm !== null && x.entranceHeightCm !== undefined && x.entranceHeightCm !== "" && Number.isInteger(height) && height>=100 && height<=500 ? height : null,

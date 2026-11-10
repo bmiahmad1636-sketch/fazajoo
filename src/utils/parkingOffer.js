@@ -1,6 +1,7 @@
+import { PARKING_RENTAL_DEFAULT } from "./parkingRental.js";
 /** عرضه واقعی پارکینگ؛ قرارداد داده مشترک فضاجو، نسخه ۱. */
 export const PARKING_OFFER_DEFAULT = Object.freeze({
-  vehicleUsage: "", cover: "", access: "", parkingStyle: "", entranceHeightCm: "", securityFeatures: [], usageNotes: "",
+  ...PARKING_RENTAL_DEFAULT, vehicleUsage: "", cover: "", access: "", parkingStyle: "", entranceHeightCm: "", securityFeatures: [], usageNotes: "",
 });
 export const PARKING_OFFER_USAGE = [["car", "خودرو"], ["motorcycle", "موتورسیکلت"], ["both", "خودرو و موتورسیکلت"], ["other", "سایر"]];
 export const PARKING_OFFER_COVER = [["covered", "مسقف"], ["open", "روباز"]];
@@ -27,6 +28,7 @@ export function validateParkingOffer(values) {
 }
 export function makeParkingAttributes(values) {
   return { schemaVersion: 1, category: "parking", values: {
+    ...Object.fromEntries(Object.keys(PARKING_RENTAL_DEFAULT).map(key => [key, values.rentalTerm ? values[key] : PARKING_RENTAL_DEFAULT[key]])),
     vehicleUsage: values.vehicleUsage,
     cover: values.cover,
     access: values.access,

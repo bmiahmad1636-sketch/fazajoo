@@ -4,6 +4,7 @@ const { createNotificationsForNewOffer } = require("../services/smartSearch.serv
 const { recordContactReveal } = require("../services/securityMonitoring.service");
 const storage = require("../services/storage.service");
 const { cleanParkingSpaceAttributes } = require("../utils/parkingSpaceAttributes");
+const { validateParkingFinance, parkingFinancePrice, readWantedParkingFinance } = require("../utils/parkingRentalFinance");
 const { cleanStorageSpaceAttributes } = require("../utils/storageSpaceAttributes");
 const { cleanIndustrialSpaceAttributes } = require("../utils/industrialSpaceAttributes");
 const { cleanLandSpaceAttributes } = require("../utils/landSpaceAttributes");
@@ -166,6 +167,13 @@ function clean(body = {}) {
   const mediaItems = video ? [video] : [];
   // A typed commercial offer has one authoritative financial interpretation.
   // Do not permit a forged generic "monthly price" to represent key money/deposit.
+  const typedParking = body.category === "parking" && body.listingType !== "wanted"
+    ? cleanParkingSpaceAttributes(body.spaceAttributes, "parking", "offer") : null;
+  const wantedParking = body.category === "parking" && body.listingType === "wanted"
+    ? readWantedParkingFinance(body.description) : null;
+  const derivedParkingPrice = typedParking?.schemaVersion === 1
+    ? parkingFinancePrice(typedParking.values, false) : wantedParking
+      ? parkingFinancePrice(wantedParking, true) : null;
   const typedShop = body.category === "shop" && body.listingType !== "wanted"
     ? cleanShopSpaceAttributes(body.spaceAttributes, "shop", "offer") : null;
   const shopRent = typedShop?.values?.transferType === "rent" ? typedShop.values.monthlyRentRial : null;
@@ -212,8 +220,8 @@ function clean(body = {}) {
     title: String(body.title || "").trim().slice(0, 160),
     city: String(body.city || "").trim().slice(0, 100),
     area: Math.max(0, Number(body.area) || 0),
-    price: typedShop?.schemaVersion === 1 ? (shopRent ? String(shopRent) : "") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate ? String(residentialShortRate) : "") : (residentialRent ? String(residentialRent) : "")) : otherValues ? (otherValues.rentalTerm==="short" ? (otherShortRent ? String(otherShortRent) : "") : (otherLongRent ? String(otherLongRent) : "")) : longVilla ? (longVillaRent ? String(longVillaRent) : "") : gardenValues?.rentalTerm ? (typedGardenRent ? String(typedGardenRent) : "") : fullDepositGarden ? "" : String(body.price || "").trim().slice(0, 100),
-    priceType: typedShop?.schemaVersion === 1 ? (shopRent ? "monthly" : "negotiable") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate && residentialShortPriceType ? residentialShortPriceType : "negotiable") : (residentialRent ? "monthly" : "negotiable")) : otherValues ? (otherValues.rentalTerm==="short" ? (otherShortRent && ["daily","weekly","monthly"].includes(otherValues.shortRateUnit) ? otherValues.shortRateUnit : "negotiable") : (otherLongRent ? "monthly" : "negotiable")) : longVilla ? (longVillaRent ? "monthly" : "negotiable") : gardenValues?.rentalTerm ? (typedGardenRent && typedGardenPeriod ? typedGardenPeriod : "negotiable") : fullDepositGarden ? "negotiable" : (["daily", "weekly", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly"),
+    price: derivedParkingPrice ? derivedParkingPrice.price : typedShop?.schemaVersion === 1 ? (shopRent ? String(shopRent) : "") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate ? String(residentialShortRate) : "") : (residentialRent ? String(residentialRent) : "")) : otherValues ? (otherValues.rentalTerm==="short" ? (otherShortRent ? String(otherShortRent) : "") : (otherLongRent ? String(otherLongRent) : "")) : longVilla ? (longVillaRent ? String(longVillaRent) : "") : gardenValues?.rentalTerm ? (typedGardenRent ? String(typedGardenRent) : "") : fullDepositGarden ? "" : String(body.price || "").trim().slice(0, 100),
+    priceType: derivedParkingPrice ? derivedParkingPrice.priceType : typedShop?.schemaVersion === 1 ? (shopRent ? "monthly" : "negotiable") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate && residentialShortPriceType ? residentialShortPriceType : "negotiable") : (residentialRent ? "monthly" : "negotiable")) : otherValues ? (otherValues.rentalTerm==="short" ? (otherShortRent && ["daily","weekly","monthly"].includes(otherValues.shortRateUnit) ? otherValues.shortRateUnit : "negotiable") : (otherLongRent ? "monthly" : "negotiable")) : longVilla ? (longVillaRent ? "monthly" : "negotiable") : gardenValues?.rentalTerm ? (typedGardenRent && typedGardenPeriod ? typedGardenPeriod : "negotiable") : fullDepositGarden ? "negotiable" : (["daily", "weekly", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly"),
     phone: String(body.phone || "").replace(/\s/g, "").slice(0, 20),
     imageUrl,
     imageUrls,
@@ -321,7 +329,29 @@ function residentialWantedShortBudget(description = "") {
   } catch { return null; }
 }
 function validate(space) {
-  // Preserve legacy listings; validate the new typed contract whenever it is supplied.
+  // Parking offers/requests are now new structured contracts. No legacy migration.
+  // Validate after sanitization and use backend-derived generic price, never trust sent price.
+  if (space.category === "parking" && (space.listingType === "wanted" || space.spaceAttributes?.category === "parking")) {
+    if (space.listingType === "offer") {
+      if (space.spaceAttributes?.category !== "parking" || space.spaceAttributes?.schemaVersion !== 1)
+        return "مشخصات تخصصی پارکینگ لازم است.";
+      const v = space.spaceAttributes.values || {};
+      const err = validateParkingFinance(v, false);
+      if (err) return err;
+      const summary = parkingFinancePrice(v, false);
+      if (summary.price !== space.price || summary.priceType !== space.priceType)
+        return "قیمت عمومی پارکینگ با قرارداد تطابق ندارد.";
+    } else {
+      const v = readWantedParkingFinance(space.description);
+      if (!v) return "مشخصات مالی درخواست پارکینگ لازم است.";
+      const err = validateParkingFinance(v, true);
+      if (err) return err;
+      const summary = parkingFinancePrice(v, true);
+      if (summary.price !== space.price || summary.priceType !== space.priceType)
+        return "بودجه درخواست پارکینگ با قرارداد تطابق ندارد.";
+    }
+  }
+  // Preserve other established categories and their contracts.
   if (space.listingType === "offer" && space.category === "parking" && space.spaceAttributes?.schemaVersion === 1) {
     const data = space.spaceAttributes.values || {};
     if (!data.vehicleUsage || !data.cover || !data.access) return "مشخصات ضروری پارکینگ کامل نیست.";

@@ -1,0 +1,22 @@
+.fj-pr{grid-column:1/-1;display:grid;gap:15px;min-width:0;padding:clamp(14px,3vw,22px);border:1px solid #e6d6c7;border-radius:17px;background:linear-gradient(145deg,#fffaf5,#fff);color:#39302b;font:inherit}
+.fj-pr-heading strong{font-size:1.02rem;color:#8f470d}.fj-pr-heading p{margin:6px 0 0;font-size:.88rem;color:#78695d;line-height:1.8}
+.fj-pr-terms{display:flex;flex-wrap:wrap;gap:10px;border:0;padding:0;margin:0;min-width:0}.fj-pr-terms legend{font-weight:800;padding-bottom:7px;margin-bottom:1px}
+.fj-pr-option{display:inline-flex;align-items:center;gap:9px;padding:10px 14px;border:1px solid #e9d7c8;border-radius:12px;background:#fff;cursor:pointer;line-height:1.6;font-size:.91rem}
+.fj-pr-option:has(input:checked){border-color:#bd6a2e;background:#fff1e5}.fj-pr-option input{accent-color:#b75918}
+.fj-pr-content{display:grid;gap:14px}.fj-pr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:12px}
+.fj-pr-field{display:grid;gap:7px;min-width:0;font-weight:700;font-size:.9rem}.fj-pr-field em{color:#b42318;font-style:normal}
+.fj-pr-field select,.fj-pr-field input{font:inherit;min-height:45px;padding:10px;border:1px solid #e6d5c7;border-radius:10px;background:#fff;width:100%;box-sizing:border-box;color:#342d28}
+.fj-pr-field input:focus,.fj-pr-field select:focus{outline:2px solid #d78b53;outline-offset:1px}
+.fj-pr-field>small,.fj-pr-note{font-size:.82rem;color:#78695d;font-weight:400;line-height:1.8}
+.fj-pr-money{position:relative;min-width:0}.fj-pr-money input{padding-left:49px;direction:ltr;text-align:left}.fj-pr-money small{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.77rem;color:#7a6a5d}
+.fj-pr-consent{justify-self:start}.fj-pr-note{margin:0}.fj-pr-error{margin:0;color:#b42318;padding:9px 12px;border:1px solid #f2b7ab;border-radius:10px;background:#fff1ef;font-weight:700}
+.fj-pr-legacy{margin:0;background:#fff9e8;padding:10px 12px;border-radius:9px;font-size:.86rem;color:#725415;line-height:1.8}
+@media(max-width:500px){.fj-pr-terms{flex-direction:column}.fj-pr-option{width:100%;box-sizing:border-box}.fj-pr-grid{grid-template-columns:1fr}}
+.fj-pr-summary{display:grid;grid-column:1/-1;gap:12px;padding:16px;border:1px solid #ead9c8;background:#fffaf6;border-radius:15px;margin:10px 0;color:#473526}
+.fj-pr-summary>strong{color:#96501c}.fj-pr-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:10px}
+.fj-pr-summary-grid>div{display:grid;gap:4px;border:1px solid #e8ddcf;background:#fff;border-radius:12px;padding:11px 13px;min-width:0}
+.fj-pr-summary-grid span{color:#7b6a5a;font-size:.8rem}.fj-pr-summary-grid bdi{color:#593919;font-size:.95rem;font-weight:800;overflow-wrap:anywhere}
+
+/* Clear separation between optional deposit label, explanatory note and the next control. */
+.fj-pr-field__hint{display:block;margin-top:4px;line-height:1.95;white-space:normal;font-weight:400;color:#77685b}
+.fj-pr-consent-help{display:block;margin-top:-9px;color:#697367;font-size:.81rem;line-height:1.95;padding-inline-start:7px}

@@ -2,3 +2,7 @@
 
 /* A compact optional free-text note lives only in supplemental offer details. */
 .fj-po-field textarea{width:100%;min-height:86px;box-sizing:border-box;font:inherit;font-weight:400;line-height:1.8;resize:vertical;border:1px solid #e2d3c6;border-radius:12px;padding:10px 12px;color:#342c27;background:#fff;direction:rtl}.fj-po-field textarea:focus-visible{outline:3px solid #f6ac6e;outline-offset:2px}
+
+
+/* F501B parking polish: aligned optional fields + clean numeric text input */
+.fj-po-extra{align-items:start}.fj-po-field{align-content:start}.fj-po-field input:not([type=checkbox]),.fj-po-field select{height:48px;min-height:48px;line-height:48px;align-self:start}.fj-po-field input[type="text"]{appearance:textfield}
