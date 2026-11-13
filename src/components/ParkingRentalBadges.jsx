@@ -5,7 +5,7 @@ export default function ParkingRentalBadges({ values, wanted = false, compact = 
   const badges = parkingRentalBadges(values, wanted);
   if (!badges.length) return null;
   return <div dir="rtl" className={`fj-vr-badges${compact ? " fj-vr-badges--compact" : ""}`}
-    aria-label={wanted ? `مدت درخواست ${category === "storage" ? "انبار" : "پارکینگ"}` : `مدت واگذاری ${category === "storage" ? "انبار" : "پارکینگ"}`}>
+    aria-label={wanted ? `مدت درخواست ${category === "warehouse" ? "سوله یا کارگاه" : category === "storage" ? "انبار" : "پارکینگ"}` : `مدت واگذاری ${category === "warehouse" ? "سوله یا کارگاه" : category === "storage" ? "انبار" : "پارکینگ"}`}>
     {badges.map(({ term, label, state }) => <span key={term}
       className={`fj-vr-badge fj-vr-badge--${state === "requested" ? "primary" : state}`}
       title={state === "primary" ? "مدت اصلی ثبت‌شده" : state === "possible" ? "مدت جایگزین، صرفاً با توافق طرفین" : "مدت موردنیاز متقاضی"}>

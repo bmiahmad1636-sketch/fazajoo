@@ -6,6 +6,7 @@ const storage = require("../services/storage.service");
 const { cleanParkingSpaceAttributes } = require("../utils/parkingSpaceAttributes");
 const { validateParkingFinance, parkingFinancePrice, readWantedParkingFinance } = require("../utils/parkingRentalFinance");
 const { validateStorageFinance, storageFinancePrice, readWantedStorageFinance } = require("../utils/storageRentalFinance");
+const { validateIndustrialFinance, industrialFinancePrice, readWantedIndustrialFinance } = require("../utils/industrialRentalFinance");
 const { cleanStorageSpaceAttributes } = require("../utils/storageSpaceAttributes");
 const { cleanIndustrialSpaceAttributes } = require("../utils/industrialSpaceAttributes");
 const { cleanLandSpaceAttributes } = require("../utils/landSpaceAttributes");
@@ -182,6 +183,13 @@ function clean(body = {}) {
   const derivedStoragePrice = typedStorage?.schemaVersion === 1
     ? storageFinancePrice(typedStorage.values,false) : wantedStorage
       ? storageFinancePrice(wantedStorage,true) : null;
+  const typedIndustrial = body.category === "warehouse" && body.listingType !== "wanted"
+    ? cleanIndustrialSpaceAttributes(body.spaceAttributes,"warehouse","offer") : null;
+  const wantedIndustrial = body.category === "warehouse" && body.listingType === "wanted"
+    ? readWantedIndustrialFinance(body.description) : null;
+  const derivedIndustrialPrice = typedIndustrial?.schemaVersion === 1
+    ? industrialFinancePrice(typedIndustrial.values,false) : wantedIndustrial
+      ? industrialFinancePrice(wantedIndustrial,true) : null;
   const typedShop = body.category === "shop" && body.listingType !== "wanted"
     ? cleanShopSpaceAttributes(body.spaceAttributes, "shop", "offer") : null;
   const shopRent = typedShop?.values?.transferType === "rent" ? typedShop.values.monthlyRentRial : null;
@@ -228,8 +236,8 @@ function clean(body = {}) {
     title: String(body.title || "").trim().slice(0, 160),
     city: String(body.city || "").trim().slice(0, 100),
     area: Math.max(0, Number(body.area) || 0),
-    price: derivedParkingPrice ? derivedParkingPrice.price : derivedStoragePrice ? derivedStoragePrice.price : typedShop?.schemaVersion === 1 ? (shopRent ? String(shopRent) : "") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate ? String(residentialShortRate) : "") : (residentialRent ? String(residentialRent) : "")) : otherValues ? (otherValues.rentalTerm==="short" ? (otherShortRent ? String(otherShortRent) : "") : (otherLongRent ? String(otherLongRent) : "")) : longVilla ? (longVillaRent ? String(longVillaRent) : "") : gardenValues?.rentalTerm ? (typedGardenRent ? String(typedGardenRent) : "") : fullDepositGarden ? "" : String(body.price || "").trim().slice(0, 100),
-    priceType: derivedParkingPrice ? derivedParkingPrice.priceType : derivedStoragePrice ? derivedStoragePrice.priceType : typedShop?.schemaVersion === 1 ? (shopRent ? "monthly" : "negotiable") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate && residentialShortPriceType ? residentialShortPriceType : "negotiable") : (residentialRent ? "monthly" : "negotiable")) : otherValues ? (otherValues.rentalTerm==="short" ? (otherShortRent && ["daily","weekly","monthly"].includes(otherValues.shortRateUnit) ? otherValues.shortRateUnit : "negotiable") : (otherLongRent ? "monthly" : "negotiable")) : longVilla ? (longVillaRent ? "monthly" : "negotiable") : gardenValues?.rentalTerm ? (typedGardenRent && typedGardenPeriod ? typedGardenPeriod : "negotiable") : fullDepositGarden ? "negotiable" : (["daily", "weekly", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly"),
+    price: derivedParkingPrice ? derivedParkingPrice.price : derivedStoragePrice ? derivedStoragePrice.price : derivedIndustrialPrice ? derivedIndustrialPrice.price : typedShop?.schemaVersion === 1 ? (shopRent ? String(shopRent) : "") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate ? String(residentialShortRate) : "") : (residentialRent ? String(residentialRent) : "")) : otherValues ? (otherValues.rentalTerm==="short" ? (otherShortRent ? String(otherShortRent) : "") : (otherLongRent ? String(otherLongRent) : "")) : longVilla ? (longVillaRent ? String(longVillaRent) : "") : gardenValues?.rentalTerm ? (typedGardenRent ? String(typedGardenRent) : "") : fullDepositGarden ? "" : String(body.price || "").trim().slice(0, 100),
+    priceType: derivedParkingPrice ? derivedParkingPrice.priceType : derivedStoragePrice ? derivedStoragePrice.priceType : derivedIndustrialPrice ? derivedIndustrialPrice.priceType : typedShop?.schemaVersion === 1 ? (shopRent ? "monthly" : "negotiable") : typedResidential?.schemaVersion === 1 ? (shortResidential ? (residentialShortRate && residentialShortPriceType ? residentialShortPriceType : "negotiable") : (residentialRent ? "monthly" : "negotiable")) : otherValues ? (otherValues.rentalTerm==="short" ? (otherShortRent && ["daily","weekly","monthly"].includes(otherValues.shortRateUnit) ? otherValues.shortRateUnit : "negotiable") : (otherLongRent ? "monthly" : "negotiable")) : longVilla ? (longVillaRent ? "monthly" : "negotiable") : gardenValues?.rentalTerm ? (typedGardenRent && typedGardenPeriod ? typedGardenPeriod : "negotiable") : fullDepositGarden ? "negotiable" : (["daily", "weekly", "monthly", "yearly", "negotiable"].includes(body.priceType) ? body.priceType : "monthly"),
     phone: String(body.phone || "").replace(/\s/g, "").slice(0, 20),
     imageUrl,
     imageUrls,
@@ -312,7 +320,7 @@ function clean(body = {}) {
           heatingSystems: cleanSystems(body.shopDetails.heatingSystems, HEATING_SYSTEMS),
           coolingSystems: cleanSystems(body.shopDetails.coolingSystems, COOLING_SYSTEMS),
         } : {},
-    spaceAttributes: body.category === "residential" ? (typedResidential || cleanResidentialSpaceAttributes(body.spaceAttributes, "residential", "wanted")) : body.category === "villa" ? (typedVilla || cleanVillaSpaceAttributes(body.spaceAttributes,"villa","wanted",body.villaDetails)) : body.category === "storage" ? (typedStorage || cleanStorageSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer")) : body.category === "warehouse" ? cleanIndustrialSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "land" ? cleanLandSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "shop" ? (typedShop || cleanShopSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : body.category === "garden" ? (typedGarden || cleanGardenSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : body.category === "other" ? (typedOther || cleanOtherSpaceAttributes(body.spaceAttributes,"other",body.listingType==="wanted"?"wanted":"offer")) : cleanParkingSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer"),
+    spaceAttributes: body.category === "residential" ? (typedResidential || cleanResidentialSpaceAttributes(body.spaceAttributes, "residential", "wanted")) : body.category === "villa" ? (typedVilla || cleanVillaSpaceAttributes(body.spaceAttributes,"villa","wanted",body.villaDetails)) : body.category === "storage" ? (typedStorage || cleanStorageSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer")) : body.category === "warehouse" ? (typedIndustrial || cleanIndustrialSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer")) : body.category === "land" ? cleanLandSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer") : body.category === "shop" ? (typedShop || cleanShopSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : body.category === "garden" ? (typedGarden || cleanGardenSpaceAttributes(body.spaceAttributes, body.category, "wanted")) : body.category === "other" ? (typedOther || cleanOtherSpaceAttributes(body.spaceAttributes,"other",body.listingType==="wanted"?"wanted":"offer")) : cleanParkingSpaceAttributes(body.spaceAttributes, body.category, body.listingType === "wanted" ? "wanted" : "offer"),
     description: String(body.description || "").trim().slice(0, 5000),
     agencyNetworkConsent: body.agencyNetworkConsent === true,
     locationLat: Number.isFinite(Number(body.location?.lat)) && Number(body.location.lat) >= 24 && Number(body.location.lat) <= 40
@@ -372,6 +380,20 @@ function validate(space) {
     const expected=storageFinancePrice(values,space.listingType==="wanted");
     if(expected.price!==space.price||expected.priceType!==space.priceType)
       return "مبلغ عمومی انبار با قرارداد تخصصی همخوانی ندارد.";
+  }
+  // Industrial (warehouse) rent is a typed RT-00 contract; the generic price is
+  // server-derived. An invalid request cannot publish by claiming a negotiated price.
+  if (space.category === "warehouse") {
+    const values = space.listingType === "wanted"
+      ? readWantedIndustrialFinance(space.description)
+      : space.spaceAttributes?.schemaVersion===1&&space.spaceAttributes.category==="warehouse"
+        ? space.spaceAttributes.values:null;
+    if(!values)return "اطلاعات تخصصی مدت و قرارداد سوله یا کارگاه لازم است.";
+    const err=validateIndustrialFinance(values,space.listingType==="wanted");
+    if(err)return err;
+    const expected=industrialFinancePrice(values,space.listingType==="wanted");
+    if(expected.price!==space.price||expected.priceType!==space.priceType)
+      return "مبلغ سوله یا کارگاه با قرارداد تخصصی همخوانی ندارد.";
   }
   // Preserve other established categories and their contracts.
   if (space.listingType === "offer" && space.category === "parking" && space.spaceAttributes?.schemaVersion === 1) {

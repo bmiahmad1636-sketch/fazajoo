@@ -53,10 +53,22 @@ export function compareSpaceProfiles(wanted, offer) {
       else conflicts.push("other-rental-term");
     } else matched.push("other-rental-term");
   }
+  // F5-03: typed industrial contracts cannot match across primary terms.
+  // Alternative owner consent signals *manual review*, not confirmed pricing.
+  const industrialWantedTerm=wanted.category==="warehouse"?wanted.fields?.industrialRentalTerm:null;
+  const industrialOfferTerm=wanted.category==="warehouse"?offer.fields?.rentalTerm:null;
+  const industrialAlternativeReview=Boolean(industrialWantedTerm&&industrialOfferTerm&&
+    industrialWantedTerm!==industrialOfferTerm&&offer.fields?.canNegotiateOtherTerm===true);
+  if(industrialWantedTerm&&industrialOfferTerm){
+    if(industrialWantedTerm!==industrialOfferTerm){
+      if(industrialAlternativeReview)unknown.push("industrial-alternative-term-price-and-contract-review");
+      else conflicts.push("industrial-rental-term");
+    }else matched.push("industrial-rental-term");
+  }
   const gardenWantedContract=wanted.category==="garden"?wanted.fields?.gardenRentalTerm:null;
   const gardenOfferContract=wanted.category==="garden"?offer.fields?.gardenRentalTerm:null;
   const gardenFinancialReview=wanted.category==="garden"&&Boolean(gardenWantedContract||gardenOfferContract)&&(!gardenWantedContract||!gardenOfferContract||gardenWantedContract!==gardenOfferContract);
-  const deferContractMoney = gardenFinancialReview || otherAlternativeReview || Boolean(otherWantedTerm&&otherOfferTerm&&otherWantedTerm!==otherOfferTerm) || villaOtherTermReview || residentialOtherTermReview ||
+  const deferContractMoney = industrialAlternativeReview || Boolean(industrialWantedTerm&&industrialOfferTerm&&industrialWantedTerm!==industrialOfferTerm) || gardenFinancialReview || otherAlternativeReview || Boolean(otherWantedTerm&&otherOfferTerm&&otherWantedTerm!==otherOfferTerm) || villaOtherTermReview || residentialOtherTermReview ||
     Boolean(residentialWantedTerm && residentialOfferTerm && residentialWantedTerm !== residentialOfferTerm);
   // Two amounts with different periods (or unverified alternative conditions) cannot be compared.
   if (!deferContractMoney && wanted.maxDepositRial !== null) requireCheck("deposit-irr", wanted.maxDepositRial, offer.depositRial, (need, actual) => actual <= need);

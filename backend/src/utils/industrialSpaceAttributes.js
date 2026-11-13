@@ -1,5 +1,6 @@
 "use strict";
 // Server-side whitelist; never trust client-supplied derived features.
+const {cleanIndustrialFinance}=require("./industrialRentalFinance");
 const TYPES=["shed","workshop"];
 const SHED_ACTIVITY=["production","heavy","logistics","packaging","storage","other"];
 const WORK_ACTIVITY=["wood","metal","repair","light","craft","packaging","other"];
@@ -26,7 +27,7 @@ function cleanIndustrialSpaceAttributes(raw,category,side){
  const safeFeatures=list(features,v.features);
  const safeActivities=list(activities,v.allowedActivities);
  return {schemaVersion:1,category:"warehouse",values:{
-  spaceType:type,allowedActivities:safeActivities,otherActivity:safeActivities.includes("other")?String(v.otherActivity||"").trim().slice(0,160):"",
+  ...cleanIndustrialFinance(v,false),spaceType:type,allowedActivities:safeActivities,otherActivity:safeActivities.includes("other")?String(v.otherActivity||"").trim().slice(0,160):"",
   power,powerCapacityKw:["three","both"].includes(power)?number(v.powerCapacityKw,1,20000):null,
   heightM:number(v.heightM,1,40),vehicleAccess:only(VEHICLES,v.vehicleAccess),features:safeFeatures,
   flooring:only(FLOORING,v.flooring),craneCapacityTons:safeFeatures.includes("crane")?number(v.craneCapacityTons,0.1,500):null,

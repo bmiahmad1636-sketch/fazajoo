@@ -1,10 +1,12 @@
 /** Real industrial shed/workshop supply, independent of demand metadata. */
+import { INDUSTRIAL_RENTAL_DEFAULT, pickIndustrialRental } from "./industrialRental.js";
 import { SHED_TYPES, shedActivitiesFor } from "./shedRequest.js";
 
 export const INDUSTRIAL_OFFER_DEFAULT = Object.freeze({
   spaceType: "", allowedActivities: [], otherActivity: "", power: "",
   powerCapacityKw: "", heightM: "", vehicleAccess: "", features: [],
   flooring: "", craneCapacityTons: "", operationHours: "",
+  ...INDUSTRIAL_RENTAL_DEFAULT,
 });
 export const INDUSTRIAL_TYPES = SHED_TYPES;
 export const INDUSTRIAL_FEATURE_OPTIONS = [
@@ -33,7 +35,7 @@ export const industrialLabel=(list,value)=>list.find(([id])=>id===value)?.[1]||"
 export function industrialOfferFromAttributes(attrs) {
  const v=attrs?.schemaVersion===1 && attrs?.category==="warehouse" && attrs?.values && !Array.isArray(attrs.values) ? attrs.values : {};
  const t=isOption(INDUSTRIAL_TYPES,v.spaceType)?v.spaceType:"";
- return { ...INDUSTRIAL_OFFER_DEFAULT,
+ return { ...INDUSTRIAL_OFFER_DEFAULT, ...pickIndustrialRental(v),
    spaceType:t, allowedActivities:selected(shedActivitiesFor(t),v.allowedActivities),
    otherActivity:asText(v.otherActivity).slice(0,160), power:isOption(INDUSTRIAL_POWER,v.power)?v.power:"",
    powerCapacityKw:v.powerCapacityKw==null?"":String(v.powerCapacityKw),
@@ -63,7 +65,7 @@ export function makeIndustrialAttributes(v={}) {
  const features=t?selected(industrialFeaturesFor(t),v.features):[];
  const power=isOption(INDUSTRIAL_POWER,v.power)?v.power:null;
  return { schemaVersion:1,category:"warehouse",values:{
-  spaceType:t,allowedActivities:activities,otherActivity:activities.includes("other")?asText(v.otherActivity).slice(0,160):"",
+  ...pickIndustrialRental(v), spaceType:t,allowedActivities:activities,otherActivity:activities.includes("other")?asText(v.otherActivity).slice(0,160):"",
   power,powerCapacityKw:["three","both"].includes(power)?numeric(v.powerCapacityKw,1,20000):null,
   heightM:numeric(v.heightM,1,40),vehicleAccess:isOption(INDUSTRIAL_VEHICLES,v.vehicleAccess)?v.vehicleAccess:null,
   features,flooring:isOption(INDUSTRIAL_FLOORS,v.flooring)?v.flooring:null,

@@ -28,6 +28,8 @@ import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText, villaRe
 import {readParkingRequestDetails} from "../utils/parkingRequestDetails";
 import {parkingMoneyRows} from "../utils/parkingRental.js";
 import {storageMoneyRows} from "../utils/storageRental.js";
+import {industrialMoneyRows} from "../utils/industrialRental.js";
+import {readShedRequest,shedRequestAreaText} from "../utils/shedRequest.js";
 import {readWarehouseRequest, storageRequestAreaText} from "../utils/warehouseRequest.js";
 import ParkingRentalBadges from "./ParkingRentalBadges";
 import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText, gardenRequestBudgetRows } from "../utils/gardenRequest";
@@ -124,6 +126,10 @@ function ParkingCard({ parking }) {
   const storageWanted = isWanted && category === "storage" ? readWarehouseRequest(parking?.description || "") : null;
   const storageWantedData = storageWanted?.hasMetadata ? storageWanted.data : null;
   const storageFinancial = category === "storage" ? storageMoneyRows(isWanted ? storageWantedData : parking?.spaceAttributes?.values,isWanted) : [];
+  const industrialWanted = isWanted && category==="warehouse" ? readShedRequest(parking?.description||"") : null;
+  const industrialData = industrialWanted?.hasMetadata ? industrialWanted.data : null;
+  const industrialFinancial = category==="warehouse" ? industrialMoneyRows(isWanted?industrialData:parking?.spaceAttributes?.values,isWanted) : [];
+  const industrialAreaText = industrialData ? (shedRequestAreaText(industrialData)||"متراژ مشخص نشده") : "";
   const storageAreaText = storageWantedData ? (storageRequestAreaText(storageWantedData) || "متراژ مشخص نشده") : "";
   const parkingAreaText = parkingWantedFields ? ((parkingWantedFields.minArea || parkingWantedFields.maxArea)
     ? `${parkingWantedFields.minArea ? `از ${Number(parkingWantedFields.minArea).toLocaleString("fa-IR")}` : ""}${parkingWantedFields.minArea && parkingWantedFields.maxArea ? " تا " : ""}${parkingWantedFields.maxArea ? `${parkingWantedFields.minArea ? "" : "تا "}${Number(parkingWantedFields.maxArea).toLocaleString("fa-IR")}` : ""} مترمربع`
@@ -541,6 +547,9 @@ function ParkingCard({ parking }) {
             {category === "storage" && <ParkingRentalBadges category="storage"
               values={isWanted ? storageWantedData : parking?.spaceAttributes?.values}
               wanted={isWanted} compact />}
+            {category === "warehouse" && <ParkingRentalBadges category="warehouse"
+              values={isWanted ? industrialData : parking?.spaceAttributes?.values}
+              wanted={isWanted} compact />}
           {isWanted && category === "garden" && gardenData?.rentalTerm && <span className="fj-vr-badge">درخواست {({short:"کوتاه‌مدت",seasonal:"فصلی",long:"بلندمدت"})[gardenData.rentalTerm]}</span>}
             {!isWanted && category === "other" && <OtherRentalBadges attributes={parking?.spaceAttributes} compact />}
             {isWanted && category === "other" && ["short","long"].includes(otherData?.rentalTerm) && <span className="fj-vr-badge">درخواست {otherData.rentalTerm==="short"?"کوتاه‌مدت":"بلندمدت"}</span>}
@@ -595,7 +604,7 @@ function ParkingCard({ parking }) {
               </span>
 
               <strong>
-                {(isWanted && category === "villa" && villaData ? (villaAreaText || "متراژ مشخص نشده") : storageAreaText || parkingAreaText || otherAreaText || gardenAreaText || residentialAreaText || landAreaText || (area
+                {(isWanted && category === "villa" && villaData ? (villaAreaText || "متراژ مشخص نشده") : storageAreaText || industrialAreaText || parkingAreaText || otherAreaText || gardenAreaText || residentialAreaText || landAreaText || (area
                   ? `${Number(area).toLocaleString("fa-IR")} متر`
                   : "ثبت نشده"))}
               </strong>
@@ -633,9 +642,9 @@ function ParkingCard({ parking }) {
                 : "قیمت"}
             </span>
 
-            {(parkingFinancial.length || storageFinancial.length || gardenPriceRows.length || residentialPriceRows.length || gardenWantedRows.length || villaWantedRows.length || villaPriceRows.length || otherPriceRows.length) ? (
+            {(parkingFinancial.length || storageFinancial.length || industrialFinancial.length || gardenPriceRows.length || residentialPriceRows.length || gardenWantedRows.length || villaWantedRows.length || villaPriceRows.length || otherPriceRows.length) ? (
               <div className="parking-card__garden-money" aria-label={isWanted?"بودجه درخواست":"شرایط مالی آگهی"}>
-                {(parkingFinancial.length ? parkingFinancial : storageFinancial.length ? storageFinancial : gardenPriceRows.length ? gardenPriceRows : gardenWantedRows.length ? gardenWantedRows : villaWantedRows.length ? villaWantedRows : villaPriceRows.length ? villaPriceRows : residentialPriceRows.length ? residentialPriceRows : otherPriceRows).map(({label,amount})=><div key={label} className="parking-card__garden-money-row"><span>{label}</span><bdi>{amount}</bdi></div>)}
+                {(parkingFinancial.length ? parkingFinancial : storageFinancial.length ? storageFinancial : industrialFinancial.length ? industrialFinancial : gardenPriceRows.length ? gardenPriceRows : gardenWantedRows.length ? gardenWantedRows : villaWantedRows.length ? villaWantedRows : villaPriceRows.length ? villaPriceRows : residentialPriceRows.length ? residentialPriceRows : otherPriceRows).map(({label,amount})=><div key={label} className="parking-card__garden-money-row"><span>{label}</span><bdi>{amount}</bdi></div>)}
               </div>
             ) : <strong>
               {landData

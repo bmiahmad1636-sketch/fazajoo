@@ -49,7 +49,7 @@ test('backend validates a blank or very short parking offer note correctly',()=>
   assert.equal(validate({...base,description:'کوتاه'}),'');
   // F5-02: new storage offers require an explicit typed rental contract.
   assert.match(validate({...base,category:'storage',spaceAttributes:{}}),/قرارداد انبار/);
-  assert.equal(validate({...base,category:'warehouse',spaceAttributes:{}}),'');
+  assert.match(validate({...base,category:'warehouse',spaceAttributes:{}}),/قرارداد سوله یا کارگاه/);
 });
 test('public details no-pin state hides map and empty description',()=>{
   const d=file('src/pages/ParkingDetails.jsx');

@@ -117,6 +117,24 @@ export function toSpaceProfile(listing = {}) {
     profile.fields = { ...profile.fields, ...attrs };
     profile.features = [...new Set([...profile.features, ...selectedFeatures(attrs.features)])];
     profile.hasStructuredDetails = Object.keys(attrs).length > 0;
+    if (category === "warehouse") {
+      const raw=listing.spaceAttributes;
+      const v=raw?.schemaVersion===1 && raw?.category==="warehouse" && raw?.values && !Array.isArray(raw.values) ? raw.values : null;
+      if(v && ["short","long"].includes(v.rentalTerm)){
+        profile.fields.rentalTerm=v.rentalTerm;
+        profile.fields.canNegotiateOtherTerm=v.canNegotiateOtherTerm===true;
+        if(v.rentalTerm==="short"){
+          profile.depositRial=null;
+          profile.rentRial=numericOrNull(v.shortRateRial);
+          profile.pricePeriod={day:"daily",week:"weekly",month:"monthly"}[v.shortRateUnit]||null;
+          profile.fields.securityHoldRial=numericOrNull(v.securityHoldRial);
+        }else{
+          profile.depositRial=v.financialMode==="rent_only"?null:numericOrNull(v.longDepositRial);
+          profile.rentRial=v.financialMode==="full_deposit"?null:numericOrNull(v.longRateUnit==="year"?v.longYearlyRentRial:v.longMonthlyRentRial);
+          profile.pricePeriod=v.financialMode==="full_deposit"?null:({month:"monthly",year:"yearly"}[v.longRateUnit]||null);
+        }
+      }
+    }
     if (category === "land" && attrs.depositRial != null) profile.depositRial = numericOrNull(attrs.depositRial);
     if (category === "garden") {
       profile.depositRial = ["short","seasonal"].includes(attrs.rentalTerm)?null:numericOrNull(attrs.depositRial);
@@ -209,7 +227,8 @@ export function toSpaceProfile(listing = {}) {
       legalUse: category === "land" && meta?.legalUse !== "other" ? textOrNull(meta?.legalUse) : null,
       locationType: category === "land" ? textOrNull(meta?.locationType) : null,
       activity: textOrNull(meta?.activity),
-      leaseDuration: category === "warehouse" ? textOrNull(meta?.duration) : null,
+      leaseDuration: category === "warehouse" && !["short","long"].includes(meta?.rentalTerm) ? textOrNull(meta?.duration) : null,
+      industrialRentalTerm: category === "warehouse" && ["short","long"].includes(meta?.rentalTerm) ? meta.rentalTerm : null,
       specialConditions: category === "warehouse" ? textOrNull(meta?.requirements) : null,
       transferType: textOrNull(meta?.transferType),
       rightsType: category === "shop" ? textOrNull(meta?.rightsType) : null,
@@ -269,6 +288,12 @@ export function toSpaceProfile(listing = {}) {
       }else{
         profile.pricePeriod=null;profile.maxRentRial=null;profile.maxDepositRial=null;
       }
+    } else if (category === "warehouse" && ["short","long"].includes(meta?.rentalTerm)) {
+      const short=meta.rentalTerm==="short";
+      profile.maxRentRial=short?numericOrNull(meta.maxBudgetRial):meta.financialMode==="full_deposit"?null:numericOrNull(meta.maxRentRial);
+      profile.maxDepositRial=short||meta.financialMode==="rent_only"?null:numericOrNull(meta.maxDepositRial);
+      profile.pricePeriod=short?({day:"daily",week:"weekly",month:"monthly"}[meta.shortRateUnit]||null):meta.financialMode==="full_deposit"?null:({month:"monthly",year:"yearly"}[meta.longRateUnit]||null);
+      profile.fields.maxSecurityHoldRial=short?numericOrNull(meta.maxSecurityHoldRial):null;
     } else if (category === "land") {
       profile.maxRentRial = numericOrNull(meta?.rent);
       profile.maxDepositRial = numericOrNull(meta?.deposit);

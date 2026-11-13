@@ -33,6 +33,7 @@ export default function IndustrialOfferFields({ value = {}, onChange, note = "",
   return <section className="fj-po fj-io" aria-label="مشخصات واقعی سوله و کارگاه">
     <header className="fj-po-header"><span aria-hidden="true">🏭</span><div><h3>مشخصات سوله یا کارگاه شما</h3><p>چند انتخاب اصلی؛ جزئیات فنی تکمیلی فقط در صورت تمایل.</p></div></header>
     <Choices title="نوع فضای موجود" selected={value.spaceType} choices={INDUSTRIAL_TYPES} onSelect={setSpaceType} disabled={disabled}/>
+    {error.startsWith("نوع فضای موجود") && <p role="alert" className="fj-po-error">{error}</p>}
     {value.spaceType && <>
       <div className="fj-io-group"><strong>چه فعالیت‌هایی در این فضا قابل انجام است؟ <span className="fj-io-required">*</span></strong>
         <div className="fj-io-options" role="group" aria-label="فعالیت‌های قابل انجام">
@@ -45,9 +46,11 @@ export default function IndustrialOfferFields({ value = {}, onChange, note = "",
           <span>نوع فعالیت دیگر <span className="fj-io-required">*</span></span>
           <input maxLength={160} disabled={disabled} value={value.otherActivity || ""} onChange={e => change("otherActivity", e.target.value)} placeholder="مثلاً مونتاژ قطعات خاص"/>
         </label>}
+        {error.startsWith("حداقل یک فعالیت") && <p role="alert" className="fj-po-error">{error}</p>}
         <small className="fj-io-help">فقط فعالیت‌هایی را انتخاب کنید که امکان واقعی انجام آن‌ها وجود دارد؛ مجوزهای قانونی جداگانه بررسی می‌شوند.</small>
       </div>
       <Choices title="وضعیت برق مجموعه" selected={value.power} choices={INDUSTRIAL_POWER} onSelect={setPower} disabled={disabled}/>
+      {error.startsWith("وضعیت واقعی برق") && <p role="alert" className="fj-po-error">{error}</p>}
       <button type="button" className="fj-po-more" disabled={disabled} aria-expanded={expanded} onClick={() => setExpanded(v => !v)}>
         <span>＋ جزئیات تکمیلی (اختیاری)</span><span>{expanded ? "⌃" : "⌄"}</span>
       </button>
@@ -103,7 +106,7 @@ export default function IndustrialOfferFields({ value = {}, onChange, note = "",
         </label>
       </div>}
     </>}
-    {error && <p role="alert" className="fj-po-error">{error}</p>}
+    {error && !["نوع فضای موجود","حداقل یک فعالیت","وضعیت واقعی برق"].some(x=>error.startsWith(x)) && <p role="alert" className="fj-po-error">{error}</p>}
     <p className="fj-po-note">متراژ واقعی را در بخش مشخصات آگهی وارد کنید؛ اطلاعات این قسمت در صفحه جزئیات نمایش داده می‌شود.</p>
   </section>;
 }

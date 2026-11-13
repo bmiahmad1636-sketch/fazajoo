@@ -1,8 +1,10 @@
+import { INDUSTRIAL_WANTED_FINANCE_DEFAULT, pickIndustrialRental } from "./industrialRental.js";
 // Structured demand data, backward-compatible with the current description storage.
 export const EMPTY_SHED_REQUEST = {
   spaceType: "", activity: "", otherActivity: "", minArea: "", maxArea: "",
   minHeight: "", power: "any", powerCapacity: "", access: "any", duration: "",
   features: [], requirements: "",
+  ...INDUSTRIAL_WANTED_FINANCE_DEFAULT,
 };
 export const SHED_TYPES = [["shed", "سوله صنعتی"], ["workshop", "کارگاه"]];
 export const SHED_ACTIVITIES = [["production", "تولید و مونتاژ"], ["repair", "تعمیرات و خدمات فنی"], ["packaging", "بسته‌بندی"], ["storage", "نگهداری کالا و تجهیزات"], ["craft", "صنایع دستی و کارگاهی"], ["other", "سایر فعالیت‌ها"]];
@@ -27,15 +29,17 @@ const HEADER = /^\[FAZAJOO_SHED_REQUEST:([^\]\n]+)\]\n?/;
 export function readShedRequest(description = "") {
   const text = String(description || "");
   const match = text.match(HEADER);
-  if (!match) return { data: { ...EMPTY_SHED_REQUEST, features: [] }, description: text };
+  if (!match) return { data: { ...EMPTY_SHED_REQUEST, features: [] }, description: text, hasMetadata:false };
   try {
     const raw = JSON.parse(decodeURIComponent(match[1]));
-    return { data: { ...EMPTY_SHED_REQUEST, ...raw, features: Array.isArray(raw.features) ? raw.features : [] }, description: text.slice(match[0].length) };
-  } catch { return { data: { ...EMPTY_SHED_REQUEST, features: [] }, description: text }; }
+    if(!raw || typeof raw !== "object" || Array.isArray(raw))throw new Error("Bad shed request metadata");
+    return { data: { ...EMPTY_SHED_REQUEST, ...raw, ...pickIndustrialRental(raw,true), features: Array.isArray(raw.features) ? raw.features : [] }, description: text.slice(match[0].length), hasMetadata:true };
+  } catch { return { data: { ...EMPTY_SHED_REQUEST, features: [] }, description: text, hasMetadata:false }; }
 }
 export function writeShedRequest(description, data) {
   const clean = readShedRequest(description).description.trim();
-  const safe = { ...EMPTY_SHED_REQUEST, ...data, features: Array.isArray(data?.features) ? data.features : [] };
+  const safe = { ...EMPTY_SHED_REQUEST, ...data, ...pickIndustrialRental(data,true), features: Array.isArray(data?.features) ? data.features : [] };
+  delete safe.duration; // retired ambiguous old duration, do not equate it to RT-00 rentalTerm
   return `[FAZAJOO_SHED_REQUEST:${encodeURIComponent(JSON.stringify(safe))}]\n${clean}`;
 }
 export function shedOptionLabel(options, value) { return options.find(([id]) => id === value)?.[1] || "مشخص نشده"; }
@@ -52,4 +56,11 @@ export function shedRequestValidation(data = {}) {
   }
   if (data.minArea && data.maxArea && Number(data.minArea) > Number(data.maxArea)) return "حداقل متراژ نمی‌تواند از حداکثر بیشتر باشد.";
   return "";
+}
+
+/** A request size range is optional and must never be presented as a fixed property size. */
+export function shedRequestAreaText(v={}) {
+  const parse=x=>x!==""&&x!=null&&Number.isFinite(Number(x))&&Number(x)>0?Number(x).toLocaleString("fa-IR"):"";
+  const min=parse(v.minArea),max=parse(v.maxArea);
+  return !min&&!max?"":`${min?`از ${min}`:""}${min&&max?" تا ":""}${max?`${min?"":"تا "}${max}`:""} مترمربع`;
 }
