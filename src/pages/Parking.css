@@ -1419,3 +1419,53 @@
     min-width: 0;
   }
 }
+/* FAZAJOO_LIST_HERO_ONE_LINE_V1_START */
+/* Scoped styling: only the title on the listing page (/parking). */
+.parking-page__title .parking-page__title-text {
+  background: none;
+  color: #18231f;
+  -webkit-text-fill-color: #18231f;
+}
+
+.parking-page__title .parking-page__title-emphasis {
+  background: linear-gradient(135deg, #ed6d32, #f47a1f 58%, #d95f0b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+@media (min-width: 851px) {
+  .parking-page__hero-content > div:first-child {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .parking-page__title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.19em;
+    max-width: none;
+    margin-bottom: 12px;
+    white-space: nowrap;
+    font-size: clamp(1.58rem, 2.85vw, 3.05rem);
+    font-weight: 830;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  .parking-page__title .parking-page__title-text,
+  .parking-page__title .parking-page__title-emphasis {
+    display: inline-block;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 850px) {
+  .parking-page__title .parking-page__title-text,
+  .parking-page__title .parking-page__title-emphasis {
+    display: inline;
+    white-space: normal;
+  }
+}
+/* FAZAJOO_LIST_HERO_ONE_LINE_V1_END */

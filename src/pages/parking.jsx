@@ -403,8 +403,8 @@ function Parking({ parkings = [], initialListingType = "", showHero = true }) {
             </span>
 
             <h1 className="parking-page__title">
-              فضای مناسب خودت را
-              <span> سریع پیدا کن</span>
+              <span className="parking-page__title-text">فضای مناسب خودت را</span>{" "}
+              <span className="parking-page__title-emphasis">سریع پیدا کن</span>
             </h1>
 
             <p className="parking-page__description">
