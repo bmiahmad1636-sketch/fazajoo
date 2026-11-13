@@ -1,7 +1,9 @@
-// Warehouse request metadata kept in description for backward-compatible storage.
+import { STORAGE_WANTED_FINANCE_DEFAULT, pickStorageRental } from "./storageRental.js";
+// Request details use structured, validated metadata within the existing description field.
 export const EMPTY_WAREHOUSE_REQUEST = {
   purpose: "", otherPurpose: "", spaceType: "any", minArea: "", maxArea: "",
-  access: "any", duration: "", features: [], requirements: "",
+  access: "any", features: [], requirements: "",
+  ...STORAGE_WANTED_FINANCE_DEFAULT,
 };
 export const WAREHOUSE_PURPOSES = [
   ["personal", "وسایل شخصی و اثاثیه"], ["commercial", "کالا و محصولات تجاری"],
@@ -14,16 +16,27 @@ export const WAREHOUSE_FEATURES = [["security", "دوربین / امنیت"], ["
 const HEADER = /^\[FAZAJOO_WAREHOUSE_REQUEST:([^\]\n]+)\]\n?/;
 export function readWarehouseRequest(description = "") {
   const text = String(description || ""); const match = text.match(HEADER);
-  if (!match) return { data: { ...EMPTY_WAREHOUSE_REQUEST, features: [] }, description: text };
+  if (!match) return { data: { ...EMPTY_WAREHOUSE_REQUEST, features: [] }, description: text, hasMetadata: false };
   try {
     const raw = JSON.parse(decodeURIComponent(match[1]));
-    return { data: { ...EMPTY_WAREHOUSE_REQUEST, ...raw, features: Array.isArray(raw.features) ? raw.features : [] }, description: text.slice(match[0].length) };
-  } catch { return { data: { ...EMPTY_WAREHOUSE_REQUEST, features: [] }, description: text }; }
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Invalid storage request metadata");
+    return { data: { ...EMPTY_WAREHOUSE_REQUEST, ...raw, ...pickStorageRental(raw,true), features: Array.isArray(raw.features) ? raw.features : [] }, description: text.slice(match[0].length), hasMetadata: true };
+  } catch { return { data: { ...EMPTY_WAREHOUSE_REQUEST, features: [] }, description: text, hasMetadata: false }; }
 }
 export function writeWarehouseRequest(description, data) {
   const clean = readWarehouseRequest(description).description.trim();
-  const safe = { ...EMPTY_WAREHOUSE_REQUEST, ...data, features: Array.isArray(data.features) ? data.features : [] };
+  const safe = { ...EMPTY_WAREHOUSE_REQUEST, ...data, ...pickStorageRental(data,true), features: Array.isArray(data.features) ? data.features : [] };
+  delete safe.duration; // old ambiguous duration must never override RT-00 rentalTerm
   return `[FAZAJOO_WAREHOUSE_REQUEST:${encodeURIComponent(JSON.stringify(safe))}]\n${clean}`;
+}
+/** Display only the requested size interval, never a guessed single area. */
+export function storageRequestAreaText(values = {}) {
+  const min = Number(values?.minArea);
+  const max = Number(values?.maxArea);
+  const minText = values?.minArea !== "" && values?.minArea != null && Number.isFinite(min) && min > 0 ? min.toLocaleString("fa-IR") : "";
+  const maxText = values?.maxArea !== "" && values?.maxArea != null && Number.isFinite(max) && max > 0 ? max.toLocaleString("fa-IR") : "";
+  if (!minText && !maxText) return "";
+  return `${minText ? `از ${minText}` : ""}${minText && maxText ? " تا " : ""}${maxText ? `${minText ? "" : "تا "}${maxText}` : ""} مترمربع`;
 }
 export function warehouseOptionLabel(options, value) { return options.find(([key]) => key === value)?.[1] || "مشخص نشده"; }
 export function warehouseRequestValidation(data) {

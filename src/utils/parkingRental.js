@@ -21,7 +21,7 @@ const positive = value => {
   return n !== null && n > 0 && n <= 999999999999999 ? n : null;
 };
 const optionalMoneyValid = value => value === "" || value === null || value === undefined || positive(value) !== null;
-const unitAllowed = (term, unit) => Boolean(PARKING_UNITS[term]?.some(([id]) => id === unit));
+const unitAllowed = (term, unit, category = "parking") => getRentalOptions(POLICY, category)?.rateUnitsByTerm?.[term]?.includes(unit) === true;
 export const PARKING_RENTAL_DEFAULT = Object.freeze({
   rentalTerm: "", shortRateUnit: "day", shortRateRial: "", securityHoldRial: "",
   financialMode: "", longRateUnit: "month", longMonthlyRentRial: "", longYearlyRentRial: "",
@@ -53,13 +53,13 @@ export function changeParkingRateUnit(values, unit, wanted = false) {
   return { ...values, longRateUnit: unit, longMonthlyRentRial: "", longYearlyRentRial: "" };
 }
 
-function contractValidation(values, wanted, requireTerm) {
+function contractValidation(values, wanted, requireTerm, category = "parking") {
   const term = values?.rentalTerm || "";
   if (!term && !requireTerm) return ""; // legacy edit: no implicit conversion
   if (!PARKING_TERMS.some(([key]) => key === term)) return "مدت اصلی قرارداد پارکینگ را انتخاب کنید.";
   const unit = term === "short" ? values.shortRateUnit : values.longRateUnit;
   const mode = values.financialMode;
-  if (!unitAllowed(term, unit)) return "دوره محاسبه اجاره را متناسب با مدت قرارداد انتخاب کنید.";
+  if (!unitAllowed(term, unit, category)) return "دوره محاسبه اجاره را متناسب با مدت قرارداد انتخاب کنید.";
   if (term === "long" && !PARKING_MODES.some(([key]) => key === mode)) return "نوع قرارداد بلندمدت را انتخاب کنید.";
   const requiredRent = term === "short" ? (wanted ? values.maxBudgetRial : values.shortRateRial)
     : wanted ? values.maxRentRial : (unit === "year" ? values.longYearlyRentRial : values.longMonthlyRentRial);
@@ -72,7 +72,7 @@ function contractValidation(values, wanted, requireTerm) {
   const optionalSecurity = wanted ? values.maxSecurityHoldRial : values.securityHoldRial;
   if (term === "short" && !optionalMoneyValid(optionalSecurity)) return "مبلغ ضمانت خسارت / ودیعه معتبر نیست.";
   // RT-00 validates the period and deposit semantics. Wanted limits are NOT offer amounts.
-  const profile = validateRentalTermProfile({ category: "parking", side: wanted ? "wanted" : "offer",
+  const profile = validateRentalTermProfile({ category, side: wanted ? "wanted" : "offer",
     primaryTerm: term, rateUnit: unit,
     canNegotiateOtherTerm: wanted ? null : values.canNegotiateOtherTerm === true,
     rateAmountRial: wanted || (term === "long" && mode === "full_deposit") ? null : positive(requiredRent),
@@ -83,8 +83,8 @@ function contractValidation(values, wanted, requireTerm) {
   if (!profile.ok) return "شرایط قرارداد با استاندارد مشترک فضاجو سازگار نیست.";
   return "";
 }
-export function validateParkingRentalOffer(values, requireTerm = true) { return contractValidation(values, false, requireTerm); }
-export function validateParkingRentalRequest(values, requireTerm = true) { return contractValidation(values, true, requireTerm); }
+export function validateParkingRentalOffer(values, requireTerm = true, category = "parking") { return contractValidation(values, false, requireTerm, category); }
+export function validateParkingRentalRequest(values, requireTerm = true, category = "parking") { return contractValidation(values, true, requireTerm, category); }
 
 /** Generic listing columns are only a backwards-compatible headline, never deposit money. */
 export function parkingListingPrice(values, wanted = false) {

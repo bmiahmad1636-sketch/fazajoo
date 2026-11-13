@@ -10,12 +10,13 @@ import { readShedRequest, shedOptionLabel, SHED_TYPES, SHED_ACTIVITIES, shedActi
 import { readParkingRequestUsage, parkingUsageLabel } from "../utils/parkingRequestUsage";
 import { readParkingRequestDetails, PARKING_COVERS, PARKING_ACCESS } from "../utils/parkingRequestDetails";
 import {parkingMoneyRows,PARKING_MODES} from "../utils/parkingRental.js";
+import {storageMoneyRows} from "../utils/storageRental.js";
 import ParkingRentalBadges from "../components/ParkingRentalBadges";
 import { PARKING_OFFER_USAGE, PARKING_OFFER_COVER, PARKING_OFFER_ACCESS, PARKING_OFFER_STYLE, PARKING_OFFER_SECURITY, parkingOfferLabel } from "../utils/parkingOffer";
 import { STORAGE_TYPES, STORAGE_PURPOSES, STORAGE_ACCESS, STORAGE_VEHICLES, STORAGE_LOADING, STORAGE_FEATURES, storageOfferLabel } from "../utils/storageOffer";
 import { INDUSTRIAL_TYPES, INDUSTRIAL_POWER, INDUSTRIAL_VEHICLES, INDUSTRIAL_FLOORS, INDUSTRIAL_HOURS, INDUSTRIAL_FEATURE_OPTIONS, industrialLabel } from "../utils/industrialOffer";
 import {LAND_OFFER_TYPES,LAND_OFFER_PURPOSES,LAND_OFFER_ROADS,LAND_OFFER_LEGAL,LAND_OFFER_LOCATION,LAND_OFFER_SLOPES,LAND_OFFER_VEHICLES,LAND_OFFER_WATER,LAND_OFFER_FEATURES,LAND_OFFER_CROPS,LAND_OFFER_IRRIGATION,landOfferLabel} from "../utils/landOffer";
-import { readWarehouseRequest, warehouseOptionLabel, WAREHOUSE_PURPOSES, WAREHOUSE_TYPES, WAREHOUSE_ACCESS, WAREHOUSE_DURATIONS, WAREHOUSE_FEATURES } from "../utils/warehouseRequest";
+import { readWarehouseRequest, storageRequestAreaText, warehouseOptionLabel, WAREHOUSE_PURPOSES, WAREHOUSE_TYPES, WAREHOUSE_ACCESS, WAREHOUSE_FEATURES } from "../utils/warehouseRequest";
 import { climateLabels } from "../components/ClimateFields";
 import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText, villaRequestBudgetRows, villaRequestLabel, VILLA_REQUEST_TYPES, VILLA_REQUEST_STAYS, VILLA_REQUEST_LONG_MODES, VILLA_REQUEST_AMENITIES } from "../utils/villaRequest";
 import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText, gardenRequestBudgetRows, gardenRequestLabel, GARDEN_REQUEST_PURPOSES, GARDEN_REQUEST_DURATIONS, GARDEN_REQUEST_FEATURES, GARDEN_REQUEST_WATER } from "../utils/gardenRequest";
@@ -273,6 +274,10 @@ function ParkingDetails({
   const parkingWanted = isWanted && category === "parking" ? readParkingRequestDetails(parking?.description || "") : null;
   const parkingWantedData = parkingWanted?.hasMetadata ? parkingWanted.data : null;
   const parkingPriceItems = category === "parking" ? parkingMoneyRows(isWanted ? parkingWantedData : parking?.spaceAttributes?.values,isWanted) : [];
+  const storageWanted = isWanted && category === "storage" ? readWarehouseRequest(parking?.description || "") : null;
+  const storageWantedData = storageWanted?.hasMetadata ? storageWanted.data : null;
+  const storagePriceItems = category === "storage" ? storageMoneyRows(isWanted ? storageWantedData : parking?.spaceAttributes?.values,isWanted) : [];
+  const storageAreaText = storageWantedData ? (storageRequestAreaText(storageWantedData) || "متراژ مشخص نشده") : "";
   const shopPriceRows = !isWanted && category === "shop"
     ? shopFinancialRows(parking?.spaceAttributes)
     : [];
@@ -638,6 +643,8 @@ function ParkingDetails({
               </p>
               {category === "parking" && <ParkingRentalBadges
                 values={isWanted ? parkingWantedData : parking?.spaceAttributes?.values} wanted={isWanted} />}
+              {category === "storage" && <ParkingRentalBadges category="storage"
+                values={isWanted ? storageWantedData : parking?.spaceAttributes?.values} wanted={isWanted} />}
               {!isWanted && category === "villa" && <VillaRentalBadges attributes={parking?.spaceAttributes} />}
               {!isWanted && category === "residential" && <ResidentialRentalBadges attributes={parking?.spaceAttributes} />}
               {!isWanted && category === "garden" && <GardenRentalBadges attributes={parking?.spaceAttributes} />}
@@ -648,13 +655,15 @@ function ParkingDetails({
                 <span className="fj-vr-badge" aria-label="مدت درخواست مسکونی">درخواست {residentialWantedData.rentalTerm === "short" ? "کوتاه‌مدت" : "بلندمدت"}</span>}
             </div>
 
-            <div className={`parking-details-hero__price${(parkingPriceItems.length || shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || gardenWantedPriceRows.length || villaWantedPriceRows.length || villaPriceRows.length || otherPriceRows.length || otherWantedPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>
+            <div className={`parking-details-hero__price${(parkingPriceItems.length || storagePriceItems.length || shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || gardenWantedPriceRows.length || villaWantedPriceRows.length || villaPriceRows.length || otherPriceRows.length || otherWantedPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>
               <span>
                 {isWanted ? "بودجه" : "قیمت آگهی"}
               </span>
 
               {parkingPriceItems.length ? (
                 <ShopMoneyRows items={parkingPriceItems} stacked ariaLabel={isWanted?"سقف مبالغ درخواست پارکینگ":"شرایط مالی پارکینگ"} />
+              ) : storagePriceItems.length ? (
+                <ShopMoneyRows items={storagePriceItems} stacked ariaLabel={isWanted?"سقف بودجه درخواست انبار":"شرایط مالی انبار"} />
               ) : shopPriceRows.length ? (
                 <ShopMoneyRows items={shopPriceRows} />
               ) : gardenPriceRows.length ? (
@@ -863,7 +872,7 @@ function ParkingDetails({
                       </span>
 
                       <strong>
-                        {isWanted && category === "villa" && villaWantedData ? (villaAreaText || "متراژ مشخص نشده") : otherAreaText || gardenAreaText || residentialAreaText || landAreaText || (parking.area
+                        {isWanted && category === "villa" && villaWantedData ? (villaAreaText || "متراژ مشخص نشده") : storageAreaText || otherAreaText || gardenAreaText || residentialAreaText || landAreaText || (parking.area
                           ? `${parking.area} متر`
                           : "ثبت نشده")}
                       </strong>
@@ -886,7 +895,7 @@ function ParkingDetails({
                     </div>
                   </div>
 
-                  <div className={`parking-details-feature${(parkingPriceItems.length || shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || gardenWantedPriceRows.length || villaWantedPriceRows.length || villaPriceRows.length || otherPriceRows.length || otherWantedPriceRows.length) ? " parking-details-feature--shop-money" : ""}`}>
+                  <div className={`parking-details-feature${(parkingPriceItems.length || storagePriceItems.length || shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || gardenWantedPriceRows.length || villaWantedPriceRows.length || villaPriceRows.length || otherPriceRows.length || otherWantedPriceRows.length) ? " parking-details-feature--shop-money" : ""}`}>
                     <span className="parking-details-feature__icon parking-details-feature__icon--orange">
                       💰
                     </span>
@@ -898,6 +907,8 @@ function ParkingDetails({
 
                       {parkingPriceItems.length ? (
                         <ShopMoneyRows items={parkingPriceItems} compact stacked ariaLabel={isWanted?"سقف مبالغ درخواست پارکینگ":"شرایط مالی پارکینگ"} />
+                      ) : storagePriceItems.length ? (
+                        <ShopMoneyRows items={storagePriceItems} compact stacked ariaLabel={isWanted?"سقف بودجه درخواست انبار":"شرایط مالی انبار"} />
                       ) : shopPriceRows.length ? (
                         <ShopMoneyRows items={shopPriceRows} compact />
                       ) : gardenPriceRows.length ? (
@@ -956,7 +967,7 @@ function ParkingDetails({
                   ["نوع فضا", warehouseOptionLabel(WAREHOUSE_TYPES, data.spaceType)],
                   ["متراژ موردنیاز", [data.minArea && `از ${data.minArea}`, data.maxArea && `تا ${data.maxArea}`].filter(Boolean).join(" ") ? `${[data.minArea && `از ${data.minArea}`, data.maxArea && `تا ${data.maxArea}`].filter(Boolean).join(" ")} مترمربع` : "تعیین نشده"],
                   ["دسترسی", warehouseOptionLabel(WAREHOUSE_ACCESS, data.access)],
-                  ["مدت اجاره", warehouseOptionLabel(WAREHOUSE_DURATIONS, data.duration)],
+                  ...(data.rentalTerm === "long" ? [["نوع قرارداد بلندمدت", PARKING_MODES.find(([id])=>id===data.financialMode)?.[1] || "مشخص نشده"]] : []),
                   ["امکانات", (data.features || []).map(id => warehouseOptionLabel(WAREHOUSE_FEATURES, id)).join("، ") || "مورد خاصی ثبت نشده"],
                   ["شرایط خاص", data.requirements || "ثبت نشده"],
                 ];

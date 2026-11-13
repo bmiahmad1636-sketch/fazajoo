@@ -1,4 +1,5 @@
 "use strict";
+const {cleanStorageFinance}=require("./storageRentalFinance");
 const TYPES=["indoor","container","outdoor"];
 const PURPOSES=["personal","commercial","food","equipment","other"];
 const ACCESS=["24h","office","scheduled"];
@@ -19,6 +20,7 @@ function cleanStorageSpaceAttributes(raw,category,side){
  if(["van","truck","trailer"].includes(vehicleAccess))features.push("truck");
  if(["ground","lift"].includes(loadingMethod))features.push("ground");
  return {schemaVersion:1,category:"storage",values:{
+  ...cleanStorageFinance(v,false),
   spaceType,allowedPurposes:purposes,
   otherPurpose:purposes.includes("other")?String(v.otherPurpose||"").trim().slice(0,160):"",
   access:only(ACCESS,v.access),

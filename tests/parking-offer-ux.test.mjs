@@ -47,8 +47,8 @@ test('backend validates a blank or very short parking offer note correctly',()=>
   const base={listingType:'offer',category:'parking',spaceAttributes:{schemaVersion:1,values:{vehicleUsage:'car',cover:'covered',access:'anytime',usageNotes:''}},area:15,title:'آگهی پارکینگ',city:'اصفهان',priceType:'monthly',price:100000,phone:'09120000000',description:'',imageUrls:['img'],video:null};
   assert.equal(validate(base),'');
   assert.equal(validate({...base,description:'کوتاه'}),'');
-  // Storage offers also have a typed, optional note; legacy storage offers remain editable.
-  assert.equal(validate({...base,category:'storage',spaceAttributes:{}}),'');
+  // F5-02: new storage offers require an explicit typed rental contract.
+  assert.match(validate({...base,category:'storage',spaceAttributes:{}}),/قرارداد انبار/);
   assert.equal(validate({...base,category:'warehouse',spaceAttributes:{}}),'');
 });
 test('public details no-pin state hides map and empty description',()=>{

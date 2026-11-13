@@ -1,7 +1,9 @@
 /** فضای انبار موجود؛ داده مستقل از توضیحات، استاندارد مشترک v1. */
+import { STORAGE_RENTAL_DEFAULT, pickStorageRental } from "./storageRental.js";
 export const STORAGE_OFFER_DEFAULT = Object.freeze({
   spaceType: "", allowedPurposes: [], otherPurpose: "", access: "",
   heightM: "", vehicleAccess: "", loadingMethod: "", features: [],
+  ...STORAGE_RENTAL_DEFAULT,
 });
 export const STORAGE_TYPES = [["indoor", "انبار سرپوشیده"], ["container", "کانکس / کانتینر"], ["outdoor", "محوطه روباز"]];
 export const STORAGE_PURPOSES = [["personal", "اثاثیه و وسایل شخصی"], ["commercial", "کالای تجاری"], ["food", "مواد غذایی غیرفاسدشدنی"], ["equipment", "تجهیزات و ابزار"], ["other", "سایر"]];
@@ -15,7 +17,7 @@ const validList = (options, values) => Array.isArray(values) ? [...new Set(value
 export const storageOfferLabel = (options, v) => options.find(([id]) => id===v)?.[1] || "";
 export function storageOfferFromAttributes(attrs) {
   const v = attrs?.schemaVersion === 1 && attrs?.category === "storage" && attrs?.values && typeof attrs.values === "object" ? attrs.values : {};
-  return { ...STORAGE_OFFER_DEFAULT,
+  return { ...STORAGE_OFFER_DEFAULT, ...pickStorageRental(v),
     spaceType: has(STORAGE_TYPES,v.spaceType) ? v.spaceType : "",
     allowedPurposes: validList(STORAGE_PURPOSES,v.allowedPurposes), otherPurpose: typeof v.otherPurpose === "string" ? v.otherPurpose : "",
     access: has(STORAGE_ACCESS,v.access) ? v.access : "",
@@ -43,6 +45,7 @@ export function makeStorageAttributes(v) {
   if (["van","truck","trailer"].includes(vehicle)) features.push("truck");
   if (["ground","lift"].includes(loading)) features.push("ground");
   return { schemaVersion: 1, category: "storage", values: {
+    ...pickStorageRental(v),
     spaceType: v.spaceType, allowedPurposes: validList(STORAGE_PURPOSES,v.allowedPurposes),
     otherPurpose: v.allowedPurposes?.includes("other") ? String(v.otherPurpose||"").trim().slice(0,160) : "",
     access: v.access,

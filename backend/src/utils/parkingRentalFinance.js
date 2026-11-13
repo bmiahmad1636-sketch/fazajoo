@@ -6,7 +6,7 @@ const POLICY = require("../../../shared/rental-term-policy.v1.json");
 const OPTIONS = POLICY.categories.parking;
 const TERMS = OPTIONS.terms;
 const MODES = ["rent_only", "full_deposit", "deposit_rent"];
-const units = term => OPTIONS.rateUnitsByTerm[term] || [];
+const units = (term, category = "parking") => POLICY.categories[category]?.rateUnitsByTerm?.[term] || [];
 const money = input => {
   if (input === null || input === undefined || input === "" || typeof input === "boolean") return null;
   const cleaned = String(input).replace(/[۰-۹]/g, c => String("۰۱۲۳۴۵۶۷۸۹".indexOf(c)))
@@ -19,14 +19,14 @@ const money = input => {
 const absent = x => x === "" || x === null || x === undefined;
 const invalidOptional = x => !absent(x) && money(x) === null;
 const asObject = value => value && typeof value === "object" && !Array.isArray(value) ? value : {};
-function cleanParkingFinance(raw, wanted = false) {
+function cleanParkingFinance(raw, wanted = false, category = "parking") {
   const v = asObject(raw);
   const term = TERMS.includes(v.rentalTerm) ? v.rentalTerm : null;
   const short = term === "short";
   const long = term === "long";
   const mode = long && MODES.includes(v.financialMode) ? v.financialMode : null;
-  const shortRateUnit = short && units("short").includes(v.shortRateUnit) ? v.shortRateUnit : null;
-  const longRateUnit = long && units("long").includes(v.longRateUnit) ? v.longRateUnit : null;
+  const shortRateUnit = short && units("short", category).includes(v.shortRateUnit) ? v.shortRateUnit : null;
+  const longRateUnit = long && units("long", category).includes(v.longRateUnit) ? v.longRateUnit : null;
   return {
     rentalTerm: term,
     shortRateUnit,
@@ -44,9 +44,9 @@ function cleanParkingFinance(raw, wanted = false) {
     canNegotiateOtherTerm: !wanted && v.canNegotiateOtherTerm === true,
   };
 }
-function validateParkingFinance(raw, wanted = false) {
+function validateParkingFinance(raw, wanted = false, category = "parking") {
   const src = asObject(raw);
-  const v = cleanParkingFinance(src, wanted);
+  const v = cleanParkingFinance(src, wanted, category);
   if (!v.rentalTerm) return "مدت اصلی پارکینگ لازم است.";
   if (v.rentalTerm === "short") {
     if (!v.shortRateUnit) return "دوره کوتاه‌مدت معتبر نیست.";
@@ -59,9 +59,9 @@ function validateParkingFinance(raw, wanted = false) {
   }
   return "";
 }
-function parkingFinancePrice(raw, wanted = false) {
-  const v = cleanParkingFinance(raw, wanted);
-  if (validateParkingFinance(raw, wanted)) return {price:"",priceType:"negotiable"};
+function parkingFinancePrice(raw, wanted = false, category = "parking") {
+  const v = cleanParkingFinance(raw, wanted, category);
+  if (validateParkingFinance(raw, wanted, category)) return {price:"",priceType:"negotiable"};
   const rateUnit = v.rentalTerm === "short" ? v.shortRateUnit : v.longRateUnit;
   const amount = v.rentalTerm === "short" ? (wanted ? v.maxBudgetRial : v.shortRateRial)
     : v.financialMode === "full_deposit" ? null : (wanted ? v.maxRentRial : v.longRateUnit === "year" ? v.longYearlyRentRial : v.longMonthlyRentRial);

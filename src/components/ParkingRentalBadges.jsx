@@ -1,11 +1,11 @@
 import { parkingRentalBadges } from "../utils/parkingRental.js";
 import "./VillaRentalBadges.css";
 /** Reuses established Fazajoo badges; a negotiable alternative is NOT a confirmed contract. */
-export default function ParkingRentalBadges({ values, wanted = false, compact = false }) {
+export default function ParkingRentalBadges({ values, wanted = false, compact = false, category = "parking" }) {
   const badges = parkingRentalBadges(values, wanted);
   if (!badges.length) return null;
   return <div dir="rtl" className={`fj-vr-badges${compact ? " fj-vr-badges--compact" : ""}`}
-    aria-label={wanted ? "مدت درخواست پارکینگ" : "مدت واگذاری پارکینگ"}>
+    aria-label={wanted ? `مدت درخواست ${category === "storage" ? "انبار" : "پارکینگ"}` : `مدت واگذاری ${category === "storage" ? "انبار" : "پارکینگ"}`}>
     {badges.map(({ term, label, state }) => <span key={term}
       className={`fj-vr-badge fj-vr-badge--${state === "requested" ? "primary" : state}`}
       title={state === "primary" ? "مدت اصلی ثبت‌شده" : state === "possible" ? "مدت جایگزین، صرفاً با توافق طرفین" : "مدت موردنیاز متقاضی"}>

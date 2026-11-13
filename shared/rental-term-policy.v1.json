@@ -54,7 +54,8 @@
       "rateUnitsByTerm": {
         "short": [
           "day",
-          "week"
+          "week",
+          "month"
         ],
         "long": [
           "month",

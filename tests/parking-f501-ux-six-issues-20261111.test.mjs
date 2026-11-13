@@ -110,7 +110,7 @@ test('both detail price locations show complete specialist amounts, not just gen
 });
 test('financial mode has its own specialist section, without repeating term and type inside price',()=>{
   const details=read('src/pages/ParkingDetails.jsx');
-  assert.equal((details.match(/\["نوع قرارداد بلندمدت", PARKING_MODES\.find/g)||[]).length,2);
+  assert.equal((details.match(/\["نوع قرارداد بلندمدت", PARKING_MODES\.find/g)||[]).length,3);
   assert.ok(parkingMoneyRows(offer()).every(x=>x.label!=='نوع قرارداد'));
   assert.ok(parkingMoneyRows(wanted(),true).every(x=>x.label!=='نوع قرارداد'));
 });
