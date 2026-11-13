@@ -100,24 +100,29 @@
   letter-spacing: -0.8px;
 }
 
-.home-hero__title span {
+.home-hero__title-brand {
   display: block;
-  margin-top: 2px;
+  margin-bottom: 10px;
 
   color: var(--hero-accent);
 
-  background: none;
-
-  -webkit-background-clip: initial;
-  background-clip: initial;
-  -webkit-text-fill-color: currentColor;
-
   font-family: inherit;
-  font-size: 0.82em;
-  font-weight: 800;
+  font-size: 0.50em;
+  font-weight: 850;
 
-  line-height: 1.5;
-  letter-spacing: -0.4px;
+  line-height: 1.1;
+  letter-spacing: -0.3px;
+}
+
+.home-hero__title-main {
+  display: block;
+
+  color: var(--hero-ink);
+
+  font-size: 1em;
+  font-weight: 800;
+  line-height: 1.23;
+  letter-spacing: -0.55px;
 }
 
 .home-hero__description {
@@ -394,12 +399,13 @@
 }
 
 .home-hero__logo-shell p {
-  margin: 4px 0 0;
+  margin: 6px 0 0;
 
-  color: #68736f;
+  color: #5d6763;
 
-  font-size: 0.68rem;
-  font-weight: 780;
+  font-size: 0.72rem;
+  font-weight: 880;
+  letter-spacing: -0.2px;
 }
 
 /* =========================================
@@ -582,9 +588,13 @@ button.home-hero__float-card--smart:hover {
     letter-spacing: -0.5px;
   }
 
-  .home-hero__title span {
-    font-size: 0.86em;
-    line-height: 1.5;
+  .home-hero__title-brand {
+    font-size: 0.50em;
+  }
+
+  .home-hero__title-main {
+    font-size: 1em;
+    line-height: 1.24;
   }
 
   .home-hero__description {

@@ -1,5 +1,11 @@
 /** Standardized real shop/commercial offer. Request preferences remain independent. */
+import {SHOP_RENTAL_DEFAULT,pickShopRental,validateShopRental,shopRentalListingPrice,shopRentalMoneyRows} from "./shopRental.js";
 import { SHOP_TYPES, SHOP_ACTIVITIES, SHOP_FLOORS, SHOP_LOCATIONS, SHOP_TRANSFER } from "./shopRequest.js";
+import {SHOP_RIGHTS, shopRightMoneyLabel} from "./shopRights.js";
+import {shopDecimalInput} from "./shopDecimal.js";
+export {shopDecimalInput};
+export {SHOP_RIGHTS};
+export const SHOP_DEAL_TYPES = [["rent","اجاره یا رهن فضای تجاری"],["key_money","واگذاری حق تجاری / سرقفلی"]];
 export const SHOP_OFFER_TYPES = SHOP_TYPES;
 export const SHOP_OFFER_ACTIVITIES = SHOP_ACTIVITIES;
 export const SHOP_OFFER_FLOORS = SHOP_FLOORS.filter(([id])=>id);
@@ -9,9 +15,8 @@ export const SHOP_OFFER_FEATURES = [
   ["showcase","ویترین"],["storage","انباری داخل واحد"],["parking","پارکینگ اختصاصی"],
   ["elevator","آسانسور"],["ventilation","تهویه"],["night","امکان فعالیت شبانه"]
 ];
-export const SHOP_RIGHTS = [["key_money","سرقفلی"],["business_right","حق کسب یا پیشه یا تجارت"],["unsure","نیازمند بررسی حقوقی"]];
 export const SHOP_OFFER_DEFAULT = Object.freeze({
-  spaceType:"",otherSpaceType:"",allowedActivities:[],otherActivity:"",transferType:"",floor:"",locationPreference:"",
+  ...SHOP_RENTAL_DEFAULT,spaceType:"",otherSpaceType:"",allowedActivities:[],otherActivity:"",transferType:"",floor:"",locationPreference:"",
   frontageM:"",features:[],rightsType:"",depositRial:"",monthlyRentRial:"",keyMoneyRial:""
 });
 const has=(list,id)=>list.some(([k])=>k===id);
@@ -32,6 +37,7 @@ export const shopOfferLabel=(list,id)=>list.find(([x])=>x===id)?.[1]||"";
 export function shopOfferFromAttributes(attrs){
  const v=attrs?.schemaVersion===1&&attrs?.category==="shop"&&attrs?.values&&!Array.isArray(attrs.values)?attrs.values:{};
  return {...SHOP_OFFER_DEFAULT,
+  ...(["short","long"].includes(v.rentalTerm)?pickShopRental(v,false):{}),
   spaceType:has(SHOP_OFFER_TYPES,v.spaceType)?v.spaceType:"",
   otherSpaceType:v.spaceType==="other"?cleanText(v.otherSpaceType).slice(0,160):"",
   allowedActivities:chosen(SHOP_OFFER_ACTIVITIES,v.allowedActivities),
@@ -67,17 +73,19 @@ export function makeShopAttributes(v={}){
  const transfer=has(SHOP_OFFER_TRANSFERS,v.transferType)?v.transferType:null;
  const floor=has(SHOP_OFFER_FLOORS,v.floor)?v.floor:null;
  return {schemaVersion:1,category:"shop",values:{
+  ...(["short","long"].includes(v.rentalTerm)&&transfer!=="key_money"?pickShopRental(v,false):{}),
   spaceType,otherSpaceType:spaceType==="other"?cleanText(v.otherSpaceType).slice(0,160):"",allowedActivities:activities,otherActivity:activities.includes("other")?cleanText(v.otherActivity).slice(0,160):"",
   transferType:transfer,floor,locationPreference:has(SHOP_OFFER_LOCATIONS,v.locationPreference)?v.locationPreference:null,
   frontageM:(()=>{if(["mall","complex","booth"].includes(spaceType))return null;const x=digits(v.frontageM);return /^\d+(?:\.\d{1,2})?$/.test(x)&&Number(x)>0&&Number(x)<=1000?Number(x):null;})(),
   features:chosen(SHOP_OFFER_FEATURES,v.features).filter(x=>["mall","complex"].includes(v.spaceType)||x!=="elevator"),rightsType:transfer==="key_money"&&has(SHOP_RIGHTS,v.rightsType)?v.rightsType:null,
-  depositRial:["rent","full_deposit"].includes(transfer)?amount(v.depositRial):null,
-  monthlyRentRial:transfer==="rent"?amount(v.monthlyRentRial):null,
+  depositRial:!["short","long"].includes(v.rentalTerm)&&["rent","full_deposit"].includes(transfer)?amount(v.depositRial):null,
+  monthlyRentRial:!["short","long"].includes(v.rentalTerm)&&transfer==="rent"?amount(v.monthlyRentRial):null,
   keyMoneyRial:transfer==="key_money"?amount(v.keyMoneyRial):null
  }};
 }
 /** The generic price is monthly rent ONLY, never deposit or commercial rights. */
 export function shopListingPrice(v={}){
+ if(v.transferType!=="key_money"&&["short","long"].includes(v.rentalTerm))return shopRentalListingPrice(v,false);
  const rent=v.transferType==="rent"?amount(v.monthlyRentRial):null;
  return rent?{price:String(rent),priceType:"monthly"}:{price:"",priceType:"negotiable"};
 }
@@ -86,6 +94,7 @@ export function shopListingPrice(v={}){
 export function shopFinancialHeadline(attrs) {
  const v=attrs?.schemaVersion===1&&attrs?.category==="shop"?attrs.values:null;
  if(!v)return "";
+ if(v.transferType!=="key_money"&&["short","long"].includes(v.rentalTerm))return shopRentalMoneyRows(v,false).map(r=>`${r.label}: ${r.amount}`).join(" • ");
  const fmt=n=>Number.isSafeInteger(Number(n))&&Number(n)>0?`${Number(n).toLocaleString("fa-IR")} ریال`:"";
  if(v.transferType==="rent"){
   const parts=[];
@@ -94,7 +103,7 @@ export function shopFinancialHeadline(attrs) {
   return parts.join(" • ");
  }
  if(v.transferType==="full_deposit")return fmt(v.depositRial)?`رهن کامل ${fmt(v.depositRial)}`:"رهن کامل توافقی";
- if(v.transferType==="key_money")return fmt(v.keyMoneyRial)?`مبلغ واگذاری حق ${fmt(v.keyMoneyRial)}`:"واگذاری حق توافقی";
+ if(v.transferType==="key_money")return `${shopRightMoneyLabel(v.rightsType,false)}: ${fmt(v.keyMoneyRial)||"توافقی پس از بررسی مدارک"}`;
  return "";
 }
 
@@ -102,12 +111,13 @@ export function shopFinancialHeadline(attrs) {
 export function shopFinancialRows(attrs) {
  const v=attrs?.schemaVersion===1&&attrs?.category==="shop"?attrs.values:null;
  if(!v)return [];
+ if(v.transferType!=="key_money"&&["short","long"].includes(v.rentalTerm))return shopRentalMoneyRows(v,false);
  const money=n=>Number.isSafeInteger(Number(n))&&Number(n)>0?`${Number(n).toLocaleString("fa-IR")} ریال`:"";
  if(v.transferType==="rent") {
   const deposit=money(v.depositRial);
   return [...(deposit?[{label:"ودیعه",amount:deposit}]:[]),{label:"اجاره ماهانه",amount:money(v.monthlyRentRial)||"توافقی"}];
  }
  if(v.transferType==="full_deposit")return [{label:"رهن کامل",amount:money(v.depositRial)||"توافقی"}];
- if(v.transferType==="key_money")return [{label:"مبلغ واگذاری حق",amount:money(v.keyMoneyRial)||"توافقی"}];
+ if(v.transferType==="key_money")return [{label:shopRightMoneyLabel(v.rightsType,false),amount:money(v.keyMoneyRial)||"توافقی پس از بررسی مدارک"}];
  return [];
 }

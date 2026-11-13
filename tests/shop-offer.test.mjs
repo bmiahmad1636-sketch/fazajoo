@@ -45,7 +45,7 @@ test('generic price only denotes known MONTHLY rent',()=>{
  assert.deepEqual(shopListingPrice({...basic,transferType:'key_money',keyMoneyRial:'600000000'}),{price:'',priceType:'negotiable'});
 });
 test('public price labels are truthful and distinguish rights',()=>{
- assert.match(shopFinancialHeadline(raw({transferType:'key_money',rightsType:'key_money',keyMoneyRial:'5000000'})),/واگذاری حق/);
+ assert.match(shopFinancialHeadline(raw({transferType:'key_money',rightsType:'key_money',keyMoneyRial:'5000000'})),/واگذاری سرقفلی/);
  assert.match(shopFinancialHeadline(raw({transferType:'full_deposit',depositRial:'5000000'})),/رهن کامل/);
  assert.match(shopFinancialHeadline(raw({monthlyRentRial:'5000000'})),/اجاره ماهانه/);
 });
@@ -122,6 +122,6 @@ test('missing security deposit is not represented as zero and rights stay separa
  assert.match(heading,/اجاره ماهانه/);
  assert.doesNotMatch(heading,/ودیعه/);
  const right=shopFinancialHeadline(raw({transferType:'key_money',rightsType:'key_money',keyMoneyRial:'300000000'}));
- assert.match(right,/واگذاری حق/);
+ assert.match(right,/واگذاری سرقفلی/);
  assert.doesNotMatch(right,/اجاره ماهانه|ودیعه/);
 });

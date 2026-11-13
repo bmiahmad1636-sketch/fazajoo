@@ -35,9 +35,8 @@ function Hero() {
           </div>
 
           <h1 className="home-hero__title">
-            فضای درست،
-            <br />
-            <span>برای نیاز واقعی تو.</span>
+            <span className="home-hero__title-brand">فضاجو</span>
+            <strong className="home-hero__title-main">هر فضا، یک فرصت</strong>
           </h1>
 
           <p className="home-hero__description">
@@ -93,7 +92,7 @@ function Hero() {
           <div className="home-hero__visual-grid" />
           <div className="home-hero__logo-shell">
             <AnimatedLogo size={190} className="home-hero__animated-logo" />
-            <p>هر فضا، یک فرصت تازه.</p>
+            <p>هر فضا، یک فرصت</p>
           </div>
 
           <div className="home-hero__float-card home-hero__float-card--search">

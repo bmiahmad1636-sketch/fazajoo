@@ -65,10 +65,22 @@ export function compareSpaceProfiles(wanted, offer) {
       else conflicts.push("industrial-rental-term");
     }else matched.push("industrial-rental-term");
   }
+  // F5-04: shop leases use exactly the same duration meaning as RT-00.
+  // A landlord's willingness to negotiate another term is NOT a priced match.
+  const shopWantedTerm=wanted.category==="shop"&&wanted.fields?.transferType!=="key_money"?wanted.fields?.shopRentalTerm:null;
+  const shopOfferTerm=wanted.category==="shop"&&offer.fields?.transferType!=="key_money"?offer.fields?.rentalTerm:null;
+  const shopAlternativeReview=Boolean(shopWantedTerm&&shopOfferTerm&&shopWantedTerm!==shopOfferTerm&&offer.fields?.canNegotiateOtherTerm===true);
+  if(wanted.category==="shop"&&wanted.fields?.transferType!=="key_money"){
+    if(!shopWantedTerm||!shopOfferTerm)unknown.push("shop-rental-term-unknown");
+    else if(shopWantedTerm!==shopOfferTerm){
+      if(shopAlternativeReview)unknown.push("shop-alternative-term-and-price-review");
+      else conflicts.push("shop-rental-term");
+    }else matched.push("shop-rental-term");
+  }
   const gardenWantedContract=wanted.category==="garden"?wanted.fields?.gardenRentalTerm:null;
   const gardenOfferContract=wanted.category==="garden"?offer.fields?.gardenRentalTerm:null;
   const gardenFinancialReview=wanted.category==="garden"&&Boolean(gardenWantedContract||gardenOfferContract)&&(!gardenWantedContract||!gardenOfferContract||gardenWantedContract!==gardenOfferContract);
-  const deferContractMoney = industrialAlternativeReview || Boolean(industrialWantedTerm&&industrialOfferTerm&&industrialWantedTerm!==industrialOfferTerm) || gardenFinancialReview || otherAlternativeReview || Boolean(otherWantedTerm&&otherOfferTerm&&otherWantedTerm!==otherOfferTerm) || villaOtherTermReview || residentialOtherTermReview ||
+  const deferContractMoney = shopAlternativeReview || Boolean(shopWantedTerm&&shopOfferTerm&&shopWantedTerm!==shopOfferTerm) || industrialAlternativeReview || Boolean(industrialWantedTerm&&industrialOfferTerm&&industrialWantedTerm!==industrialOfferTerm) || gardenFinancialReview || otherAlternativeReview || Boolean(otherWantedTerm&&otherOfferTerm&&otherWantedTerm!==otherOfferTerm) || villaOtherTermReview || residentialOtherTermReview ||
     Boolean(residentialWantedTerm && residentialOfferTerm && residentialWantedTerm !== residentialOfferTerm);
   // Two amounts with different periods (or unverified alternative conditions) cannot be compared.
   if (!deferContractMoney && wanted.maxDepositRial !== null) requireCheck("deposit-irr", wanted.maxDepositRial, offer.depositRial, (need, actual) => actual <= need);
@@ -89,7 +101,9 @@ export function compareSpaceProfiles(wanted, offer) {
     if (fields.propertyType === "other") unknown.push("residential-other-type-review");
     else requireCheck("residential-type", fields.propertyType, available.propertyType);
   } else if (wanted.category === "storage" || wanted.category === "warehouse" || wanted.category === "shop") {
-    requireCheck("space-type", fields.spaceType, available.spaceType);
+    if(wanted.category==="shop"&&(fields.spaceType==="other"||available.spaceType==="other")){
+      unknown.push("shop-other-space-type-review");
+    }else requireCheck("space-type", fields.spaceType, available.spaceType);
     if (wanted.category === "storage") {
       requireCheck("storage-access", fields.access, available.access, (need, actual) => actual === "24h" || actual === need);
       if (fields.purpose === "other") unknown.push("storage-other-purpose-review");

@@ -1,4 +1,5 @@
 /** Server whitelist for actual shop offers; never trust user-supplied derived matches. */
+const {cleanShopFinance}=require("./shopRentalFinance");
 const TYPES = new Set(["street","mall","complex","booth","large","other"]);
 const ACTIVITIES = new Set(["clothing","food","mobile","jewelry","beauty","services","restaurant","other"]);
 const TRANSFERS = new Set(["rent","full_deposit","key_money"]);
@@ -17,14 +18,16 @@ const numeric=(v,max,decimal=false)=>{
 function cleanShopSpaceAttributes(raw,category,side){
  if(category!=="shop"||side!=="offer"||!raw||typeof raw!=="object"||Array.isArray(raw)||raw.schemaVersion!==1||raw.category!=="shop"||!raw.values||typeof raw.values!=="object"||Array.isArray(raw.values))return {};
  const v=raw.values,transfer=option(v.transferType,TRANSFERS),activities=many(v.allowedActivities,ACTIVITIES);
+ const typedLease=transfer!=="key_money"&&["short","long"].includes(v.rentalTerm);
  return {schemaVersion:1,category:"shop",values:{
+  ...(typedLease?cleanShopFinance(v,false):{}),
   spaceType:option(v.spaceType,TYPES),otherSpaceType:v.spaceType==="other"?String(v.otherSpaceType||"").trim().slice(0,160):"",allowedActivities:activities,
   otherActivity:activities.includes("other")?String(v.otherActivity||"").trim().slice(0,160):"",
   transferType:transfer,floor:option(v.floor,FLOORS),locationPreference:option(v.locationPreference,LOCATIONS),
   frontageM:["mall","complex","booth"].includes(v.spaceType)?null:numeric(v.frontageM,1000,true),features:many(v.features,FEATURES).filter(x=>["mall","complex"].includes(v.spaceType)||x!=="elevator"),
   rightsType:transfer==="key_money"?option(v.rightsType,RIGHTS):null,
-  depositRial:["rent","full_deposit"].includes(transfer)?numeric(v.depositRial,1000000000000000):null,
-  monthlyRentRial:transfer==="rent"?numeric(v.monthlyRentRial,1000000000000000):null,
+  depositRial:!typedLease&&["rent","full_deposit"].includes(transfer)?numeric(v.depositRial,1000000000000000):null,
+  monthlyRentRial:!typedLease&&transfer==="rent"?numeric(v.monthlyRentRial,1000000000000000):null,
   keyMoneyRial:transfer==="key_money"?numeric(v.keyMoneyRial,1000000000000000):null
  }};
 }

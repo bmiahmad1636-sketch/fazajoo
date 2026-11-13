@@ -24,14 +24,14 @@ test('full deposit and business rights remain exclusive, never shown as monthly 
   {label:'رهن کامل',amount:'۵۰۰٬۰۰۰٬۰۰۰ ریال'}
  ]);
  assert.deepEqual(shopFinancialRows(attrs('key_money',{keyMoneyRial:300000000})),[
-  {label:'مبلغ واگذاری حق',amount:'۳۰۰٬۰۰۰٬۰۰۰ ریال'}
+  {label:'مبلغ پیشنهادی (منوط به بررسی نوع حق)',amount:'۳۰۰٬۰۰۰٬۰۰۰ ریال'}
  ]);
 });
 test('hero and compact main info both use separated finance rows without changing other categories',()=>{
  const jsx=read('../src/pages/ParkingDetails.jsx');
- assert.match(jsx,/shopPriceRows = !isWanted && category === "shop"/);
- assert.match(jsx,/<ShopMoneyRows items=\{shopPriceRows\} \/>/);
- assert.match(jsx,/<ShopMoneyRows items=\{shopPriceRows\} compact \/>/);
+ assert.match(jsx,/shopPriceRows=category==="shop"/);
+ assert.match(jsx,/<ShopMoneyRows items=\{shopPriceRows\} stacked/);
+ assert.match(jsx,/<ShopMoneyRows items=\{shopPriceRows\} compact stacked/);
  assert.match(jsx,/otherBudgetText \|\| gardenBudgetText/);
  const css=read('../src/pages/ParkingDetails.css');
  assert.match(css,/parking-details-hero__price--shop/);

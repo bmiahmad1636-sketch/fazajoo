@@ -156,10 +156,26 @@ export function toSpaceProfile(listing = {}) {
       if (garden.waterSource) profile.fields.waterSource = garden.waterSource === "share" ? "right" : garden.waterSource;
     }
     if (category === "shop" && attrs.transferType) {
+      const raw=listing.spaceAttributes?.schemaVersion===1&&listing.spaceAttributes?.category==="shop"?listing.spaceAttributes.values:null;
+      if(raw && ["short","long"].includes(raw.rentalTerm) && raw.transferType!=="key_money"){
+        profile.fields.rentalTerm=raw.rentalTerm;
+        profile.fields.canNegotiateOtherTerm=raw.canNegotiateOtherTerm===true;
+        if(raw.rentalTerm==="short"){
+          profile.rentRial=numericOrNull(raw.shortRateRial);
+          profile.depositRial=null;
+          profile.fields.securityHoldRial=numericOrNull(raw.securityHoldRial);
+          profile.pricePeriod={day:"daily",week:"weekly",month:"monthly"}[raw.shortRateUnit]||null;
+        }else{
+          profile.depositRial=raw.financialMode==="rent_only"?null:numericOrNull(raw.longDepositRial);
+          profile.rentRial=raw.financialMode==="full_deposit"?null:numericOrNull(raw.longRateUnit==="year"?raw.longYearlyRentRial:raw.longMonthlyRentRial);
+          profile.pricePeriod=raw.financialMode==="full_deposit"?null:({month:"monthly",year:"yearly"}[raw.longRateUnit]||null);
+        }
+      }else{
       profile.depositRial = numericOrNull(attrs.depositRial);
       profile.rentRial = attrs.transferType === "rent" ? numericOrNull(attrs.monthlyRentRial) : null;
       profile.pricePeriod = attrs.transferType === "rent" ? "monthly" : null;
       profile.fields.keyMoneyRial = attrs.transferType === "key_money" ? numericOrNull(attrs.keyMoneyRial) : null;
+      }
     }
     if(category === "other" && Object.keys(attrs).length){
       profile.fields.rentalTerm=["short","long"].includes(attrs.rentalTerm)?attrs.rentalTerm:null;
@@ -231,6 +247,8 @@ export function toSpaceProfile(listing = {}) {
       industrialRentalTerm: category === "warehouse" && ["short","long"].includes(meta?.rentalTerm) ? meta.rentalTerm : null,
       specialConditions: category === "warehouse" ? textOrNull(meta?.requirements) : null,
       transferType: textOrNull(meta?.transferType),
+      shopRentalTerm: category==="shop"&&["short","long"].includes(meta?.rentalTerm)?meta.rentalTerm:null,
+      shopOtherSpaceType: category==="shop"&&meta?.spaceType==="other" ? textOrNull(meta?.otherSpaceType) : null,
       rightsType: category === "shop" ? textOrNull(meta?.rightsType) : null,
       shopFloor: category === "shop" ? textOrNull(meta?.floor) : null,
       shopLocation: category === "shop" ? textOrNull(meta?.locationPreference) : null,
@@ -249,7 +267,14 @@ export function toSpaceProfile(listing = {}) {
     profile.pricePeriod = periodOrNull(meta?.pricePeriod || meta?.rentPeriod || listing.priceType);
     if (category === "residential" || category === "shop") {
       // Request budget ceilings are NOT owner asking prices.
-      if (category === "residential" && meta?.rentalTerm === "short") {
+      if(category==="shop"&&meta?.transferType==="key_money"){
+        profile.maxRentRial=null;profile.maxDepositRial=null;profile.pricePeriod=null;
+      } else if(category==="shop"&&["short","long"].includes(meta?.rentalTerm)){
+        profile.maxRentRial=meta.rentalTerm==="short"?numericOrNull(meta.maxBudgetRial):meta.financialMode==="full_deposit"?null:numericOrNull(meta.maxRentRial);
+        profile.maxDepositRial=meta.rentalTerm==="long"&&meta.financialMode!=="rent_only"?numericOrNull(meta.maxDepositRial):null;
+        profile.pricePeriod=meta.rentalTerm==="short"?({day:"daily",week:"weekly",month:"monthly"}[meta.shortRateUnit]||null):meta.financialMode==="full_deposit"?null:({month:"monthly",year:"yearly"}[meta.longRateUnit]||null);
+        profile.fields.securityHoldBudget=meta.rentalTerm==="short"?numericOrNull(meta.maxSecurityHoldRial):null;
+      } else if (category === "residential" && meta?.rentalTerm === "short") {
         profile.maxRentRial = numericOrNull(meta?.shortMaxBudgetRial);
         profile.maxDepositRial = null;
         profile.pricePeriod = {night:"daily",week:"weekly",month:"monthly"}[meta?.shortRateUnit] || null;
