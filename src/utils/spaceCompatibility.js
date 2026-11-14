@@ -77,10 +77,26 @@ export function compareSpaceProfiles(wanted, offer) {
       else conflicts.push("shop-rental-term");
     }else matched.push("shop-rental-term");
   }
+  // F5-05: guard the existing read-only compatibility adapter from false land
+  // term/price matches. The full smart matching engine will be audited next.
+  const landWantedTerm=wanted.category==="land"?wanted.fields?.landRentalTerm:null;
+  const landOfferTerm=wanted.category==="land"?offer.fields?.landRentalTerm:null;
+  const landSpecial=wanted.category==="land"&&wanted.fields?.landTransactionKind==="crop_share";
+  const landAlternative=Boolean(landWantedTerm&&landOfferTerm&&landWantedTerm!==landOfferTerm&&
+    landWantedTerm!=="seasonal"&&landOfferTerm!=="seasonal"&&offer.fields?.canNegotiateOtherTerm===true);
+  if(wanted.category==="land"){
+    if(landSpecial)unknown.push("land-crop-share-legal-review");
+    else if(!landWantedTerm||!landOfferTerm)unknown.push("land-term-unknown");
+    else if(landWantedTerm!==landOfferTerm){
+      if(landAlternative)unknown.push("land-alternative-term-and-price-review");
+      else conflicts.push("land-primary-term");
+    }else matched.push("land-primary-term");
+  }
   const gardenWantedContract=wanted.category==="garden"?wanted.fields?.gardenRentalTerm:null;
   const gardenOfferContract=wanted.category==="garden"?offer.fields?.gardenRentalTerm:null;
   const gardenFinancialReview=wanted.category==="garden"&&Boolean(gardenWantedContract||gardenOfferContract)&&(!gardenWantedContract||!gardenOfferContract||gardenWantedContract!==gardenOfferContract);
-  const deferContractMoney = shopAlternativeReview || Boolean(shopWantedTerm&&shopOfferTerm&&shopWantedTerm!==shopOfferTerm) || industrialAlternativeReview || Boolean(industrialWantedTerm&&industrialOfferTerm&&industrialWantedTerm!==industrialOfferTerm) || gardenFinancialReview || otherAlternativeReview || Boolean(otherWantedTerm&&otherOfferTerm&&otherWantedTerm!==otherOfferTerm) || villaOtherTermReview || residentialOtherTermReview ||
+  const deferContractMoney = landSpecial || landAlternative ||
+    Boolean(landWantedTerm&&landOfferTerm&&landWantedTerm!==landOfferTerm) || shopAlternativeReview || Boolean(shopWantedTerm&&shopOfferTerm&&shopWantedTerm!==shopOfferTerm) || industrialAlternativeReview || Boolean(industrialWantedTerm&&industrialOfferTerm&&industrialWantedTerm!==industrialOfferTerm) || gardenFinancialReview || otherAlternativeReview || Boolean(otherWantedTerm&&otherOfferTerm&&otherWantedTerm!==otherOfferTerm) || villaOtherTermReview || residentialOtherTermReview ||
     Boolean(residentialWantedTerm && residentialOfferTerm && residentialWantedTerm !== residentialOfferTerm);
   // Two amounts with different periods (or unverified alternative conditions) cannot be compared.
   if (!deferContractMoney && wanted.maxDepositRial !== null) requireCheck("deposit-irr", wanted.maxDepositRial, offer.depositRial, (need, actual) => actual <= need);

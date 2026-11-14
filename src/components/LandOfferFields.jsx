@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
+import LandContractFields from "./LandContractFields";
 import {LAND_OFFER_TYPES,LAND_OFFER_PURPOSES,LAND_OFFER_ROADS,LAND_OFFER_LEGAL,LAND_OFFER_LOCATION,LAND_OFFER_SLOPES,LAND_OFFER_VEHICLES,LAND_OFFER_WATER,LAND_OFFER_FEATURES,LAND_OFFER_CROPS,LAND_OFFER_IRRIGATION} from "../utils/landOffer";
 import "./ParkingOfferFields.css";
 import "./LandOfferFields.css";
 
-export default function LandOfferFields({value={},onChange,note="",onNoteChange,disabled=false,error=""}) {
+export default function LandOfferFields({value={},onChange,note="",onNoteChange,disabled=false,error="",rentalError=""}) {
   const [expanded,setExpanded]=useState(false);
   const errorTarget = !error ? "" : error.startsWith("وضعیت واقعی زمین") ? "type"
     : error.startsWith("حداقل یک کاربرد") || error.startsWith("کاربرد دیگر") ? "purposes"
@@ -42,7 +43,7 @@ export default function LandOfferFields({value={},onChange,note="",onNoteChange,
   </div>;
   return <section className="fj-po fj-lo" aria-label="مشخصات واقعی زمین">
     <header className="fj-po-header"><span aria-hidden="true">🌱</span><div>
-      <h3>مشخصات زمین شما</h3><p>سه انتخاب اصلی و متراژ واقعی؛ بقیه موارد اختیاری‌اند.</p>
+      <h3>مشخصات زمین شما</h3><p>وضعیت زمین، کاربرد و دسترسی را مشخص کنید؛ قرارداد مالی نیز همین‌جا ثبت می‌شود.</p>
     </div></header>
     <div id="land-offer-type" className={`fj-lo-group${errorTarget === "type" ? " fj-lo-group--invalid" : ""}`}><strong>وضعیت واقعی زمین <b>*</b></strong><div className="fj-lo-choices" role="group" aria-label="وضعیت واقعی زمین">
       {LAND_OFFER_TYPES.map(([id,label])=><button type="button" key={id} disabled={disabled} aria-pressed={value.landType===id} className={`fj-lo-choice${value.landType===id?" is-selected":""}`} onClick={()=>onChange({...value,landType:id,...(id!=="agricultural"&&!purposes.includes("agriculture")?{crops:[],irrigation:""}:{})})}>{value.landType===id?"✓ ":""}{label}</button>)}
@@ -56,6 +57,7 @@ export default function LandOfferFields({value={},onChange,note="",onNoteChange,
     <div id="land-offer-road" className={`fj-lo-group${errorTarget === "road" ? " fj-lo-group--invalid" : ""}`}><strong>وضعیت راه دسترسی <b>*</b></strong><div className="fj-lo-choices" role="group" aria-label="راه دسترسی">
       {LAND_OFFER_ROADS.map(([id,label])=><button key={id} type="button" disabled={disabled} aria-pressed={value.accessRoad===id} className={`fj-lo-choice${value.accessRoad===id?" is-selected":""}`} onClick={()=>change("accessRoad",id)}>{value.accessRoad===id?"✓ ":""}{label}</button>)}
     </div>{errorTarget === "road" && <p role="alert" className="fj-lo-inline-error">{error}</p>}</div>
+    <LandContractFields value={value} onChange={onChange} disabled={disabled} error={rentalError}/>
     <button type="button" className="fj-po-more" aria-expanded={expanded} disabled={disabled} onClick={()=>setExpanded(s=>!s)}><span>＋ جزئیات تکمیلی (اختیاری)</span><span>{expanded?"⌃":"⌄"}</span></button>
     {expanded&&<div id="land-offer-extra" className="fj-lo-extra">
       <div className="fj-lo-row">
@@ -68,7 +70,7 @@ export default function LandOfferFields({value={},onChange,note="",onNoteChange,
       </div>
       <div className="fj-lo-row">
         <label className="fj-po-field fj-lo-field"><span>بر زمین (متر، اختیاری)</span><input disabled={disabled} type="text" inputMode="decimal" value={value.frontageM??""} placeholder="مثلاً ۲۰" onChange={e=>change("frontageM",e.target.value)}/><small>طول بَرِ واقعی ملک؛ فقط اگر دقیق می‌دانید.</small></label>
-        <label className="fj-po-field fj-lo-field"><span>مبلغ پول پیش (ریال، اختیاری)</span><input disabled={disabled} type="text" inputMode="numeric" value={value.depositRial??""} placeholder="در صورت وجود رهن یا ودیعه" onChange={e=>change("depositRial",e.target.value)}/><small>اجاره دوره‌ای را در مرحله آخر وارد کنید؛ مبالغ جدا می‌مانند.</small></label>
+
       </div>
       {checkGroup("منابع آب تأییدشده",LAND_OFFER_WATER,waters,"waterSources")}
       {(value.landType==="agricultural" || purposes.includes("agriculture")) && <div className="fj-lo-agriculture fj-lo-wide">

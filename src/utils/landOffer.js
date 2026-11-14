@@ -1,10 +1,11 @@
 /** Real land supply contract — never treat intended use as a legal permit. */
 import { LAND_PURPOSES, LAND_LEGAL, LAND_LOCATION, LAND_WATER, LAND_FEATURES, LAND_CROPS, LAND_IRRIGATION } from "./landRental.js";
+import { LAND_CONTRACT_DEFAULT, landActiveContract } from "./landContract.js";
 
 export const LAND_OFFER_DEFAULT = Object.freeze({
   landType: "", allowedPurposes: [], otherPurpose: "", accessRoad: "",
   legalUse: "", locationType: "", slope: "", frontageM: "",
-  vehicleAccess: "", waterSources: [], features: [], crops: [], irrigation: "", depositRial: "",
+  vehicleAccess: "", waterSources: [], features: [], crops: [], irrigation: "", depositRial: "",...LAND_CONTRACT_DEFAULT,
 });
 export const LAND_OFFER_TYPES = [
   ["vacant", "زمین خالی / بدون بنا"], ["agricultural", "زمین زراعی / آماده کشت"],
@@ -58,6 +59,7 @@ export function landOfferFromAttributes(attrs) {
     crops:(v.landType==="agricultural" || selections(LAND_OFFER_PURPOSES,v.allowedPurposes).includes("agriculture"))?selections(LAND_OFFER_CROPS,v.crops):[],
     irrigation:(v.landType==="agricultural" || selections(LAND_OFFER_PURPOSES,v.allowedPurposes).includes("agriculture"))?from(LAND_OFFER_IRRIGATION,v.irrigation):"",
     depositRial:v.depositRial==null?"":String(v.depositRial),
+    ...landActiveContract(v,false),
   };
 }
 export function validateLandOffer(v={}) {
@@ -86,6 +88,7 @@ export function makeLandAttributes(v={}) {
     waterSources:waters.includes("none") ? ["none"] : waters,
     features:selections(LAND_OFFER_FEATURES,v.features).filter(x=>!(waters.includes("none")&&x==="water")),
     crops:isAgri?selections(LAND_OFFER_CROPS,v.crops):[], irrigation:isAgri?pick(LAND_OFFER_IRRIGATION,v.irrigation):null,
-    depositRial:number(v.depositRial,1,999999999999999,0),
+    depositRial:v.rentalTerm?null:number(v.depositRial,1,999999999999999,0), // Keep legacy data only when no typed rental contract exists.
+    ...landActiveContract(v,false),
   }};
 }

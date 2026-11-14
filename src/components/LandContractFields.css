@@ -1,0 +1,23 @@
+.fj-lc{display:grid;grid-column:1/-1;gap:16px;padding:18px;border:1px solid #eecdb5;border-radius:16px;background:linear-gradient(135deg,#fffaf6,#fffdfb);color:#23352e;min-width:0}
+.fj-lc header h3{margin:0 0 6px;color:#a65019;font-size:1.04rem;font-weight:850}
+.fj-lc header p{margin:0;color:#6d6259;font-size:.81rem;line-height:1.85}
+.fj-lc-group{display:grid;gap:10px}
+.fj-lc-group strong{font-size:.9rem}
+.fj-lc b{color:#c34229}
+.fj-lc-options,.fj-lc-transaction{display:flex;flex-wrap:wrap;gap:8px}
+.fj-lc-options button,.fj-lc-transaction button{cursor:pointer;padding:11px 14px;border:1px solid #e6d5c6;border-radius:11px;background:#fff;color:#384039;font:inherit;font-weight:700;min-height:43px}
+.fj-lc-options button.is-selected,.fj-lc-transaction button.is-selected{border-color:#ed752c;background:#fff0e6;color:#ac4e16}
+.fj-lc-options button:disabled,.fj-lc-transaction button:disabled{opacity:.65;cursor:default}
+.fj-lc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:12px;align-items:start}
+.fj-lc-field{display:grid;gap:7px;min-width:0;font-size:.88rem;font-weight:720}
+.fj-lc-field input,.fj-lc-field select,.fj-lc-field textarea{min-height:47px;width:100%;box-sizing:border-box;padding:12px;border:1px solid #e4d6c8;border-radius:11px;background:#fff;color:#1e302b;font:inherit;font-weight:650}
+.fj-lc-field input:focus,.fj-lc-field select:focus,.fj-lc-field textarea:focus{outline:2px solid #ffd3b2;outline-offset:1px;border-color:#e97b39}
+.fj-lc-field input[aria-invalid="true"]{border-color:#c33e32}
+.fj-lc-field textarea{resize:vertical;line-height:1.7}
+.fj-lc-hint,.fj-lc-footer{color:#766b63;font-size:.78rem;font-weight:450;line-height:1.8}
+.fj-lc-wide{grid-column:1/-1}
+.fj-lc-error{display:block;color:#a52720;font-size:.8rem;font-weight:750;line-height:1.7}
+.fj-lc-consent{display:flex;align-items:flex-start;gap:9px;font-size:.86rem;line-height:1.9;font-weight:630}
+.fj-lc-consent input{margin-top:7px;accent-color:#e56827}
+.fj-lc-footer{margin:0}
+@media(max-width:700px){.fj-lc{padding:13px}.fj-lc-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr))}.fj-lc-options button{width:100%}}

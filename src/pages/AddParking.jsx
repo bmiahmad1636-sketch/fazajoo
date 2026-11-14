@@ -52,6 +52,7 @@ import {validateShopRental,shopRentalListingPrice} from "../utils/shopRental.js"
 import {shopRightDealLabel} from "../utils/shopRights.js";
 import { SHOP_OFFER_DEFAULT, validateShopOffer, makeShopAttributes, shopListingPrice, shopFinancialHeadline, shopOfferLabel, SHOP_OFFER_TYPES, SHOP_OFFER_TRANSFERS } from "../utils/shopOffer";
 import LandRentalFields from "../components/LandRentalFields";
+import {validateLandContract,landContractPrice,landContractHeadline} from "../utils/landContract.js";
 import { EMPTY_LAND_RENTAL, landRentalValidation, writeLandRental } from "../utils/landRental";
 import ShopRequestFields from "../components/ShopRequestFields";
 import { EMPTY_SHOP_REQUEST, shopRequestValidation, writeShopRequest,shopWantedFinancialHeadline,shopRequestAreaText } from "../utils/shopRequest";
@@ -288,6 +289,8 @@ function AddParking() {
       if (!isWantedAd && form.category === "land") {
         const error = validateLandOffer(form.landOffer);
         if (error) newErrors.landOffer = error;
+        const rentalError=validateLandContract(form.landOffer);
+        if(rentalError)newErrors.landContract=rentalError;
         if (!form.area || !Number.isFinite(Number(form.area)) || Number(form.area) <= 0) newErrors.area = "مساحت واقعی زمین را وارد کنید.";
       }
       if (!isWantedAd && form.category === "garden") {
@@ -319,7 +322,7 @@ function AddParking() {
           if (err) newErrors.otherOffer = err;
         }
       }
-      if (isWantedAd && form.category === "land") { const err = landRentalValidation(form.landRental,isWantedAd); if (err) newErrors.landRental = err; }
+      if (isWantedAd && form.category === "land") { const err = landRentalValidation(form.landRental,isWantedAd); if (err) newErrors.landRental = err; const rentalError=validateLandContract(form.landRental,true); if(rentalError)newErrors.landContract=rentalError; }
       if (isWantedAd && form.category === "shop") { const err = shopRequestValidation(form.shopRequest); if (err) newErrors.shopRequest = err; if(form.shopRequest.transferType==="rent"){const rentalError=validateShopRental(form.shopRequest,true);if(rentalError)newErrors.shopRental=rentalError;} }
       if (isWantedAd && form.category === "warehouse") {
         const shedError = shedRequestValidation(form.shedRequest);
@@ -382,7 +385,7 @@ function AddParking() {
       if (["parking","storage","warehouse","residential"].includes(form.category) || (!isWantedAd && form.category === "other")) {
         // All residential finance (short/long) is validated in the dedicated first-step form.
         // Short stays must NEVER be forced to invent a long-term mortgage/monthly rent.
-      } else if (!(isWantedAd && ["land", "shop", "villa", "garden", "other"].includes(form.category)) && !(!isWantedAd && ["shop", "garden"].includes(form.category)) && !(form.category === "villa" && !isWantedAd && form.villaOffer.rentalTerm === "long") && form.priceType !== "negotiable" && !form.price.trim()) {
+      } else if (form.category!=="land" && !(isWantedAd && ["land", "shop", "villa", "garden", "other"].includes(form.category)) && !(!isWantedAd && ["shop", "garden"].includes(form.category)) && !(form.category === "villa" && !isWantedAd && form.villaOffer.rentalTerm === "long") && form.priceType !== "negotiable" && !form.price.trim()) {
         newErrors.price = isWantedAd ? "سقف بودجه موردنظرت را وارد کن." : "قیمت را وارد کنید.";
       }
 
@@ -456,7 +459,7 @@ function AddParking() {
   const saveParking = async () => {
     if (currentStep !== STEPS.length || publishingRef.current || loading) return;
 
-    if ((["storage","warehouse"].includes(form.category) || isWantedAd && ["residential", "villa", "garden", "other"].includes(form.category) || !isWantedAd && form.category === "other") && !validateStep(1)) {
+    if ((["storage","warehouse","land"].includes(form.category) || isWantedAd && ["residential", "villa", "garden", "other"].includes(form.category) || !isWantedAd && form.category === "other") && !validateStep(1)) {
       setCurrentStep(1);
       return;
     }
@@ -517,7 +520,7 @@ function AddParking() {
             : form.area ? Number(form.area) : 0,
 
           price:
-            form.category === "parking" ? parkingListingPrice(isWantedAd ? form.parkingRequestDetails : form.parkingOffer, isWantedAd).price : form.category === "storage" ? storageListingPrice(isWantedAd ? form.warehouseRequest : form.storageOffer,isWantedAd).price : form.category === "warehouse" ? industrialListingPrice(isWantedAd?form.shedRequest:form.industrialOffer,isWantedAd).price : isWantedAd && form.category === "land" ? "" : isWantedAd && form.category === "shop" ? (form.shopRequest.transferType==="rent"?shopRentalListingPrice(form.shopRequest,true).price:"") : !isWantedAd && form.category === "shop" ? shopListingPrice(form.shopOffer).price : !isWantedAd && form.category === "garden" ? gardenListingPrice(form.gardenOffer,form.price,form.priceType).price : isWantedAd && form.category === "residential" && form.residentialRequest.rentalTerm === "short" ? String(form.residentialRequest.shortMaxBudgetRial || "") : isWantedAd && form.category === "villa" ? String(form.villaRequest.rentalTerm === "long" && form.villaRequest.financialMode === "full_deposit" ? "" : form.villaRequest.maxBudget || "") : isWantedAd && form.category === "garden" ? gardenWantedListingPrice(form.gardenRequest).price : isWantedAd && form.category === "other" ? otherWantedListingPrice(form.otherRequest).price : !isWantedAd && form.category === "other" ? otherListingPrice(form.otherOffer).price : !isWantedAd && form.category === "villa" ? villaListingPrice(form.villaOffer,form.price,form.priceType).price : !isWantedAd && form.category === "residential" ? residentialListingPrice(form.residentialOffer,form.residentialDetails).price : form.category === "residential"
+            form.category === "parking" ? parkingListingPrice(isWantedAd ? form.parkingRequestDetails : form.parkingOffer, isWantedAd).price : form.category === "storage" ? storageListingPrice(isWantedAd ? form.warehouseRequest : form.storageOffer,isWantedAd).price : form.category === "warehouse" ? industrialListingPrice(isWantedAd?form.shedRequest:form.industrialOffer,isWantedAd).price : form.category === "land" ? landContractPrice(isWantedAd?form.landRental:form.landOffer,isWantedAd).price : isWantedAd && form.category === "shop" ? (form.shopRequest.transferType==="rent"?shopRentalListingPrice(form.shopRequest,true).price:"") : !isWantedAd && form.category === "shop" ? shopListingPrice(form.shopOffer).price : !isWantedAd && form.category === "garden" ? gardenListingPrice(form.gardenOffer,form.price,form.priceType).price : isWantedAd && form.category === "residential" && form.residentialRequest.rentalTerm === "short" ? String(form.residentialRequest.shortMaxBudgetRial || "") : isWantedAd && form.category === "villa" ? String(form.villaRequest.rentalTerm === "long" && form.villaRequest.financialMode === "full_deposit" ? "" : form.villaRequest.maxBudget || "") : isWantedAd && form.category === "garden" ? gardenWantedListingPrice(form.gardenRequest).price : isWantedAd && form.category === "other" ? otherWantedListingPrice(form.otherRequest).price : !isWantedAd && form.category === "other" ? otherListingPrice(form.otherOffer).price : !isWantedAd && form.category === "villa" ? villaListingPrice(form.villaOffer,form.price,form.priceType).price : !isWantedAd && form.category === "residential" ? residentialListingPrice(form.residentialOffer,form.residentialDetails).price : form.category === "residential"
               ? String(
                   isWantedAd ? (residentialRequestLegacyDetails(form.residentialRequest).monthlyRent || residentialRequestLegacyDetails(form.residentialRequest).deposit || "")
                     : (form.residentialDetails?.monthlyRent || form.residentialDetails?.deposit || "")
@@ -525,7 +528,7 @@ function AddParking() {
               : form.priceType === "negotiable" ? "" : form.price.replace(/,/g, "").trim(),
 
           priceType:
-            form.category === "parking" ? parkingListingPrice(isWantedAd ? form.parkingRequestDetails : form.parkingOffer, isWantedAd).priceType : form.category === "storage" ? storageListingPrice(isWantedAd ? form.warehouseRequest : form.storageOffer,isWantedAd).priceType : form.category === "warehouse" ? industrialListingPrice(isWantedAd?form.shedRequest:form.industrialOffer,isWantedAd).priceType : isWantedAd && form.category === "land" ? "negotiable" : isWantedAd && form.category === "shop" ? (form.shopRequest.transferType==="rent"?shopRentalListingPrice(form.shopRequest,true).priceType:"negotiable") : !isWantedAd && form.category === "shop" ? shopListingPrice(form.shopOffer).priceType : !isWantedAd && form.category === "garden" ? gardenListingPrice(form.gardenOffer,form.price,form.priceType).priceType : isWantedAd && form.category === "residential" && form.residentialRequest.rentalTerm === "short" ? ({night:"daily",week:"weekly",month:"monthly"}[form.residentialRequest.shortRateUnit] || "negotiable") : isWantedAd && form.category === "villa" ? (form.villaRequest.rentalTerm === "long" ? (form.villaRequest.financialMode === "full_deposit" ? "negotiable" : "monthly") : form.villaRequest.pricePeriod) : isWantedAd && form.category === "garden" ? gardenWantedListingPrice(form.gardenRequest).priceType : isWantedAd && form.category === "other" ? otherWantedListingPrice(form.otherRequest).priceType : !isWantedAd && form.category === "other" ? otherListingPrice(form.otherOffer).priceType : !isWantedAd && form.category === "villa" ? villaListingPrice(form.villaOffer,form.price,form.priceType).priceType : !isWantedAd && form.category === "residential" ? residentialListingPrice(form.residentialOffer,form.residentialDetails).priceType : form.category === "residential"
+            form.category === "parking" ? parkingListingPrice(isWantedAd ? form.parkingRequestDetails : form.parkingOffer, isWantedAd).priceType : form.category === "storage" ? storageListingPrice(isWantedAd ? form.warehouseRequest : form.storageOffer,isWantedAd).priceType : form.category === "warehouse" ? industrialListingPrice(isWantedAd?form.shedRequest:form.industrialOffer,isWantedAd).priceType : form.category === "land" ? landContractPrice(isWantedAd?form.landRental:form.landOffer,isWantedAd).priceType : isWantedAd && form.category === "shop" ? (form.shopRequest.transferType==="rent"?shopRentalListingPrice(form.shopRequest,true).priceType:"negotiable") : !isWantedAd && form.category === "shop" ? shopListingPrice(form.shopOffer).priceType : !isWantedAd && form.category === "garden" ? gardenListingPrice(form.gardenOffer,form.price,form.priceType).priceType : isWantedAd && form.category === "residential" && form.residentialRequest.rentalTerm === "short" ? ({night:"daily",week:"weekly",month:"monthly"}[form.residentialRequest.shortRateUnit] || "negotiable") : isWantedAd && form.category === "villa" ? (form.villaRequest.rentalTerm === "long" ? (form.villaRequest.financialMode === "full_deposit" ? "negotiable" : "monthly") : form.villaRequest.pricePeriod) : isWantedAd && form.category === "garden" ? gardenWantedListingPrice(form.gardenRequest).priceType : isWantedAd && form.category === "other" ? otherWantedListingPrice(form.otherRequest).priceType : !isWantedAd && form.category === "other" ? otherListingPrice(form.otherOffer).priceType : !isWantedAd && form.category === "villa" ? villaListingPrice(form.villaOffer,form.price,form.priceType).priceType : !isWantedAd && form.category === "residential" ? residentialListingPrice(form.residentialOffer,form.residentialDetails).priceType : form.category === "residential"
               ? "monthly"
               : form.priceType,
           residentialDetails:
@@ -986,9 +989,9 @@ function AddParking() {
                         onChange={industrialOffer=>{setForm(current=>({...current,industrialOffer}));setErrors(current=>({...current,industrialRental:""}));}} />
                     )}
                     {form.category === "land" && !isWantedAd && (
-                      <LandOfferFields value={form.landOffer} note={form.description} disabled={loading} error={errors.landOffer}
+                      <LandOfferFields value={form.landOffer} note={form.description} disabled={loading} error={errors.landOffer} rentalError={errors.landContract}
                         onNoteChange={(description)=>setForm(current=>({...current,description}))}
-                        onChange={(landOffer)=>{setForm(current=>({...current,landOffer}));setErrors(current=>({...current,landOffer:""}));}}/>
+                        onChange={(landOffer)=>{setForm(current=>({...current,landOffer}));setErrors(current=>({...current,landOffer:"",landContract:""}));}}/>
                     )}
                     {form.category === "residential" && !isWantedAd && (
                       <ResidentialFields
@@ -1226,7 +1229,7 @@ function AddParking() {
                     {isWantedAd && form.category === "residential" && (
                       <ResidentialRequestFields value={form.residentialRequest} disabled={loading} error={errors.residentialRequest} onChange={(residentialRequest) => { setForm((current) => ({ ...current, residentialRequest })); setErrors((current) => ({ ...current, residentialRequest: "" })); }} />
                     )}
-                    {isWantedAd && form.category === "land" && (<><LandRentalFields wanted={isWantedAd} value={form.landRental} disabled={loading} error={errors.landRental} onChange={landRental=>{setForm(current=>({...current,landRental}));setErrors(current=>({...current,landRental:""}));}}/></>)}
+                    {isWantedAd && form.category === "land" && (<><LandRentalFields wanted={isWantedAd} value={form.landRental} disabled={loading} error={errors.landRental} rentalError={errors.landContract} onChange={landRental=>{setForm(current=>({...current,landRental}));setErrors(current=>({...current,landRental:"",landContract:""}));}}/></>)}
                     {isWantedAd && form.category === "shop" && (<>
                       <div className="add-parking-field" style={{gridColumn:"1 / -1",padding:"14px 16px",border:"1px solid #f3d7c2",borderRadius:14,background:"#fff8f2"}}><strong style={{color:"#a94c0c"}}>فضای تجاری موردنیازت را معرفی کن</strong><p>نوع مغازه، موقعیت، طبقه، فعالیت و شرایط مالی موردنظرت را مشخص کن. شرایط خاص اختیاری است.</p></div>
                       <ShopRequestFields value={form.shopRequest} disabled={loading} error={errors.shopRequest} rentalError={errors.shopRental} onChange={shopRequest=>{setForm(current=>({...current,shopRequest}));setErrors(current=>({...current,shopRequest:"",shopRental:""}));}}/>
@@ -1404,7 +1407,7 @@ function AddParking() {
                             ? (form.category === "other" ? "مدت اجاره و بودجه در مرحله اول ثبت شده‌اند؛ اینجا شماره تماس و جزئیات نهایی درخواست را بررسی کن." : form.category === "villa" ? "نوع قرارداد و سقف مبالغ در مرحله اول مشخص شده‌اند؛ اینجا شماره تماس و پیش‌نمایش درخواست را بررسی کن." : form.category === "parking" ? "نوع قرارداد و سقف بودجه در مرحله اول مشخص شده‌اند؛ اینجا پیش‌نمایش و تماس را تأیید کن." : form.category === "storage" ? "مدت قرارداد و سقف بودجه انبار در مرحله اول ثبت شده‌اند؛ اینجا فقط شماره تماس و پیش‌نمایش را بررسی کن." : form.category === "warehouse" ? "مدت و سقف بودجه سوله یا کارگاه در مرحله اول ثبت شده‌اند؛ اینجا فقط اطلاعات تماس و پیش‌نمایش را بررسی کن." : "بودجه، شماره تماس و اولویت‌های ضروری خودت را کامل کن.")
                             : form.category === "residential"
                               ? "مشخصات مالی در مرحله اول ثبت شده‌اند؛ اینجا فقط اطلاعات تماس را تأیید کن."
-                              : form.category === "parking" ? "مدت و شرایط مالی پارکینگ در مرحله اول مشخص شده‌اند؛ اینجا فقط شماره تماس و پیش‌نمایش را بررسی کن." : form.category === "storage" ? "مدت قرارداد و مبالغ انبار در مرحله اول ثبت شده‌اند؛ اینجا شماره تماس و پیش‌نمایش را تأیید کن." : form.category === "warehouse" ? "مدت و مبلغ سوله یا کارگاه در مرحله اول ثبت شده‌اند؛ اینجا فقط شماره تماس را تأیید کن." : ["storage", "warehouse", "land"].includes(form.category) ? "قیمت و شماره تماس را وارد کن؛ نکات خاص را در مرحله اول می‌توانی بنویسی." : form.category === "garden" ? "شرایط مالی و مدت واگذاری باغ در مرحله اول ثبت شده‌اند؛ اینجا شماره تماس و اطلاعات نهایی را بررسی کن." : form.category === "shop" ? "شرایط مالی مغازه در مرحله اول ثبت می‌شود؛ اینجا فقط شماره تماس را تأیید کن."
+                              : form.category === "parking" ? "مدت و شرایط مالی پارکینگ در مرحله اول مشخص شده‌اند؛ اینجا فقط شماره تماس و پیش‌نمایش را بررسی کن." : form.category === "storage" ? "مدت قرارداد و مبالغ انبار در مرحله اول ثبت شده‌اند؛ اینجا شماره تماس و پیش‌نمایش را تأیید کن." : form.category === "warehouse" ? "مدت و مبلغ سوله یا کارگاه در مرحله اول ثبت شده‌اند؛ اینجا فقط شماره تماس را تأیید کن." : form.category === "land" ? "مدت قرارداد و شرایط مالی زمین در مرحله اول ثبت شده‌اند؛ اینجا شماره تماس و پیش‌نمایش را تأیید کن." : ["storage", "warehouse"].includes(form.category) ? "شماره تماس و جزئیات نهایی را وارد کن." : form.category === "garden" ? "شرایط مالی و مدت واگذاری باغ در مرحله اول ثبت شده‌اند؛ اینجا شماره تماس و اطلاعات نهایی را بررسی کن." : form.category === "shop" ? "شرایط مالی مغازه در مرحله اول ثبت می‌شود؛ اینجا فقط شماره تماس را تأیید کن."
                               : form.category === "villa" ? (form.villaOffer.rentalTerm === "long" ? "مبالغ رهن و اجاره ماهانه در بخش قرارداد بلندمدت ثبت شده‌اند؛ اینجا فقط شماره تماس را تأیید کن." : "دوره و مبلغ اقامت را اینجا مشخص کن؛ ضمانت خسارت احتمالی در مرحله اول جدا ثبت می‌شود.") : form.category === "other" ? "مبلغ و شرایط قرارداد در مرحله اول ثبت شده‌اند؛ اینجا شماره تماس و جزئیات نهایی آگهی را بررسی کن." : "قیمت، شماره تماس و جزئیات آگهی را کامل کن."}
                         </p>
                       </div>
@@ -1415,7 +1418,7 @@ function AddParking() {
                     {form.category === "warehouse" && <section aria-label="خلاصه مالی سوله و کارگاه" className="fj-pr-summary"><strong>خلاصه مدت و شرایط مالی سوله یا کارگاه</strong><div className="fj-pr-summary-grid">{industrialFinancialRows(isWantedAd?form.shedRequest:form.industrialOffer,isWantedAd).map(({label,amount})=><div key={label}><span>{label}</span><bdi>{amount}</bdi></div>)}</div></section>}
                     {!isWantedAd && form.category === "garden" && form.gardenOffer.rentalTerm === "long" && form.gardenOffer.financialMode === "full_deposit" && <p className="fj-go-price-note">رهن کامل باغ: {formatPriceInput(form.gardenOffer.depositRial)} ریال؛ در این آگهی اجاره‌ای ثبت نمی‌شود.</p>}
                     <div className="add-parking-fields-grid">
-                      {form.category !== "parking" && form.category !== "storage" && form.category !== "warehouse" && form.category !== "residential" && !(!isWantedAd && (form.category === "shop" || form.category === "other" || (form.category === "garden"))) && !(isWantedAd && ["land", "shop", "villa", "garden", "other"].includes(form.category)) && !(!isWantedAd && form.category === "villa" && form.villaOffer.rentalTerm === "long") && (
+                      {form.category !== "parking" && form.category !== "storage" && form.category !== "warehouse" && form.category !== "land" && form.category !== "residential" && !(!isWantedAd && (form.category === "shop" || form.category === "other" || (form.category === "garden"))) && !(isWantedAd && ["land", "shop", "villa", "garden", "other"].includes(form.category)) && !(!isWantedAd && form.category === "villa" && form.villaOffer.rentalTerm === "long") && (
                         <>
                       <div
                         className={`add-parking-field add-parking-field--price-combo${form.priceType === "negotiable" ? " add-parking-field--negotiable" : ""}`}
@@ -1727,8 +1730,12 @@ function AddParking() {
                           )}
 
                           <div>
+                            {/* F505_LAND_PREVIEW_COMPACT_SAFE_20261114: match the compact financial text of the other categories. */}
                             <strong>
-                              {form.category === "parking"
+                              {form.category === "land"
+                                ? (landContractHeadline(isWantedAd ? form.landRental : form.landOffer, isWantedAd)
+                                  || (isWantedAd && form.landRental?.transactionKind === "crop_share" ? "مشارکت در محصول؛ توافقی" : "شرایط مالی ثبت نشده"))
+                                : form.category === "parking"
                                 ? (parkingFinancialHeadline(isWantedAd ? form.parkingRequestDetails : form.parkingOffer, isWantedAd) || "شرایط مالی ثبت نشده")
                                 : form.category === "storage" ? (storageFinancialHeadline(isWantedAd?form.warehouseRequest:form.storageOffer,isWantedAd) || "شرایط مالی ثبت نشده")
                                 : form.category === "warehouse" ? (industrialFinancialHeadline(isWantedAd?form.shedRequest:form.industrialOffer,isWantedAd) || "شرایط مالی ثبت نشده")

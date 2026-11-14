@@ -1,4 +1,5 @@
 "use strict";
+const { cleanLandFinance } = require("./landRentalFinance");
 /** Server-side land supply whitelist. Fields never constitute a verified permit. */
 const TYPES=new Set(["vacant","agricultural","prepared","trees"]);
 const PURPOSES=new Set(["agriculture","parking","depot","livestock","construction","event","logistics","tourism","commerce","infrastructure","personal","other"]);
@@ -32,6 +33,7 @@ function cleanLandSpaceAttributes(raw, category, side){
    frontageM:number(v.frontageM,0.1,5000), vehicleAccess:only(VEHICLES,v.vehicleAccess),
    waterSources:waters.includes("none")?["none"]:waters,
    features:list(FEATURES,v.features).filter(x=>!(waters.includes("none")&&x==="water")), crops:isAgri?list(CROPS,v.crops):[], irrigation:isAgri?only(IRRIGATION,v.irrigation):null, depositRial:number(v.depositRial,1,999999999999999,0),
+   ...cleanLandFinance(v,false),
  }};
 }
 module.exports={cleanLandSpaceAttributes};

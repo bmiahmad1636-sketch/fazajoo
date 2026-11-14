@@ -109,7 +109,8 @@
       "rateUnitsByTerm": {
         "short": [
           "day",
-          "week"
+          "week",
+          "month"
         ],
         "seasonal": [
           "season"

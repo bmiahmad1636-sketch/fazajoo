@@ -22,6 +22,8 @@ import {
 
 import { formatRialPrice, normalizePriceNumber } from "../utils/priceFormatter";
 import { readLandRental } from "../utils/landRental";
+import {landContractMoneyRows} from "../utils/landContract.js";
+import LandRentalBadges from "./LandRentalBadges";
 import { readResidentialRequest, residentialRequestAreaText, residentialRequestBudgetText } from "../utils/residentialRequest";
 import { residentialFinancialHeadline, residentialFinancialRows } from "../utils/residentialOffer";
 import { readVillaRequest, villaRequestAreaText, villaRequestBudgetText, villaRequestBudgetRows } from "../utils/villaRequest";
@@ -167,6 +169,7 @@ function ParkingCard({ parking }) {
     ? readLandRental(parking.description || "")
     : null;
   const landData = landRequest?.hasMetadata ? landRequest.data : null;
+  const landMoneyRows=category==="land"?landContractMoneyRows(isWanted?landData:parking?.spaceAttributes?.values,isWanted):[];
   const landAreaUnit = landData?.areaUnit === "hectare" ? "هکتار" : "مترمربع";
   const landMinArea = normalizePriceNumber(landData?.minArea ?? parking.landRental?.minArea ?? parking.landRequest?.minArea);
   const landMaxArea = normalizePriceNumber(landData?.maxArea ?? parking.landRental?.maxArea ?? parking.landRequest?.maxArea);
@@ -554,6 +557,7 @@ function ParkingCard({ parking }) {
             {category === "warehouse" && <ParkingRentalBadges category="warehouse"
               values={isWanted ? industrialData : parking?.spaceAttributes?.values}
               wanted={isWanted} compact />}
+            {category === "land" && <LandRentalBadges values={isWanted?landData:parking?.spaceAttributes?.values} wanted={isWanted} compact/>}
             {category === "shop" && (isWanted?shopWanted?.transferType!=="key_money":parking?.spaceAttributes?.values?.transferType!=="key_money") && <ParkingRentalBadges category="shop"
               values={isWanted?shopWanted:parking?.spaceAttributes?.values} wanted={isWanted} compact />}
           {isWanted && category === "garden" && gardenData?.rentalTerm && <span className="fj-vr-badge">درخواست {({short:"کوتاه‌مدت",seasonal:"فصلی",long:"بلندمدت"})[gardenData.rentalTerm]}</span>}
@@ -648,9 +652,9 @@ function ParkingCard({ parking }) {
                 : "قیمت"}
             </span>
 
-            {(parkingFinancial.length || storageFinancial.length || industrialFinancial.length || shopFinancial.length || gardenPriceRows.length || residentialPriceRows.length || gardenWantedRows.length || villaWantedRows.length || villaPriceRows.length || otherPriceRows.length) ? (
+            {(parkingFinancial.length || storageFinancial.length || industrialFinancial.length || shopFinancial.length || landMoneyRows.length || gardenPriceRows.length || residentialPriceRows.length || gardenWantedRows.length || villaWantedRows.length || villaPriceRows.length || otherPriceRows.length) ? (
               <div className="parking-card__garden-money" aria-label={isWanted?"بودجه درخواست":"شرایط مالی آگهی"}>
-                {(parkingFinancial.length ? parkingFinancial : storageFinancial.length ? storageFinancial : industrialFinancial.length ? industrialFinancial : shopFinancial.length ? shopFinancial : gardenPriceRows.length ? gardenPriceRows : gardenWantedRows.length ? gardenWantedRows : villaWantedRows.length ? villaWantedRows : villaPriceRows.length ? villaPriceRows : residentialPriceRows.length ? residentialPriceRows : otherPriceRows).map(({label,amount})=><div key={label} className="parking-card__garden-money-row"><span>{label}</span><bdi>{amount}</bdi></div>)}
+                {(parkingFinancial.length ? parkingFinancial : storageFinancial.length ? storageFinancial : industrialFinancial.length ? industrialFinancial : shopFinancial.length ? shopFinancial : landMoneyRows.length ? landMoneyRows : gardenPriceRows.length ? gardenPriceRows : gardenWantedRows.length ? gardenWantedRows : villaWantedRows.length ? villaWantedRows : villaPriceRows.length ? villaPriceRows : residentialPriceRows.length ? residentialPriceRows : otherPriceRows).map(({label,amount})=><div key={label} className="parking-card__garden-money-row"><span>{label}</span><bdi>{amount}</bdi></div>)}
               </div>
             ) : <strong>
               {landData

@@ -135,7 +135,28 @@ export function toSpaceProfile(listing = {}) {
         }
       }
     }
-    if (category === "land" && attrs.depositRial != null) profile.depositRial = numericOrNull(attrs.depositRial);
+    if (category === "land") {
+      const raw=listing.spaceAttributes?.schemaVersion===1&&listing.spaceAttributes?.category==="land"?listing.spaceAttributes.values:null;
+      if(raw && ["short","seasonal","long"].includes(raw.rentalTerm)){
+        profile.fields.landRentalTerm=raw.rentalTerm;
+        profile.fields.canNegotiateOtherTerm=raw.canNegotiateOtherTerm===true;
+        profile.fields.landTransactionKind="lease";
+        profile.depositRial=null;
+        if(raw.rentalTerm==="short"){
+          profile.rentRial=numericOrNull(raw.shortRateRial);
+          profile.pricePeriod={day:"daily",week:"weekly",month:"monthly"}[raw.shortRateUnit]||null;
+          profile.fields.securityHoldRial=numericOrNull(raw.securityHoldRial);
+        }else if(raw.rentalTerm==="seasonal"){
+          profile.rentRial=numericOrNull(raw.seasonalRateRial);
+          profile.pricePeriod="seasonal";
+          profile.fields.securityHoldRial=numericOrNull(raw.seasonalSecurityHoldRial);
+        }else{
+          profile.depositRial=raw.financialMode==="rent_only"?null:numericOrNull(raw.longDepositRial);
+          profile.rentRial=raw.financialMode==="full_deposit"?null:numericOrNull(raw.longRateUnit==="year"?raw.longYearlyRentRial:raw.longMonthlyRentRial);
+          profile.pricePeriod=raw.financialMode==="full_deposit"?null:({month:"monthly",year:"yearly"}[raw.longRateUnit]||null);
+        }
+      }else if(attrs.depositRial!=null)profile.depositRial=numericOrNull(attrs.depositRial);
+    }
     if (category === "garden") {
       profile.depositRial = ["short","seasonal"].includes(attrs.rentalTerm)?null:numericOrNull(attrs.depositRial);
       profile.fields.gardenRentalTerm=["short","seasonal","long"].includes(attrs.rentalTerm)?attrs.rentalTerm:null;
@@ -242,6 +263,8 @@ export function toSpaceProfile(listing = {}) {
       gardenPrivacyRequired: category === "garden" && meta?.privacyRequired === true,
       legalUse: category === "land" && meta?.legalUse !== "other" ? textOrNull(meta?.legalUse) : null,
       locationType: category === "land" ? textOrNull(meta?.locationType) : null,
+      landRentalTerm:category==="land"&&["short","seasonal","long"].includes(meta?.rentalTerm)?meta.rentalTerm:null,
+      landTransactionKind:category==="land"?meta?.transactionKind==="crop_share"?"crop_share":"lease":null,
       activity: textOrNull(meta?.activity),
       leaseDuration: category === "warehouse" && !["short","long"].includes(meta?.rentalTerm) ? textOrNull(meta?.duration) : null,
       industrialRentalTerm: category === "warehouse" && ["short","long"].includes(meta?.rentalTerm) ? meta.rentalTerm : null,
@@ -320,8 +343,18 @@ export function toSpaceProfile(listing = {}) {
       profile.pricePeriod=short?({day:"daily",week:"weekly",month:"monthly"}[meta.shortRateUnit]||null):meta.financialMode==="full_deposit"?null:({month:"monthly",year:"yearly"}[meta.longRateUnit]||null);
       profile.fields.maxSecurityHoldRial=short?numericOrNull(meta.maxSecurityHoldRial):null;
     } else if (category === "land") {
-      profile.maxRentRial = numericOrNull(meta?.rent);
-      profile.maxDepositRial = numericOrNull(meta?.deposit);
+      if(meta?.transactionKind==="crop_share"){
+        profile.maxRentRial=null;profile.maxDepositRial=null;profile.pricePeriod=null;
+      }else if(meta && ["short","seasonal","long"].includes(meta.rentalTerm)){
+        const term=meta.rentalTerm;
+        profile.maxRentRial=term==="long"&&meta.financialMode==="full_deposit"?null:numericOrNull(term==="long"?meta.maxRentRial:meta.maxBudgetRial);
+        profile.maxDepositRial=term==="long"&&meta.financialMode!=="rent_only"?numericOrNull(meta.maxDepositRial):null;
+        profile.pricePeriod=term==="short"?({day:"daily",week:"weekly",month:"monthly"}[meta.shortRateUnit]||null):term==="seasonal"?"seasonal":meta.financialMode==="full_deposit"?null:({month:"monthly",year:"yearly"}[meta.longRateUnit]||null);
+        profile.fields.maxSecurityHoldRial=term==="short"||term==="seasonal"?numericOrNull(meta.maxSecurityHoldRial):null;
+      }else{
+        profile.maxRentRial=numericOrNull(meta?.rent);
+        profile.maxDepositRial=numericOrNull(meta?.deposit);
+      }
     } else {
       profile.maxRentRial = numericOrNull(meta?.maxBudget);
       profile.maxDepositRial = numericOrNull(meta?.maxDeposit);
