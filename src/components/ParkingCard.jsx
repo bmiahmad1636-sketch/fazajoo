@@ -46,6 +46,7 @@ import OtherRentalBadges from "./OtherRentalBadges";
 import GardenRentalBadges from "./GardenRentalBadges";
 import {otherFinancialRows} from "../utils/otherOffer";
 
+import IndustrialCardPilot from "./IndustrialCardPilot.jsx";
 import "./ParkingCard.css";
 
 const CATEGORY_INFO = {
@@ -425,6 +426,18 @@ function ParkingCard({ parking }) {
         setFavoriteChanging(false);
       }
     };
+
+  // DS-01 pilot is restricted to the warehouse/shed category.
+  // All existing hooks and non-industrial rendering remain unchanged.
+  if (category === "warehouse") {
+    return <IndustrialCardPilot
+      parking={parking}
+      requested={industrialData}
+      favorite={isFavorite}
+      onFavorite={handleFavorite}
+      favoriteDisabled={favoriteLoading || favoriteChanging}
+    />;
+  }
 
   return (
     <article
