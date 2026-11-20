@@ -1,0 +1,74 @@
+/* Fazajoo DS-08: reliable, bounded live preview while editing a tall listing.
+   Sticky tracks the form; never fixed, never intercepts mobile scrolling. */
+@media (min-width: 1051px) {
+  .edit-parking-page .edit-parking-layout {
+    align-items: start;
+  }
+  .edit-parking-page .edit-parking-sidebar {
+    position: sticky;
+    top: 86px;
+    align-self: start;
+    height: max-content;
+    max-height: calc(100vh - 102px);
+    max-height: calc(100dvh - 102px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(61, 92, 75, .25) transparent;
+    padding-bottom: 2px;
+  }
+  .edit-parking-page .edit-parking-preview__image {
+    height: clamp(120px, 22dvh, 205px);
+  }
+}
+/* Tablet/mobile: preview follows document, preserving form width & touch usability. */
+@media (max-width: 1050px) {
+  .edit-parking-page .edit-parking-sidebar {
+    position: static;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+/* DS09: make viewport sticky independent of the preview card's own scrolling.
+   Desktop: root must not form a secondary scroll container; only the preview
+   may scroll internally if its CONTENT is taller than the screen. */
+@media (min-width: 1051px) {
+  .edit-parking-page {
+    overflow: visible !important;
+  }
+  .edit-parking-page .edit-parking-layout {
+    align-items: start;
+    overflow: visible !important;
+  }
+  .edit-parking-page .edit-parking-sidebar {
+    position: sticky !important;
+    top: 88px !important;
+    align-self: start !important;
+    display: block;
+    height: max-content !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .edit-parking-page .edit-parking-preview {
+    max-height: calc(100vh - 102px);
+    max-height: calc(100dvh - 102px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+  }
+}
+@media (max-width: 1050px) {
+  .edit-parking-page .edit-parking-sidebar {
+    position: static !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .edit-parking-page .edit-parking-preview {
+    max-height: none !important;
+    overflow: hidden;
+  }
+}

@@ -27,11 +27,11 @@ test('full deposit and business rights remain exclusive, never shown as monthly 
   {label:'مبلغ پیشنهادی (منوط به بررسی نوع حق)',amount:'۳۰۰٬۰۰۰٬۰۰۰ ریال'}
  ]);
 });
-test('hero and compact main info both use separated finance rows without changing other categories',()=>{
+test('main hero uses separated finance rows without repeated financial feature tile',()=>{
  const jsx=read('../src/pages/ParkingDetails.jsx');
  assert.match(jsx,/shopPriceRows=category==="shop"/);
  assert.match(jsx,/<ShopMoneyRows items=\{shopPriceRows\} stacked/);
- assert.match(jsx,/<ShopMoneyRows items=\{shopPriceRows\} compact stacked/);
+ assert.doesNotMatch(jsx,/<ShopMoneyRows items=\{shopPriceRows\} compact stacked/);
  assert.match(jsx,/otherBudgetText \|\| gardenBudgetText/);
  const css=read('../src/pages/ParkingDetails.css');
  assert.match(css,/parking-details-hero__price--shop/);

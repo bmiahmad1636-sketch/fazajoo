@@ -1,0 +1,32 @@
+/* DS09 — 9 categories on ONE row at desktop width, responsive elsewhere.
+   Scoped strictly to the category picker on the Add listing page. */
+.add-parking-page .add-parking-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+@media (min-width: 1220px) {
+  .add-parking-page .add-parking-categories-grid {
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .add-parking-page .add-parking-categories-grid > button {
+    min-width: 0;
+    white-space: nowrap;
+    font-size: .81rem;
+    padding-inline: 3px !important;
+    border-radius: 12px !important;
+    letter-spacing: -.08px;
+  }
+  .add-parking-page .add-parking-categories-grid > button > span {
+    flex: 0 0 auto;
+    font-size: .9rem !important;
+  }
+}
+@media (max-width: 700px) {
+  .add-parking-page .add-parking-categories-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+}

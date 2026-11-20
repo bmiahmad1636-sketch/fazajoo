@@ -1,0 +1,61 @@
+/* DS11 — Villa area only. No changes to global forms or other categories. */
+.fj-villa-area-ds11,
+.fj-villa-request-area-ds11 {
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid #e9dfd5;
+  border-radius: 14px;
+  background: #fffdfa;
+}
+.fj-villa-area-ds11 { display: grid; gap: 8px; }
+.fj-villa-area-ds11 label b { color: #283c33; font-size: .93rem; }
+.fj-villa-area-ds11 em { font-style: normal; color: #e46c1e; }
+.fj-villa-area-ds11 > p:not(.fj-villa-area-ds11__error),
+.fj-villa-request-area-ds11 > p:not(.residential-request__error) {
+  margin: 0;
+  color: #796e63;
+  font-size: .78rem;
+  line-height: 1.8;
+}
+.fj-villa-area-ds11__input { display: flex; align-items: center; gap: 9px; position: relative; }
+.fj-vo .fj-villa-area-ds11__input > input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 48px;
+  padding: 9px 12px;
+  font-size: .93rem;
+  direction: ltr;
+  text-align: right;
+}
+.fj-villa-area-ds11__input > span { flex: 0 0 auto; color: #65786c; font-size: .75rem; }
+.fj-villa-area-ds11__input input[aria-invalid="true"],
+.fj-villa-request-area-ds11 input[aria-invalid="true"] {
+  border-color: #cc5546;
+  box-shadow: 0 0 0 2px rgba(204, 85, 70, .08);
+}
+.fj-villa-area-ds11__error {
+  margin: 0;
+  padding: 9px 11px;
+  border: 1px solid #f0bab2;
+  border-radius: 10px;
+  background: #fff2ef;
+  color: #aa3324;
+  font-size: .82rem;
+  font-weight: 700;
+  line-height: 1.8;
+}
+.fj-villa-request-area-ds11 { margin-top: 15px; }
+.fj-villa-request-area-ds11 > strong { display: block; color: #284438; font-size: .95rem; }
+.fj-villa-request-area-ds11 > strong span {
+  display: inline-block;
+  margin-inline-start: 5px;
+  color: #668275;
+  font-size: .74rem;
+  font-weight: 500;
+}
+.fj-villa-request-area-ds11 .residential-request__grid { margin-top: 12px; }
+.fj-villa-request-area-ds11 .residential-request__error { margin-bottom: 0; }
+@media (max-width: 540px) {
+  .fj-villa-area-ds11,
+  .fj-villa-request-area-ds11 { padding: 11px 12px; }
+}

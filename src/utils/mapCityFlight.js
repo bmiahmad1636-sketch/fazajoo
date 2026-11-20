@@ -18,7 +18,7 @@ export function animateCityFlight(map, center, { zoom = 12, reducedMotion = fals
     map.off("moveend", onOverviewEnd);
     waitingForOverview = false;
     if (!cancelled) {
-      map.flyTo({ center: destination, zoom, duration: 1400, curve: 1.45, essential: false });
+      map.flyTo({ center: destination, zoom, duration: 1700, curve: 1.45, essential: false });
     }
   };
 
@@ -26,8 +26,8 @@ export function animateCityFlight(map, center, { zoom = 12, reducedMotion = fals
     map.jumpTo({ center: destination, zoom });
   } else {
     const currentZoom = Number(map.getZoom());
-    const overviewZoom = Math.min(Number.isFinite(currentZoom) ? currentZoom : 5, 5);
-    if (currentZoom > overviewZoom + 0.4) {
+    const overviewZoom = 3.85; // recognizable Iran-wide overview before the city approach
+    if (Number.isFinite(currentZoom) && currentZoom > overviewZoom + 0.4) {
       waitingForOverview = true;
       map.on("moveend", onOverviewEnd);
       map.easeTo({ zoom: overviewZoom, duration: 650, essential: false });

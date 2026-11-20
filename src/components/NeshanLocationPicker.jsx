@@ -30,6 +30,7 @@ export default function NeshanLocationPicker({
   value,
   onChange,
   city = "",
+  cityFlightDelay = 350,
   disabled = false,
 }) {
   const mapElementRef = useRef(null);
@@ -233,10 +234,10 @@ export default function NeshanLocationPicker({
     const delay = window.setTimeout(() => {
       const map = mapRef.current;
       if (map) flyToCity(map, cityCenter, 12);
-    }, 350);
+    }, cityFlightDelay);
     return () => window.clearTimeout(delay);
     // Viewport-only: no onChange, no stored coordinates and no auto-marker.
-  }, [city, status, savedLat, savedLng]);
+  }, [city, status, savedLat, savedLng, cityFlightDelay]);
 
   useEffect(() => {
     const map = mapRef.current;

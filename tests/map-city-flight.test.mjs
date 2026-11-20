@@ -26,7 +26,7 @@ test("city visit zooms out first, then flies into the city without pin placement
   animateCityFlight(map, center);
   assert.equal(map.calls.filter(([name]) => name === "easeTo").length, 1);
   assert.equal(map.calls.filter(([name]) => name === "flyTo").length, 0);
-  assert.equal(map.calls.find(([name]) => name === "easeTo")[1].zoom, 5);
+  assert.equal(map.calls.find(([name]) => name === "easeTo")[1].zoom, 3.85);
   map.finishOverview();
   const flight = map.calls.find(([name]) => name === "flyTo");
   assert.ok(flight);
@@ -46,7 +46,7 @@ test("cancelling the overview never resumes the stale destination", () => {
 });
 
 test("city can fly in directly when map is already zoomed out", () => {
-  const map = fakeMap(4.5);
+  const map = fakeMap(3.5);
   animateCityFlight(map, [51.42, 35.69]);
   assert.equal(map.calls.filter(([name]) => name === "easeTo").length, 0);
   assert.equal(map.calls.filter(([name]) => name === "flyTo").length, 1);
@@ -81,10 +81,20 @@ test("shared location picker animates form-selected city without saving a locati
 
 test("selected city is only a viewport hint and manual city navigation is removed", () => {
   const picker = readFileSync(new URL("../src/components/NeshanLocationPicker.jsx", import.meta.url), "utf8");
-  const cityEffect = picker.slice(picker.indexOf('const savedLng = value?.lng;'), picker.indexOf('}, [city, status, savedLat, savedLng]);'));
+  const cityEffect = picker.slice(picker.indexOf('const savedLng = value?.lng;'), picker.indexOf('}, [city, status, savedLat, savedLng, cityFlightDelay]);'));
   assert.match(cityEffect, /if \(hasSavedPoint\) return undefined/);
   assert.match(cityEffect, /flyToCity\(map, cityCenter, 12\)/);
   assert.doesNotMatch(cityEffect, /onChangeRef\.current|drawPoint\(|new maplibregl\.Marker/);
   assert.doesNotMatch(picker, /jumpToCity|cityQuery|citySearchStatus|neshan-location-picker__city-jump|رفتن به شهر آگهی/);
   assert.match(picker, /موقعیت فعلی من/);
+});
+
+
+test("first city selection zooms out from the original Iran map before approaching", () => {
+  const map = fakeMap(5);
+  animateCityFlight(map, [51.42, 35.69]);
+  assert.equal(map.calls.filter(([name]) => name === "easeTo").length, 1);
+  assert.equal(map.calls.filter(([name]) => name === "flyTo").length, 0);
+  map.finishOverview();
+  assert.equal(map.calls.filter(([name]) => name === "flyTo").length, 1);
 });

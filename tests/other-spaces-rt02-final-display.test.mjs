@@ -44,11 +44,11 @@ test('RT02 final: owner offer financial rows stay unchanged', () => {
  assert.equal(rows.length,2);
  assert.match(rows[0].label,/اجاره/);assert.match(rows[1].label,/ودیعه/);
 });
-test('RT02 final: detail hero and details summary share the same money component for typed demand', () => {
+test('RT02 final: typed demand money remains in the hero without a repeated feature tile', () => {
  const jsx=source('src/pages/ParkingDetails.jsx');
  assert.match(jsx,/const otherWantedPriceRows = otherWantedData \? otherRequestBudgetRows\(otherWantedData\) : \[\]/);
  assert.match(jsx,/<ShopMoneyRows items=\{otherWantedPriceRows\} ariaLabel="بودجه درخواست" \/>/);
- assert.match(jsx,/<ShopMoneyRows items=\{otherWantedPriceRows\} compact ariaLabel="بودجه درخواست" \/>/);
+ assert.doesNotMatch(jsx,/<ShopMoneyRows items=\{otherWantedPriceRows\} compact ariaLabel="بودجه درخواست" \/>/);
  assert.match(jsx,/otherPriceRows\.length \|\| otherWantedPriceRows\.length/);
  assert.match(jsx,/!otherWantedPriceRows\.length \? \[\["بودجه",otherBudgetText\]\] : \[\]/);
  assert.match(source('src/pages/ParkingDetails.css'),/\.parking-details-hero__price--shop/);

@@ -33,12 +33,12 @@ test("server ignores forged generic rent and separates financial modes",()=>{
   assert.match(ctrl,/full_deposit" && \(space.price \|\| space.priceType !== "negotiable"\)/);
   assert.match(ctrl,/"garden","residential","villa"\].includes\(space.category\)/);
 });
-test("cards and both detail price locations use separate actual amounts",()=>{
+test("cards and detail hero use separate actual amounts without duplicated feature price",()=>{
   assert.match(card,/residentialFinancialRows\(residentialDetails,parking\?\.spaceAttributes\)/);
   assert.match(card,/gardenPriceRows.length \|\| residentialPriceRows.length/);
   assert.match(details,/residentialFinancialRows\(parking\?\.residentialDetails,parking\?\.spaceAttributes\)/);
   assert.match(details,/ShopMoneyRows items=\{residentialPriceRows\}/);
-  assert.match(details,/ShopMoneyRows items=\{residentialPriceRows\} compact/);
+  assert.doesNotMatch(details,/ShopMoneyRows items=\{residentialPriceRows\} compact/);
   assert.match(details,/residentialPriceRows.map/);
 });
 test("form keeps existing room, building and climate fields conditional, paired on desktop, stacked on mobile",()=>{

@@ -68,6 +68,9 @@ import { emptyVillaDetails } from "../components/villaDetails";
 import "../components/ResidentialFields.css";
 
 import "./EditParking.css";
+import "./ListingFormVisualRefresh.css";
+import "./ListingFormJourneyDS07.css";
+import "./EditParkingStickyDS08.css";
 import { editListingCategoryLabel, editListingTitle, editListingBaseHint, editListingTitlePlaceholder } from "../utils/editListingLabels.js";
 
 const EMPTY_FORM = {
@@ -758,68 +761,6 @@ parking?.category === "storage" ? storageListingPrice(isWanted?form.warehouseReq
                 </div>
               )}
 
-        {parking?.category === "parking" && !isWanted && (
-          <ParkingOfferFields value={form.parkingOffer} note={form.description} disabled={loading} error={errors.parkingOffer}
-            onNoteChange={(description) => { setForm(current=>({...current,description})); setShowSuccess(false); }}
-            onChange={(parkingOffer) => { setForm(current=>({...current,parkingOffer})); setErrors(current=>({...current,parkingOffer:""})); }} />
-        )}
-        {parking?.category === "parking" && !isWanted && <ParkingRentalFields value={form.parkingOffer} disabled={loading} error={errors.parkingRental} onChange={parkingOffer=>{setForm(current=>({...current,parkingOffer}));setErrors(current=>({...current,parkingOffer:"",parkingRental:""}));}} />}
-        {parking?.category === "storage" && !isWanted && (
-          <StorageOfferFields value={form.storageOffer} note={form.description} disabled={loading} error={errors.storageOffer}
-            onNoteChange={(description) => { setForm(current=>({...current,description})); setShowSuccess(false); }}
-            onChange={(storageOffer) => { setForm(current=>({...current,storageOffer})); setErrors(current=>({...current,storageOffer:""})); setShowSuccess(false); }} />
-        )}
-        {parking?.category === "storage" && !isWanted && (
-          <ParkingRentalFields category="storage" value={form.storageOffer} disabled={loading} error={errors.storageRental}
-            onChange={storageOffer=>{setForm(current=>({...current,storageOffer}));setErrors(current=>({...current,storageRental:""}));setShowSuccess(false);}}/>
-        )}
-        {parking?.category === "warehouse" && !isWanted && (
-          <IndustrialOfferFields value={form.industrialOffer} note={form.description} disabled={loading} error={errors.industrialOffer}
-            onNoteChange={(description) => { setForm(current=>({...current,description})); setShowSuccess(false); }}
-            onChange={(industrialOffer) => { setForm(current=>({...current,industrialOffer})); setErrors(current=>({...current,industrialOffer:""})); setShowSuccess(false); }} />
-        )}
-        {parking?.category === "warehouse" && !isWanted && (
-          <ParkingRentalFields category="warehouse" value={form.industrialOffer} disabled={loading} error={errors.industrialRental}
-            onChange={industrialOffer=>{setForm(current=>({...current,industrialOffer}));setErrors(current=>({...current,industrialRental:""}));setShowSuccess(false);}}/>
-        )}
-        {parking?.category === "land" && !isWanted && (
-          <LandOfferFields value={form.landOffer} note={form.description} disabled={loading} error={errors.landOffer} rentalError={errors.landContract}
-            onNoteChange={(description)=>{setForm(current=>({...current,description}));setShowSuccess(false);}}
-            onChange={(landOffer)=>{setForm(current=>({...current,landOffer}));setErrors(current=>({...current,landOffer:"",landContract:""}));setShowSuccess(false);}}/>
-        )}
-        {parking?.category === "residential" && !isWanted && (
-          <ResidentialFields
-            value={form.residentialDetails}
-            offer={form.residentialOffer}
-            note={form.description}
-            disabled={loading}
-            error={errors.residentialOffer}
-            onNoteChange={(description) => setForm((current) => ({...current, description}))}
-            onOfferChange={(residentialOffer) => { setForm((current) => ({...current, residentialOffer})); setErrors((current) => ({...current, residentialOffer: ""})); }}
-            onChange={(residentialDetails) => { setForm((current) => ({...current, residentialDetails})); setErrors((current) => ({...current, residentialOffer: ""})); }}
-          />
-        )}
-
-        {parking?.category === "shop" && !isWanted && <ShopOfferFields value={form.shopOffer} details={form.shopDetails} note={form.description} disabled={loading} error={errors.shopOffer} rentalError={errors.shopRental}
-          onNoteChange={description=>setForm(current=>({...current,description}))}
-          onDetailsChange={shopDetails=>setForm(current=>({...current,shopDetails}))}
-          onChange={shopOffer=>{setForm(current=>({...current,shopOffer}));setErrors(current=>({...current,shopOffer:"",shopRental:""}));setShowSuccess(false);}}/>}
-
-        {parking?.category === "garden" && !isWanted && <GardenOfferFields value={form.gardenOffer} details={form.gardenDetails} note={form.description} disabled={loading} error={errors.gardenOffer}
-          onNoteChange={description=>{setForm(current=>({...current,description}));setShowSuccess(false);}}
-          onDetailsChange={gardenDetails=>{setForm(current=>({...current,gardenDetails}));setShowSuccess(false);}}
-          onChange={gardenOffer=>{setForm(current=>({...current,gardenOffer,...(gardenOffer.financialMode==="full_deposit"?{price:"",priceType:"negotiable"}:current.gardenOffer.financialMode==="full_deposit"?{priceType:"monthly"}:{})}));setErrors(current=>({...current,gardenOffer:"",price:""}));setShowSuccess(false);}}/>}
-
-        {parking?.category === "other" && !isWanted && <OtherOfferFields value={form.otherOffer} note={form.description} disabled={loading} error={errors.otherOffer}
-          onNoteChange={description=>setForm(c=>({...c,description}))}
-          onChange={otherOffer=>{setForm(c=>({...c,otherOffer}));setErrors(c=>({...c,otherOffer:""}));setShowSuccess(false);}}/>}
-        {parking?.category === "villa" && !isWanted && <VillaOfferFields
-          value={form.villaOffer} details={form.villaDetails} note={form.description} disabled={loading} error={errors.villaOffer}
-          onNoteChange={description=>{setForm(current=>({...current,description}));setShowSuccess(false);}}
-          onDetailsChange={villaDetails=>{setForm(current=>({...current,villaDetails}));setErrors(current=>({...current,villaOffer:""}));setShowSuccess(false);}}
-          onChange={villaOffer=>{setForm(current=>({...current,villaOffer}));setErrors(current=>({...current,villaOffer:""}));setShowSuccess(false);}}
-        />}
-
               <section className="edit-parking-card">
                 <div className="edit-parking-card__header">
                   <div className="edit-parking-card__icon">
@@ -1088,6 +1029,71 @@ parking?.category === "storage" ? storageListingPrice(isWanted?form.warehouseReq
                   />
                 </div>
               </section>
+
+              {/* Specialized offer fields follow the basic listing details, not before them. */}
+        {parking?.category === "parking" && !isWanted && (
+          <ParkingOfferFields value={form.parkingOffer} note={form.description} disabled={loading} error={errors.parkingOffer}
+            onNoteChange={(description) => { setForm(current=>({...current,description})); setShowSuccess(false); }}
+            onChange={(parkingOffer) => { setForm(current=>({...current,parkingOffer})); setErrors(current=>({...current,parkingOffer:""})); }} />
+        )}
+        {parking?.category === "parking" && !isWanted && <ParkingRentalFields value={form.parkingOffer} disabled={loading} error={errors.parkingRental} onChange={parkingOffer=>{setForm(current=>({...current,parkingOffer}));setErrors(current=>({...current,parkingOffer:"",parkingRental:""}));}} />}
+        {parking?.category === "storage" && !isWanted && (
+          <StorageOfferFields value={form.storageOffer} note={form.description} disabled={loading} error={errors.storageOffer}
+            onNoteChange={(description) => { setForm(current=>({...current,description})); setShowSuccess(false); }}
+            onChange={(storageOffer) => { setForm(current=>({...current,storageOffer})); setErrors(current=>({...current,storageOffer:""})); setShowSuccess(false); }} />
+        )}
+        {parking?.category === "storage" && !isWanted && (
+          <ParkingRentalFields category="storage" value={form.storageOffer} disabled={loading} error={errors.storageRental}
+            onChange={storageOffer=>{setForm(current=>({...current,storageOffer}));setErrors(current=>({...current,storageRental:""}));setShowSuccess(false);}}/>
+        )}
+        {parking?.category === "warehouse" && !isWanted && (
+          <IndustrialOfferFields value={form.industrialOffer} note={form.description} disabled={loading} error={errors.industrialOffer}
+            onNoteChange={(description) => { setForm(current=>({...current,description})); setShowSuccess(false); }}
+            onChange={(industrialOffer) => { setForm(current=>({...current,industrialOffer})); setErrors(current=>({...current,industrialOffer:""})); setShowSuccess(false); }} />
+        )}
+        {parking?.category === "warehouse" && !isWanted && (
+          <ParkingRentalFields category="warehouse" value={form.industrialOffer} disabled={loading} error={errors.industrialRental}
+            onChange={industrialOffer=>{setForm(current=>({...current,industrialOffer}));setErrors(current=>({...current,industrialRental:""}));setShowSuccess(false);}}/>
+        )}
+        {parking?.category === "land" && !isWanted && (
+          <LandOfferFields value={form.landOffer} note={form.description} disabled={loading} error={errors.landOffer} rentalError={errors.landContract}
+            onNoteChange={(description)=>{setForm(current=>({...current,description}));setShowSuccess(false);}}
+            onChange={(landOffer)=>{setForm(current=>({...current,landOffer}));setErrors(current=>({...current,landOffer:"",landContract:""}));setShowSuccess(false);}}/>
+        )}
+        {parking?.category === "residential" && !isWanted && (
+          <ResidentialFields
+            value={form.residentialDetails}
+            offer={form.residentialOffer}
+            note={form.description}
+            disabled={loading}
+            error={errors.residentialOffer}
+            onNoteChange={(description) => setForm((current) => ({...current, description}))}
+            onOfferChange={(residentialOffer) => { setForm((current) => ({...current, residentialOffer})); setErrors((current) => ({...current, residentialOffer: ""})); }}
+            onChange={(residentialDetails) => { setForm((current) => ({...current, residentialDetails})); setErrors((current) => ({...current, residentialOffer: ""})); }}
+          />
+        )}
+
+        {parking?.category === "shop" && !isWanted && <ShopOfferFields value={form.shopOffer} details={form.shopDetails} note={form.description} disabled={loading} error={errors.shopOffer} rentalError={errors.shopRental}
+          onNoteChange={description=>setForm(current=>({...current,description}))}
+          onDetailsChange={shopDetails=>setForm(current=>({...current,shopDetails}))}
+          onChange={shopOffer=>{setForm(current=>({...current,shopOffer}));setErrors(current=>({...current,shopOffer:"",shopRental:""}));setShowSuccess(false);}}/>}
+
+        {parking?.category === "garden" && !isWanted && <GardenOfferFields value={form.gardenOffer} details={form.gardenDetails} note={form.description} disabled={loading} error={errors.gardenOffer}
+          onNoteChange={description=>{setForm(current=>({...current,description}));setShowSuccess(false);}}
+          onDetailsChange={gardenDetails=>{setForm(current=>({...current,gardenDetails}));setShowSuccess(false);}}
+          onChange={gardenOffer=>{setForm(current=>({...current,gardenOffer,...(gardenOffer.financialMode==="full_deposit"?{price:"",priceType:"negotiable"}:current.gardenOffer.financialMode==="full_deposit"?{priceType:"monthly"}:{})}));setErrors(current=>({...current,gardenOffer:"",price:""}));setShowSuccess(false);}}/>}
+
+        {parking?.category === "other" && !isWanted && <OtherOfferFields value={form.otherOffer} note={form.description} disabled={loading} error={errors.otherOffer}
+          onNoteChange={description=>setForm(c=>({...c,description}))}
+          onChange={otherOffer=>{setForm(c=>({...c,otherOffer}));setErrors(c=>({...c,otherOffer:""}));setShowSuccess(false);}}/>}
+        {parking?.category === "villa" && !isWanted && <VillaOfferFields
+          value={form.villaOffer} details={form.villaDetails} note={form.description} disabled={loading} error={errors.villaOffer}
+          onNoteChange={description=>{setForm(current=>({...current,description}));setShowSuccess(false);}}
+          onDetailsChange={villaDetails=>{setForm(current=>({...current,villaDetails}));setErrors(current=>({...current,villaOffer:""}));setShowSuccess(false);}}
+          onChange={villaOffer=>{setForm(current=>({...current,villaOffer}));setErrors(current=>({...current,villaOffer:""}));setShowSuccess(false);}}
+        />}
+
+
 
               {!isWanted && (
               <section className="edit-parking-card">

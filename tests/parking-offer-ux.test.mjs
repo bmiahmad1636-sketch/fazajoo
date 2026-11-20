@@ -18,7 +18,7 @@ test('city flight updates only the map viewport; it never saves a listing pin',(
   const picker=file('src/components/NeshanLocationPicker.jsx');
   const afterSavedCoordinates=picker.indexOf('const savedLng = value?.lng;');
   const start=picker.indexOf('useEffect(() => {',afterSavedCoordinates);
-  const end=picker.indexOf('}, [city, status, savedLat, savedLng]);',start);
+  const end=picker.indexOf('}, [city, status, savedLat, savedLng, cityFlightDelay]);',start);
   assert.ok(afterSavedCoordinates>0 && start>afterSavedCoordinates && end>start, 'city-only map effect must be present');
   const cityEffect=picker.slice(start,end);
   assert.match(cityEffect,/getKnownCityCenter\(name, iranCitiesWithCoordinates\)/);

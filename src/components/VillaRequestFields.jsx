@@ -2,7 +2,9 @@ import {
   EMPTY_VILLA_REQUEST, VILLA_REQUEST_TYPES, VILLA_REQUEST_STAYS, VILLA_REQUEST_TERMS, VILLA_REQUEST_LONG_MODES,
   VILLA_REQUEST_AMENITIES, normalizeVillaDigits, changeVillaRequestFinancialMode, changeVillaRequestTerm,
 } from "../utils/villaRequest";
+import { useEffect } from "react";
 import "./ResidentialRequestFields.css";
+import "./VillaAreaDS11.css";
 
 const digitOnly = (value) => normalizeVillaDigits(value).replace(/\D/g, "");
 const money = (value) => {
@@ -15,6 +17,10 @@ export default function VillaRequestFields({ value = {}, onChange, disabled = fa
   const set = (key, next) => onChange({ ...form, [key]: next });
   const long = form.rentalTerm === "long";
   const contractError = long && error.includes("نوع قرارداد بلندمدت");
+  const areaError = error.includes("متراژ") || error.includes("مساحت");
+  useEffect(()=>{if(!areaError)return; const raf=requestAnimationFrame(()=>{
+    document.getElementById("fj-villa-request-area")?.scrollIntoView({behavior:"smooth",block:"center"});
+  });return ()=>cancelAnimationFrame(raf);},[areaError]);
   const selectFinancialMode = (financialMode) => onChange(changeVillaRequestFinancialMode(form, financialMode));
   const toggleAmenity = (key, checked) => set("amenities", checked
     ? [...new Set([...(form.amenities || []), key])]
@@ -64,6 +70,21 @@ export default function VillaRequestFields({ value = {}, onChange, disabled = fa
           </select>
         </label>
       </div>
+      <section className="fj-villa-request-area-ds11" id="fj-villa-request-area" aria-labelledby="fj-villa-request-area-title">
+        <strong id="fj-villa-request-area-title">📐 محدوده متراژ دلخواه <span>اختیاری</span></strong>
+        <p>اگر مساحت برایت مهم است، حداقل، حداکثر یا هر دو را بنویس. خالی گذاشتن هر دو مجاز است.</p>
+        <div className="residential-request__grid">
+          <label className="residential-request__field"><span>حداقل متراژ (مترمربع)</span>
+            <input id="fj-villa-request-min-area" disabled={disabled} inputMode="numeric" value={money(form.minArea)}
+              aria-invalid={Boolean(areaError)} aria-describedby={areaError ? "fj-villa-request-area-error" : undefined}
+              onChange={(e) => set("minArea", digitOnly(e.target.value).slice(0, 7))} placeholder="مثلاً ۲۰۰" /></label>
+          <label className="residential-request__field"><span>حداکثر متراژ (مترمربع)</span>
+            <input id="fj-villa-request-max-area" disabled={disabled} inputMode="numeric" value={money(form.maxArea)}
+              aria-invalid={Boolean(areaError)} aria-describedby={areaError ? "fj-villa-request-area-error" : undefined}
+              onChange={(e) => set("maxArea", digitOnly(e.target.value).slice(0, 7))} placeholder="مثلاً ۵۰۰" /></label>
+        </div>
+        {areaError && <p id="fj-villa-request-area-error" className="residential-request__error" role="alert">{error}</p>}
+      </section>
       <div className="residential-request__money">
         <strong>💰 {long?"بودجه اجاره بلندمدت":"سقف بودجه اقامت"}</strong>
         <p>{long?"رهن و اجاره ماهانه دو مبلغ مستقل‌اند.":"مبلغ حداکثری برای هر دوره را مشخص کن."} واحد مبالغ ریال است.</p>
@@ -101,15 +122,9 @@ export default function VillaRequestFields({ value = {}, onChange, disabled = fa
         </div>
       </details>
       <details className="residential-request__fold">
-        <summary>📐 مساحت و شرایط تکمیلی <span>اختیاری</span></summary>
+        <summary>📝 شرایط تکمیلی <span>اختیاری</span></summary>
         <div className="residential-request__fold-body">
           <div className="residential-request__grid">
-            <label className="residential-request__field"><span>حداقل متراژ (مترمربع)</span>
-              <input disabled={disabled} inputMode="numeric" value={money(form.minArea)}
-                onChange={(e) => set("minArea", digitOnly(e.target.value).slice(0, 7))} placeholder="مثلاً ۲۰۰" /></label>
-            <label className="residential-request__field"><span>حداکثر متراژ (مترمربع)</span>
-              <input disabled={disabled} inputMode="numeric" value={money(form.maxArea)}
-                onChange={(e) => set("maxArea", digitOnly(e.target.value).slice(0, 7))} placeholder="مثلاً ۵۰۰" /></label>
             {!long&&<label className="residential-request__field"><span>حداکثر ضمانت خسارت / ودیعه (ریال)</span>
               <input disabled={disabled} inputMode="numeric" value={money(form.maxDeposit)}
                 onChange={(e) => set("maxDeposit", digitOnly(e.target.value).slice(0, 15))} placeholder="اگر قابل پرداخت است" /></label>}
@@ -123,7 +138,7 @@ export default function VillaRequestFields({ value = {}, onChange, disabled = fa
           </label>
         </div>
       </details>
-      {error && !contractError && <p className="residential-request__error" role="alert">{error}</p>}
+      {error && !contractError && !areaError && <p className="residential-request__error" role="alert">{error}</p>}
     </section>
   );
 }

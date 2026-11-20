@@ -1,0 +1,81 @@
+/* Fazajoo DS-08: listing gallery, non-cropping photo with soft image-backed ambient.
+   Scoped to a REAL gallery image. Placeholder/request cards stay unchanged. */
+.parking-details-page .parking-details-gallery--with-photo {
+  position: relative;
+  isolation: isolate;
+  height: clamp(310px, 30vw, 405px) !important;
+  padding: 0 !important;
+  background: #293a32 !important;
+  overflow: hidden;
+}
+.parking-details-page .parking-details-gallery__ambient {
+  position: absolute;
+  inset: -24px;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.parking-details-page .parking-details-gallery__ambient img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(24px) brightness(.65) saturate(.78);
+  transform: scale(1.07);
+}
+.parking-details-page .parking-details-gallery--with-photo .parking-details-gallery__image-button {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+  cursor: zoom-in;
+}
+.parking-details-page .parking-details-gallery--with-photo .parking-details-gallery__image-button img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center center;
+  filter: drop-shadow(0 6px 22px rgba(14, 28, 23, .19));
+  transform: none;
+  transition: filter .2s ease;
+}
+.parking-details-page .parking-details-gallery--with-photo .parking-details-gallery__image-button:hover img {
+  transform: none;
+  filter: drop-shadow(0 8px 24px rgba(14, 28, 23, .25));
+}
+.parking-details-page .parking-details-gallery--with-photo::after {
+  z-index: 2;
+  background: linear-gradient(to top, rgba(10, 27, 24, .28), transparent 24%) !important;
+}
+.parking-details-page .parking-details-gallery--with-photo .parking-details-gallery__overlay,
+.parking-details-page .parking-details-gallery--with-photo .parking-details-gallery__counter,
+.parking-details-page .parking-details-gallery--with-photo .parking-details-gallery__nav {
+  z-index: 4;
+}
+@media (max-width: 900px) {
+  .parking-details-page .parking-details-gallery--with-photo {
+    height: clamp(255px, 42vw, 340px) !important;
+  }
+}
+@media (max-width: 620px) {
+  .parking-details-page .parking-details-gallery--with-photo {
+    height: clamp(235px, 76vw, 325px) !important;
+  }
+  .parking-details-page .parking-details-gallery--with-photo .parking-details-gallery__image-button {
+    padding: 7px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .parking-details-page .parking-details-gallery--with-photo .parking-details-gallery__image-button img {
+    transition: none;
+  }
+}

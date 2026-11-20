@@ -3,8 +3,10 @@ import VillaFields from "./VillaFields";
 import { VILLA_OFFER_TYPES, VILLA_OFFER_STAYS, VILLA_OFFER_PRIVACY, VILLA_RENTAL_TERMS,
  VILLA_LONG_MODES, villaMoneyInput, villaDigits } from "../utils/villaOffer";
 import "./VillaOfferFields.css";
+import "./VillaShortStayFinanceDS10.css";
+import "./VillaAreaDS11.css";
 
-export default function VillaOfferFields({value={},details={},onChange,onDetailsChange,note="",onNoteChange,disabled=false,error=""}) {
+export default function VillaOfferFields({value={},details={},onChange,onDetailsChange,note="",onNoteChange,disabled=false,error="",shortRate="",shortRateType="daily",onShortRateChange,shortRateError="",area,areaError="",onAreaChange}) {
  const term=value.rentalTerm||"short";
  const stays=Array.isArray(value.availableStays)?value.availableStays:[];
  const extras=Array.isArray(value.extraFeatures)?value.extraFeatures:[];
@@ -15,6 +17,12 @@ export default function VillaOfferFields({value={},details={},onChange,onDetails
    const node=document.getElementById(`fj-villa-${target}`);
    node?.closest("details")?.setAttribute("open","");node?.scrollIntoView({behavior:"smooth",block:"center"});
  });return ()=>cancelAnimationFrame(raf);},[error,target]);
+ useEffect(()=>{if(!areaError)return; const raf=requestAnimationFrame(()=>{
+   document.getElementById("fj-villa-offer-area")?.scrollIntoView({behavior:"smooth",block:"center"});
+ });return ()=>cancelAnimationFrame(raf);},[areaError]);
+ useEffect(()=>{if(!shortRateError)return; const raf=requestAnimationFrame(()=>{
+   document.getElementById("fj-villa-short-rate")?.scrollIntoView({behavior:"smooth",block:"center"});
+ });return ()=>cancelAnimationFrame(raf);},[shortRateError]);
  const moneyField=(id,label,key,description)=> <label id={id} className="fj-vo__money"><b>{label}</b><input disabled={disabled} inputMode="numeric" value={villaMoneyInput(value[key])} onChange={e=>update(key,villaDigits(e.target.value).slice(0,15))} placeholder="مبلغ به ریال"/><small>{description}</small></label>;
  return <div className="fj-vo-wrap" dir="rtl">
   <section className="fj-vo">
@@ -32,10 +40,42 @@ export default function VillaOfferFields({value={},details={},onChange,onDetails
     <label id="fj-villa-privacy"><b>حریم خصوصی <em>*</em></b><select disabled={disabled} value={value.privacy||""} onChange={e=>update("privacy",e.target.value)}><option value="">انتخاب کن</option>{VILLA_OFFER_PRIVACY.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
    </div>
    <small>«کاملاً اختصاصی» را فقط در صورت اطمینان انتخاب کن.</small>
+   {typeof onAreaChange === "function" && <div id="fj-villa-offer-area" className="fj-villa-area-ds11">
+     <label htmlFor="fj-villa-offer-area-input"><b>متراژ واقعی اقامتگاه (مترمربع) <em>*</em></b></label>
+     <p>مساحت واقعی فضا را وارد کن؛ این عدد در کارت آگهی و جستجو استفاده می‌شود.</p>
+     <div className="fj-villa-area-ds11__input">
+       <input id="fj-villa-offer-area-input" name="area" type="number" inputMode="decimal" min="1" step="any"
+         disabled={disabled} required value={area ?? ""} placeholder="مثلاً ۲۵۰"
+         aria-invalid={Boolean(areaError)} aria-describedby={areaError ? "fj-villa-offer-area-error" : undefined}
+         onChange={e=>onAreaChange(e.target.value)} />
+       <span>مترمربع</span>
+     </div>
+     {areaError && <p id="fj-villa-offer-area-error" className="fj-villa-area-ds11__error" role="alert">{areaError}</p>}
+   </div>}
    {value.accommodationType==="other"&&<label><b>نام دقیق اقامتگاه دیگر <em>*</em></b><input disabled={disabled} maxLength={80} value={value.otherType||""} onChange={e=>update("otherType",e.target.value)} placeholder="حداقل ۵ حرف"/></label>}
-   {term==="short"&&<div id="fj-villa-stays" className="fj-vo__group"><strong>شیوه‌های اقامت قابل ارائه <em>*</em></strong><div className="fj-vo__checks">{VILLA_OFFER_STAYS.map(([id,label])=><label key={id} className={stays.includes(id)?"is-selected":""}><input type="checkbox" disabled={disabled} checked={stays.includes(id)} onChange={e=>toggle("availableStays",stays,id,e.target.checked)}/>{label}</label>)}</div><small>قیمت هر دوره در مرحله آخر مشخص می‌شود؛ این گزینه‌ها فقط نوع اقامت قابل پذیرش‌اند.</small></div>}
+   {term==="short"&&<div id="fj-villa-stays" className="fj-vo__group"><strong>شیوه‌های اقامت قابل ارائه <em>*</em></strong><div className="fj-vo__checks">{VILLA_OFFER_STAYS.map(([id,label])=><label key={id} className={stays.includes(id)?"is-selected":""}><input type="checkbox" disabled={disabled} checked={stays.includes(id)} onChange={e=>toggle("availableStays",stays,id,e.target.checked)}/>{label}</label>)}</div><small>{onShortRateChange ? "هزینه دوره اصلی اقامت را پایین‌تر، در همین مرحله مشخص کن. شیوه‌های دیگر صرفاً امکان پذیرش آن دوره‌ها هستند." : "این گزینه‌ها شیوه‌های اقامت قابل ارائه‌اند؛ مبلغ اصلی ثبت‌شده آگهی مستقل از آن‌هاست."}</small></div>}
    {term==="long"&&<div className="fj-vo__group fj-vo__finance" id="fj-villa-contract"><strong>قرارداد بلندمدت <em>*</em></strong><div className="fj-vo__checks">{VILLA_LONG_MODES.map(([id,label])=><label key={id} className={value.financialMode===id?"is-selected":""}><input type="radio" name="fj-villa-long-mode" disabled={disabled} checked={value.financialMode===id} onChange={()=>update("financialMode",id)}/>{label}</label>)}</div>{value.financialMode&&<div className="fj-vo__grid">{value.financialMode!=="rent_only"&&moneyField("fj-villa-finance","مبلغ رهن (ریال)","longDepositRial","وجه رهن قرارداد بلندمدت؛ با ضمانت خسارت اقامت کوتاه‌مدت تفاوت دارد.")}{value.financialMode!=="full_deposit"&&moneyField("fj-villa-finance-rent","اجاره ماهانه (ریال)","longMonthlyRentRial","مبلغ ماهانه، جدا از رهن وارد شود.")}</div>}<small>در قرارداد رهن کامل اجاره ماهانه نداریم. در فقط اجاره، مبلغ رهن ثبت نمی‌شود.</small></div>}
-   {term==="short"&&<div className="fj-vo__finance" id="fj-villa-finance">{moneyField("fj-villa-deposit","ودیعه یا ضمانت خسارت (اختیاری، ریال)","depositRial","این مبلغ جدا از هزینه اقامت است. اگر دریافت نمی‌کنی خالی بگذار؛ به معنی رهن بلندمدت نیست.")}</div>}
+   {term==="short"&&<div className="fj-vo__finance" id="fj-villa-finance">
+     {typeof onShortRateChange === "function" && <div className="fj-vo__short-rate-panel" id="fj-villa-short-rate">
+       <strong>هزینه اصلی اقامت کوتاه‌مدت <em>*</em></strong>
+       <p>هزینه اقامت را همین‌جا، مستقل از ودیعه یا ضمانت خسارت تعیین کن.</p>
+       <div className="fj-vo__short-rate-grid">
+         <label><b>دوره محاسبه هزینه اقامت <em>*</em></b>
+           <select id="villa-short-stay-period" disabled={disabled} value={["daily","weekly","monthly","negotiable"].includes(shortRateType) ? shortRateType : "daily"}
+             onChange={e=>onShortRateChange({priceType:e.target.value,price:e.target.value==="negotiable"?"":shortRate})}>
+             <option value="daily">شبانه / روزانه</option><option value="weekly">هفتگی</option><option value="monthly">ماهانه</option><option value="negotiable">توافقی</option>
+           </select>
+         </label>
+         {shortRateType!=="negotiable" && <label><b>مبلغ اقامت (ریال) <em>*</em></b>
+           <input id="villa-short-stay-amount" disabled={disabled} inputMode="numeric" value={villaMoneyInput(shortRate)}
+             onChange={e=>onShortRateChange({priceType:shortRateType,price:villaDigits(e.target.value).slice(0,15)})} placeholder="مثلاً ۲۵,۰۰۰,۰۰۰" />
+         </label>}
+       </div>
+       {shortRateType==="negotiable" && <small>هزینه اقامت با توافق طرفین تعیین می‌شود؛ مبلغی به‌عنوان قیمت قطعی ثبت نخواهد شد.</small>}
+       {shortRateError && <p className="fj-vo__short-rate-error" role="alert">{shortRateError}</p>}
+     </div>}
+     {moneyField("fj-villa-deposit","ودیعه یا ضمانت خسارت (اختیاری، ریال)","depositRial","این مبلغ جدا از هزینه اقامت است. اگر دریافت نمی‌کنی خالی بگذار؛ به معنی رهن بلندمدت نیست.")}
+   </div>}
    <div id="fj-villa-details" className="fj-vo__villa-fields"><VillaFields value={details} onChange={onDetailsChange} rentalTerm={term} extraFeatures={extras} onExtraChange={(id,checked)=>toggle("extraFeatures",extras,id,checked)} disabled={disabled}/></div>
    {error&&<p className="fj-vo__error" role="alert">{error}</p>}
   </section>

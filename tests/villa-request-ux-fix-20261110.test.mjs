@@ -105,10 +105,10 @@ test("Wanted villa card and details show unspecified area instead of guest capac
   assert.match(details, /villaAreaText \|\| "متراژ مشخص نشده"/);
   assert.match(add, /villaRequestAreaText\(form\.villaRequest\) \|\| "متراژ مشخص نشده"/);
 });
-test("Wanted villa budget rows are used on card, detail hero and detail feature", () => {
+test("Wanted villa budget rows are used on card and detail hero, without duplicate feature", () => {
   assert.match(card, /villaWantedRows = villaData \? villaRequestBudgetRows\(villaData\)/);
   assert.match(details, /villaWantedPriceRows = villaWantedData \? villaRequestBudgetRows\(villaWantedData\)/);
-  assert.equal((details.match(/<ShopMoneyRows items=\{villaWantedPriceRows\} compact stacked/g) || []).length, 1);
+  assert.equal((details.match(/<ShopMoneyRows items=\{villaWantedPriceRows\} compact stacked/g) || []).length, 0);
   assert.equal((details.match(/<ShopMoneyRows items=\{villaWantedPriceRows\} stacked/g) || []).length, 1);
   assert.match(details, /\.\.\.villaWantedPriceRows\.map\(\(\{label, amount\}\) => \[label, amount\]\)/);
 });

@@ -1,0 +1,160 @@
+/* Fazajoo DS-07 — listing form journey, limited to AddParking / EditParking only.
+   Visual-only: no global component changes and no specialty field state changes. */
+
+/* Collapse the repeated, full-height page billboard: leave a clear, compact context. */
+.add-parking-page .add-parking-hero { padding: 10px 0 13px; }
+.add-parking-page .add-parking-hero__content { margin-top: 4px; gap: 4px; }
+.add-parking-page .add-parking-eyebrow { display: none; }
+.add-parking-page .add-parking-hero h1 {
+  font-size: clamp(1.15rem, 1.65vw, 1.65rem);
+  line-height: 1.5;
+  letter-spacing: 0;
+  margin-bottom: 1px;
+}
+.add-parking-page .add-parking-hero p { font-size: .73rem; line-height: 1.65; }
+.add-parking-page .add-parking-content { margin-top: 12px; }
+.add-parking-page .add-parking-form-header { padding-block: 12px 10px; }
+.add-parking-page .add-parking-form-header__step { margin-bottom: 3px; }
+.add-parking-page .add-parking-form-header h2 { font-size: 1.15rem; }
+.add-parking-page .add-parking-form-header p { font-size: .7rem; }
+
+/* One surface for a functional group: prefer whitespace over nested colored frames. */
+.add-parking-page .add-parking-step-content .fj-po,
+.edit-parking-page .edit-parking-form > .fj-po {
+  border-color: #eae4db;
+  background: #fff;
+  padding: 17px 20px;
+  gap: 13px;
+}
+.add-parking-page .add-parking-step-content .fj-po-header,
+.edit-parking-page .edit-parking-form > .fj-po .fj-po-header {
+  border-bottom: 1px solid #f2ede7;
+  padding-bottom: 10px;
+  margin-bottom: 2px;
+}
+.add-parking-page .add-parking-intro {
+  background: #faf9f6;
+  border-color: #f0ebe4;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+}
+.add-parking-page .add-parking-intro > span { width: 31px; height: 31px; }
+
+/* Selecting a city immediately reveals the map, before every category's technical questionnaire. */
+.add-parking-page .fj-map-journey {
+  scroll-margin-top: 105px;
+  border: 1px solid #e6e7db;
+  border-radius: 17px;
+  background: #fffdf8;
+  padding: 12px 15px;
+  margin: 13px 0 19px;
+  min-width: 0;
+}
+.add-parking-page .fj-map-journey__intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 0 8px;
+}
+.add-parking-page .fj-map-journey__intro strong {
+  display: block;
+  color: #1b3e32;
+  font-size: .87rem;
+}
+.add-parking-page .fj-map-journey__intro p {
+  max-width: 760px;
+  margin: 4px 0 0;
+  color: #6c7970;
+  font-size: .72rem;
+  line-height: 1.75;
+}
+.add-parking-page .fj-map-journey__intro > span {
+  flex: 0 0 auto;
+  padding: 5px 10px;
+  background: #f0f7f1;
+  border: 1px solid #dfebdf;
+  border-radius: 999px;
+  color: #366d4f;
+  font-size: .7rem;
+  font-weight: 800;
+}
+.add-parking-page .fj-map-journey .neshan-location-picker {
+  margin: 0;
+  border: 0;
+  border-radius: 10px;
+  padding: 2px;
+  background: transparent;
+  overflow: visible;
+}
+.add-parking-page .fj-map-journey .neshan-location-picker__map { height: 285px; }
+
+/* Media selection: only occupied tiles grow; remove the 4-column blank track problem. */
+.add-parking-page .add-parking-uploader {
+  border: 1px solid #e8e4dd;
+  background: #fff;
+  padding: 13px 14px;
+  border-radius: 16px;
+}
+.add-parking-page .add-parking-uploader--completed {
+  border-color: #cee8d7;
+  background: #fcfffc;
+}
+.add-parking-page .multi-image-uploader__grid,
+.edit-parking-page .multi-image-uploader__grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 10px;
+}
+.add-parking-page .multi-image-uploader__item,
+.edit-parking-page .multi-image-uploader__item {
+  flex: 0 1 185px;
+  width: 185px;
+  max-width: 100%;
+  min-height: 0;
+  border-radius: 12px;
+}
+.add-parking-page .multi-image-uploader__item img,
+.edit-parking-page .multi-image-uploader__item img {
+  width: 100%;
+  height: 118px;
+  object-fit: cover;
+}
+.add-parking-page .add-parking-image-guide > div {
+  box-shadow: none;
+  border-color: #f0ede7;
+  background: #fafaf7;
+}
+
+/* Root overflow:hidden was a scrolling ancestor that prevented sticky preview in desktop. */
+.edit-parking-page { overflow: clip; }
+@media (min-width: 1051px) {
+  .edit-parking-page .edit-parking-sidebar {
+    position: sticky;
+    top: 86px;
+    align-self: start;
+  }
+}
+
+@media (max-width: 1050px) {
+  .edit-parking-page .edit-parking-sidebar { position: static; }
+}
+@media (max-width: 700px) {
+  .add-parking-page .add-parking-hero { padding: 8px 0 10px; }
+  .add-parking-page .add-parking-hero h1 { font-size: 1.18rem; }
+  .add-parking-page .add-parking-hero p { font-size: .7rem; }
+  .add-parking-page .add-parking-form-header { padding: 10px 14px; }
+  .add-parking-page .fj-map-journey { padding: 10px; border-radius: 13px; scroll-margin-top: 86px; }
+  .add-parking-page .fj-map-journey__intro { align-items: flex-start; flex-direction: column; gap: 6px; }
+  .add-parking-page .fj-map-journey__intro > span { flex: none; }
+  .add-parking-page .fj-map-journey .neshan-location-picker__map { height: 230px; }
+  .add-parking-page .multi-image-uploader__item,
+  .edit-parking-page .multi-image-uploader__item { flex-basis: min(185px, 100%); }
+  .add-parking-page .add-parking-step-content .fj-po,
+  .edit-parking-page .edit-parking-form > .fj-po { padding: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .add-parking-page .fj-map-journey { scroll-behavior: auto; }
+}

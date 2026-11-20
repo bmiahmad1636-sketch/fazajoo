@@ -15,7 +15,7 @@ const CITY_NAMES = [...new Set(
   IRAN_CITIES.map((item) => normalize(item?.name || item?.cityName || "")).filter(Boolean)
 )].sort((a, b) => a.localeCompare(b, "fa"));
 
-export default function IranCityAutocomplete({ value = "", onChange, disabled = false, error = false }) {
+export default function IranCityAutocomplete({ value = "", onChange, onSelect, disabled = false, error = false }) {
   const [open, setOpen] = useState(false);
   const query = normalize(value);
 
@@ -55,6 +55,11 @@ export default function IranCityAutocomplete({ value = "", onChange, disabled = 
           }}
           onKeyDown={(event) => {
             if (event.key === "Escape") setOpen(false);
+            if (event.key === "Enter" && CITY_NAMES.includes(query)) {
+              event.preventDefault();
+              setOpen(false);
+              onSelect?.(query);
+            }
           }}
         />
       </div>
@@ -71,6 +76,7 @@ export default function IranCityAutocomplete({ value = "", onChange, disabled = 
                 onClick={() => {
                   setValue(name);
                   setOpen(false);
+                  onSelect?.(name);
                 }}
               >
                 {name}

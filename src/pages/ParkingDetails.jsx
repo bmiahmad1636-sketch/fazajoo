@@ -44,6 +44,7 @@ import { formatRialPrice } from "../utils/priceFormatter";
 import TrustSafetyActions from "../components/TrustSafetyActions";
 import NeshanApproximateMap from "../components/NeshanApproximateMap";
 import "./ParkingDetails.css";
+import "./ParkingDetailsGalleryDS08.css";
 
 
 const CATEGORY_INFO = {
@@ -726,6 +727,7 @@ function ParkingDetails({
               <article
                 className={[
                   "parking-details-gallery",
+                  activeImage ? "parking-details-gallery--with-photo" : "",
                   !activeImage
                     ? "parking-details-gallery--empty"
                     : "",
@@ -738,6 +740,9 @@ function ParkingDetails({
               >
                 {activeImage ? (
                   <>
+                    <div className="parking-details-gallery__ambient" aria-hidden="true">
+                      <img src={activeImage} alt="" />
+                    </div>
                     <button
                       type="button"
                       className="parking-details-gallery__image-button"
@@ -913,50 +918,7 @@ function ParkingDetails({
                     </div>
                   </div>
 
-                  <div className={`parking-details-feature${(parkingPriceItems.length || storagePriceItems.length || industrialPriceItems.length || landPriceItems.length || shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || gardenWantedPriceRows.length || villaWantedPriceRows.length || villaPriceRows.length || otherPriceRows.length || otherWantedPriceRows.length) ? " parking-details-feature--shop-money" : ""}`}>
-                    <span className="parking-details-feature__icon parking-details-feature__icon--orange">
-                      💰
-                    </span>
 
-                    <div>
-                      <span>
-                        {isWanted ? "بودجه" : "قیمت"}
-                      </span>
-
-                      {parkingPriceItems.length ? (
-                        <ShopMoneyRows items={parkingPriceItems} compact stacked ariaLabel={isWanted?"سقف مبالغ درخواست پارکینگ":"شرایط مالی پارکینگ"} />
-                      ) : storagePriceItems.length ? (
-                        <ShopMoneyRows items={storagePriceItems} compact stacked ariaLabel={isWanted?"سقف بودجه درخواست انبار":"شرایط مالی انبار"} />
-                      ) : industrialPriceItems.length ? (
-                        <ShopMoneyRows items={industrialPriceItems} compact stacked ariaLabel={isWanted?"سقف بودجه درخواست سوله یا کارگاه":"شرایط مالی سوله یا کارگاه"} />
-                      ) : landPriceItems.length ? (
-                        <ShopMoneyRows items={landPriceItems} compact stacked ariaLabel={isWanted?"سقف مبالغ درخواست زمین":"شرایط مالی زمین"}/>
-                      ) : shopPriceRows.length ? (
-                        <ShopMoneyRows items={shopPriceRows} compact stacked ariaLabel={isWanted?"سقف بودجه درخواست مغازه":"شرایط مالی مغازه"} />
-                      ) : gardenPriceRows.length ? (
-                        <ShopMoneyRows items={gardenPriceRows} compact />
-                      ) : gardenWantedPriceRows.length ? (
-                        <ShopMoneyRows items={gardenWantedPriceRows} compact ariaLabel="بودجه درخواست" />
-                      ) : residentialPriceRows.length ? (
-                        <ShopMoneyRows items={residentialPriceRows} compact />
-                      ) : villaWantedPriceRows.length ? (
-                        <ShopMoneyRows items={villaWantedPriceRows} compact stacked ariaLabel="سقف مبالغ درخواست ویلا" />
-                      ) : villaPriceRows.length ? (
-                        <ShopMoneyRows items={villaPriceRows} compact />
-                      ) : otherPriceRows.length ? (
-                        <ShopMoneyRows items={otherPriceRows} compact />
-                      ) : otherWantedPriceRows.length ? (
-                        <ShopMoneyRows items={otherWantedPriceRows} compact ariaLabel="بودجه درخواست" />
-                      ) : (
-                        <strong>
-                          {otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
-                            priceType: parking.priceType || "monthly",
-                            fallback: "توافقی",
-                          })}
-                        </strong>
-                      )}
-                    </div>
-                  </div>
                 </div>
               </article>
 

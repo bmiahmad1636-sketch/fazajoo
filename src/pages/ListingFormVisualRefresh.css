@@ -1,0 +1,611 @@
+/*
+ * Fazajoo DS-06 | Listing form visual refinement
+ * Scope: only AddParking and EditParking page shells.
+ * Intent: calm, cohesive first-page styling without changing field logic,
+ * values, state, validation, specialized category widgets or navigation.
+ * Loaded after each page's legacy stylesheet. No site-wide selectors.
+ */
+
+.add-parking-page,
+.edit-parking-page {
+  --fj-form-ink: #1c2a26;
+  --fj-form-muted: #64746b;
+  --fj-form-line: #e9e2d8;
+  --fj-form-orange: #ef741a;
+  --fj-form-orange-dark: #d9610f;
+  --fj-form-paper: #fffdfa;
+  --fj-form-soft: #faf7f1;
+  --fj-form-shadow: 0 16px 42px rgba(54, 44, 31, .065), 0 2px 8px rgba(54, 44, 31, .028);
+  overflow-x: clip;
+  background:
+    radial-gradient(ellipse at 8% 6%, rgba(196, 218, 200, .21), transparent 36%),
+    radial-gradient(ellipse at 93% 9%, rgba(243, 172, 114, .12), transparent 32%),
+    #faf8f4;
+  color: var(--fj-form-ink);
+}
+
+/* Old decorative blurred discs sit behind very long forms. They are unnecessary. */
+.add-parking-page .add-parking-background,
+.edit-parking-page .edit-parking-page__background {
+  display: none;
+}
+
+.add-parking-page .add-parking-hero,
+.edit-parking-page .edit-parking-hero,
+.edit-parking-page--wanted .edit-parking-hero,
+.edit-parking-page--offer .edit-parking-hero,
+.edit-parking-page--parking-offer .edit-parking-hero {
+  padding: 17px 0 24px;
+  color: var(--fj-form-ink);
+  border-bottom: 1px solid #e8e8df;
+  background:
+    radial-gradient(ellipse at 11% 48%, rgba(191, 215, 199, .21), transparent 33%),
+    radial-gradient(ellipse at 87% 14%, rgba(255, 190, 130, .15), transparent 28%),
+    linear-gradient(115deg, #f6f8f3, #fffaf4 68%, #fff7ee);
+}
+
+.add-parking-page .add-parking-hero::before,
+.edit-parking-page .edit-parking-hero::before {
+  opacity: .15;
+  background-image: radial-gradient(rgba(59, 77, 66, .16) .75px, transparent .75px);
+  background-size: 21px 21px;
+}
+
+.add-parking-page .add-parking-hero .container,
+.add-parking-page .add-parking-content .container,
+.edit-parking-page .edit-parking-hero .container,
+.edit-parking-page .edit-parking-content .container {
+  max-width: 1120px;
+}
+
+.add-parking-page .add-parking-back,
+.edit-parking-page .edit-parking-back {
+  min-height: 37px;
+  padding: 7px 13px;
+  border: 1px solid #e6dfd6;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, .91);
+  box-shadow: 0 3px 10px rgba(32, 42, 35, .035);
+  color: #35463e;
+  font-size: .77rem;
+  font-weight: 750;
+  backdrop-filter: none;
+  transform: none;
+}
+.add-parking-page .add-parking-back:hover,
+.edit-parking-page .edit-parking-back:hover:not(:disabled) {
+  transform: none;
+  border-color: #e5b78f;
+  background: #fff;
+}
+
+.add-parking-page .add-parking-hero__content {
+  align-items: center;
+  gap: 16px;
+  margin-top: 10px;
+}
+.edit-parking-page .edit-parking-toolbar {
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 9px 16px;
+}
+.edit-parking-page .edit-parking-hero__content,
+.edit-parking-page--wanted .edit-parking-hero__content {
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 12px;
+}
+
+.add-parking-page .add-parking-eyebrow,
+.edit-parking-page .edit-parking-eyebrow {
+  margin-bottom: 6px;
+  padding: 4px 10px;
+  border: 1px solid #f2d9c2;
+  border-radius: 100px;
+  background: #fff2e6;
+  color: #bd581b;
+  font-size: .7rem;
+  font-weight: 800;
+}
+
+.add-parking-page .add-parking-hero h1,
+.edit-parking-page .edit-parking-hero h1 {
+  max-width: 800px;
+  margin: 0 0 5px;
+  color: #1b2b26;
+  font-size: clamp(1.42rem, 2.2vw, 2.12rem);
+  font-weight: 900;
+  line-height: 1.43;
+  letter-spacing: -.02em;
+}
+.add-parking-page .add-parking-hero p,
+.edit-parking-page .edit-parking-hero p {
+  max-width: 770px;
+  margin: 0;
+  color: #61716a;
+  font-size: .78rem;
+  font-weight: 500;
+  line-height: 1.8;
+}
+
+.edit-parking-page .edit-parking-status {
+  padding: 8px 11px;
+  border-color: #e5e2db;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .82);
+  box-shadow: none;
+  color: #52665c;
+  font-weight: 750;
+}
+.edit-parking-page .edit-parking-status--changed {
+  border-color: #edd6b6;
+  background: #fff7ea;
+  color: #98601e;
+}
+.edit-parking-page .edit-parking-status--saved {
+  border-color: #dcece2;
+  background: #f3fbf5;
+  color: #2c6d48;
+}
+.edit-parking-page .edit-parking-hero__meta {
+  flex: 0 1 260px;
+  max-width: 260px;
+  min-width: 0;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid #e8e3dc;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .85);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.edit-parking-page .edit-parking-hero__meta-icon {
+  width: 35px;
+  height: 35px;
+  border: 1px solid #f3dcc9;
+  border-radius: 10px;
+  background: #fff0e3;
+  box-shadow: none;
+  color: #db661b;
+  font-size: 1rem;
+}
+.edit-parking-page .edit-parking-hero__meta small {
+  color: #839087;
+  font-size: .65rem;
+}
+.edit-parking-page .edit-parking-hero__meta strong {
+  color: #27352d;
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+/* Normal document flow prevents a tall heading from overlapping the editor. */
+.add-parking-page .add-parking-content,
+.edit-parking-page .edit-parking-content,
+.edit-parking-page--wanted .edit-parking-content,
+.edit-parking-page--offer .edit-parking-content,
+.edit-parking-page--parking-offer .edit-parking-content {
+  margin-top: 16px;
+  padding-bottom: 64px;
+}
+.add-parking-page .add-parking-layout {
+  max-width: 1120px;
+  gap: 18px;
+}
+.edit-parking-page .edit-parking-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(270px, 320px);
+  gap: 20px;
+}
+.edit-parking-page .edit-parking-form {
+  min-width: 0;
+  gap: 15px;
+}
+.edit-parking-page .edit-parking-sidebar {
+  min-width: 0;
+  top: 86px;
+  gap: 14px;
+}
+
+.add-parking-page .add-parking-form-card,
+.edit-parking-page .edit-parking-card,
+.edit-parking-page .edit-parking-preview,
+.edit-parking-page .edit-parking-actions {
+  border: 1px solid var(--fj-form-line);
+  border-radius: 21px;
+  background: #fff;
+  box-shadow: var(--fj-form-shadow);
+}
+.add-parking-page .add-parking-form-card,
+.edit-parking-page .edit-parking-card,
+.edit-parking-page .edit-parking-preview {
+  overflow: hidden;
+}
+
+.add-parking-page .add-parking-form-header {
+  position: relative;
+  padding: 19px 24px 15px;
+  border-bottom: 1px solid #f0e8dd;
+  background: linear-gradient(115deg, #fffaf5 2%, #f8faf6 100%);
+}
+.add-parking-page .add-parking-form-header::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 24px;
+  width: 70px;
+  height: 3px;
+  border-radius: 0 0 7px 7px;
+  background: #ef761e;
+}
+.add-parking-page .add-parking-form-header__step {
+  margin-bottom: 5px;
+  padding: 3px 9px;
+  border: 1px solid #f4e5d6;
+  background: #fff;
+  color: #c5682d;
+  font-size: .67rem;
+  font-weight: 800;
+}
+.add-parking-page .add-parking-form-header h2 {
+  margin: 0 0 2px;
+  color: var(--fj-form-ink);
+  font-size: clamp(1.13rem, 1.6vw, 1.36rem);
+  font-weight: 900;
+  line-height: 1.55;
+}
+.add-parking-page .add-parking-form-header p {
+  color: #78837b;
+  font-size: .72rem;
+  line-height: 1.7;
+}
+.add-parking-page .add-parking-step-content {
+  padding: 17px 24px 14px;
+}
+.add-parking-page .add-parking-intro {
+  gap: 10px;
+  margin-bottom: 13px;
+  padding: 10px 12px;
+  border: 1px solid #eee7de;
+  border-radius: 13px;
+  background: #faf9f6;
+}
+.add-parking-page .add-parking-intro > span {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #f4e7d8;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: none;
+  font-size: 1rem;
+}
+.add-parking-page .add-parking-intro strong {
+  color: #25342d;
+  font-size: .84rem;
+  font-weight: 850;
+}
+.add-parking-page .add-parking-intro p {
+  margin-top: 2px;
+  color: #718078;
+  font-size: .72rem;
+  line-height: 1.65;
+}
+
+.edit-parking-page .edit-parking-card__header {
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0e8e0;
+  background: linear-gradient(115deg, #fffaf4, #f9faf7);
+}
+.edit-parking-page .edit-parking-card__icon,
+.edit-parking-page .edit-parking-card__icon--cyan,
+.edit-parking-page .edit-parking-card__icon--green {
+  width: 38px;
+  height: 38px;
+  border: 1px solid #f0d9c3;
+  border-radius: 11px;
+  background: #fff0e3;
+  box-shadow: none;
+  color: #ca6726;
+  font-size: .76rem;
+}
+.edit-parking-page .edit-parking-card__header span {
+  color: #be6b35;
+  font-size: .65rem;
+  font-weight: 800;
+}
+.edit-parking-page .edit-parking-card__header h2 {
+  margin: 2px 0 3px;
+  color: #1f2e28;
+  font-size: 1.04rem;
+  font-weight: 900;
+  line-height: 1.52;
+}
+.edit-parking-page .edit-parking-card__header p {
+  color: #7b887d;
+  font-size: .73rem;
+  line-height: 1.7;
+}
+.edit-parking-page .edit-parking-card__body {
+  padding: 21px 20px;
+}
+.edit-parking-page .edit-parking-grid {
+  column-gap: 16px;
+  row-gap: 10px;
+}
+
+/* Inputs in the two page-owned form families only; nested category components retain their behavior. */
+.add-parking-page .add-parking-field label,
+.edit-parking-page .edit-parking-field label {
+  color: #3c4940;
+  font-size: .78rem;
+  font-weight: 800;
+}
+.add-parking-page .add-parking-input,
+.add-parking-page .add-parking-textarea,
+.edit-parking-page .edit-parking-input,
+.edit-parking-page .edit-parking-textarea {
+  border: 1px solid #e8e4df;
+  border-radius: 12px;
+  background: #fffefa;
+}
+.add-parking-page .add-parking-input:focus-within,
+.add-parking-page .add-parking-textarea:focus-within,
+.edit-parking-page .edit-parking-input:focus-within,
+.edit-parking-page .edit-parking-textarea:focus-within {
+  border-color: #e99a66;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(239, 116, 26, .09);
+}
+/* Keep validation emphasis when a field is invalid. */
+.add-parking-page .add-parking-input--error,
+.edit-parking-page .edit-parking-input--error {
+  border-color: rgba(220, 38, 38, .6);
+  background: #fff7f5;
+}
+.add-parking-page .add-parking-field__meta,
+.edit-parking-page .edit-parking-field__meta {
+  color: #859187;
+  font-size: .68rem;
+}
+
+.add-parking-page .add-parking-actions {
+  padding: 14px 24px;
+  border-top: 1px solid #efe9e1;
+  background: #fffefa;
+}
+.add-parking-page .add-parking-button,
+.edit-parking-page .edit-parking-button {
+  min-height: 44px;
+  border-radius: 11px;
+  font-weight: 850;
+  box-shadow: none;
+}
+.add-parking-page .add-parking-button--secondary,
+.edit-parking-page .edit-parking-button--cancel,
+.edit-parking-page .edit-parking-button--reset {
+  border: 1px solid #e9e1d7;
+  background: #fff;
+  color: #44534a;
+}
+.add-parking-page .add-parking-button--primary,
+.edit-parking-page .edit-parking-button--save {
+  border: 1px solid #ec791e;
+  background: linear-gradient(115deg, #f98b26, #ed7016);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(234, 112, 25, .15);
+}
+.add-parking-page .add-parking-button--publish {
+  border: 1px solid #2e7155;
+  background: #286f50;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(40, 111, 80, .14);
+}
+.add-parking-page .add-parking-button:focus-visible,
+.edit-parking-page .edit-parking-button:focus-visible,
+.add-parking-page .add-parking-back:focus-visible,
+.edit-parking-page .edit-parking-back:focus-visible {
+  outline: 3px solid rgba(234, 112, 25, .40);
+  outline-offset: 3px;
+}
+.edit-parking-page .edit-parking-actions {
+  padding: 13px 15px;
+  border-radius: 16px;
+}
+
+/* The live preview is an aid, not a second giant hero. */
+.edit-parking-page .edit-parking-preview__top {
+  padding: 13px 15px;
+  border-bottom: 1px solid #f0eae2;
+  background: #fffaf5;
+}
+.edit-parking-page .edit-parking-preview__top span {
+  color: #819087;
+}
+.edit-parking-page .edit-parking-preview__top strong {
+  color: #26362e;
+  font-size: .81rem;
+}
+.edit-parking-page .edit-parking-preview__image {
+  height: 178px;
+  background: #f2eee7;
+}
+.edit-parking-page .edit-parking-preview__content {
+  padding: 15px;
+}
+.edit-parking-page .edit-parking-preview__content h3 {
+  color: #20322a;
+  font-size: .94rem;
+}
+.edit-parking-page .edit-parking-preview__price {
+  border-color: #ece8e1;
+}
+.edit-parking-page .edit-parking-preview__price strong {
+  color: #2b7851;
+}
+
+/* Responsive flow keeps content visible, not squeezed beside a sticky sidebar. */
+@media (max-width: 1050px) {
+  .edit-parking-page .edit-parking-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .edit-parking-page .edit-parking-sidebar {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+  }
+}
+@media (max-width: 720px) {
+  .add-parking-page .add-parking-hero,
+  .edit-parking-page .edit-parking-hero {
+    padding: 14px 0 18px;
+  }
+  .add-parking-page .add-parking-hero .container,
+  .add-parking-page .add-parking-content .container,
+  .edit-parking-page .edit-parking-hero .container,
+  .edit-parking-page .edit-parking-content .container {
+    width: calc(100% - 24px);
+  }
+  .add-parking-page .add-parking-hero h1,
+  .edit-parking-page .edit-parking-hero h1 {
+    font-size: clamp(1.24rem, 5.5vw, 1.65rem);
+  }
+  .add-parking-page .add-parking-hero p,
+  .edit-parking-page .edit-parking-hero p {
+    font-size: .72rem;
+    line-height: 1.7;
+  }
+  .edit-parking-page .edit-parking-hero__content {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .edit-parking-page .edit-parking-hero__meta {
+    flex: none;
+    width: fit-content;
+    max-width: 100%;
+  }
+  .add-parking-page .add-parking-content,
+  .edit-parking-page .edit-parking-content {
+    margin-top: 12px;
+    padding-bottom: 35px;
+  }
+  .add-parking-page .add-parking-form-card,
+  .edit-parking-page .edit-parking-card,
+  .edit-parking-page .edit-parking-preview {
+    border-radius: 17px;
+  }
+  .add-parking-page .add-parking-form-header,
+  .edit-parking-page .edit-parking-card__header {
+    padding: 15px 15px 13px;
+  }
+  .add-parking-page .add-parking-step-content,
+  .edit-parking-page .edit-parking-card__body {
+    padding: 14px 15px;
+  }
+  .add-parking-page .add-parking-actions {
+    padding: 12px 15px;
+  }
+  .add-parking-page .add-parking-intro {
+    align-items: flex-start;
+  }
+  .edit-parking-page .edit-parking-actions {
+    padding: 12px;
+  }
+  .edit-parking-page .edit-parking-preview__image {
+    height: 190px;
+  }
+}
+@media (max-width: 380px) {
+  .add-parking-page .add-parking-button,
+  .edit-parking-page .edit-parking-button {
+    font-size: .7rem;
+    padding-inline: 11px;
+  }
+  .edit-parking-page .edit-parking-status {
+    font-size: .65rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .add-parking-page .add-parking-intro,
+  .edit-parking-page .edit-parking-card {
+    transition: none;
+  }
+}
+
+/* Specialized offer sections use the same paper/card language, without touching selectors and state. */
+.add-parking-page .add-parking-step-content .fj-po,
+.edit-parking-page .edit-parking-form > .fj-po {
+  min-width: 0;
+  gap: 15px;
+  padding: 18px 19px;
+  border: 1px solid #eae2d8;
+  border-radius: 18px;
+  background: #fffefa;
+  box-shadow: none;
+}
+.edit-parking-page .edit-parking-form > .fj-po {
+  background: #fff;
+  box-shadow: var(--fj-form-shadow);
+}
+.add-parking-page .add-parking-step-content .fj-po-header,
+.edit-parking-page .edit-parking-form > .fj-po .fj-po-header {
+  padding-bottom: 11px;
+  border-bottom: 1px solid #f2ebe4;
+}
+.add-parking-page .add-parking-step-content .fj-po-header > span,
+.edit-parking-page .edit-parking-form > .fj-po .fj-po-header > span {
+  padding: 7px;
+  border: 1px solid #f2e2d1;
+  border-radius: 10px;
+  background: #fff4e9;
+  font-size: 1.15rem;
+}
+.add-parking-page .add-parking-step-content .fj-po-header h3,
+.edit-parking-page .edit-parking-form > .fj-po .fj-po-header h3 {
+  color: #293a31;
+  font-size: .99rem;
+  font-weight: 900;
+}
+.add-parking-page .add-parking-step-content .fj-po-header p,
+.edit-parking-page .edit-parking-form > .fj-po .fj-po-header p {
+  color: #7a857c;
+  font-size: .75rem;
+  line-height: 1.65;
+}
+@media (max-width: 720px) {
+  .add-parking-page .add-parking-step-content .fj-po,
+  .edit-parking-page .edit-parking-form > .fj-po {
+    padding: 14px;
+    border-radius: 15px;
+  }
+}
+
+/* Compatibility: App.jsx loads compact.css after page styles; those legacy
+ * desktop !important rules otherwise add unintended card padding and gaps.
+ * Override ONLY these two pages without changing compact.css site-wide. */
+@media (min-width: 769px) {
+  .add-parking-page .add-parking-hero,
+  .edit-parking-page .edit-parking-hero {
+    padding-top: 17px !important;
+    padding-bottom: 24px !important;
+  }
+  .add-parking-page .add-parking-content,
+  .edit-parking-page .edit-parking-content {
+    padding-top: 0 !important;
+    padding-bottom: 64px !important;
+  }
+  .add-parking-page .add-parking-layout { gap: 18px !important; }
+  .edit-parking-page .edit-parking-layout { gap: 20px !important; }
+  .add-parking-page .add-parking-form-card,
+  .edit-parking-page .edit-parking-card {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}
