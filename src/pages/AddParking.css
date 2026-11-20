@@ -273,9 +273,10 @@
 
 .add-parking-layout {
   display: grid;
-  grid-template-columns:
-    310px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
+  max-width: 1120px;
+  margin-inline: auto;
   gap: 25px;
 }
 

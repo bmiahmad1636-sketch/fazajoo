@@ -17,11 +17,11 @@ import NeshanLocationPicker from "../components/NeshanLocationPicker";
 import ParkingRequestUsageFields from "../components/ParkingRequestUsageFields";
 import ParkingOfferFields from "../components/ParkingOfferFields";
 import ParkingRentalFields from "../components/ParkingRentalFields";
-import { parkingListingPrice, parkingFinancialRows, parkingFinancialHeadline, validateParkingRentalOffer, validateParkingRentalRequest } from "../utils/parkingRental.js";
+import { parkingListingPrice, parkingFinancialHeadline, validateParkingRentalOffer, validateParkingRentalRequest } from "../utils/parkingRental.js";
 
 import StorageOfferFields from "../components/StorageOfferFields";
-import { storageListingPrice, storageFinancialRows, storageFinancialHeadline, validateStorageRental } from "../utils/storageRental.js";
-import { industrialListingPrice, industrialFinancialRows, industrialFinancialHeadline, validateIndustrialRental } from "../utils/industrialRental.js";
+import { storageListingPrice, storageFinancialHeadline, validateStorageRental } from "../utils/storageRental.js";
+import { industrialListingPrice, industrialFinancialHeadline, validateIndustrialRental } from "../utils/industrialRental.js";
 import IndustrialOfferFields from "../components/IndustrialOfferFields";
 import LandOfferFields from "../components/LandOfferFields";
 import {LAND_OFFER_DEFAULT,landOfferFromAttributes,validateLandOffer,makeLandAttributes,landOfferLabel,LAND_OFFER_TYPES,LAND_OFFER_ROADS} from "../utils/landOffer";
@@ -59,7 +59,7 @@ import {shopRightDealLabel} from "../utils/shopRights.js";
 import { SHOP_OFFER_DEFAULT, shopOfferFromAttributes, validateShopOffer, makeShopAttributes, shopListingPrice, shopFinancialHeadline, shopOfferLabel, SHOP_OFFER_TYPES, SHOP_OFFER_TRANSFERS } from "../utils/shopOffer";
 import ShopRequestFields from "../components/ShopRequestFields";
 import LandRentalFields from "../components/LandRentalFields";
-import {validateLandContract,landContractPrice,landContractRows,landContractHeadline} from "../utils/landContract.js";
+import {validateLandContract,landContractPrice,landContractHeadline} from "../utils/landContract.js";
 import { readLandRental, writeLandRental, landRentalValidation } from "../utils/landRental";
 import { readShopRequest, writeShopRequest, shopRequestValidation,shopWantedFinancialHeadline,shopRequestAreaText } from "../utils/shopRequest";
 import { emptyShopDetails } from "../components/shopDetails";
@@ -263,29 +263,6 @@ function EditParking({
     return JSON.stringify(form) !==
       JSON.stringify(initialForm);
   }, [form, initialForm]);
-
-  const completionPercentage =
-    useMemo(() => {
-      // Requests are complete without photos; negotiated budgets need no amount.
-      const fields = [
-        form.title.trim(),
-        form.city.trim(),
-        isWanted && parking?.category === "warehouse" ? (form.shedRequest?.minArea || form.shedRequest?.maxArea || form.shedRequest?.spaceType) : isWanted && parking?.category === "storage" ? (form.warehouseRequest?.rentalTerm) : form.area,
-        parking?.category === "storage" ? !validateStorageRental(isWanted ? form.warehouseRequest : form.storageOffer, isWanted) : parking?.category === "warehouse" ? !validateIndustrialRental(isWanted ? form.shedRequest : form.industrialOffer, isWanted) : parking?.category === "land" ? !validateLandContract(isWanted?form.landRental:form.landOffer,isWanted) : form.priceType === "negotiable" ? true : form.price.trim(),
-        form.phone.trim(),
-        ...(!isWanted ? [form.imageUrl] : []),
-        ...(parking?.category === "parking" && !isWanted ? [form.parkingOffer.vehicleUsage, form.parkingOffer.cover, form.parkingOffer.access] : parking?.category === "storage" && !isWanted ? [form.storageOffer.spaceType, form.storageOffer.access, form.storageOffer.allowedPurposes.length] : parking?.category === "warehouse" && !isWanted ? [form.industrialOffer.spaceType, form.industrialOffer.power, form.industrialOffer.allowedActivities.length] : parking?.category === "land" && !isWanted ? [form.landOffer.landType, form.landOffer.accessRoad, form.landOffer.allowedPurposes.length] : parking?.category === "shop" && !isWanted ? [form.shopOffer.spaceType,form.shopOffer.allowedActivities.length,form.shopOffer.transferType] : isWanted && parking?.category === "warehouse" ? [form.shedRequest?.activity] : isWanted && parking?.category === "storage" ? [form.warehouseRequest?.purpose] : [form.description.trim()]),
-      ];
-
-      const completedFields =
-        fields.filter(Boolean).length;
-
-      return Math.round(
-        (completedFields /
-          fields.length) *
-          100
-      );
-    }, [form, isWanted]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -1227,11 +1204,6 @@ parking?.category === "storage" ? storageListingPrice(isWanted?form.warehouseReq
                 </div>
 
                 <div className="edit-parking-card__body">
-                  {parking?.category === "parking" && <section aria-label="خلاصه مالی پارکینگ" className="fj-pr-summary"><strong>مدت و شرایط مالی ثبت‌شده</strong><div className="fj-pr-summary-grid">{parkingFinancialRows(isWanted?form.parkingRequestDetails:form.parkingOffer,isWanted).map(({label,amount})=><div key={label}><span>{label}</span><bdi>{amount}</bdi></div>)}</div></section>}
-                  {parking?.category === "storage" && <section aria-label="خلاصه مالی انبار" className="fj-pr-summary"><strong>مدت و مبالغ قرارداد انبار</strong><div className="fj-pr-summary-grid">{storageFinancialRows(isWanted?form.warehouseRequest:form.storageOffer,isWanted).map(({label,amount})=><div key={label}><span>{label}</span><bdi>{amount}</bdi></div>)}</div></section>}
-                  {parking?.category === "land" && <section aria-label="خلاصه مدت و قرارداد زمین" className="fj-pr-summary"><strong>مدت و شرایط مالی زمین</strong><div className="fj-pr-summary-grid">{landContractRows(isWanted?form.landRental:form.landOffer,isWanted).map(({label,amount})=><div key={label}><span>{label}</span><bdi>{amount}</bdi></div>)}</div></section>}
-                  {parking?.category === "warehouse" && <section aria-label="خلاصه مالی سوله یا کارگاه" className="fj-pr-summary"><strong>مدت و مبالغ قرارداد سوله یا کارگاه</strong><div className="fj-pr-summary-grid">{industrialFinancialRows(isWanted?form.shedRequest:form.industrialOffer,isWanted).map(({label,amount})=><div key={label}><span>{label}</span><bdi>{amount}</bdi></div>)}</div></section>}
-                  {!isWanted && parking?.category === "garden" && form.gardenOffer.rentalTerm === "long" && form.gardenOffer.financialMode === "full_deposit" && <p className="fj-go-price-note">رهن کامل باغ: {formatPriceInput(form.gardenOffer.depositRial)} ریال؛ این آگهی اجاره ندارد.</p>}
                   <div className="edit-parking-grid">
                     {parking?.category !== "parking" && parking?.category !== "storage" && parking?.category !== "warehouse" && parking?.category !== "land" && parking?.category !== "residential" && !(!isWanted && (parking?.category === "shop" || parking?.category === "other" || parking?.category === "garden")) && !(isWanted && ["land", "shop", "villa", "garden", "other"].includes(parking?.category)) && !(!isWanted && parking?.category === "villa" && form.villaOffer.rentalTerm === "long") && (
 <div className="edit-parking-field" style={{ gridColumn: "1 / -1", display: "grid", gridTemplateColumns: form.priceType === "negotiable" ? "minmax(0, 1fr)" : "minmax(145px, 1fr) minmax(0, 2fr)", gap: "12px", alignItems: "end", direction: "rtl" }}>
@@ -1564,56 +1536,6 @@ parking?.category === "storage" ? storageListingPrice(isWanted?form.warehouseReq
                 </div>
               </section>
 
-              <section className="edit-parking-completion">
-                <div className="edit-parking-completion__header">
-                  <div>
-                    <span>
-                      {isWanted ? "کامل بودن درخواست" : "کامل بودن آگهی"}
-                    </span>
-
-                    <strong>
-                      {completionPercentage}٪
-                    </strong>
-                  </div>
-
-                  <span>
-                    {completionPercentage ===
-                    100
-                      ? "عالی"
-                      : "در حال تکمیل"}
-                  </span>
-                </div>
-
-                <div className="edit-parking-completion__bar">
-                  <span
-                    style={{
-                      width: `${completionPercentage}%`,
-                    }}
-                  />
-                </div>
-
-                <p>
-                  {isWanted
-                    ? `درخواست‌های دقیق‌تر، پیدا کردن ${spaceCategoryLabel} مناسب را آسان‌تر می‌کنند. عکس و فیلم برای درخواست لازم نیست.`
-                    : "آگهی‌های کامل‌تر اعتماد و بازدید بیشتری دریافت می‌کنند."}
-                </p>
-              </section>
-
-              <section className="edit-parking-tip">
-                <span>✦</span>
-
-                <div>
-                  <strong>
-                    قبل از ذخیره بررسی کن
-                  </strong>
-
-                  <p>
-                    {parking?.category === "other"
-                      ? (isWanted ? "مدت و بودجه در بخش مشخصات درخواست ثبت شده‌اند؛ شماره تماس و اطلاعات نهایی را مرور کن." : "قیمت و شرایط قرارداد در بخش مشخصات فضا ثبت شده‌اند؛ شماره تماس و تصاویر را مرور کن.")
-                      : (isWanted ? "شهر، محدوده روی نقشه، بودجه، شماره تماس و شرایط موردنیازت را دوباره بررسی کن." : "قیمت، شماره تماس و تصویر آگهی را دوباره بررسی کن تا کاربران اطلاعات اشتباه نبینند.")}
-                  </p>
-                </div>
-              </section>
             </aside>
           </div>
         </div>

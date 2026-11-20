@@ -9,11 +9,11 @@ import NeshanLocationPicker from "../components/NeshanLocationPicker";
 import ParkingRequestUsageFields from "../components/ParkingRequestUsageFields";
 import ParkingOfferFields from "../components/ParkingOfferFields";
 import ParkingRentalFields from "../components/ParkingRentalFields";
-import { parkingListingPrice, parkingFinancialRows, parkingFinancialHeadline, validateParkingRentalOffer, validateParkingRentalRequest } from "../utils/parkingRental.js";
+import { parkingListingPrice, parkingFinancialHeadline, validateParkingRentalOffer, validateParkingRentalRequest } from "../utils/parkingRental.js";
 
 import StorageOfferFields from "../components/StorageOfferFields";
-import { storageListingPrice, storageFinancialRows, storageFinancialHeadline, validateStorageRental } from "../utils/storageRental.js";
-import { industrialListingPrice, industrialFinancialRows, industrialFinancialHeadline, validateIndustrialRental } from "../utils/industrialRental.js";
+import { storageListingPrice, storageFinancialHeadline, validateStorageRental } from "../utils/storageRental.js";
+import { industrialListingPrice, industrialFinancialHeadline, validateIndustrialRental } from "../utils/industrialRental.js";
 import IndustrialOfferFields from "../components/IndustrialOfferFields";
 import LandOfferFields from "../components/LandOfferFields";
 import {LAND_OFFER_DEFAULT,validateLandOffer,makeLandAttributes,landOfferLabel,LAND_OFFER_TYPES,LAND_OFFER_ROADS} from "../utils/landOffer";
@@ -202,9 +202,7 @@ function AddParking() {
   const [errors, setErrors] = useState({});
 
   const isWantedAd = form.listingType === "wanted";
-  const visibleSteps = isWantedAd ? STEPS.filter((step) => step.id !== 2) : STEPS;
   const displayedStep = isWantedAd && currentStep === 3 ? 2 : currentStep;
-  const progress = (displayedStep / visibleSteps.length) * 100;
 
   const selectedCategory = useMemo(() => {
     return SPACE_CATEGORIES.find(
@@ -445,15 +443,6 @@ function AddParking() {
     });
   };
 
-  const goToStep = (step) => {
-    if (step >= currentStep) {
-      return;
-    }
-
-    setErrors({});
-    setCurrentStep(step);
-  };
-
   // Publishing is deliberately disconnected from the form submit event.
   // Only the final-step Publish button can call this function.
   const saveParking = async () => {
@@ -632,19 +621,6 @@ function AddParking() {
               </p>
             </div>
 
-            <div className="add-parking-hero__badge">
-              <span>{isWantedAd ? "۲" : "۳"}</span>
-
-              <div>
-                <strong>
-                  مرحله کوتاه
-                </strong>
-
-                <small>
-                  تا انتشار آگهی
-                </small>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -652,100 +628,6 @@ function AddParking() {
       <section className="add-parking-content">
         <div className="container">
           <div className="add-parking-layout">
-            <aside className="add-parking-sidebar">
-              <div className="add-parking-progress-card">
-                <div className="add-parking-progress-card__heading">
-                  <div>
-                    <span>
-                      پیشرفت ثبت آگهی
-                    </span>
-
-                    <strong>
-                      مرحله {displayedStep} از{" "}
-                      {visibleSteps.length}
-                    </strong>
-                  </div>
-
-                  <span className="add-parking-progress-card__percent">
-                    {Math.round(progress)}٪
-                  </span>
-                </div>
-
-                <div className="add-parking-progress">
-                  <span
-                    style={{
-                      width: `${progress}%`,
-                    }}
-                  />
-                </div>
-
-                <div className="add-parking-steps">
-                  {visibleSteps.map((step) => {
-                    const isActive =
-                      step.id === currentStep;
-
-                    const isCompleted =
-                      step.id < currentStep;
-
-                    return (
-                      <button
-                        type="button"
-                        key={step.id}
-                        onClick={() =>
-                          goToStep(step.id)
-                        }
-                        className={[
-                          "add-parking-step",
-                          isActive
-                            ? "add-parking-step--active"
-                            : "",
-                          isCompleted
-                            ? "add-parking-step--completed"
-                            : "",
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                      >
-                        <span className="add-parking-step__number">
-                          {isCompleted
-                            ? "✓"
-                            : isWantedAd && step.id === 3 ? 2 : step.id}
-                        </span>
-
-                        <span className="add-parking-step__text">
-                          <strong>
-                            {isWantedAd && step.id === 3 ? "بودجه و راه ارتباط" : step.title}
-                          </strong>
-
-                          <small>
-                            {isWantedAd && step.id === 3 ? "سقف بودجه، تماس و شرایط موردنیاز" : !isWantedAd && ["parking", "storage"].includes(form.category) && step.id === 3 ? "قیمت و راه ارتباطی" : step.description}
-                          </small>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="add-parking-tip">
-                <span className="add-parking-tip__icon">
-                  ✦
-                </span>
-
-                <div>
-                  <strong>
-                    {isWantedAd ? "درخواست دقیق‌تر، نتیجه بهتر" : "آگهی کامل‌تر، بازدید بیشتر"}
-                  </strong>
-
-                  <p>
-                    {isWantedAd
-                      ? "شهر، محدوده مطلوب، سقف بودجه و شرایط ضروری را دقیق بنویس تا پیشنهادهای مناسب‌تری دریافت کنی."
-                      : form.category === "parking" ? "تصویر واضح و مشخصات واقعی، اعتماد و کیفیت جست‌وجوی آگهی را بهتر می‌کند." : "تصویر واضح، عنوان دقیق و توضیحات کامل باعث اعتماد بیشتر کاربران می‌شود."}
-                  </p>
-                </div>
-              </div>
-            </aside>
-
             <div className="add-parking-form-card">
               <form
                 onSubmit={(event) => event.preventDefault()}
@@ -1413,10 +1295,6 @@ function AddParking() {
                       </div>
                     </div>
 
-                    {form.category === "parking" && <section aria-label="پیش‌نمایش مالی پارکینگ" className="fj-pr-summary"><strong>خلاصه مدت و شرایط مالی ثبت‌شده</strong><div className="fj-pr-summary-grid">{parkingFinancialRows(isWantedAd ? form.parkingRequestDetails : form.parkingOffer,isWantedAd).map(({label,amount})=><div key={label}><span>{label}</span><bdi>{amount}</bdi></div>)}</div></section>}
-                    {form.category === "storage" && <section aria-label="خلاصه مالی انبار" className="fj-pr-summary"><strong>خلاصه مدت و شرایط مالی انبار</strong><div className="fj-pr-summary-grid">{storageFinancialRows(isWantedAd?form.warehouseRequest:form.storageOffer,isWantedAd).map(({label,amount})=><div key={label}><span>{label}</span><bdi>{amount}</bdi></div>)}</div></section>}
-                    {form.category === "warehouse" && <section aria-label="خلاصه مالی سوله و کارگاه" className="fj-pr-summary"><strong>خلاصه مدت و شرایط مالی سوله یا کارگاه</strong><div className="fj-pr-summary-grid">{industrialFinancialRows(isWantedAd?form.shedRequest:form.industrialOffer,isWantedAd).map(({label,amount})=><div key={label}><span>{label}</span><bdi>{amount}</bdi></div>)}</div></section>}
-                    {!isWantedAd && form.category === "garden" && form.gardenOffer.rentalTerm === "long" && form.gardenOffer.financialMode === "full_deposit" && <p className="fj-go-price-note">رهن کامل باغ: {formatPriceInput(form.gardenOffer.depositRial)} ریال؛ در این آگهی اجاره‌ای ثبت نمی‌شود.</p>}
                     <div className="add-parking-fields-grid">
                       {form.category !== "parking" && form.category !== "storage" && form.category !== "warehouse" && form.category !== "land" && form.category !== "residential" && !(!isWantedAd && (form.category === "shop" || form.category === "other" || (form.category === "garden"))) && !(isWantedAd && ["land", "shop", "villa", "garden", "other"].includes(form.category)) && !(!isWantedAd && form.category === "villa" && form.villaOffer.rentalTerm === "long") && (
                         <>
