@@ -45,6 +45,12 @@ import TrustSafetyActions from "../components/TrustSafetyActions";
 import NeshanApproximateMap from "../components/NeshanApproximateMap";
 import "./ParkingDetails.css";
 import "./ParkingDetailsGalleryDS08.css";
+import "./ParkingDetailsVisualRefreshDS10.css";
+import "./ParkingDetailsEditorialDS11.css";
+import "./ParkingDetailsAlignmentDS12.css";
+import "./ParkingDetailsHeroMetaDS13.css";
+import "./ParkingDetailsMetaRailDS14.css";
+import "./ParkingDetailsTitleCityDS15.css";
 
 
 const CATEGORY_INFO = {
@@ -574,6 +580,54 @@ function ParkingDetails({
     );
   }
 
+  // DS-12: one price markup used in two responsive placements; only one is visible.
+  const ds12PriceCard = (
+            <div className={`parking-details-hero__price${(parkingPriceItems.length || storagePriceItems.length || industrialPriceItems.length || landPriceItems.length || shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || gardenWantedPriceRows.length || villaWantedPriceRows.length || villaPriceRows.length || otherPriceRows.length || otherWantedPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>
+              <span>
+                {isWanted ? "بودجه" : "قیمت آگهی"}
+              </span>
+
+              {parkingPriceItems.length ? (
+                <ShopMoneyRows items={parkingPriceItems} stacked ariaLabel={isWanted?"سقف مبالغ درخواست پارکینگ":"شرایط مالی پارکینگ"} />
+              ) : storagePriceItems.length ? (
+                <ShopMoneyRows items={storagePriceItems} stacked ariaLabel={isWanted?"سقف بودجه درخواست انبار":"شرایط مالی انبار"} />
+              ) : industrialPriceItems.length ? (
+                <ShopMoneyRows items={industrialPriceItems} stacked ariaLabel={isWanted?"سقف بودجه درخواست سوله یا کارگاه":"شرایط مالی سوله یا کارگاه"} />
+              ) : landPriceItems.length ? (
+                <ShopMoneyRows items={landPriceItems} stacked ariaLabel={isWanted?"سقف مبالغ درخواست زمین":"شرایط مالی زمین"}/>
+              ) : shopPriceRows.length ? (
+                <ShopMoneyRows items={shopPriceRows} stacked ariaLabel={isWanted?"سقف بودجه درخواست مغازه":"شرایط مالی مغازه"} />
+              ) : gardenPriceRows.length ? (
+                <ShopMoneyRows items={gardenPriceRows} />
+              ) : gardenWantedPriceRows.length ? (
+                <ShopMoneyRows items={gardenWantedPriceRows} ariaLabel="بودجه درخواست" />
+              ) : residentialPriceRows.length ? (
+                <ShopMoneyRows items={residentialPriceRows} />
+              ) : villaWantedPriceRows.length ? (
+                <ShopMoneyRows items={villaWantedPriceRows} stacked ariaLabel="سقف مبالغ درخواست ویلا" />
+              ) : villaPriceRows.length ? (
+                <ShopMoneyRows items={villaPriceRows} />
+              ) : otherPriceRows.length ? (
+                <ShopMoneyRows items={otherPriceRows} />
+              ) : otherWantedPriceRows.length ? (
+                <ShopMoneyRows items={otherWantedPriceRows} ariaLabel="بودجه درخواست" />
+              ) : (
+                <strong>
+                  {(!isWanted && category === "shop" ? shopFinancialHeadline(parking?.spaceAttributes) : "") || otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
+                    priceType: parking.priceType || "monthly",
+                    fallback: "توافقی",
+                  })}
+                </strong>
+              )}
+
+              <small>
+                {isWanted
+                  ? "بودجه ثبت‌شده توسط متقاضی"
+                  : "مبلغ ثبت‌شده توسط آگهی‌دهنده"}
+              </small>
+            </div>
+  );
+
   return (
     <main className="parking-details-page">
       <section className="parking-details-hero">
@@ -670,49 +724,8 @@ function ParkingDetails({
                 <span className="fj-vr-badge" aria-label="مدت درخواست مسکونی">درخواست {residentialWantedData.rentalTerm === "short" ? "کوتاه‌مدت" : "بلندمدت"}</span>}
             </div>
 
-            <div className={`parking-details-hero__price${(parkingPriceItems.length || storagePriceItems.length || industrialPriceItems.length || landPriceItems.length || shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || gardenWantedPriceRows.length || villaWantedPriceRows.length || villaPriceRows.length || otherPriceRows.length || otherWantedPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>
-              <span>
-                {isWanted ? "بودجه" : "قیمت آگهی"}
-              </span>
-
-              {parkingPriceItems.length ? (
-                <ShopMoneyRows items={parkingPriceItems} stacked ariaLabel={isWanted?"سقف مبالغ درخواست پارکینگ":"شرایط مالی پارکینگ"} />
-              ) : storagePriceItems.length ? (
-                <ShopMoneyRows items={storagePriceItems} stacked ariaLabel={isWanted?"سقف بودجه درخواست انبار":"شرایط مالی انبار"} />
-              ) : industrialPriceItems.length ? (
-                <ShopMoneyRows items={industrialPriceItems} stacked ariaLabel={isWanted?"سقف بودجه درخواست سوله یا کارگاه":"شرایط مالی سوله یا کارگاه"} />
-              ) : landPriceItems.length ? (
-                <ShopMoneyRows items={landPriceItems} stacked ariaLabel={isWanted?"سقف مبالغ درخواست زمین":"شرایط مالی زمین"}/>
-              ) : shopPriceRows.length ? (
-                <ShopMoneyRows items={shopPriceRows} stacked ariaLabel={isWanted?"سقف بودجه درخواست مغازه":"شرایط مالی مغازه"} />
-              ) : gardenPriceRows.length ? (
-                <ShopMoneyRows items={gardenPriceRows} />
-              ) : gardenWantedPriceRows.length ? (
-                <ShopMoneyRows items={gardenWantedPriceRows} ariaLabel="بودجه درخواست" />
-              ) : residentialPriceRows.length ? (
-                <ShopMoneyRows items={residentialPriceRows} />
-              ) : villaWantedPriceRows.length ? (
-                <ShopMoneyRows items={villaWantedPriceRows} stacked ariaLabel="سقف مبالغ درخواست ویلا" />
-              ) : villaPriceRows.length ? (
-                <ShopMoneyRows items={villaPriceRows} />
-              ) : otherPriceRows.length ? (
-                <ShopMoneyRows items={otherPriceRows} />
-              ) : otherWantedPriceRows.length ? (
-                <ShopMoneyRows items={otherWantedPriceRows} ariaLabel="بودجه درخواست" />
-              ) : (
-                <strong>
-                  {(!isWanted && category === "shop" ? shopFinancialHeadline(parking?.spaceAttributes) : "") || otherBudgetText || gardenBudgetText || villaBudgetText || landBudget || residentialBudgetText || formatRialPrice(parking.price, {
-                    priceType: parking.priceType || "monthly",
-                    fallback: "توافقی",
-                  })}
-                </strong>
-              )}
-
-              <small>
-                {isWanted
-                  ? "بودجه ثبت‌شده توسط متقاضی"
-                  : "مبلغ ثبت‌شده توسط آگهی‌دهنده"}
-              </small>
+            <div className="parking-details-price-placement parking-details-price-placement--hero">
+              {ds12PriceCard}
             </div>
           </div>
         </div>
@@ -1473,6 +1486,9 @@ function ParkingDetails({
             </div>
 
             <aside className="parking-details-sidebar">
+              <div className="parking-details-price-placement parking-details-price-placement--sidebar">
+                {ds12PriceCard}
+              </div>
               <div className="parking-contact-card">
                 <div className="parking-contact-card__header">
                   <span className="parking-contact-card__eyebrow">

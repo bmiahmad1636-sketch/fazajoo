@@ -1,0 +1,321 @@
+/*
+ * Fazajoo DS-10 — listing detail visual refresh / compact density.
+ * Scope: ONLY .parking-details-page. Presentation only; no field or behavior removed.
+ * Imported after ParkingDetails.css and ParkingDetailsGalleryDS08.css.
+ * Desktop / tablet / mobile rules are explicit and do not touch global tokens.
+ */
+.parking-details-page {
+  --ds10-ink: #192b26;
+  --ds10-pine: #174b3b;
+  --ds10-amber: #cb7b28;
+  --ds10-muted: #63736a;
+  --ds10-hairline: #e5eae3;
+  --ds10-surface: #fff;
+  background: linear-gradient(180deg, #f6f9f5 0%, #fbfcf9 440px, #f7f9f6 100%);
+  color: var(--ds10-ink);
+}
+
+/* A more editorial header, with restrained ornament and less wasted height. */
+.parking-details-page .parking-details-hero {
+  padding: 15px 0 51px !important;
+  background:
+    radial-gradient(ellipse at 82% -35%, rgba(214,159,88,.17), transparent 48%),
+    radial-gradient(ellipse at 6% 120%, rgba(27,103,80,.09), transparent 45%),
+    linear-gradient(115deg, #f0f6f0, #fcfaf4 52%, #f9f5ed) !important;
+  border-bottom: 1px solid #e0e6df;
+}
+.parking-details-page .parking-details-hero::before {
+  opacity: .15;
+  background-size: 24px 24px;
+}
+.parking-details-page .parking-details-hero__glow { opacity: .42; pointer-events: none; }
+.parking-details-page .parking-details-toolbar { margin-bottom: 12px !important; }
+.parking-details-page .parking-details-toolbar__back,
+.parking-details-page .parking-details-toolbar__actions button {
+  min-height: 40px !important;
+  padding: 7px 12px !important;
+  border: 1px solid #dce5dc !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,.88) !important;
+  color: var(--ds10-pine) !important;
+  box-shadow: 0 4px 15px rgba(28,57,44,.04);
+}
+.parking-details-page .parking-details-toolbar__back:hover,
+.parking-details-page .parking-details-toolbar__actions button:hover {
+  background: #fff !important;
+  border-color: #c6d9c9 !important;
+}
+.parking-details-page .parking-details-hero__content {
+  align-items: center !important;
+  gap: 20px !important;
+}
+.parking-details-page .parking-details-hero__badges { gap: 6px !important; margin-bottom: 6px !important; }
+.parking-details-page .parking-details-badge {
+  min-height: 26px !important;
+  padding: 3px 9px !important;
+  border-radius: 9px;
+  font-size: .7rem !important;
+  letter-spacing: 0;
+}
+.parking-details-page .parking-details-hero h1 {
+  margin-bottom: 6px !important;
+  font-size: clamp(1.45rem, 2.65vw, 2.35rem) !important;
+  line-height: 1.38 !important;
+  color: var(--ds10-ink) !important;
+  letter-spacing: -.015em;
+  text-shadow: none;
+  overflow-wrap: anywhere;
+}
+.parking-details-page .parking-details-hero__content > div:first-child > p {
+  font-size: .83rem;
+  line-height: 1.5;
+  color: var(--ds10-muted);
+}
+.parking-details-page .parking-details-hero__price {
+  padding: 12px 15px !important;
+  border: 1px solid #dfe7dd !important;
+  border-inline-start: 3px solid var(--ds10-amber) !important;
+  border-radius: 16px !important;
+  background: rgba(255,255,255,.97) !important;
+  box-shadow: 0 10px 26px rgba(29,71,50,.07) !important;
+}
+.parking-details-page .parking-details-hero__price > span { color: var(--ds10-muted); }
+.parking-details-page .parking-details-hero__price strong {
+  color: #9c5a16 !important;
+  -webkit-text-fill-color: #9c5a16 !important;
+  font-size: clamp(1.05rem, 1.9vw, 1.3rem) !important;
+  line-height: 1.4;
+}
+.parking-details-page .parking-details-hero__price small { line-height: 1.4; }
+.parking-details-page .parking-details-hero__price--shop { max-width: min(405px,100%); }
+.parking-details-page .parking-details-shop-money { gap: 3px; margin: 4px 0; }
+.parking-details-page .parking-details-shop-money__row { padding-block: 3px; }
+/* Keep the special individually bounded villa-request amounts; just trim padding. */
+.parking-details-page .parking-details-shop-money--villa-request { gap: 5px; }
+.parking-details-page .parking-details-shop-money--villa-request .parking-details-shop-money__row {
+  padding: 7px 10px;
+  border-radius: 10px;
+}
+.parking-details-page .parking-details-shop-money__amount { line-height: 1.48; }
+
+/* Compact reading rhythm: do not hide, collapse, clamp, truncate or reorder any fields. */
+.parking-details-page .parking-details-content { margin-top: -27px !important; padding-bottom: 22px !important; }
+.parking-details-page .parking-details-layout { gap: 17px !important; }
+.parking-details-page .parking-details-main { gap: 10px !important; }
+.parking-details-page .parking-details-gallery,
+.parking-details-page .parking-details-section,
+.parking-details-page .parking-details-location,
+.parking-details-page .parking-contact-card,
+.parking-details-page .parking-owner-card,
+.parking-details-page .parking-owner-note {
+  border: 1px solid var(--ds10-hairline) !important;
+  border-radius: 17px !important;
+  background-color: var(--ds10-surface);
+  box-shadow: 0 7px 26px rgba(26,59,43,.055) !important;
+}
+.parking-details-page .parking-details-section { padding: 12px 15px !important; }
+.parking-details-page .parking-details-section__heading {
+  gap: 9px;
+  margin-bottom: 8px !important;
+  padding-bottom: 7px;
+  border-bottom: 1px solid #edf0ea;
+}
+.parking-details-page .parking-details-section__icon {
+  width: 33px !important;
+  height: 33px !important;
+  border-radius: 10px !important;
+  background: #eef4ed;
+  box-shadow: none;
+  font-size: .95rem !important;
+}
+.parking-details-page .parking-details-section__heading span {
+  color: #7b8a80;
+  font-size: .67rem;
+}
+.parking-details-page .parking-details-section__heading h2 {
+  font-size: 1rem !important;
+  line-height: 1.4;
+  color: var(--ds10-ink);
+}
+.parking-details-page .parking-details-features { gap: 7px !important; }
+.parking-details-page .parking-details-feature {
+  min-width: 0;
+  min-height: 57px !important;
+  gap: 8px !important;
+  padding: 8px 10px !important;
+  border-color: #e9eee7;
+  border-radius: 11px;
+  background: #f8faf7;
+}
+.parking-details-page .parking-details-feature__icon {
+  width: 31px !important;
+  height: 31px !important;
+  border-radius: 9px;
+}
+.parking-details-page .parking-details-feature div span { color: #718075; font-size: .71rem; }
+.parking-details-page .parking-details-feature strong {
+  color: var(--ds10-ink);
+  font-size: .85rem;
+  line-height: 1.5;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+.parking-details-page .parking-details-feature--shop-money { min-height: 57px; }
+
+/* Older specialized detail blocks contain inline grid styles. Select their known
+ * article-level grids only; never blanket-target arbitrary divs or map contents. */
+.parking-details-page .parking-details-section > div[style*="grid-template-columns"] {
+  gap: 7px !important;
+  padding-block: 5px !important;
+}
+.parking-details-page .parking-details-section > div[style*="grid-template-columns"] > div[style*="padding"] {
+  padding: 8px 10px !important;
+  border: 1px solid #e5eae3 !important;
+  border-radius: 10px !important;
+  background: #fafbf8;
+  min-width: 0;
+  line-height: 1.48;
+  overflow-wrap: anywhere;
+}
+.parking-details-page .parking-details-section > div[style*="grid-template-columns"] > div > small {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--ds10-muted) !important;
+  font-size: .72rem;
+}
+.parking-details-page .parking-details-section > div[style*="grid-template-columns"] > div > strong {
+  font-size: .86rem;
+  color: var(--ds10-ink);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.parking-details-page .parking-details-residential {
+  padding: 10px !important;
+  margin: 8px 0 !important;
+  border-radius: 12px;
+  background: #f9fbf8;
+}
+.parking-details-page .parking-details-residential h3 { margin: 0 0 8px; font-size: .99rem; }
+.parking-details-page .parking-details-residential__grid { gap: 7px; }
+.parking-details-page .parking-details-residential__grid span {
+  padding: 8px 10px;
+  gap: 3px;
+  border-radius: 10px;
+  background: #fff;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.parking-details-page .parking-details-residential__grid small { color: #77867b; font-size: .73rem; }
+.parking-details-page .parking-details-residential__grid strong { font-size: .87rem; line-height: 1.55; }
+.parking-details-page .parking-details-residential__amenities { gap: 6px; margin-top: 8px; }
+.parking-details-page .parking-details-residential__amenities b {
+  padding: 5px 9px;
+  border: 1px solid #dce9de;
+  border-radius: 8px;
+  background: #eff6ef;
+  color: var(--ds10-pine);
+  font-size: .78rem;
+  font-weight: 750;
+}
+.parking-details-page .parking-details-description {
+  font-size: .88rem;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+.parking-details-page .parking-details-section--description { padding-block: 12px !important; }
+.parking-details-page .parking-details-location {
+  grid-template-columns: minmax(0,1fr) 48px;
+  min-height: 0 !important;
+  padding: 12px 15px !important;
+  gap: 9px;
+}
+.parking-details-page .parking-details-location h2 { margin: 2px 0 4px; font-size: 1.08rem; }
+.parking-details-page .parking-details-location p { font-size: .81rem; line-height: 1.65; }
+/* The location map is a third grid child: it must always span both columns. */
+.parking-details-page .parking-details-location > :nth-child(3) { grid-column: 1 / -1; min-width: 0; }
+
+/* Phone & chat remain distinct and easy to tap; no duplicated sticky CTA. */
+.parking-details-page .parking-details-sidebar { gap: 10px !important; }
+.parking-details-page .parking-contact-card { padding: 13px 15px !important; }
+.parking-details-page .parking-contact-card::before { margin: -13px -15px 10px !important; }
+.parking-details-page .parking-contact-card__header h2 { font-size: 1.02rem !important; line-height: 1.45; }
+.parking-details-page .parking-contact-card__header p { line-height: 1.65; }
+.parking-details-page .parking-contact-card__phone-button,
+.parking-details-page .parking-contact-card > a.parking-contact-card__phone-button {
+  min-height: 44px !important;
+  border-radius: 11px !important;
+  font-size: .9rem;
+}
+.parking-details-page .parking-contact-card__divider { margin: 9px 0 !important; }
+.parking-details-page .parking-contact-card__notice { margin-top: 8px !important; }
+.parking-details-page .parking-owner-card { padding: 12px 14px !important; }
+.parking-details-page .parking-owner-card button { min-height: 42px; }
+.parking-details-page .parking-owner-note { padding: 9px 12px !important; }
+
+/* DS-08 preserve: photo is contained (never crop a real listing image).
+ * Smaller presentation area, full-size zoom and thumbnails remain available. */
+.parking-details-page .parking-details-gallery--with-photo { height: clamp(268px, 27vw, 350px) !important; }
+.parking-details-page .parking-details-gallery--empty { height: 255px !important; }
+.parking-details-page .parking-details-thumbnails { gap: 6px !important; margin-bottom: 0 !important; }
+.parking-details-page .parking-details-thumbnail { height: 53px !important; }
+.parking-details-page .parking-details-video { padding: 7px; }
+.parking-details-page .parking-details-video video { max-height: 400px; }
+.parking-details-page .parking-details-video p { line-height: 1.6; }
+
+/* Responsive density. Avoid horizontal overflow with long monetary strings. */
+@media (max-width: 1000px) {
+  .parking-details-page .parking-details-layout { grid-template-columns: minmax(0,1fr); }
+  .parking-details-page .parking-details-sidebar { top: auto !important; }
+  .parking-details-page .parking-details-hero__content { align-items: stretch !important; }
+}
+@media (max-width: 760px) {
+  .parking-details-page .parking-details-hero { padding: 12px 0 43px !important; }
+  .parking-details-page .parking-details-toolbar { margin-bottom: 10px !important; gap: 8px; }
+  .parking-details-page .parking-details-toolbar__actions { gap: 6px; }
+  .parking-details-page .parking-details-hero__content { gap: 11px !important; }
+  .parking-details-page .parking-details-hero h1 { font-size: clamp(1.32rem, 5vw, 1.85rem) !important; }
+  .parking-details-page .parking-details-hero__price,
+  .parking-details-page .parking-details-hero__price--shop {
+    width: 100%; max-width: 100%; min-width: 0 !important;
+    padding: 11px 13px !important;
+  }
+  .parking-details-page .parking-details-content { margin-top: -22px !important; }
+  .parking-details-page .parking-details-section { padding: 11px 12px !important; }
+  .parking-details-page .parking-details-gallery--with-photo { height: clamp(228px, 54vw, 310px) !important; }
+  .parking-details-page .parking-details-gallery--empty { height: 210px !important; }
+  .parking-details-page .parking-details-feature { min-height: 56px !important; }
+  .parking-details-page .parking-details-location { padding: 11px 12px !important; }
+  .parking-details-page .parking-details-thumbnail { height: 54px !important; }
+}
+@media (max-width: 560px) {
+  .parking-details-page .parking-details-toolbar__back,
+  .parking-details-page .parking-details-toolbar__actions button {
+    min-height: 40px !important;
+    padding-inline: 9px !important;
+    font-size: .77rem;
+  }
+  .parking-details-page .parking-details-hero__badges { gap: 5px !important; }
+  .parking-details-page .parking-details-badge { font-size: .66rem !important; }
+  .parking-details-page .parking-details-features { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .parking-details-page .parking-details-feature { padding: 8px !important; }
+  .parking-details-page .parking-details-feature__icon { width: 27px !important; height: 27px !important; }
+  .parking-details-page .parking-details-gallery--with-photo { height: clamp(215px, 66vw, 295px) !important; }
+  .parking-details-page .parking-details-section > div[style*="grid-template-columns"] { grid-template-columns: repeat(auto-fit,minmax(min(100%,145px),1fr)) !important; }
+  .parking-details-page .parking-details-residential__grid { grid-template-columns: repeat(auto-fit,minmax(min(100%,135px),1fr)); }
+  .parking-details-page .parking-details-description { line-height: 1.7; }
+  .parking-details-page .parking-details-shop-money__amount { font-size: .96rem; }
+  .parking-details-page .parking-details-location { grid-template-columns: minmax(0,1fr) 42px; }
+}
+@media (max-width: 375px) {
+  .parking-details-page .parking-details-features { grid-template-columns: 1fr; }
+  .parking-details-page .parking-details-toolbar { flex-wrap: wrap; }
+  .parking-details-page .parking-details-toolbar__actions { flex-wrap: wrap; }
+  .parking-details-page .parking-details-gallery--with-photo { height: 220px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .parking-details-page .parking-details-feature,
+  .parking-details-page .parking-details-thumbnail { transition: none; }
+  .parking-details-page .parking-details-feature:hover { transform: none; }
+}

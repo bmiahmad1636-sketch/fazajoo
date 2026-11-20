@@ -1,0 +1,86 @@
+/* Fazajoo DS-12: single price card declaration, desktop gallery alignment,
+   compact two-level identity header. No finance/contact/navigation logic changes. */
+.parking-details-page .parking-details-price-placement { min-width:0; }
+/* Desktop: price starts at the same vertical origin as the gallery.
+   Both blocks share a single CSS-grid row (parking-details-layout). */
+@media (min-width:1001px) {
+  .parking-details-page .parking-details-price-placement--hero { display:none !important; }
+  .parking-details-page .parking-details-price-placement--sidebar { display:block; }
+  .parking-details-page .parking-details-content {
+    margin-top:0 !important;
+  }
+  .parking-details-page .parking-details-hero {
+    padding:12px 0 19px !important;
+  }
+  .parking-details-page .parking-details-toolbar {
+    margin-bottom:9px !important;
+  }
+  .parking-details-page .parking-details-hero__content {
+    display:block !important;
+  }
+  .parking-details-page .parking-details-hero__content > div:first-child {
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    align-content:start;
+    gap:6px 14px;
+    min-width:0;
+  }
+  /* Title is never squeezed into a crowded single-line toolbar. */
+  .parking-details-page .parking-details-hero__content > div:first-child > h1 {
+    order:0;
+    flex:0 0 100%;
+    margin:0 !important;
+    min-width:0;
+    overflow-wrap:anywhere;
+    font-size:clamp(1.65rem,2.65vw,2.4rem) !important;
+    line-height:1.27 !important;
+  }
+  .parking-details-page .parking-details-hero__badges {
+    order:2;
+    flex:0 1 auto;
+    width:auto;
+    margin:0 !important;
+  }
+  .parking-details-page .parking-details-hero__content > div:first-child > p {
+    order:1;
+    flex:0 0 auto;
+    margin:0 !important;
+    line-height:1.6 !important;
+  }
+  .parking-details-page .parking-details-hero__content > div:first-child > :not(h1):not(p):not(.parking-details-hero__badges) {
+    order:3;
+  }
+  .parking-details-page .parking-details-layout {
+    align-items:start !important;
+  }
+  .parking-details-page .parking-details-sidebar {
+    position:sticky;
+    top:82px;
+    align-self:start;
+  }
+  .parking-details-page .parking-details-price-placement--sidebar .parking-details-hero__price {
+    box-sizing:border-box;
+    width:100% !important;
+    max-width:none !important;
+    min-width:0 !important;
+    margin:0 !important;
+    border-radius:16px !important;
+    box-shadow:0 10px 25px rgba(29,48,35,.07) !important;
+  }
+}
+/* Tablet and phone: price remains above imagery, never stranded below the long details.
+   Sidebar price is removed from layout and accessibility tree via display:none. */
+@media (max-width:1000px) {
+  .parking-details-page .parking-details-price-placement--sidebar { display:none !important; }
+  .parking-details-page .parking-details-price-placement--hero { display:block; }
+  .parking-details-page .parking-details-hero__price { width:100% !important; max-width:none !important; }
+}
+@media (max-width:760px) {
+  .parking-details-page .parking-details-hero { padding-bottom:24px !important; }
+  .parking-details-page .parking-details-hero__content { gap:11px !important; }
+  .parking-details-page .parking-details-content { margin-top:-11px !important; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .parking-details-page .parking-details-hero__content * { scroll-behavior:auto !important; }
+}
