@@ -46,6 +46,9 @@ import OtherRentalBadges from "./OtherRentalBadges";
 import GardenRentalBadges from "./GardenRentalBadges";
 import {otherFinancialRows} from "../utils/otherOffer";
 
+import UnifiedSpaceCard from "./UnifiedSpaceCard.jsx";
+import { GENERAL_CATEGORIES, residentialDemandCardRows } from "../utils/unifiedCardModel.js";
+import { otherRequestBudgetRows } from "../utils/otherRequest.js";
 import IndustrialCardPilot from "./IndustrialCardPilot.jsx";
 import "./ParkingCard.css";
 
@@ -433,6 +436,62 @@ function ParkingCard({ parking }) {
     return <IndustrialCardPilot
       parking={parking}
       requested={industrialData}
+      favorite={isFavorite}
+      onFavorite={handleFavorite}
+      favoriteDisabled={favoriteLoading || favoriteChanging}
+    />;
+  }
+
+  // DS-02: same approved compact design for all EIGHT remaining categories.
+  // Reuses the old data read paths and existing category financial functions.
+  // This changes presentation ONLY and does not alter registration or matching.
+  if (GENERAL_CATEGORIES.includes(category)) {
+    const requestByCategory = {
+      parking: parkingWantedFields, storage: storageWantedData,
+      shop: shopWanted, land: landData,
+      residential: residentialRequest || (isWanted ? readResidentialRequest(parking.description || "", residentialDetails, area).data : null),
+      villa: villaData, garden: gardenData, other: otherData,
+    };
+    const moneyByCategory = {
+      parking: parkingFinancial, storage: storageFinancial,
+      shop: shopFinancial, land: landMoneyRows,
+      residential: isWanted ? residentialDemandCardRows(requestByCategory.residential) : residentialPriceRows,
+      villa: isWanted ? villaWantedRows : villaPriceRows,
+      garden: isWanted ? gardenWantedRows : gardenPriceRows,
+      other: isWanted ? (otherData ? otherRequestBudgetRows(otherData) : []) : otherPriceRows,
+    };
+    const areaByCategory = {
+      parking: parkingAreaText, storage: storageAreaText,
+      shop: shopAreaText, land: landAreaText,
+      residential: residentialAreaText, villa: villaAreaText,
+      garden: gardenAreaText, other: otherAreaText,
+    };
+    const termDeclaredByCategory = {
+      parking: Boolean(parkingWanted?.hasMetadata && parkingWantedFields?.rentalTerm),
+      storage: Boolean(storageWanted?.hasMetadata && storageWantedData?.rentalTerm),
+      shop: Boolean((parking.description || "").startsWith("[FAZAJOO_SHOP_REQUEST:") && shopWanted?.rentalTerm),
+      land: Boolean(landRequest?.hasMetadata && landData?.rentalTerm),
+      residential: Boolean(wantedResidential?.termDeclared),
+      villa: Boolean(wantedVilla?.hasMetadata && villaData?.rentalTerm),
+      garden: Boolean(wantedGarden?.hasMetadata && gardenData?.rentalTerm),
+      other: Boolean(wantedOther?.hasMetadata && otherData?.rentalTerm),
+    };
+    const fallbackByCategory = {
+      parking: "", storage: "", shop: isWanted ? "" : shopPriceText,
+      land: isWanted ? landBudgetText : "",
+      residential: isWanted ? (residentialBudgetText || "") : residentialPrice,
+      villa: isWanted ? villaBudgetText : "",
+      garden: isWanted ? gardenBudgetText : gardenPriceText,
+      other: isWanted ? otherBudgetText : "",
+    };
+    return <UnifiedSpaceCard
+      parking={parking}
+      request={isWanted ? requestByCategory[category] : null}
+      termDeclared={Boolean(isWanted && termDeclaredByCategory[category])}
+      areaText={isWanted ? areaByCategory[category] : ""}
+      moneyRows={moneyByCategory[category]}
+      fallbackText={fallbackByCategory[category]}
+      categoryLabel={visibleCategory}
       favorite={isFavorite}
       onFavorite={handleFavorite}
       favoriteDisabled={favoriteLoading || favoriteChanging}

@@ -1,0 +1,9 @@
+/* DS-02 extensions only. The approved compact15 design comes from IndustrialCardPilot.css. */
+.fj-unified-card .fj-unified-card__illustration { background: linear-gradient(180deg,#fff5ec,#ffe9d8); }
+.fj-unified-card .fj-unified-card__illustration img { padding: 0; object-fit: cover; }
+.fj-unified-card .fj-industrial-card__term--requested { color: #257b44; background: #e9f8ee; border-color: #c7e8d2; }
+/* Never force cards in a grid row to stretch to a tall legacy neighbor. */
+.fj-unified-card { height: auto; align-self: start; }
+@media(max-width:540px) {
+  .fj-unified-card .fj-industrial-card__category { max-width: 53%; overflow: hidden; text-overflow: ellipsis; }
+}
