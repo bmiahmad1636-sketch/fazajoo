@@ -7,10 +7,15 @@ import {
 
 import ParkingCard from "../components/ParkingCard";
 import "./Parking.css";
+import "./ParkingCatalogLP01.css";
 
 function Parking({ parkings = [], initialListingType = "", showHero = true }) {
   const [searchParams] =
     useSearchParams();
+
+  // LP-01: Mobile-only visual disclosure for the existing filter controls.
+  // Does not change filter state, queries, or result ordering.
+  const [lp01FiltersOpen, setLp01FiltersOpen] = useState(false);
 
   const search = (
     searchParams.get("search") || ""
@@ -388,8 +393,19 @@ function Parking({ parkings = [], initialListingType = "", showHero = true }) {
     maximumPrice !== "" ||
     sortType !== "";
 
+  const lp01ActiveFilterCount = [
+    selectedCity,
+    selectedListingType,
+    selectedCategory,
+    selectedPropertyType,
+    minimumBedrooms,
+    minimumPrice,
+    maximumPrice,
+    sortType,
+  ].filter(Boolean).length;
+
   return (
-    <main className="parking-page">
+    <main className={showHero ? "parking-page parking-page--catalog" : "parking-page"}>
       {showHero && (
       <section className="parking-page__hero">
         <div className="parking-page__hero-shape parking-page__hero-shape--one" />
@@ -455,6 +471,24 @@ function Parking({ parkings = [], initialListingType = "", showHero = true }) {
                 </p>
               </div>
 
+              {showHero && (
+                <button
+                  type="button"
+                  className="parking-filter__mobile-toggle"
+                  onClick={() => setLp01FiltersOpen((current) => !current)}
+                  aria-expanded={lp01FiltersOpen}
+                  aria-controls="lp01-filter-fields"
+                >
+                  <span aria-hidden="true">☷</span>
+                  {lp01FiltersOpen ? "بستن فیلترها" : "نمایش فیلترها"}
+                  {lp01ActiveFilterCount > 0 && (
+                    <b className="parking-filter__mobile-count">
+                      {lp01ActiveFilterCount.toLocaleString("fa-IR")}
+                    </b>
+                  )}
+                </button>
+              )}
+
               {hasActiveFilters && (
                 <button
                   type="button"
@@ -468,7 +502,10 @@ function Parking({ parkings = [], initialListingType = "", showHero = true }) {
               )}
             </div>
 
-            <div className="parking-filter__grid">
+            <div
+              id={showHero ? "lp01-filter-fields" : undefined}
+              className={`parking-filter__grid${showHero ? (lp01FiltersOpen ? " parking-filter__grid--lp01-open" : " parking-filter__grid--lp01-closed") : ""}`}
+            >
               <label className="parking-filter__field">
                 <span>
                   <span className="parking-filter__field-icon parking-filter__field-icon--orange">
