@@ -1,4 +1,4 @@
-﻿# Dependencies
+# Dependencies
 node_modules/
 backend/node_modules/
 
@@ -43,3 +43,7 @@ Thumbs.db
 .idea/
 backups/
 backend/backups/
+/DS10_Backup_*/
+/DS11_Backup_*/
+
+/DS*_Backup_*/
