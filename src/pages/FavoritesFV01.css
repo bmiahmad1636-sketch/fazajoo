@@ -1,0 +1,144 @@
+/* FAZAJOO FV-01 — favorites /favorites ONLY. Original card behavior unchanged. */
+.favorites-page {
+  --fv-forest:#102e26; --fv-ink:#17362a; --fv-line:#dae7dc;
+  --fv-separator:#18382f; --fv-separator-soft:rgba(24,56,47,.14);
+  direction:rtl; color:var(--fv-ink);
+  background:linear-gradient(180deg,#f2f7f2 0%,#f8faf7 56%,#fbfaf6 100%);
+}
+.favorites-page *, .favorites-page *::before, .favorites-page *::after {box-sizing:border-box;}
+.favorites-page .favorites-hero {
+  isolation:isolate; padding:0!important;
+  background:radial-gradient(ellipse at 3% 95%,rgba(97,145,110,.25),transparent 42%),linear-gradient(110deg,#1b4436 0%,#102f27 60%,#0a2821 100%)!important;
+  border-bottom:1px solid rgba(246,255,248,.15);
+}
+.favorites-page .favorites-hero::after {
+  background-image:radial-gradient(circle at 90% -140%,transparent 0 300px,rgba(230,250,235,.1) 301px 302px,transparent 303px),radial-gradient(circle at 7% 110%,transparent 0 215px,rgba(230,250,235,.08) 216px 217px,transparent 218px);
+  background-size:auto;mask-image:none;
+}
+.favorites-page .favorites-hero__shape {background:transparent;border-color:rgba(221,241,227,.10);}
+.favorites-page .favorites-hero__content {
+  min-height:173px;gap:22px;padding-top:29px!important;padding-bottom:41px!important;
+  align-items:center;flex-direction:row;
+}
+.favorites-page .favorites-hero__eyebrow {
+  margin-bottom:8px!important;padding:6px 12px!important;
+  background:rgba(255,255,255,.08)!important;border:1px solid rgba(237,250,239,.24)!important;
+  color:#f4dfc6!important;font-size:.75rem;letter-spacing:0;
+}
+.favorites-page .favorites-hero h1 {
+  margin:0 0 4px!important;font-size:clamp(2rem,3.2vw,2.8rem)!important;
+  line-height:1.35;color:#fff9f2!important;letter-spacing:0;
+}
+.favorites-page .favorites-hero p {font-size:.86rem!important;color:#cbdcd0!important;line-height:1.8;max-width:640px;}
+.favorites-page .favorites-hero__count {
+  min-width:145px;flex:0 0 auto; padding:11px 15px;
+  border-radius:16px!important; background:rgba(255,255,255,.11)!important;
+  border:1px solid rgba(251,251,242,.26)!important;
+  box-shadow:0 12px 29px rgba(0,0,0,.1)!important;backdrop-filter:blur(7px);
+}
+.favorites-page .favorites-hero__count strong {font-size:1.6rem;color:#fff9f0;}
+.favorites-page .favorites-hero__count span {font-size:.7rem;color:#d9e7d8;}
+.favorites-page .favorites-content {margin-top:-20px;padding-top:0!important;padding-bottom:56px;position:relative;z-index:3;}
+.favorites-page .favorites-heading {
+  min-height:70px;margin:0 0 14px;padding:12px 18px;border-radius:18px;
+  align-items:center;gap:14px;
+  border:1px solid var(--fv-line)!important;
+  background:rgba(255,255,255,.98)!important;
+  box-shadow:0 13px 29px rgba(16,49,33,.08)!important;
+}
+.favorites-page .favorites-heading>div>span {color:#b96429;font-size:.69rem;}
+.favorites-page .favorites-heading h2 {font-size:1.16rem;color:var(--fv-ink);margin-top:2px;}
+.favorites-page .favorites-heading__link {
+  background:#163d2f!important;color:#fff!important;border:0!important;
+  min-height:40px;border-radius:11px!important;padding:8px 14px!important;font-size:.78rem;
+}
+.favorites-page .favorites-grid {
+  grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px;align-items:stretch;
+  padding:0;overflow:visible;
+  background:transparent; border:0; box-shadow:none;
+}
+.favorites-page .favorites-item {
+  min-width:0;display:flex;flex-direction:column;gap:8px;
+  padding:10px; background:#fff; border:1px solid rgba(20,61,47,.33)!important;
+  border-radius:20px!important; box-shadow:0 12px 28px rgba(16,47,35,.075);
+  transform:none!important;transition:box-shadow .16s ease,border-color .16s ease;
+}
+.favorites-page .favorites-item:hover {
+  transform:none!important;border-color:rgba(20,61,47,.40)!important;
+  box-shadow:0 14px 30px rgba(16,47,35,.095);
+}
+.favorites-page .favorites-item>.fj-industrial-card,
+.favorites-page .favorites-item>.parking-card {
+  width:100%;min-width:0;height:100%;align-self:stretch;
+  background:#fff!important;border:0!important;
+  border-radius:16px!important;box-shadow:none!important;
+  transform:none!important;transition:none!important;
+}
+/* Shared-card hover animations do not move cards in the favorites grid. */
+.favorites-page .favorites-item:hover>.fj-industrial-card,
+.favorites-page .favorites-item:hover>.parking-card,
+.favorites-page .favorites-item .fj-industrial-card__photo,
+.favorites-page .favorites-item:hover .fj-industrial-card__photo,
+.favorites-page .favorites-item .parking-card__image-wrapper img,
+.favorites-page .favorites-item:hover .parking-card__image-wrapper img {
+  transform:none!important;transition:none!important;
+}
+.favorites-page .favorites-item>.fj-industrial-card {padding:9px;}
+.favorites-page .favorites-item .fj-industrial-card__media {aspect-ratio:1/.72;border-radius:15px;}
+.favorites-page .favorites-item .fj-industrial-card__body {min-height:182px;gap:6px;padding-top:9px;}
+.favorites-page .favorites-item .fj-industrial-card__money-row {background:#f7faf6;border-color:#e5ece4;}
+.favorites-page .favorites-item .fj-industrial-card__button {
+  min-height:42px;margin-top:auto;border-radius:11px;
+  color:#fff;background:#113c2d;box-shadow:none;font-size:.82rem;
+}
+.favorites-page .favorites-item .fj-industrial-card__button:hover {background:#1b5742;}
+.favorites-page .favorites-item .parking-card__image-wrapper {height:220px;}
+.favorites-page .favorites-item .parking-card__details-button {background:#113c2d!important;color:#fff!important;border-color:#113c2d!important;}
+.favorites-page .favorites-item__remove {
+  min-height:41px;flex:0 0 auto;padding:8px 12px;
+  border-radius:11px!important;background:#fff8f3!important;
+  border:1px solid #f1e3d8!important;color:#a35322!important;
+  font-size:.78rem;
+}
+.favorites-page .favorites-item__remove:hover:not(:disabled) {background:#fff0e4!important;border-color:#e6bb97!important;}
+.favorites-page .favorites-empty,
+.favorites-page .favorites-loading {
+  margin:12px auto 0;padding:36px 24px;border:1px solid var(--fv-line)!important;
+  border-radius:20px!important;background:#fff!important;
+  box-shadow:0 12px 30px rgba(18,48,32,.06)!important;
+}
+.favorites-page .favorites-empty__icon {width:66px;height:66px;border-radius:18px;font-size:1.8rem;}
+.favorites-page .favorites-empty__button {background:#153c2f!important;color:#fff!important;box-shadow:none;}
+.favorites-page .favorites-error {border-radius:12px;}
+.favorites-page .favorites-hero__content,
+.favorites-page .favorites-heading,
+.favorites-page .favorites-grid {min-width:0;}
+.favorites-page a:focus-visible,
+.favorites-page button:focus-visible {outline:3px solid #e48c50;outline-offset:3px;}
+@media(max-width:1080px){
+ .favorites-page .favorites-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:0;}
+}
+@media(max-width:700px){
+ .favorites-page .favorites-hero__content {min-height:0;padding:24px 0 43px!important;gap:11px;flex-direction:column;align-items:stretch;}
+ .favorites-page .favorites-hero h1 {font-size:1.9rem!important;}
+ .favorites-page .favorites-hero p {font-size:.79rem!important;}
+ .favorites-page .favorites-hero__count {align-self:flex-start;min-width:0;width:auto;flex-direction:row;gap:8px;padding:7px 12px;border-radius:12px!important;}
+ .favorites-page .favorites-hero__count strong {font-size:1.14rem;}
+ .favorites-page .favorites-hero__count span {margin:0;}
+ .favorites-page .favorites-content {margin-top:-20px;}
+ .favorites-page .favorites-heading {padding:12px;align-items:stretch;flex-direction:column;gap:11px;}
+ .favorites-page .favorites-heading__link {width:100%;}
+ .favorites-page .favorites-grid {grid-template-columns:1fr;gap:14px;padding:0;}
+ .favorites-page .favorites-item .fj-industrial-card__media {aspect-ratio:1/.7;}
+ .favorites-page .favorites-item .fj-industrial-card__body {min-height:0;}
+ .favorites-page .favorites-item .parking-card__image-wrapper {height:210px;}
+}
+@media(max-width:390px){
+ .favorites-page .favorites-item .fj-industrial-card__media {aspect-ratio:1/.8;}
+ .favorites-page .favorites-heading {border-radius:15px;}
+}
+@media(prefers-reduced-motion:reduce){
+ .favorites-page .favorites-item .fj-industrial-card,
+ .favorites-page .favorites-item .fj-industrial-card__photo,
+ .favorites-page .favorites-item__remove {transition:none!important;animation:none!important;}
+}

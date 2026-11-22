@@ -1,0 +1,129 @@
+/* Fazajoo MPFV-04 — Favorites: visual parity with premium listing cards.
+ * Scoped to /favorites. All events, shared-card logic, confirmation modal untouched.
+ */
+.favorites-page .favorites-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:20px;
+  align-items:stretch;
+  padding:0;
+  background:transparent;
+  border:0;
+  overflow:visible;
+  box-shadow:none;
+}
+.favorites-page .favorites-item {
+  position:relative;
+  isolation:isolate;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  gap:9px;
+  padding:9px;
+  background:#fff!important;
+  border:1px solid #dbe5dc!important;
+  border-radius:21px!important;
+  box-shadow:0 10px 30px rgba(13,43,32,.065)!important;
+  transform:none!important;
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+.favorites-page .favorites-item::before {
+  content:"";
+  position:absolute;
+  inset:0 14px auto;
+  height:3px;
+  background:linear-gradient(90deg,#f4ad70,#e46c20);
+  z-index:5;
+  pointer-events:none;
+}
+.favorites-page .favorites-item:hover,
+.favorites-page .favorites-item:focus-within {
+  transform:none!important;
+  border-color:#b9d2c3!important;
+  box-shadow:0 12px 32px rgba(13,43,32,.095)!important;
+}
+.favorites-page .favorites-item>.parking-card,
+.favorites-page .favorites-item>.fj-industrial-card {
+  display:flex;
+  flex:1 1 auto;
+  flex-direction:column;
+  align-self:stretch;
+  width:100%;
+  min-width:0;
+  height:auto;
+  padding:0!important;
+  overflow:hidden;
+  border:0!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  box-shadow:none!important;
+  transform:none!important;
+  transition:none!important;
+}
+.favorites-page .favorites-item .fj-industrial-card__media {
+  width:100%;
+  aspect-ratio:1.95/1;
+  min-height:170px;
+  overflow:hidden;
+  border-radius:14px;
+}
+.favorites-page .favorites-item .parking-card__image-wrapper {
+  height:183px;
+  min-height:183px;
+  border-radius:14px;
+  overflow:hidden;
+}
+.favorites-page .favorites-item .fj-industrial-card__photo,
+.favorites-page .favorites-item .parking-card__image-wrapper img,
+.favorites-page .favorites-item:hover .fj-industrial-card__photo,
+.favorites-page .favorites-item:hover .parking-card__image-wrapper img {
+  transform:none!important;
+  transition:none!important;
+}
+.favorites-page .favorites-item .fj-industrial-card__body {min-height:0;flex:1;padding:11px 6px 0;gap:7px;}
+.favorites-page .favorites-item .fj-industrial-card__money-row {background:#fff8f1;border:1px solid #f1e7da;}
+.favorites-page .favorites-item .fj-industrial-card__button,
+.favorites-page .favorites-item .parking-card__details-button {
+  min-height:42px;
+  border-radius:11px!important;
+  background:#153e31!important;
+  border-color:#153e31!important;
+  color:#fff!important;
+  box-shadow:none!important;
+}
+.favorites-page .favorites-item .fj-industrial-card__button:hover,
+.favorites-page .favorites-item .parking-card__details-button:hover {background:#1c5541!important;}
+.favorites-page .favorites-item__remove {
+  flex:0 0 auto;
+  width:100%;
+  min-height:41px;
+  margin-top:auto;
+  padding:8px 12px;
+  border-radius:11px!important;
+  border:1px solid #ecdccb!important;
+  background:#fff7f0!important;
+  color:#a9561e!important;
+  box-shadow:none!important;
+  transform:none!important;
+  font-size:.77rem;
+}
+.favorites-page .favorites-item__remove:hover:not(:disabled) {
+  transform:none!important;
+  background:#ffeede!important;
+  border-color:#e4c5a7!important;
+}
+.favorites-page .favorites-item a:focus-visible,
+.favorites-page .favorites-item button:focus-visible {outline:3px solid #e78c4c;outline-offset:3px;}
+@media(max-width:1130px) {
+  .favorites-page .favorites-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;}
+}
+@media(max-width:700px) {
+  .favorites-page .favorites-grid {grid-template-columns:1fr;gap:14px;}
+  .favorites-page .favorites-item {border-radius:18px!important;}
+  .favorites-page .favorites-item .fj-industrial-card__media {aspect-ratio:1.9/1;min-height:170px;}
+  .favorites-page .favorites-item .parking-card__image-wrapper {height:187px;min-height:187px;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .favorites-page .favorites-item,
+  .favorites-page .favorites-item * {transition:none!important;animation:none!important;}
+}

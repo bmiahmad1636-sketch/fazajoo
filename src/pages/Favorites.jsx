@@ -15,6 +15,9 @@ import {
   removeFavorite,
 } from "../services/favoriteService";
 import "./Favorites.css";
+import "./FavoritesFV01.css";
+import "./FavoritesFV04.css";
+import "./FavoritesFV05.css";
 
 function Favorites() {
   const [user, setUser] =
@@ -291,12 +294,11 @@ function Favorites() {
             </span>
 
             <h1>
-              آگهی‌های ذخیره‌شده
+              علاقه‌مندی‌های من
             </h1>
 
             <p>
-              همه پارکینگ‌هایی که پسندیده‌ای
-              در این صفحه نگهداری می‌شوند.
+              فضاهایی که نشان کرده‌اید را سریع و منظم اینجا پیدا کنید.
             </p>
           </div>
 
@@ -331,11 +333,11 @@ function Favorites() {
               <div className="favorites-heading">
                 <div>
                   <span>
-                    انتخاب‌های شما
+                    فهرست ذخیره‌شده‌ها
                   </span>
 
                   <h2>
-                    علاقه‌مندی‌های من
+                    آگهی‌های ذخیره‌شده
                   </h2>
                 </div>
 

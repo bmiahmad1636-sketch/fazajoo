@@ -1,0 +1,43 @@
+/* MPFV-05: /favorites ONLY. Reuse existing financial models and shared
+   ParkingCard/UnifiedSpaceCard; suppress only the duplicate inline heart
+   because the page has a separate confirmed remove action. */
+.favorites-page .favorites-item {
+  gap:8px;
+}
+.favorites-page .favorites-item .fj-industrial-card__favorite,
+.favorites-page .favorites-item .parking-card__favorite {
+  display:none!important;
+}
+.favorites-page .favorites-item .fj-industrial-card__body {
+  padding:10px 5px 0;
+  gap:7px;
+}
+.favorites-page .favorites-item .fj-industrial-card__summary {
+  min-height:0;
+  gap:5px;
+}
+.favorites-page .favorites-item .fj-industrial-card__head {
+  min-height:0;
+}
+.favorites-page .favorites-item .fj-industrial-card__money-row {
+  border-radius:9px;
+  padding-block:7px;
+}
+.favorites-page .favorites-item .fj-industrial-card__finance {
+  gap:5px;
+}
+.favorites-page .favorites-item .parking-card__content {
+  gap:8px;
+}
+.favorites-page .favorites-item .parking-card__features {
+  gap:5px;
+}
+.favorites-page .favorites-item__remove {
+  margin-top:0;
+  min-height:40px;
+  font-weight:750;
+}
+.favorites-page .favorites-item__remove:focus-visible {
+  outline:3px solid #e78c4c;
+  outline-offset:2px;
+}

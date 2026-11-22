@@ -15,6 +15,10 @@ import { getMySpaces, updateSpace } from "../services/spaceService";
 import { formatRialPrice } from "../utils/priceFormatter";
 
 import "./MyParkings.css";
+import "./MyParkingsMP01.css";
+import "./MyParkingsMP04.css";
+import "./MyParkingsMP05.css";
+import "./MyParkingsMP06.css";
 
 function MyParkings() {
   const [user, setUser] =
@@ -310,6 +314,7 @@ function MyParkings() {
                   ? "my-parkings-summary-card--selected"
                   : ""
               }`}
+              aria-pressed={statusFilter === "all"}
               onClick={() =>
                 setStatusFilter(
                   "all"
@@ -341,6 +346,7 @@ function MyParkings() {
                   ? "my-parkings-summary-card--selected"
                   : ""
               }`}
+              aria-pressed={statusFilter === "active"}
               onClick={() =>
                 setStatusFilter(
                   "active"
@@ -372,6 +378,7 @@ function MyParkings() {
                   ? "my-parkings-summary-card--selected"
                   : ""
               }`}
+              aria-pressed={statusFilter === "rented"}
               onClick={() =>
                 setStatusFilter(
                   "rented"
@@ -403,6 +410,7 @@ function MyParkings() {
                   ? "my-parkings-summary-card--selected"
                   : ""
               }`}
+              aria-pressed={statusFilter === "inactive"}
               onClick={() =>
                 setStatusFilter(
                   "inactive"
@@ -465,7 +473,8 @@ function MyParkings() {
                       .value
                   )
                 }
-                placeholder="جستجو در عنوان یا شهر..."
+                placeholder="نام آگهی یا شهر را بنویسید..."
+                aria-label="جست‌وجو در عنوان و شهر آگهی‌های من"
               />
             </div>
           </div>
@@ -584,152 +593,30 @@ function MyParkings() {
 
                       <div className="my-parking-card__body">
                         <div className="my-parking-card__heading">
-                          <div>
-                            <span className="my-parking-card__eyebrow">
-                              آگهی شما
-                            </span>
-
-                            <h3>
-                              {parking.title ||
-                                "پارکینگ بدون عنوان"}
-                            </h3>
-                          </div>
-
-                          <Link
-                            to={`/parking/${parking.id}`}
-                            className="my-parking-card__open"
-                            title="مشاهده آگهی"
-                            aria-label="مشاهده آگهی"
-                          >
-                            ↗
-                          </Link>
+                          <h3 title={parking.title || "آگهی بدون عنوان"}>
+                            {parking.title || "آگهی بدون عنوان"}
+                          </h3>
                         </div>
 
-                        <div className="my-parking-card__facts">
-                          <div>
-                            <span>
-                              📍
-                            </span>
-
-                            <div>
-                              <small>
-                                شهر
-                              </small>
-
-                              <strong>
-                                {parking.city ||
-                                  "ثبت نشده"}
-                              </strong>
-                            </div>
-                          </div>
-
-                          <div>
-                            <span>
-                              ↔
-                            </span>
-
-                            <div>
-                              <small>
-                                متراژ
-                              </small>
-
-                              <strong>
-                                {parking.area
-                                  ? `${parking.area} متر`
-                                  : "ثبت نشده"}
-                              </strong>
-                            </div>
-                          </div>
-
-                          <div>
-                            <span>
-                              💰
-                            </span>
-
-                            <div>
-                              <small>
-                                قیمت
-                              </small>
-
-                              <strong>
-                                {formatRialPrice(
-                                  parking.price,
-                                  {
-                                    priceType:
-                                      parking.priceType ||
-                                      "monthly",
-                                    fallback:
-                                      "توافقی",
-                                  }
-                                )}
-                              </strong>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="my-parking-card__status-copy">
-                          <span>
-                            وضعیت فعلی
+                        <div className="my-parking-card__overview" aria-label="شهر و متراژ آگهی">
+                          <span className="my-parking-card__city">
+                            <span aria-hidden="true">⌖</span>
+                            {parking.city || "شهر ثبت نشده"}
                           </span>
-
-                          <strong>
-                            {
-                              statusInfo.short
-                            }
-                          </strong>
+                          <span className="my-parking-card__meta-dot" aria-hidden="true">·</span>
+                          <span className="my-parking-card__area">
+                            {parking.area ? `${parking.area} متر` : "متراژ نامشخص"}
+                          </span>
                         </div>
 
-                        <div className="my-parking-card__status-control">
-                          <label
-                            htmlFor={`status-${parking.id}`}
-                          >
-                            تغییر وضعیت آگهی
-                          </label>
-
-                          <div className="my-parking-card__select-wrap">
-                            <select
-                              id={`status-${parking.id}`}
-                              value={
-                                status
-                              }
-                              disabled={
-                                updatingId ===
-                                parking.id
-                              }
-                              onChange={(
-                                event
-                              ) =>
-                                handleStatusChange(
-                                  parking.id,
-                                  event.target
-                                    .value
-                                )
-                              }
-                            >
-                              <option value="active">
-                                فعال
-                              </option>
-
-                              <option value="rented">
-                                اجاره داده شد
-                              </option>
-
-                              <option value="inactive">
-                                غیرفعال
-                              </option>
-                            </select>
-
-                            <span>
-                              ▾
-                            </span>
-                          </div>
-
-                          {updatingId ===
-                            parking.id && (
-                            <div className="my-parking-card__saving">
-                              در حال ذخیره تغییرات...
-                            </div>
-                          )}
+                        <div className="my-parking-card__price">
+                          <span>قیمت آگهی</span>
+                          <strong>
+                            {formatRialPrice(parking.price, {
+                              priceType: parking.priceType || "monthly",
+                              fallback: "توافقی",
+                            })}
+                          </strong>
                         </div>
 
                         <div className="my-parking-card__actions">
@@ -739,13 +626,45 @@ function MyParkings() {
                           >
                             مشاهده آگهی
                           </Link>
-
-                          <Link
-                            to={`/edit-parking/${parking.id}`}
-                            className="my-parking-card__action my-parking-card__action--primary"
-                          >
-                            ویرایش آگهی
-                          </Link>
+                          <details className="my-parking-card__management">
+                            <summary aria-label={`مدیریت آگهی ${parking.title || "بدون عنوان"}`}>
+                              مدیریت آگهی
+                              <span className="my-parking-card__manage-chevron" aria-hidden="true">⌄</span>
+                            </summary>
+                            <div className="my-parking-card__management-panel">
+                              <div className="my-parking-card__status-control">
+                                <label htmlFor={`status-${parking.id}`}>
+                                  وضعیت نمایش
+                                </label>
+                                <div className="my-parking-card__select-wrap">
+                                  <select
+                                    id={`status-${parking.id}`}
+                                    value={status}
+                                    disabled={updatingId === parking.id}
+                                    onChange={(event) =>
+                                      handleStatusChange(parking.id, event.target.value)
+                                    }
+                                  >
+                                    <option value="active">فعال</option>
+                                    <option value="rented">اجاره داده شد</option>
+                                    <option value="inactive">غیرفعال</option>
+                                  </select>
+                                  <span aria-hidden="true">▾</span>
+                                </div>
+                                {updatingId === parking.id && (
+                                  <div className="my-parking-card__saving" role="status">
+                                    در حال ذخیره تغییرات...
+                                  </div>
+                                )}
+                              </div>
+                              <Link
+                                to={`/edit-parking/${parking.id}`}
+                                className="my-parking-card__action my-parking-card__action--primary"
+                              >
+                                ویرایش آگهی
+                              </Link>
+                            </div>
+                          </details>
                         </div>
                       </div>
                     </article>

@@ -1,0 +1,271 @@
+/* Fazajoo MPFV-04 — My Listings editorial cards
+ * A scoped PRESENTATION LAYER loaded after MPFV-03. No data, event or API changes.
+ * Page uses the existing media/heading/facts/status/select/action DOM.
+ */
+.my-parkings-page {
+  --mp4-green:#143d30;
+  --mp4-border:#dbe5dc;
+  --mp4-orange:#e87323;
+  --mp4-muted:#718077;
+}
+.my-parkings-page .my-parkings-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:stretch;
+  gap:20px;
+  padding:0;
+  margin-top:19px;
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  overflow:visible;
+}
+.my-parkings-page .my-parking-card {
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  isolation:isolate;
+  min-width:0;
+  overflow:hidden;
+  border:1px solid var(--mp4-border)!important;
+  border-radius:21px!important;
+  background:#fff!important;
+  box-shadow:0 10px 30px rgba(13,43,32,.065)!important;
+  transform:none!important;
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+.my-parkings-page .my-parking-card::before {
+  content:"";
+  position:absolute;
+  inset:0 14px auto;
+  height:3px;
+  background:linear-gradient(90deg,#f4ad70,#e46c20);
+  z-index:4;
+  pointer-events:none;
+}
+.my-parkings-page .my-parking-card:hover,
+.my-parkings-page .my-parking-card:focus-within {
+  transform:none!important;
+  border-color:#b9d2c3!important;
+  box-shadow:0 12px 32px rgba(13,43,32,.095)!important;
+}
+.my-parkings-page .my-parking-card--inactive {opacity:1;}
+.my-parkings-page .my-parking-card__media {
+  position:relative;
+  isolation:isolate;
+  flex:0 0 auto;
+  width:calc(100% - 18px);
+  height:184px;
+  min-height:184px;
+  margin:9px 9px 0;
+  overflow:hidden;
+  border-radius:14px;
+  background:linear-gradient(125deg,#e9f0e7,#f7f2e8);
+}
+.my-parkings-page .my-parking-card__media img,
+.my-parkings-page .my-parking-card:hover .my-parking-card__media img {
+  display:block;
+  position:absolute;
+  inset:0;
+  width:100%;height:100%;
+  object-fit:cover;
+  transform:none!important;
+  transition:none!important;
+}
+.my-parkings-page .my-parking-card__placeholder {
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  color:#386b55;
+  background:radial-gradient(circle at 72% 16%,rgba(245,170,113,.25),transparent 37%),linear-gradient(135deg,#eef5ec,#f6f0e4);
+}
+.my-parkings-page .my-parking-card__placeholder span {
+  display:grid;place-items:center;
+  width:55px;height:55px;
+  border:1px solid rgba(20,61,48,.13);
+  border-radius:18px;
+  background:rgba(255,255,255,.70);
+  font-size:1.5rem;
+}
+.my-parkings-page .my-parking-card__placeholder small {font-size:.79rem;color:#527462;}
+.my-parkings-page .my-parkings-status {top:12px;right:12px;z-index:2;}
+.my-parkings-page .my-parking-card__body {
+  display:flex;
+  flex:1 1 auto;
+  flex-direction:column;
+  min-width:0;
+  padding:13px 15px 15px;
+  background:#fff!important;
+}
+.my-parkings-page .my-parking-card__heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:11px;
+  min-height:53px;
+}
+.my-parkings-page .my-parking-card__eyebrow {color:#bd642b;font-size:.67rem;font-weight:800;}
+.my-parkings-page .my-parking-card__heading h3 {
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+  color:#17372d;
+  font-size:1.03rem;
+  line-height:1.48;
+  margin:3px 0 0;
+  font-weight:900;
+}
+.my-parkings-page .my-parking-card__open {
+  display:grid;place-items:center;
+  flex:0 0 auto;
+  width:35px;height:35px;
+  border:1px solid #dbe8dc;
+  border-radius:12px;
+  background:#f0f6f0;
+  color:#1d5b43;
+}
+.my-parkings-page .my-parking-card__facts {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+  margin-top:9px;
+}
+.my-parkings-page .my-parking-card__facts>div {
+  display:flex;
+  align-items:center;
+  min-width:0;
+  min-height:48px;
+  gap:8px;
+  padding:8px 10px;
+  border:1px solid #e8ede7!important;
+  border-radius:10px!important;
+  background:#f8faf7!important;
+}
+.my-parkings-page .my-parking-card__facts>div:last-child {
+  grid-column:1/-1;
+  min-height:43px;
+  border-color:#f2e7d8!important;
+  background:#fff8f1!important;
+}
+.my-parkings-page .my-parking-card__facts>div>span {font-size:.88rem;}
+.my-parkings-page .my-parking-card__facts small {font-size:.65rem;line-height:1.4;color:#718177;}
+.my-parkings-page .my-parking-card__facts strong {
+  display:block;
+  font-size:.79rem;
+  line-height:1.6;
+  color:#1c3c2f;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.my-parkings-page .my-parking-card__facts>div:last-child strong {
+  color:#b85b1e;
+  font-size:.83rem;
+  direction:rtl;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  text-overflow:clip;
+}
+.my-parkings-page .my-parking-card__status-copy {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:6px;
+  margin-top:9px;
+  padding:7px 10px;
+  background:#f0f6f0!important;
+  border-radius:10px!important;
+  min-height:31px;
+}
+.my-parkings-page .my-parking-card__status-copy span,
+.my-parkings-page .my-parking-card__status-copy strong {
+  font-size:.65rem;line-height:1.5;color:#526b5b;
+}
+.my-parkings-page .my-parking-card__status-control {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(115px,43%);
+  align-items:center;
+  gap:8px;
+  margin-top:auto;
+  padding-top:11px;
+}
+.my-parkings-page .my-parking-card__status-control label {
+  margin:0;
+  color:#456052;
+  font-size:.71rem;
+  font-weight:850;
+}
+.my-parkings-page .my-parking-card__select-wrap {min-width:0;}
+.my-parkings-page .my-parking-card__select-wrap select {
+  min-height:37px;
+  width:100%;
+  padding:4px 11px 4px 28px;
+  color:#173c2f;
+  font-size:.82rem;
+  border:1px solid #dce9df;
+  border-radius:10px;
+  background:#f5f9f5;
+}
+.my-parkings-page .my-parking-card__select-wrap>span {left:9px;}
+.my-parkings-page .my-parking-card__saving {grid-column:1/-1;font-size:.7rem;}
+.my-parkings-page .my-parking-card__actions {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-top:10px;
+  padding-top:0;
+}
+.my-parkings-page .my-parking-card__action {
+  min-height:41px;
+  padding:8px 6px;
+  font-size:.75rem;
+  border-radius:11px!important;
+  box-shadow:none!important;
+}
+.my-parkings-page .my-parking-card__action--secondary {
+  border:1px solid #153e31!important;
+  background:#153e31!important;
+  color:#fff!important;
+}
+.my-parkings-page .my-parking-card__action--secondary:hover {background:#1c5541!important;}
+.my-parkings-page .my-parking-card__action--primary {
+  border:1px solid #e8d8c9!important;
+  background:#fff5eb!important;
+  color:#a9561e!important;
+}
+.my-parkings-page .my-parking-card__action--primary:hover {background:#ffebda!important;}
+.my-parkings-page .my-parking-card__action:focus-visible,
+.my-parkings-page .my-parking-card__open:focus-visible,
+.my-parkings-page .my-parking-card__select-wrap select:focus-visible {
+  outline:3px solid #e78c4c;
+  outline-offset:3px;
+}
+@media(max-width:1330px) {
+  .my-parkings-page .my-parkings-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;}
+  .my-parkings-page .my-parking-card__media {height:195px;min-height:195px;}
+}
+@media(max-width:840px) {
+  .my-parkings-page .my-parkings-grid {grid-template-columns:1fr;gap:16px;}
+  .my-parkings-page .my-parking-card__media {height:210px;min-height:210px;}
+}
+@media(max-width:520px) {
+  .my-parkings-page .my-parkings-grid {grid-template-columns:1fr;gap:14px;}
+  .my-parkings-page .my-parking-card {border-radius:18px!important;}
+  .my-parkings-page .my-parking-card__media {height:183px;min-height:183px;}
+  .my-parkings-page .my-parking-card__body {padding:12px;}
+  .my-parkings-page .my-parking-card__status-control {grid-template-columns:minmax(0,1fr) minmax(112px,43%);}
+}
+@media(max-width:340px) {
+  .my-parkings-page .my-parking-card__facts strong {font-size:.72rem;}
+  .my-parkings-page .my-parking-card__actions {gap:6px;}
+  .my-parkings-page .my-parking-card__action {font-size:.70rem;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .my-parkings-page .my-parking-card,
+  .my-parkings-page .my-parking-card * {transition:none!important;animation:none!important;}
+}
