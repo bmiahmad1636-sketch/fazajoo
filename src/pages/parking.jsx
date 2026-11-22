@@ -16,6 +16,8 @@ function Parking({ parkings = [], initialListingType = "", showHero = true }) {
   // LP-01: Mobile-only visual disclosure for the existing filter controls.
   // Does not change filter state, queries, or result ordering.
   const [lp01FiltersOpen, setLp01FiltersOpen] = useState(false);
+  // HP-02: Home-only disclosure; the same filters and results remain mounted.
+  const [hp02HomeFiltersOpen, setHp02HomeFiltersOpen] = useState(false);
 
   const search = (
     searchParams.get("search") || ""
@@ -489,6 +491,20 @@ function Parking({ parkings = [], initialListingType = "", showHero = true }) {
                 </button>
               )}
 
+              {!showHero && (
+                <button
+                  type="button"
+                  className="hp02-filter-toggle"
+                  aria-expanded={hp02HomeFiltersOpen}
+                  aria-controls="hp02-home-filter-fields"
+                  onClick={() => setHp02HomeFiltersOpen((open) => !open)}
+                >
+                  <span aria-hidden="true">☷</span>
+                  {hp02HomeFiltersOpen ? "بستن فیلترهای پیشرفته" : "نمایش فیلترهای پیشرفته"}
+                  {lp01ActiveFilterCount > 0 && <b>{lp01ActiveFilterCount.toLocaleString("fa-IR")}</b>}
+                </button>
+              )}
+
               {hasActiveFilters && (
                 <button
                   type="button"
@@ -503,8 +519,8 @@ function Parking({ parkings = [], initialListingType = "", showHero = true }) {
             </div>
 
             <div
-              id={showHero ? "lp01-filter-fields" : undefined}
-              className={`parking-filter__grid${showHero ? (lp01FiltersOpen ? " parking-filter__grid--lp01-open" : " parking-filter__grid--lp01-closed") : ""}`}
+              id={showHero ? "lp01-filter-fields" : "hp02-home-filter-fields"}
+              className={`parking-filter__grid${showHero ? (lp01FiltersOpen ? " parking-filter__grid--lp01-open" : " parking-filter__grid--lp01-closed") : (hp02HomeFiltersOpen ? " hp02-home-filters--open" : " hp02-home-filters--closed")}`}
             >
               <label className="parking-filter__field">
                 <span>

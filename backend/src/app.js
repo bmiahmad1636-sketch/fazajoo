@@ -19,6 +19,7 @@ const legalRoutes = require("./routes/legal.routes");
 const trustSafetyRoutes = require("./routes/trustSafety.routes");
 const adminDirectRoutes = require("./routes/adminDirect.routes");
 const walletRoutes = require("./routes/wallet.routes");
+const featuredShowcaseRoutes = require("./routes/featuredShowcase.routes");
 
 const app = express();
 
@@ -447,6 +448,9 @@ app.use("/api/admin/direct", adminDirectRoutes);
 
 // Authenticated read-only wallet endpoints (no credit/debit over HTTP).
 app.use("/api/wallet", walletRoutes);
+
+// HP-03: public showcase + strictly admin-protected scheduling.
+app.use("/api/featured-showcase", featuredShowcaseRoutes);
 
 /*
 |--------------------------------------------------------------------------

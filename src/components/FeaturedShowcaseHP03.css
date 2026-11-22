@@ -1,0 +1,16 @@
+/* HP-03 | Showcase is isolated from existing listings and details UI. */
+.hp03-showcase-window { position: relative; overflow: hidden; }
+.hp03-showcase-window .hp03-showcase-featured { display: block; position: absolute; inset: 0; border-radius: inherit; overflow: hidden; text-decoration: none; color: white; background: #183e32; }
+.hp03-showcase-featured img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+.hp03-showcase-featured:hover img { transform: scale(1.04); }
+.hp03-showcase-featured::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(5,25,18,.88),rgba(5,25,18,.08) 55%); pointer-events: none; }
+.hp03-showcase-label { position:absolute; z-index: 3; top: 12px; right: 12px; padding: 7px 13px; border-radius: 99px; background: #fff8eb; color: #633c23; font-size: .75rem; font-weight: 900; box-shadow: 0 6px 20px #102c2440; }
+.hp03-showcase-caption { position:absolute; z-index: 3; bottom: 14px; right: 15px; left: 15px; display:flex; flex-direction:column; gap: 2px; line-height:1.5; text-shadow: 0 2px 8px #0009; }
+.hp03-showcase-caption strong { font-weight:900; font-size:1.18rem; }
+.hp03-showcase-caption small { font-size:.8rem; opacity:.9; }
+.hp03-showcase-caption span { font-size:.73rem; font-weight:800; color:#ffc99a; }
+.hp03-showcase-window .hp03-showcase-seal { z-index:4; pointer-events:none; opacity:.93; }
+.hp03-showcase-empty-art { width:100%;height:100%;display:grid;place-items:center;font-size:3rem;font-weight:900;color:#ffe0aa; }
+.hp03-showcase-window .hp03-showcase-available { position:absolute; right: 24px; bottom: 13px; font-size:.85rem; font-weight:850; color:#285845; opacity:.9; }
+.hp03-showcase-featured:focus-visible { outline: 3px solid #ed8b45; outline-offset:-4px; }
+@media (prefers-reduced-motion:reduce) {.hp03-showcase-featured img { transition:none; }}

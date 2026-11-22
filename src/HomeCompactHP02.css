@@ -1,0 +1,54 @@
+/* HP-02 | Home-only catalog refinement; LP-01 and DS-15 untouched. */
+.hp02-home .hp01-home__discover { padding-top: 28px; }
+.hp02-home .hp01-home__discover .parking-page__content { padding-top: 14px; }
+.hp02-home .hp01-home__discover .parking-filter {
+  padding: 14px 18px;
+  border: 1px solid #dbe6d9;
+  border-radius: 20px;
+  box-shadow: 0 12px 26px rgba(16,45,38,.07);
+}
+.hp02-home .hp01-home__discover .parking-filter__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.hp02-home .hp01-home__discover .parking-filter__header > div:first-child { flex: 1 1 240px; }
+.hp02-home .hp01-home__discover .parking-filter__header h2 { margin-bottom: 0; font-size: 1rem; }
+.hp02-home .hp01-home__discover .parking-filter__header p { display: none; }
+.hp02-home .hp02-filter-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 9px; min-height: 42px; padding: 8px 14px;
+  border: 1px solid #b6d0bf; border-radius: 12px;
+  background: #ebf5ec; color: #194934;
+  font: inherit; font-size: .79rem; font-weight: 800; cursor: pointer;
+}
+.hp02-home .hp02-filter-toggle:hover { background: #e0f0e4; }
+.hp02-home .hp02-filter-toggle:focus-visible { outline: 3px solid #e88b41; outline-offset: 3px; }
+.hp02-home .hp02-filter-toggle b { border-radius: 99px; background: #174b36; color: #fff; padding: 1px 6px; font-size: .72rem; }
+.hp02-home .hp01-home__discover .parking-filter__grid.hp02-home-filters--closed { display: none; }
+.hp02-home .hp01-home__discover .parking-filter__grid.hp02-home-filters--open {
+  display: grid; margin-top: 14px;
+}
+/* The smart-search path remains available in the hero panel; omit the duplicate banner on home only. */
+@media (min-width: 621px) {
+  .hp02-home .hp01-home__discover .parking-smart-find { display: none; }
+}
+.hp02-home .hp01-home__discover .parking-results__header { margin-top: 20px; }
+/* Both industrial and unified cards share the same CTA class. The older parking fallback has its own. */
+.hp02-home .hp01-home__discover .parking-grid .fj-industrial-card__button,
+.hp02-home .hp01-home__discover .parking-grid .parking-card__details-button {
+  background: linear-gradient(120deg, #163d31, #0b2f26);
+  color: #fffaf3;
+  border-color: #163d31;
+}
+.hp02-home .hp01-home__discover .parking-grid .fj-industrial-card__button:hover,
+.hp02-home .hp01-home__discover .parking-grid .parking-card__details-button:hover { background: #245a44; color: #fffaf3; }
+@media (max-width: 700px) {
+  .hp02-home .hp01-home__discover { padding-top: 20px; }
+  .hp02-home .hp01-home__discover .parking-filter { padding: 12px; }
+  .hp02-home .hp01-home__discover .parking-filter__header { gap: 9px; }
+  .hp02-home .hp02-filter-toggle { width: 100%; }
+  .hp02-home .hp01-home__discover .parking-filter__grid.hp02-home-filters--open { grid-template-columns: 1fr; }
+}

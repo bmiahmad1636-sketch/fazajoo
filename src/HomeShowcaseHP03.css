@@ -1,0 +1,8 @@
+/* HP-03: one catalog count remains beside the actual results title. */
+.hp03-home .hp01-home__discover { padding-top: 16px; }
+.hp03-home .hp01-home__discover .parking-page__content { padding-top: 10px; }
+.hp03-home .hp01-home__discover .parking-results__header { margin-top: 16px; }
+@media (max-width:700px) {
+ .hp03-home .hp01-home__discover { padding-top: 10px; }
+ .hp03-home .hp01-home__discover .parking-results__header { margin-top: 12px; }
+}

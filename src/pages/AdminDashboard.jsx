@@ -565,6 +565,11 @@ function AdminDashboard() {
           </div>
 
           <div className="admin-dashboard__quick-nav-inner">
+            <Link to="/admin/featured" className="admin-dashboard__quick-link admin-dashboard__quick-link--users">
+              <span className="admin-dashboard__quick-icon">✦</span>
+              <div><strong>ویترین ویژه</strong><small>ظرفیت، درآمد دستی، صف و گردش آگهی‌های ویژه</small></div>
+              <b aria-hidden="true">←</b>
+            </Link>
             <Link to="/admin/legal" className="admin-dashboard__quick-link admin-dashboard__quick-link--legal">
               <span className="admin-dashboard__quick-icon">⚖️</span>
               <div><strong>امور حقوقی</strong><small>پرونده‌ها، دستورات قضایی و محدودیت‌ها</small></div>

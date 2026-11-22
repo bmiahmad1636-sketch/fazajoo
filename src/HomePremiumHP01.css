@@ -1,0 +1,73 @@
+/* HP-01 home framing only; the shared catalog's business logic is untouched. */
+.hp01-home {
+  --hp01-home-green: #102d26;
+  background: linear-gradient(180deg, #f5f6f1 0%, #f0f5f0 52%, #fff9f3 100%);
+  min-height: 100vh;
+}
+.hp01-home .hp01-home__discover {
+  width: min(1320px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: 44px 0 70px;
+}
+.hp01-home .hp01-home__discover-intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 0 2px 20px;
+  border-bottom: 1px solid #dbe7dc;
+}
+.hp01-home .hp01-home__kicker { color: #ad612c; font-size: .72rem; font-weight: 850; }
+.hp01-home .hp01-home__discover-intro h2 { font-size: clamp(1.7rem, 2.7vw, 2.55rem); line-height: 1.4; color: #123329; margin: 5px 0 4px; font-weight: 900; }
+.hp01-home .hp01-home__discover-intro p { font-size: .86rem; color: #64766b; margin: 0; }
+.hp01-home .hp01-home__count {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  border: 1px solid #d1e1d4;
+  border-radius: 15px;
+  background: #fff;
+  color: #4a6758;
+}
+.hp01-home .hp01-home__count strong { color: #1a6748; font-size: 1.65rem; line-height: 1.2; font-weight: 900; }
+.hp01-home .hp01-home__count span { font-size: .76rem; }
+.hp01-home .hp01-home__error {
+  margin-top: 16px;
+  padding: 15px 20px;
+  border-radius: 15px;
+  background: #fff0ed;
+  border: 1px solid #fad2ca;
+  color: #a53d2a;
+  font-size: .85rem;
+}
+.hp01-home .hp01-home__state {
+  min-height: 135px;
+  display: grid;
+  place-items: center;
+  padding: 35px 25px;
+  text-align: center;
+  color: #61746a;
+  font-size: .91rem;
+}
+.hp01-home .hp01-home__discover .parking-page { background: transparent; }
+.hp01-home .hp01-home__discover .parking-page__content { padding: 24px 0 0; margin-top: 0; }
+.hp01-home .hp01-home__discover .parking-page__content > .container { width: 100%; max-width: none; }
+.hp01-home .hp01-home__discover .parking-filter {
+  box-shadow: 0 15px 38px rgba(18,55,37,.07);
+  border: 1px solid #e1ebe1;
+}
+.hp01-home .hp01-home__discover .parking-results__header { margin-top: 35px; }
+.hp01-home .hp01-home__discover .parking-grid { gap: 18px; }
+@media (max-width: 700px) {
+  .hp01-home .hp01-home__discover { width: calc(100% - 24px); padding: 28px 0 42px; }
+  .hp01-home .hp01-home__discover-intro { align-items: center; gap: 12px; padding-bottom: 14px; }
+  .hp01-home .hp01-home__discover-intro h2 { font-size: 1.4rem; }
+  .hp01-home .hp01-home__discover-intro p { font-size: .75rem; line-height: 1.7; }
+  .hp01-home .hp01-home__count { padding: 7px 10px; }
+  .hp01-home .hp01-home__count strong { font-size: 1.28rem; }
+  .hp01-home .hp01-home__count span { font-size: .66rem; }
+  .hp01-home .hp01-home__discover .parking-page__content { padding-top: 14px; }
+  .hp01-home .hp01-home__discover .parking-grid { grid-template-columns: 1fr; gap: 15px; }
+}

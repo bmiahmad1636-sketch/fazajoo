@@ -26,6 +26,7 @@ import AgencyDashboard from "./pages/AgencyDashboard";
 import AgencyApplicants from "./pages/AgencyApplicants";
 import AgencyAccess from "./pages/AgencyAccess";
 import AdminDashboard from "./pages/AdminDashboard";
+import FeaturedShowcaseAdmin from "./pages/FeaturedShowcaseAdmin";
 import LegalCenterJalali from "./pages/LegalCenterJalali";
 import FindForMe from "./pages/FindForMe";
 import Account from "./pages/Account";
@@ -48,6 +49,9 @@ import {
 
 import "./compact.css";
 import "./typography.css";
+import "./HomePremiumHP01.css";
+import "./HomeCompactHP02.css";
+import "./HomeShowcaseHP03.css";
 
 function Home({
   parkings,
@@ -55,78 +59,27 @@ function Home({
   parkingsError,
 }) {
   return (
-    <>
-      <Hero />
+    <div className="hp01-home hp02-home hp03-home">
+      <Hero parkings={parkings} />
 
-      {parkingsError && (
-        <div
-          style={{
-            maxWidth: "1100px",
-            margin: "20px auto",
-            padding: "14px 20px",
-            direction: "rtl",
-            borderRadius: "14px",
-            background: "#fff1f2",
-            border: "1px solid #fecdd3",
-            color: "#be123c",
-          }}
-        >
-          دریافت آگهی‌های آنلاین با مشکل
-          مواجه شد. آگهی‌های پیش‌فرض
-          نمایش داده می‌شوند.
-        </div>
-      )}
+      <section className="hp01-home__discover" aria-label="آگهی‌های فضا" dir="rtl">
+        {parkingsError && (
+          <div className="hp01-home__error" role="status">
+            ارتباط با آگهی‌های آنلاین برقرار نشد. برای دیدن آگهی‌های به‌روز، اتصال را بررسی کن.
+          </div>
+        )}
 
-      <div
-        style={{
-          maxWidth: "1100px",
-          margin: "0 auto 15px",
-          padding: "0 20px",
-          direction: "rtl",
-          color: "#4b5563",
-        }}
-      >
-        {parkingsLoading
-          ? "در حال دریافت آگهی‌ها..."
-          : `تعداد آگهی‌ها: ${parkings.length}`}
-      </div>
-
-      {parkingsLoading ? (
-        <div
-          style={{
-            maxWidth: "1100px",
-            margin: "30px auto",
-            padding: "50px 20px",
-            textAlign: "center",
-            direction: "rtl",
-            color: "#6b7280",
-          }}
-        >
-          در حال دریافت آگهی‌ها...
-        </div>
-      ) : parkings.length > 0 ? (
-        <Parking
-          parkings={parkings}
-          showHero={false}
-        />
-      ) : (
-        <div
-          style={{
-            maxWidth: "1100px",
-            margin: "30px auto",
-            padding: "40px 20px",
-            textAlign: "center",
-            direction: "rtl",
-            backgroundColor: "#f9fafb",
-            borderRadius: "16px",
-            color: "#6b7280",
-            fontSize: "18px",
-          }}
-        >
-          هنوز آگهی‌ای ثبت نشده است.
-        </div>
-      )}
-    </>
+        {parkingsLoading ? (
+          <div className="hp01-home__state" role="status">در حال دریافت آگهی‌ها...</div>
+        ) : parkings.length > 0 ? (
+          <Parking parkings={parkings} showHero={false} />
+        ) : (
+          <div className="hp01-home__state">
+            هنوز آگهی‌ای برای نمایش وجود ندارد. می‌توانی اولین آگهی را ثبت کنی یا از جستجوی هوشمند استفاده کنی.
+          </div>
+        )}
+      </section>
+    </div>
   );
 }
 
@@ -694,6 +647,11 @@ function App() {
         />
 
 
+        <Route path="/admin/featured" element={
+          <AdminRoute user={user} authLoading={authLoading} userProfile={userProfile} profileLoading={profileLoading}>
+            <FeaturedShowcaseAdmin />
+          </AdminRoute>
+        } />
         <Route
           path="/admin/direct-management"
           element={
