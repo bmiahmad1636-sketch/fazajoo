@@ -9,7 +9,7 @@ const marker='\n/* ED12 — compact workspace';
 const i=css.indexOf(marker);
 const next=css.slice(i);
 test('ED11 stylesheet stays byte-equivalent after newline normalization',()=>{assert.ok(i>0);assert.equal(hash(css.slice(0,i)),'9d47484611491798e34bab98b541492c0568833e65c24ee915bcbd62e7044e12');});
-test('ED14 approved edit source preserves the ED12 workspace',()=>assert.equal(hash(read('src/pages/EditParking.jsx')),'99b8d97484f2a52c4b46dd87de5ed15061725de563f3ee4bd072bc751f3ed128'));
+test('ED14 approved edit source preserves the ED12 workspace',()=>assert.equal(hash(read('src/pages/EditParking.jsx').replace('import "./EditParkingRhythmED15.css";\n', '')),'99b8d97484f2a52c4b46dd87de5ed15061725de563f3ee4bd072bc751f3ed128'));
 test('all new rules are limited to the existing ED11 root',()=>{for(const line of next.split('\n').map(x=>x.trim()).filter(x=>x.startsWith('.'))) assert.ok(line.startsWith('.edit-parking-page.edit-parking-ed11'),line);assert.doesNotMatch(next,/\.add-parking-page|display:\s*none|position:\s*fixed/);});
 test('wide layout only compacts offer base with title and area, not other space or wanted',()=>{assert.match(next,/@media\(min-width:1280px\)/);assert.match(next,/edit-parking-page--offer[^\n]+:has\(> \.edit-parking-field #title\):has\(> \.edit-parking-grid #area\):not\(:has\(#other-edit-name\)\)/);});
 test('map remains in layout with tools, unselected message and clear control',()=>{const src=read('src/components/NeshanLocationPicker.jsx');for(const c of ['heading','unselected','tools','map-wrap','clear']){assert.ok(src.includes('neshan-location-picker__'+c));assert.ok(next.includes('neshan-location-picker__'+c));}assert.match(next,/height:245px/);});

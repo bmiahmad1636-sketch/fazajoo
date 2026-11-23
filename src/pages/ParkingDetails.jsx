@@ -1,5 +1,6 @@
 import { readResidentialRequest, residentialRequestAreaText, residentialRequestBudgetText, residentialRequestLabel, RESIDENTIAL_REQUEST_TYPES, RESIDENTIAL_REQUEST_FEATURES, RESIDENTIAL_FLOOR_PREFERENCES } from "../utils/residentialRequest";
 import { residentialFinancialRows } from "../utils/residentialOffer";
+import { residentialDemandCardRows } from "../utils/unifiedCardModel.js";
 import {OTHER_LAYOUTS,OTHER_ACCESS,OTHER_FEATURES,OTHER_LONG_MODES,otherOfferLabel,otherFinancialRows} from "../utils/otherOffer";
 import OtherRentalBadges from "../components/OtherRentalBadges";
 import GardenRentalBadges from "../components/GardenRentalBadges";
@@ -51,6 +52,7 @@ import "./ParkingDetailsAlignmentDS12.css";
 import "./ParkingDetailsHeroMetaDS13.css";
 import "./ParkingDetailsMetaRailDS14.css";
 import "./ParkingDetailsTitleCityDS15.css";
+import "./ParkingDetailsMoneyDS16.css";
 
 
 const CATEGORY_INFO = {
@@ -309,6 +311,7 @@ function ParkingDetails({
   const residentialWantedData = wantedResidential?.hasMetadata ? wantedResidential.data : null;
   const residentialAreaText = residentialWantedData ? residentialRequestAreaText(residentialWantedData) : "";
   const residentialBudgetText = residentialWantedData ? residentialRequestBudgetText(residentialWantedData) : "";
+  const residentialWantedPriceRows = residentialWantedData ? residentialDemandCardRows(residentialWantedData) : [];
   const wantedVilla = isWanted && category === "villa" ? readVillaRequest(parking?.description || "") : null;
   const villaWantedData = wantedVilla?.hasMetadata ? wantedVilla.data : null;
   const villaAreaText = villaWantedData ? villaRequestAreaText(villaWantedData) : "";
@@ -582,7 +585,7 @@ function ParkingDetails({
 
   // DS-12: one price markup used in two responsive placements; only one is visible.
   const ds12PriceCard = (
-            <div className={`parking-details-hero__price${(parkingPriceItems.length || storagePriceItems.length || industrialPriceItems.length || landPriceItems.length || shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || gardenWantedPriceRows.length || villaWantedPriceRows.length || villaPriceRows.length || otherPriceRows.length || otherWantedPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>
+            <div className={`parking-details-hero__price${(parkingPriceItems.length || storagePriceItems.length || industrialPriceItems.length || landPriceItems.length || shopPriceRows.length || gardenPriceRows.length || residentialPriceRows.length || residentialWantedPriceRows.length || gardenWantedPriceRows.length || villaWantedPriceRows.length || villaPriceRows.length || otherPriceRows.length || otherWantedPriceRows.length) ? " parking-details-hero__price--shop" : ""}`}>
               <span>
                 {isWanted ? "بودجه" : "قیمت آگهی"}
               </span>
@@ -601,6 +604,8 @@ function ParkingDetails({
                 <ShopMoneyRows items={gardenPriceRows} />
               ) : gardenWantedPriceRows.length ? (
                 <ShopMoneyRows items={gardenWantedPriceRows} ariaLabel="بودجه درخواست" />
+              ) : residentialWantedPriceRows.length ? (
+                <ShopMoneyRows items={residentialWantedPriceRows} stacked ariaLabel="سقف بودجه درخواست مسکونی" />
               ) : residentialPriceRows.length ? (
                 <ShopMoneyRows items={residentialPriceRows} />
               ) : villaWantedPriceRows.length ? (

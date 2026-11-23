@@ -68,6 +68,9 @@ import "./ListingFormJourneyDS07.css";
 import "./ListingFinalDS09.css";
 import { revealCityMap } from "../utils/revealCityMapED14.js";
 import "./ListingCityMapED14.css";
+import { GENERAL_ART } from "../utils/unifiedCardModel.js";
+import { resolveOtherDemandArt } from "../utils/otherDemandArt.js";
+import "./AddParkingPremiumAL01.css";
 import { shouldAskVillaShortRateAtFirstStep, validateVillaShortRate, villaOfferPreviewAtFinalStep } from "../utils/listingFinalDS09.js";
 
 const INITIAL_FORM = {
@@ -177,6 +180,23 @@ const SPACE_CATEGORIES = [
     icon: "✨",
   },
 ];
+
+const AL01_ICONS = {
+  parking: "M4 20V4h16v16H4z M10 17V7h4a3 3 0 0 1 0 6h-4",
+  residential: "M3 11l9-8 9 8 M5 10v11h14V10 M10 21v-7h4v7",
+  villa: "M2 12l10-9 10 9 M5 10v10h14V10 M9 20v-6h6v6 M16 4V2h3v5",
+  storage: "M3 8l9-5 9 5v13H3z M3 8h18 M7 12h10v9H7z M7 16h10",
+  warehouse: "M3 21V8l6 4V7l6 5V4h5v17H3z M7 17h2 M12 17h2 M17 17h2",
+  shop: "M3 9l2-6h14l2 6 M3 9v3a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0V9 M5 15v6h14v-6 M10 21v-5h4v5",
+  garden: "M12 22V12 M12 17c-7 0-9-5-8-9 5 0 8 3 8 7 M12 13c0-6 3-9 8-10 1 6-2 10-8 10 M7 22h10",
+  land: "M2 8l10-5 10 5-10 5z M2 12l10 5 10-5 M2 16l10 5 10-5",
+  other: "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 17.5h7 M17.5 14v7",
+  offer: "M3 11l9-8 9 8 M5 10v11h14V10 M10 21v-7h4v7",
+  wanted: "M10 3a7 7 0 1 0 0 14 7 7 0 0 0 0-14z M15 15l6 6",
+};
+function AL01Icon({ name }) {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round"><path d={AL01_ICONS[name] || AL01_ICONS.other} /></svg>;
+}
 
 function formatPriceInput(value) {
   const digits = String(value).replace(/\D/g, "");
@@ -596,8 +616,13 @@ function AddParking() {
     }
   };
 
+  const al01Steps = isWantedAd ? [STEPS[0], STEPS[2]] : STEPS;
+  const al01DemandArt = isWantedAd ? (form.category === "other"
+    ? resolveOtherDemandArt(form, form.otherRequest).src
+    : form.category === "warehouse" ? "/images/fj-industrial-demand.webp" : GENERAL_ART[form.category] || GENERAL_ART.other) : null;
+
   return (
-    <main className="add-parking-page">
+    <main className="add-parking-page add-parking-al01" data-mode={form.listingType} data-category={form.category}>
       <div className="add-parking-background">
         <span className="add-parking-orb add-parking-orb--one" />
         <span className="add-parking-orb add-parking-orb--two" />
@@ -624,13 +649,11 @@ function AddParking() {
               </span>
 
               <h1>
-                فضای مناسب را در فضاجو
-                پیدا کن یا معرفی کن
+                {isWantedAd ? "ثبت درخواست فضا" : "ثبت آگهی اجاره فضا"}
               </h1>
 
               <p>
-                چه فضایی برای اجاره داشته باشی و چه دنبال فضای مناسب باشی،
-                {isWantedAd ? "نیاز و بودجه‌ات را در دو مرحله کوتاه ثبت کن." : "اطلاعات را در سه مرحله کوتاه وارد کن و آگهی خودت را منتشر کن."}
+                {isWantedAd ? "فضای موردنیازت را معرفی کن تا دیگران بتوانند پیشنهاد مناسب بدهند." : "فضایت را معرفی کن و اطلاعات لازم برای تصمیم‌گیری متقاضیان را ثبت کن."}
               </p>
             </div>
 
@@ -646,9 +669,17 @@ function AddParking() {
                 onSubmit={(event) => event.preventDefault()}
                 noValidate
               >
+                <ol className="al01-progress" aria-label="مراحل ثبت آگهی">
+                  {al01Steps.map((step, index) => (
+                    <li key={step.id} data-state={index + 1 === displayedStep ? "current" : index + 1 < displayedStep ? "complete" : "upcoming"} aria-current={index + 1 === displayedStep ? "step" : undefined}>
+                      <span className="al01-progress-number">{index + 1 < displayedStep ? "✓" : (index + 1).toLocaleString("fa-IR")}</span>
+                      <span><strong>{step.id === 1 ? "مشخصات و شرایط" : step.id === 2 ? "عکس و ویدئو" : "بررسی و انتشار"}</strong><small>{step.id === 1 ? "نوع فضا، موقعیت و مبالغ" : step.id === 2 ? "رسانه‌های آگهی" : "تماس و پیش‌نمایش"}</small></span>
+                    </li>
+                  ))}
+                </ol>
                 <div className="add-parking-form-header">
                   <span className="add-parking-form-header__step">
-                    مرحله {displayedStep}
+                    مرحله {displayedStep.toLocaleString("fa-IR")} از {al01Steps.length.toLocaleString("fa-IR")}
                   </span>
 
                   <h2>
@@ -669,9 +700,7 @@ function AddParking() {
                 {currentStep === 1 && (
                   <div className="add-parking-step-content add-parking-step-content--details">
                     <div className="add-parking-intro">
-                      <span>
-                        {selectedCategory?.icon || "✨"}
-                      </span>
+                      <span className="al01-section-number">۰۱</span>
 
                       <div>
                         <strong>
@@ -691,7 +720,7 @@ function AddParking() {
                         <span>*</span>
                       </label>
 
-                      <div
+                      <div className="al01-mode-grid"
                         style={{
                           display: "grid",
                           gridTemplateColumns:
@@ -701,6 +730,8 @@ function AddParking() {
                       >
                         <button
                           type="button"
+                          className="al01-mode"
+                          aria-pressed={form.listingType === "offer"}
                           onClick={() =>
                             setForm((currentForm) => ({
                               ...currentForm,
@@ -726,11 +757,15 @@ function AddParking() {
                             fontWeight: "900",
                           }}
                         >
-                          🏠 فضا برای اجاره دارم
+                          <span className="al01-mode-icon"><AL01Icon name="offer" /></span>
+                          <span className="al01-mode-copy"><strong>فضا برای اجاره دارم</strong><small>معرفی فضای موجود به متقاضیان</small></span>
+                          <span className="al01-mode-check" aria-hidden="true">{form.listingType === "offer" ? "✓" : ""}</span>
                         </button>
 
                         <button
                           type="button"
+                          className="al01-mode"
+                          aria-pressed={form.listingType === "wanted"}
                           onClick={() =>
                             setForm((currentForm) => ({
                               ...currentForm,
@@ -756,7 +791,9 @@ function AddParking() {
                             fontWeight: "900",
                           }}
                         >
-                          🔎 دنبال فضا برای اجاره هستم
+                          <span className="al01-mode-icon"><AL01Icon name="wanted" /></span>
+                          <span className="al01-mode-copy"><strong>دنبال فضا برای اجاره هستم</strong><small>ثبت نیاز و دریافت پیشنهاد مناسب</small></span>
+                          <span className="al01-mode-check" aria-hidden="true">{form.listingType === "wanted" ? "✓" : ""}</span>
                         </button>
                       </div>
                     </div>
@@ -776,6 +813,7 @@ function AddParking() {
                             <button
                               type="button"
                               key={category.value}
+                              aria-pressed={isSelected}
                               disabled={loading}
                               onClick={() => {
                                 setForm((currentForm) => ({
@@ -826,7 +864,7 @@ function AddParking() {
                                   lineHeight: 1,
                                 }}
                               >
-                                {category.icon}
+                                <AL01Icon name={category.value} />
                               </span>
 
                               {category.label}
@@ -850,6 +888,7 @@ function AddParking() {
                       </div>
                     )}
 
+                    <div className="al01-section-title"><span>۰۲</span><div><strong>مشخصات و موقعیت</strong><small>عنوان، شهر و محدوده آگهی</small></div></div>
                     {form.category === "other" && (
                       <div className="add-parking-field">
                         <label htmlFor="customCategory">
@@ -891,6 +930,7 @@ function AddParking() {
                       </div>
                     )}
 
+                    <div className="al01-location-fields">
                     <div className="add-parking-field">
                       <label htmlFor="title">
                         عنوان آگهی
@@ -1016,6 +1056,8 @@ function AddParking() {
                       )}
                     </div>
 
+                    </div>
+
                     <section className="fj-map-journey" ref={mapJourneyRef} aria-label="انتخاب موقعیت آگهی روی نقشه">
                       <div className="fj-map-journey__intro">
                         <div>
@@ -1038,6 +1080,7 @@ function AddParking() {
                     />
                     </section>
 
+                    <div className="al01-section-title"><span>۰۳</span><div><strong>{isWantedAd ? "نیازها و بودجه" : "ویژگی‌ها و شرایط اجاره"}</strong><small>{spaceLabel} · اطلاعات تخصصی</small></div></div>
                     {form.category === "parking" && !isWantedAd && (
                       <ParkingOfferFields value={form.parkingOffer} note={form.description} disabled={loading} error={errors.parkingOffer}
                         onNoteChange={(description) => setForm(current => ({ ...current, description }))}
@@ -1179,7 +1222,7 @@ function AddParking() {
                 )}
 
                 {currentStep === 2 && (
-                  <div className="add-parking-step-content">
+                  <div className="add-parking-step-content al01-media-step">
                     <div className="add-parking-intro add-parking-intro--image">
                       <span>▧</span>
 
@@ -1243,7 +1286,7 @@ function AddParking() {
                     )}
 
                     {!isWantedAd && (
-                      <div style={{ marginTop: "14px" }}>
+                      <div className="al01-video-panel" style={{ marginTop: "14px" }}>
                         <div className="add-parking-section-heading" style={{ marginBottom: "8px" }}>
                           <div>
                             <strong>ویدئوی کوتاه فضا (اختیاری)</strong>
@@ -1468,19 +1511,21 @@ function AddParking() {
                           </span>
 
                           <strong>
-                            آماده انتشار
+                            بررسی قبل از انتشار
                           </strong>
                         </div>
 
                         <span className="add-parking-preview__status">
                           <i />
-                          فعال
+                          پیش‌نویس
                         </span>
                       </div>
 
                       <div className="add-parking-preview__card">
                         <div className="add-parking-preview__image">
-                          {form.imageUrl ? (
+                          {al01DemandArt ? (
+                            <img className="al01-demand-art" src={al01DemandArt} alt={`تصویر نمونه درخواست ${spaceLabel}`} />
+                          ) : form.imageUrl ? (
                             <img
                               src={
                                 form.imageUrl
@@ -1491,7 +1536,7 @@ function AddParking() {
                               }
                             />
                           ) : (
-                            <span>{form.category === "residential" ? "🏠" : "🚘"}</span>
+                            <span className="al01-empty-preview"><AL01Icon name={form.category} /><small>بدون تصویر</small></span>
                           )}
                         </div>
 
@@ -1632,6 +1677,7 @@ function AddParking() {
                     </button>
                   )}
 
+                  <span className="al01-action-context">{displayedStep.toLocaleString("fa-IR")} از {al01Steps.length.toLocaleString("fa-IR")} مرحله</span>
                   {currentStep <
                   STEPS.length ? (
                     <button

@@ -1,0 +1,19 @@
+/* DS16: Estedad tabular figures create excessive gaps in Persian digits.
+   Reset numeric typography only inside the common details price card.
+   Keep finance labels, amounts, period, currency and legacy fallbacks intact. */
+.parking-details-page .parking-details-hero__price > strong,
+.parking-details-page .parking-details-hero__price .parking-details-shop-money__amount {
+  font-variant-numeric: normal;
+  font-feature-settings: normal;
+  letter-spacing: normal;
+  word-spacing: normal;
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+.parking-details-page .parking-details-hero__price > strong {
+  unicode-bidi: isolate;
+  line-height: 1.55;
+}

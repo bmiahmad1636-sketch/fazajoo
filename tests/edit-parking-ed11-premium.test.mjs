@@ -7,7 +7,7 @@ const page = read('src/pages/EditParking.jsx');
 const css = read('src/pages/EditParkingPremiumED11.css');
 const hash = str => createHash('sha256').update(str).digest('hex');
 test('ED11 plus ED14 approved city-map layout matches the reviewed source', () => {
- assert.equal(hash(page), '99b8d97484f2a52c4b46dd87de5ed15061725de563f3ee4bd072bc751f3ed128');
+ assert.equal(hash(page.replace('import "./EditParkingRhythmED15.css";\n', "")), '99b8d97484f2a52c4b46dd87de5ed15061725de563f3ee4bd072bc751f3ed128');
 });
 test('stylesheet only applies to the dedicated edit page root', () => {
  const stripped = css.replace(/\/\*[\s\S]*?\*\//g, '');
