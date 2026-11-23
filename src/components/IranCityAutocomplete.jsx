@@ -15,9 +15,10 @@ const CITY_NAMES = [...new Set(
   IRAN_CITIES.map((item) => normalize(item?.name || item?.cityName || "")).filter(Boolean)
 )].sort((a, b) => a.localeCompare(b, "fa"));
 
-export default function IranCityAutocomplete({ value = "", onChange, onSelect, disabled = false, error = false }) {
+export default function IranCityAutocomplete({ value = "", onChange, onSelect, disabled = false, error = false, appearance = "add" }) {
   const [open, setOpen] = useState(false);
   const query = normalize(value);
+  const prefix = appearance === "edit" ? "edit-parking" : "add-parking";
 
   const matches = useMemo(() => {
     if (!query) return CITY_NAMES.slice(0, 80);
@@ -37,9 +38,9 @@ export default function IranCityAutocomplete({ value = "", onChange, onSelect, d
   };
 
   return (
-    <div className="iran-city-autocomplete">
-      <div className={["add-parking-input", error ? "add-parking-input--error" : ""].filter(Boolean).join(" ")}>
-        <span className="add-parking-input__icon">⌖</span>
+    <div className="iran-city-autocomplete" onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false); }}>
+      <div className={[`${prefix}-input`, error ? `${prefix}-input--error` : ""].filter(Boolean).join(" ")}>
+        <span className={`${prefix}-input__icon`}>⌖</span>
         <input
           id="city"
           name="city"

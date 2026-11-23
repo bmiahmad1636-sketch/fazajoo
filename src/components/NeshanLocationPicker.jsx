@@ -39,8 +39,11 @@ export default function NeshanLocationPicker({
   const onChangeRef = useRef(onChange);
   const lastFormCityRef = useRef(normalizeCityName(city));
   const cancelCityFlightRef = useRef(null);
+  const pendingCityFlightRef = useRef(null);
 
   const stopCityFlight = () => {
+    if (pendingCityFlightRef.current !== null) window.clearTimeout(pendingCityFlightRef.current);
+    pendingCityFlightRef.current = null;
     cancelCityFlightRef.current?.();
     cancelCityFlightRef.current = null;
   };
@@ -221,21 +224,26 @@ export default function NeshanLocationPicker({
     if (status !== "ready") return undefined;
     const name = normalizeCityName(city);
     if (name === lastFormCityRef.current) return undefined;
-    lastFormCityRef.current = name;
     stopCityFlight();
 
     const hasSavedPoint = savedLat !== null && savedLat !== undefined && savedLat !== "" &&
       savedLng !== null && savedLng !== undefined && savedLng !== "" &&
       Number.isFinite(Number(savedLat)) && Number.isFinite(Number(savedLng));
     if (hasSavedPoint) return undefined;
+    lastFormCityRef.current = name;
     const cityCenter = getKnownCityCenter(name, iranCitiesWithCoordinates);
     if (!cityCenter) return undefined;
 
     const delay = window.setTimeout(() => {
+      pendingCityFlightRef.current = null;
       const map = mapRef.current;
       if (map) flyToCity(map, cityCenter, 12);
     }, cityFlightDelay);
-    return () => window.clearTimeout(delay);
+    pendingCityFlightRef.current = delay;
+    return () => {
+      window.clearTimeout(delay);
+      if (pendingCityFlightRef.current === delay) pendingCityFlightRef.current = null;
+    };
     // Viewport-only: no onChange, no stored coordinates and no auto-marker.
   }, [city, status, savedLat, savedLng, cityFlightDelay]);
 
@@ -306,6 +314,7 @@ export default function NeshanLocationPicker({
       return;
     }
 
+    stopCityFlight();
     map.panBy([x, y], {
       duration: 260,
     });
@@ -491,6 +500,9 @@ export default function NeshanLocationPicker({
         </div>
       )}
 
+      {hasSelectedLocation && !disabled && (
+        <p className="neshan-location-picker__saved-hint">اگر شهر را تغییر می‌دهی، نقطه قبلی خودکار جابه‌جا نمی‌شود؛ برای حرکت به شهر جدید، ابتدا موقعیت قبلی را پاک کن یا نقطه جدید را خودت انتخاب کن.</p>
+      )}
       {hasSelectedLocation &&
         !disabled && (
           <button

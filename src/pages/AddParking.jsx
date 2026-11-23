@@ -66,6 +66,8 @@ import "./AddParking.css";
 import "./ListingFormVisualRefresh.css";
 import "./ListingFormJourneyDS07.css";
 import "./ListingFinalDS09.css";
+import { revealCityMap } from "../utils/revealCityMapED14.js";
+import "./ListingCityMapED14.css";
 import { shouldAskVillaShortRateAtFirstStep, validateVillaShortRate, villaOfferPreviewAtFinalStep } from "../utils/listingFinalDS09.js";
 
 const INITIAL_FORM = {
@@ -202,8 +204,7 @@ function AddParking() {
   // The map animation is viewport-only; choosing a city cannot pin a property.
   const revealSelectedCity = () => {
     window.setTimeout(() => {
-      const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-      mapJourneyRef.current?.scrollIntoView({ behavior: reduced ? "instant" : "smooth", block: "start" });
+      revealCityMap(mapJourneyRef.current);
     }, 100);
   };
   const [errors, setErrors] = useState({});
@@ -945,7 +946,7 @@ function AddParking() {
                       </div>
                     </div>
 
-                    <div className="add-parking-fields-grid">
+                    <div className="add-parking-fields-grid fj-city-fields-ed14">
                       <div className="add-parking-field">
                         <label htmlFor="city">
                           شهر
@@ -1019,7 +1020,7 @@ function AddParking() {
                       <div className="fj-map-journey__intro">
                         <div>
                           <strong>شهر و موقعیت روی نقشه</strong>
-                          <p>با انتخاب شهر، نقشه به‌آرامی به آن شهر می‌رود. برای مشخص‌کردن محل فضا، خودت روی نقشه بزن؛ مرکز شهر به معنی محل آگهی نیست.</p>
+                          <p>با انتخاب شهر، نقشه به‌آرامی به آن شهر می‌رود؛ ثبت نقطه روی نقشه با انتخاب خودت انجام می‌شود.</p>
                         </div>
                         <span>موقعیت دقیق اختیاری است</span>
                       </div>

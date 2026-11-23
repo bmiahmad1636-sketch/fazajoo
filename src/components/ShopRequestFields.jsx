@@ -31,7 +31,7 @@ export default function ShopRequestFields({value={},onChange,disabled=false,erro
  const otherError=show("فعالیت دیگر");
  const areaError=show("متراژ");
  const frontageError=show("برِ مغازه");
- return <section aria-label="مشخصات و بودجه مغازه موردنیاز" style={{display:"grid",gridColumn:"1 / -1",gap:15,padding:18,border:"1px solid #f0d7c1",borderRadius:16,background:"#fffaf6"}}>
+ return <section className="fj-edit-surface fj-edit-surface--shop-request" aria-label="مشخصات و بودجه مغازه موردنیاز" style={{display:"grid",gridColumn:"1 / -1",gap:15,padding:18,border:"1px solid #f0d7c1",borderRadius:16,background:"#fffaf6"}}>
   <div><strong style={{color:"#a94c0c"}}>🏪 فضای تجاری موردنیاز</strong><p style={{margin:"5px 0",fontSize:13,color:"#6d5a50"}}>انتخاب‌های تخصصی را براساس نیاز خودت وارد کن.</p></div>
   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(185px,1fr))",gap:12}}>
    {select("نوع فضای تجاری","spaceType",SHOP_TYPES,true,typeError)}

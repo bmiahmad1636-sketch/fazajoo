@@ -25,7 +25,7 @@ export default function GardenRequestFields({ value = EMPTY_GARDEN_REQUEST, onCh
     </label>
   );
   const isCultivation = ["orchard", "gardening"].includes(data.purpose);
-  return <section dir="rtl" style={{ border: "1px solid #f4ddc9", borderRadius: 18, padding: 16, background: "#fffdfa", gridColumn: "1 / -1", width: "100%", boxSizing: "border-box" }}>
+  return <section className="fj-edit-surface fj-edit-surface--garden-request" dir="rtl" style={{ border: "1px solid #f4ddc9", borderRadius: 18, padding: 16, background: "#fffdfa", gridColumn: "1 / -1", width: "100%", boxSizing: "border-box" }}>
     <div style={{ marginBottom: 14 }}>
       <strong style={{ fontSize: 17, color: "#9e4f20" }}>🌳 باغ موردنیازت را ساده معرفی کن</strong>
       <p style={{ color: "#74675e", margin: "5px 0" }}>فقط هدف اجاره، حدود مساحت و بودجه را مشخص کن؛ جزئیات بیشتر اختیاری و کشویی هستند.</p>

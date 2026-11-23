@@ -30,7 +30,7 @@ export default function ShedRequestFields({ value = {}, onChange, disabled = fal
     access: value.access === "trailer" && nextType === "workshop" ? "any" : value.access,
     ...(nextType === "workshop" ? { minHeight: "" } : {}),
   });
-  return <section style={{ gridColumn: "1 / -1", display: "grid", gap: 16, padding: 18, border: "1px solid #f0d7c1", borderRadius: 16, background: "#fffaf6" }}>
+  return <section className="fj-edit-surface fj-edit-surface--shed-request" style={{ gridColumn: "1 / -1", display: "grid", gap: 16, padding: 18, border: "1px solid #f0d7c1", borderRadius: 16, background: "#fffaf6" }}>
     <div><strong style={{ color: "#a94c0c" }}>🏭 مشخصات سوله یا کارگاه موردنیاز</strong><p style={{ margin: "5px 0 0", color: "#6d5a50" }}>نوع فضا را انتخاب کن تا پرسش‌های متناسب با همان فضا نمایش داده شوند.</p></div>
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 12 }}>
       <label style={labelStyle}><span>نوع فضای موردنیاز{requiredMark}</span><select value={spaceType} disabled={disabled} onChange={e => handleTypeChange(e.target.value)} style={fieldStyle}><option value="">انتخاب کنید</option>{SHED_TYPES.map(([id, text]) => <option key={id} value={id}>{text}</option>)}</select>{typeError && <small role="alert" style={{color:"#b42318"}}>{error}</small>}</label>

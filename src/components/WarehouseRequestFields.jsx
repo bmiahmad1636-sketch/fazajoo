@@ -15,7 +15,7 @@ export default function WarehouseRequestFields({ value, onChange, disabled = fal
     </label>
   );
   return (
-    <section style={{ gridColumn: "1 / -1", display: "grid", gap: 16, padding: 18, border: "1px solid #f0d7c1", borderRadius: 16, background: "#fffaf6" }}>
+    <section className="fj-edit-surface fj-edit-surface--warehouse-request" style={{ gridColumn: "1 / -1", display: "grid", gap: 16, padding: 18, border: "1px solid #f0d7c1", borderRadius: 16, background: "#fffaf6" }}>
       <div><strong style={{ color: "#a94c0c" }}>📦 مشخصات انبار موردنیاز</strong><p style={{ margin: "5px 0 0", color: "#6d5a50" }}>فقط نیازهای واقعی‌ات را انتخاب کن؛ امکانات اختیاری‌اند.</p></div>
       {select("کاربری انبار *", "purpose", [["", "انتخاب کنید"], ...WAREHOUSE_PURPOSES], purposeError ? error : "")}
       {value.purpose === "other" && <label style={{ display: "grid", gap: 6 }}>توضیح کاربری سایر *<input value={value.otherPurpose || ""} maxLength={100} disabled={disabled} onChange={e => update("otherPurpose", e.target.value)} placeholder="حداقل ۵ حرف" aria-invalid={otherPurposeError} style={{ padding: 12, border: otherPurposeError ? "1px solid #b42318" : "1px solid #e8d8cb", borderRadius: 12, font: "inherit" }}/>{otherPurposeError && <small role="alert" style={{ color: "#b42318", fontWeight: 600 }}>{error}</small>}</label>}

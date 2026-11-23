@@ -32,7 +32,7 @@ export default function LandRentalFields({value=EMPTY_LAND_RENTAL,onChange,disab
  const agricultural=d.primaryPurpose==="agriculture";
  const spec=purposeSpecific[d.primaryPurpose];
  const purposeSelect=<label style={label}><span>هدف اصلی اجاره زمین <span style={{color:"#d92d20"}}>*</span></span><select style={{...field,borderColor:"#edb47e",fontWeight:650}} value={d.primaryPurpose||""} disabled={disabled} onChange={e=>onChange({...d,primaryPurpose:e.target.value,...(e.target.value!=="agriculture"&&d.transactionKind==="crop_share"?{transactionKind:"lease"}:{})})}><option value="">زمین را برای چه کاری می‌خواهید؟</option>{LAND_PURPOSES.map(([id,name])=><option key={id} value={id}>{name}</option>)}</select></label>;
- return <section style={{gridColumn:"1 / -1",display:"grid",gap:14,padding:16,border:"1px solid #f0d8c3",borderRadius:16,background:"#fffaf7"}}>
+ return <section className="fj-edit-surface fj-edit-surface--land-rental" style={{gridColumn:"1 / -1",display:"grid",gap:14,padding:16,border:"1px solid #f0d8c3",borderRadius:16,background:"#fffaf7"}}>
  <div style={{display:"grid",gap:4}}><strong style={{fontSize:17,color:"#a95113"}}>🌱 {wanted?"زمین موردنیاز شما":"زمین قابل اجاره شما"}</strong><span style={{fontSize:13,color:"#746b62"}}>فقط اطلاعات اصلی را وارد کنید؛ جزئیات بیشتر اختیاری و کشویی هستند.</span></div>
  {purposeSelect}
  {error.includes("هدف اصلی")&&<small role="alert" style={{color:"#b42318",fontWeight:700}}>{error}</small>}

@@ -19,6 +19,8 @@ import "./MyParkingsMP01.css";
 import "./MyParkingsMP04.css";
 import "./MyParkingsMP05.css";
 import "./MyParkingsMP06.css";
+import { myListingDemandArt } from "../utils/myListingDemandArtED14.js";
+import "./MyParkingsDemandArtED14.css";
 
 function MyParkings() {
   const [user, setUser] =
@@ -544,6 +546,8 @@ function MyParkings() {
                       status
                     );
 
+                  const demandArt = myListingDemandArt(parking);
+
                   return (
                     <article
                       key={
@@ -552,7 +556,11 @@ function MyParkings() {
                       className={`my-parking-card my-parking-card--${status}`}
                     >
                       <div className="my-parking-card__media">
-                        {parking.imageUrl ? (
+                        {demandArt ? (
+                          <div className={`my-parking-card__demand-art${parking.category === "warehouse" ? " my-parking-card__demand-art--industrial" : ""}`}>
+                            <img src={demandArt} alt="تصویرسازی نمادین فضای مورد تقاضا، نه عکس واقعی ملک" loading="lazy" />
+                          </div>
+                        ) : parking.imageUrl ? (
                           <img
                             src={
                               parking.imageUrl

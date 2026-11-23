@@ -3,7 +3,7 @@ const field = { width: "100%", boxSizing: "border-box", padding: 12, border: "1p
 const label = { display: "grid", gap: 7, fontWeight: 700, minWidth: 0 };
 export default function ParkingRequestDetailsFields({ value = {}, onChange, disabled = false, error = "" }) {
  const update = (key, next) => onChange({ ...value, [key]: next });
- return <section style={{ gridColumn: "1 / -1", display: "grid", gap: 15, padding: 18, border: "1px solid #f0d7c1", borderRadius: 16, background: "#fffaf6" }}>
+ return <section className="fj-edit-surface fj-edit-surface--parking-request-details" style={{ gridColumn: "1 / -1", display: "grid", gap: 15, padding: 18, border: "1px solid #f0d7c1", borderRadius: 16, background: "#fffaf6" }}>
  <strong style={{ color: "#a94c0c" }}>🚘 مشخصات پارکینگ موردنیاز</strong>
  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12 }}>
  <label style={label}>حداقل متراژ (مترمربع، اختیاری)<input type="number" min="1" value={value.minArea || ""} onChange={e => update("minArea", e.target.value)} disabled={disabled} placeholder="مثلاً ۱۲" style={field}/></label>

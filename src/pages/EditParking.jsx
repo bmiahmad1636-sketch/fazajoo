@@ -2,6 +2,7 @@ import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -71,6 +72,11 @@ import "./EditParking.css";
 import "./ListingFormVisualRefresh.css";
 import "./ListingFormJourneyDS07.css";
 import "./EditParkingStickyDS08.css";
+import "./EditParkingEditorialED10.css";
+import "./EditParkingPremiumED11.css";
+import IranCityAutocomplete from "../components/IranCityAutocomplete";
+import { revealCityMap } from "../utils/revealCityMapED14.js";
+import "./ListingCityMapED14.css";
 import { editListingCategoryLabel, editListingTitle, editListingBaseHint, editListingTitlePlaceholder } from "../utils/editListingLabels.js";
 
 const EMPTY_FORM = {
@@ -219,6 +225,10 @@ function EditParking({
 }) {
   const { id } = useParams();
   const navigate = useNavigate();
+  const mapJourneyRef = useRef(null);
+  const revealSelectedCity = () => {
+    window.setTimeout(() => revealCityMap(mapJourneyRef.current), 100);
+  };
 
   // Navigation into the edit page should not inherit the previous page scroll.
   useEffect(() => {
@@ -662,7 +672,7 @@ parking?.category === "storage" ? storageListingPrice(isWanted?form.warehouseReq
   }
 
   return (
-    <main className={`edit-parking-page${isWanted ? " edit-parking-page--wanted" : " edit-parking-page--offer"}${parking?.category === "parking" && !isWanted ? " edit-parking-page--parking-offer" : ""}`}>
+    <main className={`edit-parking-page edit-parking-ed11${isWanted ? " edit-parking-page--wanted" : " edit-parking-page--offer"}${parking?.category === "parking" && !isWanted ? " edit-parking-page--parking-offer" : ""}`}>
       <div className="edit-parking-page__background">
         <span className="edit-parking-orb edit-parking-orb--one" />
         <span className="edit-parking-orb edit-parking-orb--two" />
@@ -853,30 +863,14 @@ parking?.category === "storage" ? storageListingPrice(isWanted?form.warehouseReq
                         <span>*</span>
                       </label>
 
-                      <div
-                        className={[
-                          "edit-parking-input",
-                          errors.city
-                            ? "edit-parking-input--error"
-                            : "",
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                      >
-                        <span className="edit-parking-input__icon">
-                          ⌖
-                        </span>
-
-                        <input
-                          id="city"
-                          name="city"
-                          type="text"
-                          value={form.city}
-                          onChange={handleChange}
-                          placeholder="مثلاً تهران"
-                          disabled={loading}
-                        />
-                      </div>
+                      <IranCityAutocomplete
+                        appearance="edit"
+                        value={form.city}
+                        onChange={handleChange}
+                        onSelect={revealSelectedCity}
+                        error={Boolean(errors.city)}
+                        disabled={loading}
+                      />
 
                       {errors.city && (
                         <span className="edit-parking-error">
@@ -930,6 +924,40 @@ parking?.category === "storage" ? storageListingPrice(isWanted?form.warehouseReq
                     </div>
                     )}
                   </div>
+
+                </div>
+              </section>
+
+              <section className="edit-parking-card fj-edit-city-map-ed14" ref={mapJourneyRef}>
+                <div className="edit-parking-card__header">
+                  <div className="edit-parking-card__icon">⌖</div>
+                  <div>
+                    <span>موقعیت مکانی</span>
+                    <h2>ویرایش موقعیت روی نقشه</h2>
+                    <p>{isWanted ? "محدوده مطلوب ثبت‌شده را ببین و فقط در صورت نیاز تغییر بده." : parking?.category === "parking" ? "اگر هنوز نقطه‌ای ثبت نشده، نقشه فقط مرکز شهر را نشان می‌دهد؛ برای ثبت محل پارکینگ روی نقشه کلیک کن." : "نقطه فعلی آگهی را ببین و در صورت نیاز جای آن را تغییر بده."}</p>
+                  </div>
+                </div>
+                <div className="edit-parking-card__body">
+                  <NeshanLocationPicker
+                    value={form.location}
+                    city={form.city}
+                    cityFlightDelay={850}
+                    disabled={loading}
+                    onChange={(location) => {
+                      setForm((currentForm) => ({ ...currentForm, location }));
+                      setShowSuccess(false);
+                    }}
+                  />
+                </div>
+              </section>
+
+              {isWanted && (
+                <section className="edit-parking-card fj-edit-request-specialist-ed14">
+                  <div className="edit-parking-card__header">
+                    <div className="edit-parking-card__icon">◇</div>
+                    <div><span>مشخصات تخصصی</span><h2>ویژگی‌ها و شرایط فضای موردنیاز</h2></div>
+                  </div>
+                  <div className="edit-parking-card__body">
                                      {isWanted && parking?.category === "parking" && (
                      <>
                        <div style={{ padding: 14, background: "#fff8f2", border: "1px solid #f3d7c2", borderRadius: 14 }}><strong>پارکینگ موردنیازت را معرفی کن</strong><p style={{ margin: "6px 0 0" }}>کاربری، متراژ، نوع پوشش و زمان دسترسی را ویرایش کن؛ شرایط خاص اختیاری است.</p></div>
@@ -1005,30 +1033,9 @@ parking?.category === "storage" ? storageListingPrice(isWanted?form.warehouseReq
                       <WarehouseRequestFields value={form.warehouseRequest} disabled={loading} error={errors.warehouseRequest} rentalError={errors.storageRental} onChange={(warehouseRequest) => { setForm(current => ({ ...current, warehouseRequest })); setErrors(current => ({ ...current, warehouseRequest: "", storageRental: "" })); }} />
                     </>
                   )}
-                </div>
-              </section>
-
-              <section className="edit-parking-card">
-                <div className="edit-parking-card__header">
-                  <div className="edit-parking-card__icon">⌖</div>
-                  <div>
-                    <span>موقعیت مکانی</span>
-                    <h2>ویرایش موقعیت روی نقشه</h2>
-                    <p>{isWanted ? "محدوده مطلوب ثبت‌شده را ببین و فقط در صورت نیاز تغییر بده." : parking?.category === "parking" ? "اگر هنوز نقطه‌ای ثبت نشده، نقشه فقط مرکز شهر را نشان می‌دهد؛ برای ثبت محل پارکینگ روی نقشه کلیک کن." : "نقطه فعلی آگهی را ببین و در صورت نیاز جای آن را تغییر بده."}</p>
                   </div>
-                </div>
-                <div className="edit-parking-card__body">
-                  <NeshanLocationPicker
-                    value={form.location}
-                    city={form.city}
-                    disabled={loading}
-                    onChange={(location) => {
-                      setForm((currentForm) => ({ ...currentForm, location }));
-                      setShowSuccess(false);
-                    }}
-                  />
-                </div>
-              </section>
+                </section>
+              )}
 
               {/* Specialized offer fields follow the basic listing details, not before them. */}
         {parking?.category === "parking" && !isWanted && (
@@ -1112,7 +1119,7 @@ parking?.category === "storage" ? storageListingPrice(isWanted?form.warehouseReq
                     </h2>
 
                     <p>
-                      تا ۸ عکس نگه دار، عکس جدید اضافه کن یا عکس اصلی کارت را تغییر بده.
+                      عکس‌ها را مدیریت کن یا عکس اصلی کارت را تغییر بده.
                     </p>
                   </div>
                 </div>
@@ -1448,7 +1455,7 @@ parking?.category === "storage" ? storageListingPrice(isWanted?form.warehouseReq
                   )}
 
                   <span className="edit-parking-preview__badge">
-                    {isWanted ? "درخواست فعال" : "آماده انتشار"}
+                    {spaceCategoryLabel}
                   </span>
                 </div>
 

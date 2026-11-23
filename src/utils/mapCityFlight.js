@@ -18,7 +18,7 @@ export function animateCityFlight(map, center, { zoom = 12, reducedMotion = fals
     map.off("moveend", onOverviewEnd);
     waitingForOverview = false;
     if (!cancelled) {
-      map.flyTo({ center: destination, zoom, duration: 1700, curve: 1.45, essential: false });
+      map.flyTo({ center: destination, zoom, duration: 3400, curve: 1.45, essential: false });
     }
   };
 
@@ -30,7 +30,7 @@ export function animateCityFlight(map, center, { zoom = 12, reducedMotion = fals
     if (Number.isFinite(currentZoom) && currentZoom > overviewZoom + 0.4) {
       waitingForOverview = true;
       map.on("moveend", onOverviewEnd);
-      map.easeTo({ zoom: overviewZoom, duration: 650, essential: false });
+      map.easeTo({ zoom: overviewZoom, duration: 1300, essential: false });
     } else {
       onOverviewEnd();
     }

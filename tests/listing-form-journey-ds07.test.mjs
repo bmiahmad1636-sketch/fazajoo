@@ -49,7 +49,9 @@ test('city choice reveals map only for explicit selection or Enter of complete c
   assert.match(cityPicker, /onSelect\?\.\(name\)/);
   assert.match(cityPicker, /CITY_NAMES\.includes\(query\)/);
   assert.match(add, /onSelect=\{revealSelectedCity\}/);
-  assert.match(add, /scrollIntoView\(\{ behavior: reduced \? "instant" : "smooth", block: "start" \}\)/);
+  assert.match(add, /revealCityMap\(mapJourneyRef.current\)/);
+  assert.match(edit, /onSelect=\{revealSelectedCity\}/);
+  assert.match(edit, /revealCityMap\(mapJourneyRef.current\)/);
 });
 
 test('city animation is a viewport hint; a chosen city does not save a location', () => {

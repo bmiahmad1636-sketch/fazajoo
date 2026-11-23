@@ -1,0 +1,296 @@
+/* ED11 — exclusively the edit route. No changes to field behaviour. */
+.edit-parking-page.edit-parking-ed11 {
+  --ed11-ink: #12382e;
+  --ed11-muted: #52675e;
+  --ed11-line: #dbe5dc;
+  --ed11-soft: #f4f7f3;
+  --ed11-orange: #a7470d;
+  background: #f2f5f0;
+  color: var(--ed11-ink);
+}
+.edit-parking-page.edit-parking-ed11 .edit-parking-hero {
+  background: linear-gradient(115deg,#24483b 0%,#10352b 55%,#102d26 100%);
+  border-bottom: 3px solid #e88940;
+  padding: 14px 0 18px !important;
+  color: #fffdf5;
+}
+.edit-parking-page.edit-parking-ed11 .edit-parking-hero::before { background: none; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-hero .container,
+.edit-parking-page.edit-parking-ed11 .edit-parking-content .container { max-width: 1200px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-toolbar { gap: 8px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-back { background:#ffffff12; border-color:#ffffff38; color:#fffdf5; box-shadow:none; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-back:hover:not(:disabled) { background:#ffffff24; color:#fff; border-color:#ffffff70; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-status { background:#ffffff10; border-color:#ffffff35; color:#e8f4ed; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-status--changed { background:#fff1da; color:#82430c; border-color:#f3c994; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-hero__content { margin-top:12px; align-items:center; gap:16px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-hero h1 { color:#fffdf5; font-size:clamp(1.35rem,2.25vw,2rem); letter-spacing:0; margin:0 0 4px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-hero p { color:#d5e5da; font-size:.79rem; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-eyebrow { color:#ffd1ac; background:#ffffff0c; border-color:#ffffff35; margin-bottom:4px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-hero__meta { background:#ffffff0e; border-color:#ffffff35; width: min(100%,260px); }
+.edit-parking-page.edit-parking-ed11 .edit-parking-hero__meta small { color:#cfddd2; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-hero__meta strong { color:#fffdf5; overflow-wrap:anywhere; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-hero__meta-icon { color:#ffbd86; background:#ffffff0e; border-color:#ffffff35; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-content { margin-top:20px; padding:0 0 40px !important; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-layout { grid-template-columns:minmax(0,1fr) minmax(280px,320px); gap:20px !important; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form { gap:16px; min-width:0; }
+/* All offer root families, including financial sections rendered directly in form. */
+.edit-parking-page.edit-parking-ed11 .edit-parking-form > :is(.edit-parking-card,.fj-po,.fj-pr,.fj-other,.residential-fields),
+.edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-vo-wrap > .fj-vo {
+  background:#fff; border:1px solid var(--ed11-line); border-radius:16px;
+  box-shadow:0 4px 15px #17382c09; min-width:0; box-sizing:border-box;
+}
+.edit-parking-page.edit-parking-ed11 .edit-parking-card { padding-block:0 !important; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-card__header { padding:13px 18px; background:#eaf1ea; border-bottom:1px solid #dbe5dc; gap:12px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-card__header::before { display:none; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-card__icon { flex:0 0 38px; width:38px; height:38px; background:#163d31; border:0; color:#fff; border-radius:10px; box-shadow:none; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-card__header span { color:#a7470d; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-card__header h2 { color:#163d31; font-size:1.03rem; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-card__header p { color:var(--ed11-muted); font-size:.76rem; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-card__body { padding:17px 18px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-grid { gap:12px 16px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-field { min-width:0; margin-bottom:12px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-field label { color:#234537; font-size:.82rem; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-input:not(.edit-parking-input--error),
+.edit-parking-page.edit-parking-ed11 .edit-parking-textarea:not(.edit-parking-input--error) { background:#f7faf6; border-color:#d5e2d7; border-radius:10px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-input input { height:44px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-field__meta { color:#596f64; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form > :is(.fj-po,.fj-pr,.fj-other,.residential-fields) { padding:16px 18px; gap:14px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-po .fj-po-header,
+.edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-pr > .fj-pr-heading { margin:-16px -18px 0; padding:14px 18px; border-radius:15px 15px 0 0; background:#eaf1ea; border-bottom:1px solid var(--ed11-line); }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-po .fj-po-header > span { background:#dbe9dd; border-color:#cbded0; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-po .fj-po-header h3,
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-pr-heading strong { color:#163d31; font-size:1.03rem; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-po-header p,
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-pr-heading p { color:var(--ed11-muted); font-size:.77rem; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-po-primary { gap:14px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-po-choices,.fj-io-options,.fj-sh-choices,.fj-lo-choices,.fj-go-choices,.fj-pr-terms) { gap:8px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-po-choice,.fj-po-check,.fj-io-choice,.fj-io-check,.fj-sh-choice,.fj-sh-check,.fj-lo-choice,.fj-lo-check,.fj-go-choice,.fj-go-check,.fj-pr-option,.residential-fields__choice,.residential-request__check) {
+  border-radius:9px; padding:9px 12px; min-height:40px; max-width:100%; box-sizing:border-box; white-space:normal; overflow-wrap:anywhere; font-size:.86rem;
+}
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-po-choice,.fj-po-check,.fj-io-choice,.fj-io-check,.fj-sh-choice,.fj-sh-check,.fj-lo-choice,.fj-lo-check,.fj-go-choice,.fj-go-check,.fj-pr-option,.residential-fields__choice,.residential-request__check):not(.is-selected):not(:has(input:checked)):not([aria-pressed="true"]) { border-color:#dbe5dc; background:#f7faf6; color:#304b3e; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-po-choice,.fj-po-check,.fj-io-choice,.fj-io-check,.fj-sh-choice,.fj-sh-check,.fj-lo-choice,.fj-lo-check,.fj-go-choice,.fj-go-check,.fj-pr-option,.residential-fields__choice,.residential-request__check):is(.is-selected,:has(input:checked),[aria-pressed="true"]) { background:#e3f0e6; border-color:#54876a; color:#164e32; box-shadow:inset 0 0 0 1px #54876a; font-weight:750; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-po-check,.fj-io-check,.fj-sh-check,.fj-lo-check,.fj-go-check,.fj-pr-option,.residential-request__check) input { accent-color:#256448; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-po-more { background:#f1f6f1; color:#24513e; border:1px solid #cddfd1; border-radius:10px; }
+/* Rental inputs: only style actual money inputs, never reformat or change values. */
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-pr { background:#fff; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-pr-content { gap:12px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-pr-money input { background:#fff8ef; border-color:#e9c9a9; color:#93420e; font-weight:800; border-radius:10px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-pr-field select { background:#f7faf6; border-color:#d5e2d7; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-pr-money small { color:#76573d; }
+/* Keep invalid fields legible and don't hide hints or errors. */
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(input,select,textarea)[aria-invalid="true"] { outline:2px solid #b42318; outline-offset:1px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(button,input,select,textarea,summary):focus-visible { outline:2px solid #b96120; outline-offset:2px; }
+/* Media and map controls stay intact. */
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .neshan-location-picker { border:0; background:#f5f8f4; padding:10px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .edit-parking-uploader:not(.edit-parking-uploader--error) { background:#f7faf6; border:1px solid #dbe5dc; padding:12px; box-shadow:none; }
+.edit-parking-page.edit-parking-ed11 .multi-image-uploader__add { background:#163d31; color:#fff; box-shadow:none; }
+.edit-parking-page.edit-parking-ed11 .multi-image-uploader__item { box-shadow:none; }
+.edit-parking-page.edit-parking-ed11 .multi-image-uploader__item:hover { transform:none; }
+.edit-parking-page.edit-parking-ed11 .fazajoo-video-uploader { background:#f7faf6; border-color:#dbe5dc; }
+.edit-parking-page.edit-parking-ed11 .fazajoo-video-uploader__pick { background:#edf4ed; border-color:#a9c5af; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-network-consent { background:#fff; border-color:#dbe5dc; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-actions { background:#fff; border:1px solid #dbe5dc; border-radius:14px; box-shadow:0 4px 15px #17382c09; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-button--save { background:#153d31; border-color:#153d31; color:#fff; box-shadow:none; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-button--save:not(:disabled):hover { background:#245540; transform:none; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-button--save:disabled { background:#dce5df; border-color:#dce5df; color:#51665b; opacity:1; }
+/* Live preview: compact like MPFV05, without dropping description or amounts. */
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview { background:#fff; border:1px solid #cbded0; border-radius:16px; box-shadow:0 8px 24px #17382c12; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview__top { padding:11px 14px; background:#173e32; border-bottom:0; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview__top > div > span { color:#d5e5da; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview__top strong { color:#fffdf5; font-size:.86rem; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview__image { margin:9px 9px 0; border-radius:11px; height:clamp(135px,21vh,190px); background:#e8efe5; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview:hover .edit-parking-preview__image > img { transform:none; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview__badge { background:#fffdf5; color:#173e32; border:0; right:9px; top:9px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview__content { padding:12px 13px 14px; display:flex; flex-direction:column; gap:7px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview__content h3 { order:-2; font-size:1.04rem; white-space:normal; overflow-wrap:anywhere; margin:0; color:#173e32; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview__location { order:-1; color:#52675e; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview__content > p { min-height:0; margin:0; color:#52675e; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview__features { margin:0; gap:6px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview__features > span { background:#edf4ee; color:#315543; max-width:100%; overflow-wrap:anywhere; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview__price { display:grid; gap:4px; padding:10px 12px; background:#fff5e9; border:1px solid #f0d8bd; border-radius:10px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview__price span { color:#72563c; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-preview__price strong { color:#a7470d; line-height:1.95; overflow-wrap:anywhere; font-size:.8rem; }
+@media(max-width:1050px){
+  .edit-parking-page.edit-parking-ed11 .edit-parking-layout { grid-template-columns:minmax(0,1fr); gap:15px !important; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-preview__image { height:clamp(160px,40vw,260px); }
+}
+@media(max-width:720px){
+  .edit-parking-page.edit-parking-ed11 .edit-parking-hero__content { flex-direction:column; align-items:stretch; gap:9px; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-hero__meta { flex:none; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-card__header,.edit-parking-page.edit-parking-ed11 .edit-parking-card__body { padding:12px; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form > :is(.fj-po,.fj-pr,.fj-other,.residential-fields) { padding:12px; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-po .fj-po-header,.edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-pr > .fj-pr-heading { margin:-12px -12px 0; padding:12px; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-grid { grid-template-columns:minmax(0,1fr); }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-actions,.edit-parking-page.edit-parking-ed11 .edit-parking-actions > div { flex-wrap:wrap; gap:8px; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-actions > div { flex:1 1 100%; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-actions > div > button { flex:1 1 auto; min-width:0; }
+}
+
+/* ED12 — compact workspace; preserve ED11 palette and all existing controls. */
+.edit-parking-page.edit-parking-ed11 .edit-parking-hero { padding:10px 0 12px !important; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-hero__content { margin-top:6px; gap:12px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-hero__meta { padding:8px 12px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-hero__meta-icon { width:36px; height:36px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-eyebrow { padding:3px 9px; margin-bottom:2px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-content { margin-top:12px; padding-bottom:24px !important; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form { gap:12px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-card__header { padding:9px 15px; gap:10px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-card__header h2 { margin:0; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-card__header p { line-height:1.65; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-card__body { padding:12px 15px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-grid { gap:10px 12px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-field { margin-bottom:8px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-field label { margin-bottom:5px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-field__meta { margin-top:4px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-po-primary { gap:10px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-po-group { gap:6px; align-content:start; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-po-more { padding:9px 12px; min-height:44px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-pr-content { gap:9px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-pr-field { gap:5px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-pr-consent-help { margin-top:0; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .neshan-location-picker { margin-top:0; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .neshan-location-picker__map { min-height:0; height:245px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-network-consent { margin-top:0; padding:10px 12px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-actions { padding:9px 12px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form > :is(.fj-po,.fj-pr) { padding:12px 15px; gap:10px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-po .fj-po-header,
+.edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-pr > .fj-pr-heading { margin:-12px -15px 0; padding:9px 15px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-po .fj-po-header > span { font-size:23px; padding:6px; }
+/* Wide screens: use available width rather than smaller fonts or hidden content. */
+@media(min-width:1280px) {
+  .edit-parking-page.edit-parking-ed11 .edit-parking-hero .container,
+  .edit-parking-page.edit-parking-ed11 .edit-parking-content .container { width:calc(100% - 64px); max-width:1400px; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-layout { grid-template-columns:minmax(0,1fr) minmax(280px,320px); gap:16px !important; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-hero .container { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,auto); align-items:center; gap:18px; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-toolbar { grid-column:2; grid-row:1; justify-content:flex-end; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-hero__content { grid-column:1; grid-row:1; margin:0; min-width:0; justify-content:flex-start; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-hero__content > div:first-child { min-width:0; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-hero__meta { flex:0 1 220px; min-width:0; }
+  /* Offer base form only: title, city and area share a row. Wanted questionnaires remain intact. */
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--offer .edit-parking-form > .edit-parking-card > .edit-parking-card__body:has(> .edit-parking-field #title):has(> .edit-parking-grid #area):not(:has(#other-edit-name)) { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,.85fr); gap:12px; align-items:start; }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--offer .edit-parking-form > .edit-parking-card > .edit-parking-card__body:has(> .edit-parking-field #title):has(> .edit-parking-grid #area):not(:has(#other-edit-name)) > .edit-parking-grid { display:contents; }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--offer .edit-parking-form > .edit-parking-card > .edit-parking-card__body:has(> .edit-parking-field #title):has(> .edit-parking-grid #area):not(:has(#other-edit-name)) > .edit-parking-field { grid-column:auto; }
+  /* The map stays mounted and usable; text, permission tools and reset stay visible. */
+  .edit-parking-page.edit-parking-ed11 .neshan-location-picker:has(> .neshan-location-picker__map-wrap) { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.65fr); grid-template-rows:auto auto auto 1fr; gap:7px 14px; align-items:start; }
+  .edit-parking-page.edit-parking-ed11 .neshan-location-picker:has(> .neshan-location-picker__map-wrap) > .neshan-location-picker__heading { grid-column:1; grid-row:1; margin:0; flex-wrap:wrap; }
+  .edit-parking-page.edit-parking-ed11 .neshan-location-picker > .neshan-location-picker__unselected { grid-column:1; grid-row:2; margin:0 !important; }
+  .edit-parking-page.edit-parking-ed11 .neshan-location-picker > .neshan-location-picker__tools { grid-column:1; grid-row:3; margin:0; }
+  .edit-parking-page.edit-parking-ed11 .neshan-location-picker > .neshan-location-picker__map-wrap { grid-column:2; grid-row:1 / 5; min-width:0; }
+  .edit-parking-page.edit-parking-ed11 .neshan-location-picker > .neshan-location-picker__clear { grid-column:1; grid-row:4; justify-self:start; }
+  /* Adjacent price grids share one row only when both exist. No field reordering. */
+  .edit-parking-page.edit-parking-ed11 .fj-pr-content:has(> .fj-pr-grid + .fj-pr-grid) { grid-template-columns:minmax(0,2fr) minmax(0,1fr); align-items:start; }
+  .edit-parking-page.edit-parking-ed11 .fj-pr-content:has(> .fj-pr-grid + .fj-pr-grid) > * { grid-column:1/-1; }
+  .edit-parking-page.edit-parking-ed11 .fj-pr-content:has(> .fj-pr-grid + .fj-pr-grid) > .fj-pr-grid:has(+ .fj-pr-grid) { grid-column:1; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .edit-parking-page.edit-parking-ed11 .fj-pr-content:has(> .fj-pr-grid + .fj-pr-grid) > .fj-pr-grid + .fj-pr-grid { grid-column:2; grid-template-columns:minmax(0,1fr); }
+  /* Two media cards share a row only with at most two photos and no ready video.
+     Larger galleries or active uploads retain full width, without clipping controls. */
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--offer .edit-parking-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--offer .edit-parking-form > * { grid-column:1/-1; min-width:0; }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--offer .edit-parking-form > .edit-parking-card:has(.multi-image-uploader):not(:has(.multi-image-uploader__item:nth-child(3),.multi-image-uploader__message)):has(+ .edit-parking-card .fazajoo-video-uploader__pick):not(:has(+ .edit-parking-card .fazajoo-video-uploader__progress-panel)) { grid-column:1; }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--offer .edit-parking-form > .edit-parking-card:has(.multi-image-uploader):not(:has(.multi-image-uploader__item:nth-child(3),.multi-image-uploader__message)) + .edit-parking-card:has(.fazajoo-video-uploader__pick):not(:has(.fazajoo-video-uploader__progress-panel)) { grid-column:2; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-card:has(.multi-image-uploader) .multi-image-uploader__grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,175px),1fr)); gap:8px; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-card:has(.multi-image-uploader) .multi-image-uploader__item { width:100%; max-width:205px; min-width:0; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-card:has(.multi-image-uploader) .multi-image-uploader__actions { flex-wrap:wrap; }
+  /* A contact-only card and its adjacent optional consent can share a row. */
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--offer .edit-parking-form > .edit-parking-card:has(.edit-parking-card__body > .edit-parking-grid > .edit-parking-field:only-child #phone):not(:has(textarea)):has(+ .edit-parking-network-consent) { grid-column:1; }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--offer .edit-parking-form > .edit-parking-card:has(.edit-parking-card__body > .edit-parking-grid > .edit-parking-field:only-child #phone):not(:has(textarea)) + .edit-parking-network-consent { grid-column:2; align-self:stretch; align-items:center; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-card__body > .edit-parking-grid:has(> .edit-parking-field:only-child #phone) { grid-template-columns:minmax(0,1fr); }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-so > .fj-po-primary { grid-template-columns:minmax(0,1fr) minmax(0,1.35fr); align-items:start; gap:12px 16px; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-so > .fj-po-primary > .fj-po-group:last-child { grid-column:1/-1; }
+}
+@media(max-width:720px) {
+  .edit-parking-page.edit-parking-ed11 .edit-parking-card__header,.edit-parking-page.edit-parking-ed11 .edit-parking-card__body { padding:11px 12px; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form > :is(.fj-po,.fj-pr) { padding:12px; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-po .fj-po-header,.edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-pr > .fj-pr-heading { margin:-12px -12px 0; padding:10px 12px; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form .neshan-location-picker__map { height:220px; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-po-choice,.fj-po-check,.fj-pr-option) { min-height:44px; }
+}
+
+/* ED13 — specialist edit workspaces; keep ED12 storage offer unchanged. */
+/* Wanted forms use their own real root classes, including inline-styled forms. */
+.edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .edit-parking-card__body > :is(.fj-edit-surface,.residential-request,.fj-other,div:has(> [aria-label="کاربری موردنظر"])) {
+  box-sizing:border-box; min-width:0; width:100%; margin:12px 0 0; padding:14px !important; border:1px solid #dbe5dc !important; border-radius:12px !important; background:#fff !important; box-shadow:none !important;
+}
+.edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .edit-parking-card__body > .fj-edit-surface { gap:10px !important; }
+.edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .edit-parking-card__body > .fj-edit-surface > div:first-child { margin-bottom:0 !important; }
+.edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .edit-parking-card__body > .fj-edit-surface > div:first-child > strong,
+.edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .edit-parking-card__body > .fj-edit-surface > strong:first-child { color:#163d31 !important; }
+/* Compact the nested forms without collapsing native details or hiding errors. */
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.residential-request,.fj-other,.fj-vo,.residential-fields,.fj-lc) { min-width:0; box-sizing:border-box; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form > :is(.residential-fields,.fj-other),
+.edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-vo-wrap > .fj-vo { margin:0; padding:13px 15px; gap:10px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-vo-wrap { gap:12px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.residential-fields__head,.residential-request__heading,.fj-other__intro,.fj-vo__header,.fj-lc > header) { margin:0 0 10px; padding:0 0 9px; border-bottom:1px solid #dbe5dc; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.residential-fields__head,.residential-request__heading,.fj-other__intro,.fj-vo__header,.fj-lc > header) :is(strong,h3) { color:#163d31; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.residential-fields__head,.residential-request__heading,.fj-vo__header) > span { font-size:23px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.residential-fields__term,.residential-request__term) { margin:0 0 10px; gap:8px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.residential-fields__finance,.residential-request__money,.fj-other__panel,.fj-vo__finance,.fj-sh-finance,.fj-go-finance,.fj-lc) { min-width:0; background:#f8faf6; border:1px solid #dbe5dc; border-radius:12px; padding:12px 14px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.residential-fields__finance,.residential-request__money,.fj-other__panel) { margin-top:12px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.residential-fields__finance,.residential-request__money,.fj-other__panel,.fj-vo__finance,.fj-sh-finance,.fj-go-finance,.fj-lc) > strong { color:#163d31; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.residential-fields__finance,.residential-request__money,.fj-other__panel,.fj-vo__finance,.fj-sh-finance,.fj-go-finance,.fj-lc) input[inputmode="numeric"]:not([aria-invalid="true"]) { background:#fff8ef; border-color:#e9c9a9; color:#93420e; font-weight:750; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.residential-fields__grid,.residential-request__grid,.fj-other__grid,.fj-vo__grid,.fj-lc-grid,.fj-io-row,.fj-sh-row,.fj-go-row,.fj-lo-row) { gap:9px 12px; align-items:start; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-io-field,.fj-sh-field,.fj-go-field,.fj-lo-field,.fj-vo__grid > label) { grid-template-rows:auto; gap:6px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-io-field,.fj-sh-field,.fj-go-field,.fj-lo-field) > small { min-height:0; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-io-group,.fj-sh-group,.fj-lo-group,.fj-go-group,.fj-lc-group,.fj-vo__group) { gap:7px; align-content:start; min-width:0; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-io-extra,.fj-sh-extra,.fj-lo-extra,.fj-go-extra,.residential-fields__extras,.fj-vo__extra-body) { gap:10px; padding-top:10px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.residential-fields__more,.residential-request__fold,.fj-other__extras,.fj-vo__extra,.fj-edit-surface details) { margin-top:8px !important; border-color:#cddfd1 !important; background:#f5f8f4 !important; border-radius:10px !important; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.residential-fields__more,.residential-request__fold > summary,.fj-other__extras > summary,.fj-vo__extra > summary,.fj-edit-surface details > summary) { color:#24513e !important; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.residential-request__fold-body,.fj-vo__extra-body) { padding:10px 12px; }
+/* Match all existing choice controls, including radio labels and inline request buttons. */
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-vo__term button,.fj-vo__checks label,.residential-request__term button,.residential-fields__amenities label,.fj-other__term,.fj-lc-options button,.fj-lc-transaction button,.fj-edit-surface button[aria-pressed],.fj-edit-surface label:has(> input[type="radio"]),[aria-label="کاربری موردنظر"] > label) { min-height:44px; box-sizing:border-box; max-width:100%; white-space:normal; overflow-wrap:anywhere; border:1px solid #dbe5dc !important; background:#f7faf6 !important; color:#304b3e !important; border-radius:9px !important; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-vo__term button,.fj-vo__checks label,.residential-request__term button,.residential-fields__amenities label,.fj-other__term,.fj-lc-options button,.fj-lc-transaction button,.fj-edit-surface button[aria-pressed],.fj-edit-surface label:has(> input[type="radio"]),[aria-label="کاربری موردنظر"] > label):is(.active,.is-selected,.fj-other__term--active,[aria-pressed="true"],:has(input:checked)) { background:#e3f0e6 !important; border-color:#54876a !important; color:#164e32 !important; box-shadow:inset 0 0 0 1px #54876a; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-vo,.residential-fields,.residential-request,.fj-other,.fj-lc,.fj-edit-surface,[aria-label="کاربری موردنظر"]) :is(input[type="radio"],input[type="checkbox"]) { accent-color:#256448; flex-shrink:0; }
+/* Inline requested-space controls; invalid borders and warning text are never overwritten. */
+.edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .fj-edit-surface :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea) { box-sizing:border-box; min-width:0; max-width:100%; font-family:inherit; }
+.edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .fj-edit-surface :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea):not([aria-invalid="true"]):not([style*="b42318"]):not([style*="d92d20"]) { background:#f7faf6 !important; border-color:#d5e2d7 !important; border-radius:10px !important; }
+.edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .fj-edit-surface :is(input,select):not([type="radio"]):not([type="checkbox"]) { min-height:44px; }
+.edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .fj-edit-surface .fj-pr-money input:not([aria-invalid="true"]) { background:#fff8ef !important; border-color:#e9c9a9 !important; }
+.edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .fj-edit-surface :is(.fj-pr,.fj-lc) { margin-top:4px; }
+/* Storage wanted: purposeful two-column layout, no reordering of fields. */
+/* Villa: compact native optional sections, area panel and paired finance fields. */
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-vo .fj-vo__header { margin-bottom:0; padding-bottom:6px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-vo .fj-villa-inline { gap:7px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-vo .fj-vo__extra { margin-top:0 !important; padding:9px 11px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-vo .fj-vo__conversion { padding:8px 10px; gap:3px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-villa-area-ds11,.fj-villa-request-area-ds11) { padding:10px 12px; border-color:#dbe5dc; background:#f8faf6; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-villa-request-area-ds11 { margin-top:9px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-vo .fj-vo__short-rate-panel { padding:10px 12px; }
+@media(min-width:1280px) {
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .edit-parking-card__body:has(> .edit-parking-field #title):has(> .edit-parking-grid #city) { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:10px 12px; align-items:start; }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .edit-parking-card__body:has(> .edit-parking-field #title):has(> .edit-parking-grid #city) > * { grid-column:1/-1; min-width:0; }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .edit-parking-card__body:has(> .edit-parking-field #title):has(> .edit-parking-grid #city) > .edit-parking-field:has(#title) { grid-column:1; }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .edit-parking-card__body:has(> .edit-parking-field #title):has(> .edit-parking-grid #city) > .edit-parking-grid { grid-column:2; grid-template-columns:minmax(0,1fr); }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .fj-edit-surface--warehouse-request { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .fj-edit-surface--warehouse-request > * { grid-column:1/-1; min-width:0; }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .fj-edit-surface--warehouse-request > label:has(> select) { grid-column:auto; }
+  /* Other offers have a separate name field; keep it next to title, not in the area row. */
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--offer .edit-parking-card__body:has(> .edit-parking-field #other-edit-name) { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 12px; }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--offer .edit-parking-card__body:has(> .edit-parking-field #other-edit-name) > * { grid-column:1/-1; }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--offer .edit-parking-card__body:has(> .edit-parking-field #other-edit-name) > .edit-parking-field:has(:is(#other-edit-name,#title)) { grid-column:auto; }
+  /* Parking choices differ from storage. Two smaller groups share the second row. */
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--parking-offer .fj-po:not(.fj-so) > .fj-po-primary { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:10px 14px; }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--parking-offer .fj-po:not(.fj-so) > .fj-po-primary > :first-child,
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--parking-offer .fj-po:not(.fj-so) > .fj-po-primary > .fj-po-field { grid-column:1/-1; }
+  /* Industrial, land, retail, garden use conditional question groups; pair only actual adjacent groups. */
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form > :is(.fj-io,.fj-lo,.fj-sh,.fj-go) { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form > :is(.fj-io,.fj-lo,.fj-sh,.fj-go) > * { grid-column:1/-1; min-width:0; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-io > .fj-io-group:first-of-type:has(+ .fj-io-group),
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-io > .fj-io-group:first-of-type + .fj-io-group { grid-column:auto; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-go > :is(#garden-offer-type,#garden-offer-purposes) { grid-column:auto; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-sh > #shop-offer-type:has(+ #shop-offer-activities),
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-sh > #shop-offer-type + #shop-offer-activities { grid-column:auto; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.residential-fields__grid,.fj-vo__grid,.fj-go-finance .fj-go-row):has(> label:nth-child(3)) { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.residential-request__grid,.fj-other__grid,.fj-lc-grid) { grid-template-columns:repeat(auto-fit,minmax(min(100%,215px),1fr)); }
+}
+@media(max-width:720px) {
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form > :is(.residential-fields,.fj-other),
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form > .fj-vo-wrap > .fj-vo { padding:12px; }
+  .edit-parking-page.edit-parking-ed11.edit-parking-page--wanted .edit-parking-card__body > :is(.fj-edit-surface,.residential-request,.fj-other,div:has(> [aria-label="کاربری موردنظر"])) { padding:10px !important; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-edit-surface,.residential-request,.fj-other,.fj-vo,.residential-fields,.fj-lc) { max-width:100%; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form .fj-edit-surface div[style*="grid-template-columns"] { grid-template-columns: minmax(0,1fr) !important; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-other__grid,.fj-lc-grid,.residential-request__grid) { grid-template-columns:minmax(0,1fr); }
+}
+@media(max-width:720px) {
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form :is(.fj-po-choice,.fj-po-check,.fj-pr-option) { min-height:44px; }
+  .edit-parking-page.edit-parking-ed11 .edit-parking-form .neshan-location-picker__map { height:220px; }
+}

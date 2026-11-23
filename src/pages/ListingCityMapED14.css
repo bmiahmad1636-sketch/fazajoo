@@ -1,0 +1,25 @@
+/* Shared form journey, scoped to registration and editing only. */
+.add-parking-page .fj-city-fields-ed14 { margin-bottom:0; }
+.add-parking-page .fj-city-fields-ed14 > .add-parking-field { margin-bottom:0; min-width:0; }
+.add-parking-page .fj-map-journey { margin-top:8px; padding:10px 12px; }
+.add-parking-page .fj-map-journey__intro { margin-bottom:5px; }
+.edit-parking-page.edit-parking-ed11 .fj-edit-city-map-ed14 .edit-parking-card__header { padding-block:9px; }
+.edit-parking-page.edit-parking-ed11 .fj-edit-city-map-ed14 .edit-parking-card__body { padding-block:10px; }
+.edit-parking-page.edit-parking-ed11 .edit-parking-card:has(#city) { overflow:visible !important; position:relative; z-index:3; }
+.edit-parking-page.edit-parking-ed11 .iran-city-autocomplete { min-width:0; }
+.edit-parking-page.edit-parking-ed11 .iran-city-autocomplete__menu { z-index:20; }
+.add-parking-page .neshan-location-picker__saved-hint,.edit-parking-page .neshan-location-picker__saved-hint { margin:4px 0; color:#6a5140; font-size:.76rem; line-height:1.65; }
+@media(min-width:1000px) {
+  .add-parking-page .fj-map-journey .neshan-location-picker:has(> .neshan-location-picker__map-wrap) { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.65fr); gap:7px 12px; align-items:start; }
+  .add-parking-page .fj-map-journey .neshan-location-picker > .neshan-location-picker__heading { grid-column:1; grid-row:1; flex-wrap:wrap; margin:0; }
+  .add-parking-page .fj-map-journey .neshan-location-picker > .neshan-location-picker__unselected { grid-column:1; grid-row:2; margin:0!important; }
+  .add-parking-page .fj-map-journey .neshan-location-picker > .neshan-location-picker__tools { grid-column:1; grid-row:3; margin:0; }
+  .add-parking-page .fj-map-journey .neshan-location-picker > .neshan-location-picker__map-wrap { grid-column:2; grid-row:1/6; min-width:0; }
+  .add-parking-page .fj-map-journey .neshan-location-picker > .neshan-location-picker__saved-hint { grid-column:1; grid-row:4; }
+  .add-parking-page .fj-map-journey .neshan-location-picker > .neshan-location-picker__clear { grid-column:1; grid-row:5; justify-self:start; }
+}
+@media(min-width:1280px) {
+  .edit-parking-page.edit-parking-ed11 .fj-edit-city-map-ed14 .neshan-location-picker > .neshan-location-picker__saved-hint { grid-column:1; grid-row:4; }
+  .edit-parking-page.edit-parking-ed11 .fj-edit-city-map-ed14 .neshan-location-picker > .neshan-location-picker__clear { grid-row:5; }
+  .edit-parking-page.edit-parking-ed11 .fj-edit-city-map-ed14 .neshan-location-picker > .neshan-location-picker__map-wrap { grid-row:1/6; }
+}

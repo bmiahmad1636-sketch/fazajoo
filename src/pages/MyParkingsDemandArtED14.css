@@ -1,0 +1,6 @@
+/* Same stable image treatment and subtle breathing animation as public cards. */
+.my-parkings-page .my-parking-card__demand-art { position:absolute; inset:0; background:linear-gradient(180deg,#fff5ec,#ffe9d8); }
+.my-parkings-page .my-parking-card__demand-art img { object-fit:cover; animation:fjMyDemandBreathED14 7s ease-in-out infinite alternate; }
+ .my-parkings-page .my-parking-card__demand-art--industrial img { object-fit:contain; }
+@keyframes fjMyDemandBreathED14 { from { filter:saturate(.95) brightness(1); } to { filter:saturate(1.035) brightness(1.022); } }
+@media(prefers-reduced-motion:reduce) { .my-parkings-page .my-parking-card__demand-art img { animation:none; } }

@@ -1,0 +1,328 @@
+/* Fazajoo ED-10 — edit listing visual cleanup
+   Scope: EditParking only. هدف: کاهش شلوغی و یکپارچه‌سازی فرم‌های ویرایش
+   بدون دست‌زدن به منطق، اعتبارسنجی و ساختار داده. */
+
+.edit-parking-page {
+  --fj-edit-line: #ece5db;
+  --fj-edit-soft: #faf7f1;
+  --fj-edit-paper: #fffdfa;
+  --fj-edit-ink: #24332d;
+  --fj-edit-muted: #718077;
+  --fj-edit-accent: #ef7a1c;
+  --fj-edit-accent-soft: #fff1e3;
+}
+
+.edit-parking-page .edit-parking-hero {
+  padding: 10px 0 16px;
+}
+
+.edit-parking-page .edit-parking-toolbar {
+  gap: 8px 12px;
+}
+
+.edit-parking-page .edit-parking-back,
+.edit-parking-page .edit-parking-status {
+  min-height: 36px;
+}
+
+.edit-parking-page .edit-parking-eyebrow {
+  margin-bottom: 4px;
+}
+
+.edit-parking-page .edit-parking-hero__content {
+  gap: 16px;
+  margin-top: 8px;
+  align-items: flex-start;
+}
+
+.edit-parking-page .edit-parking-hero h1 {
+  margin-bottom: 3px;
+}
+
+.edit-parking-page .edit-parking-content {
+  padding-bottom: 44px;
+}
+
+.edit-parking-page .edit-parking-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(282px, 318px);
+  gap: 18px;
+}
+
+.edit-parking-page .edit-parking-form {
+  gap: 14px;
+}
+
+.edit-parking-page .edit-parking-card,
+.edit-parking-page .edit-parking-preview,
+.edit-parking-page .edit-parking-actions {
+  border-color: var(--fj-edit-line);
+  border-radius: 18px;
+}
+
+.edit-parking-page .edit-parking-card__header {
+  position: relative;
+  gap: 11px;
+  padding: 14px 18px;
+  background: linear-gradient(115deg, #fffaf3, #fbfbf8);
+}
+
+.edit-parking-page .edit-parking-card__header::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 18px;
+  width: 56px;
+  height: 3px;
+  border-radius: 0 0 8px 8px;
+  background: var(--fj-edit-accent);
+}
+
+.edit-parking-page .edit-parking-card__icon,
+.edit-parking-page .edit-parking-card__icon--cyan,
+.edit-parking-page .edit-parking-card__icon--green {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.edit-parking-page .edit-parking-card__header h2 {
+  font-size: 0.98rem;
+}
+
+.edit-parking-page .edit-parking-card__header p {
+  max-width: 760px;
+  font-size: 0.7rem;
+}
+
+.edit-parking-page .edit-parking-card__body {
+  padding: 17px 18px 18px;
+}
+
+.edit-parking-page .edit-parking-grid {
+  gap: 12px 15px;
+}
+
+.edit-parking-page .edit-parking-field {
+  margin-bottom: 14px;
+}
+
+.edit-parking-page .edit-parking-input,
+.edit-parking-page .edit-parking-textarea {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.78);
+}
+
+.edit-parking-page .edit-parking-input input,
+.edit-parking-page .edit-parking-input select,
+.edit-parking-page .edit-parking-textarea textarea {
+  font-size: 0.8rem;
+}
+
+.edit-parking-page .edit-parking-input__icon {
+  width: 42px;
+}
+
+.edit-parking-page .edit-parking-network-consent {
+  margin-top: 12px;
+  padding: 13px 14px;
+  border-color: #ecd7bf;
+  border-radius: 15px;
+  background: #fffaf3;
+}
+
+.edit-parking-page .edit-parking-network-consent strong {
+  color: var(--fj-edit-ink);
+  font-size: 0.86rem;
+}
+
+.edit-parking-page .edit-parking-network-consent small {
+  color: var(--fj-edit-muted);
+  font-size: 0.73rem;
+}
+
+.edit-parking-page .edit-parking-actions {
+  padding: 12px 14px;
+}
+
+.edit-parking-page .edit-parking-actions > div {
+  flex-wrap: wrap;
+}
+
+.edit-parking-page .edit-parking-button {
+  min-height: 42px;
+}
+
+/* Preview rail: calmer and tighter. */
+.edit-parking-page .edit-parking-sidebar {
+  gap: 12px;
+}
+
+.edit-parking-page .edit-parking-preview__top {
+  padding: 12px 14px;
+}
+
+.edit-parking-page .edit-parking-preview__image {
+  height: 165px;
+}
+
+.edit-parking-page .edit-parking-preview__content {
+  padding: 14px;
+}
+
+.edit-parking-page .edit-parking-preview__content > p {
+  min-height: 38px;
+  margin-bottom: 13px;
+}
+
+.edit-parking-page .edit-parking-preview__features {
+  gap: 7px;
+  margin-bottom: 13px;
+}
+
+.edit-parking-page .edit-parking-preview__features > span {
+  padding: 6px 8px;
+  border-radius: 9px;
+}
+
+/* Flatten nested speciality blocks inside edit cards. */
+.edit-parking-page .edit-parking-card__body > :is(.fj-po, .fj-pr, .fj-other, .residential-fields, .residential-request, .fj-vo-wrap, .fj-edit-surface) {
+  width: 100%;
+  margin: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.edit-parking-page .edit-parking-card__body > :is(.fj-po, .fj-pr, .fj-other, .residential-fields, .residential-request, .fj-vo-wrap, .fj-edit-surface) + :is(.fj-po, .fj-pr, .fj-other, .residential-fields, .residential-request, .fj-vo-wrap, .fj-edit-surface) {
+  margin-top: 14px;
+  padding-top: 14px !important;
+  border-top: 1px solid #efe8de !important;
+}
+
+.edit-parking-page .edit-parking-card__body > .fj-po .fj-po-header,
+.edit-parking-page .edit-parking-card__body > .residential-request .residential-request__heading,
+.edit-parking-page .edit-parking-card__body > .residential-fields .residential-fields__header {
+  margin-bottom: 2px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f1ebdf;
+}
+
+.edit-parking-page .edit-parking-card__body > .fj-po .fj-po-extra,
+.edit-parking-page .edit-parking-card__body > .fj-po .fj-po-primary,
+.edit-parking-page .edit-parking-card__body > .fj-other .fj-other__section,
+.edit-parking-page .edit-parking-card__body > .residential-request .residential-request__money,
+.edit-parking-page .edit-parking-card__body > .residential-request .residential-request__fold,
+.edit-parking-page .edit-parking-card__body > .fj-edit-surface .fj-pr {
+  margin-top: 12px;
+}
+
+.edit-parking-page .edit-parking-card__body > .fj-po .fj-po-note,
+.edit-parking-page .edit-parking-card__body > .fj-pr .fj-pr-note,
+.edit-parking-page .edit-parking-card__body > .fj-other .fj-other__footer {
+  margin-top: 10px;
+}
+
+.edit-parking-page .fj-edit-surface {
+  display: grid;
+  gap: 14px;
+}
+
+.edit-parking-page .fj-edit-surface > div:first-child strong,
+.edit-parking-page .fj-edit-surface > strong:first-child {
+  color: #9f4e16 !important;
+}
+
+.edit-parking-page .fj-edit-surface textarea,
+.edit-parking-page .fj-edit-surface input,
+.edit-parking-page .fj-edit-surface select {
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.74);
+}
+
+/* Map block cleanup */
+.edit-parking-page .neshan-location-picker {
+  border: 1px solid var(--fj-edit-line);
+  border-radius: 16px;
+  background: #fcfbf8;
+  padding: 11px;
+}
+
+.edit-parking-page .neshan-location-picker__header {
+  gap: 8px;
+}
+
+.edit-parking-page .neshan-location-picker__map {
+  overflow: hidden;
+  border-radius: 13px;
+  min-height: 270px;
+}
+
+/* Media blocks */
+.edit-parking-page .edit-parking-uploader {
+  padding: 14px;
+  border-radius: 16px;
+}
+
+.edit-parking-page .multi-image-uploader__top,
+.edit-parking-page .fazajoo-video-uploader__status,
+.edit-parking-page .fazajoo-video-uploader__ready,
+.edit-parking-page .fazajoo-video-uploader__progress-panel {
+  border-radius: 14px;
+}
+
+@media (max-width: 1050px) {
+  .edit-parking-page .edit-parking-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 15px;
+  }
+
+  .edit-parking-page .edit-parking-preview__image {
+    height: 210px;
+  }
+}
+
+@media (max-width: 760px) {
+  .edit-parking-page .edit-parking-hero {
+    padding: 10px 0 14px;
+  }
+
+  .edit-parking-page .edit-parking-hero__content {
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .edit-parking-page .edit-parking-card,
+  .edit-parking-page .edit-parking-preview,
+  .edit-parking-page .edit-parking-actions {
+    border-radius: 16px;
+  }
+
+  .edit-parking-page .edit-parking-card__header {
+    padding: 13px 14px;
+  }
+
+  .edit-parking-page .edit-parking-card__header::before {
+    inset-inline-start: 14px;
+  }
+
+  .edit-parking-page .edit-parking-card__body {
+    padding: 14px;
+  }
+
+  .edit-parking-page .edit-parking-actions {
+    padding: 11px;
+  }
+
+  .edit-parking-page .edit-parking-preview__image {
+    height: 180px;
+  }
+
+  .edit-parking-page .neshan-location-picker {
+    padding: 9px;
+    border-radius: 14px;
+  }
+
+  .edit-parking-page .neshan-location-picker__map {
+    min-height: 220px;
+  }
+}
