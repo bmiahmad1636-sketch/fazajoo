@@ -1,0 +1,89 @@
+/* MP07: loading presentation only, scoped to My Listings. */
+.my-parkings-page .mp07-sr-status {
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip-path:inset(50%);
+  white-space:nowrap;
+}
+.my-parkings-page .my-parkings-summary-card:disabled {
+  cursor:default;
+  opacity:1;
+  transform:none;
+}
+.my-parkings-page .my-parkings-search input:disabled {
+  cursor:default;
+  opacity:1;
+}
+.my-parkings-page .mp07-count-placeholder {
+  display:inline-block;
+  vertical-align:middle;
+  width:1.7em;
+  height:.85em;
+  border-radius:5px;
+  background:#e0e9e0;
+  animation:mp07-pulse 1.8s ease-in-out infinite alternate;
+}
+.my-parkings-page .mp07-skeleton-card {
+  pointer-events:none;
+}
+.my-parkings-page .mp07-skeleton-card::before {
+  opacity:.5;
+}
+.my-parkings-page .mp07-shade {
+  display:block;
+  background:linear-gradient(115deg,#e5ede5,#edf1eb);
+  animation:mp07-pulse 1.8s ease-in-out infinite alternate;
+}
+.my-parkings-page .mp07-skeleton-card .my-parking-card__media {
+  background:linear-gradient(120deg,#dce7dd,#e9eee7);
+}
+.my-parkings-page .mp07-skeleton-badge {
+  position:absolute;
+  inset:12px 12px auto auto;
+  width:62px;
+  height:30px;
+  border-radius:999px;
+  background:#f7faf6;
+}
+.my-parkings-page .mp07-skeleton-title {
+  width:58%;
+  height:22px;
+  border-radius:6px;
+}
+.my-parkings-page .mp07-skeleton-meta {
+  width:38%;
+  height:14px;
+  margin-top:9px;
+  border-radius:5px;
+}
+.my-parkings-page .mp07-skeleton-price {
+  height:49px;
+  margin-top:13px;
+  border-radius:12px;
+  background:#f2eee6;
+}
+.my-parkings-page .mp07-skeleton-card .my-parking-card__actions {
+  margin-top:auto;
+}
+.my-parkings-page .mp07-skeleton-action {
+  min-height:44px;
+  border-radius:11px;
+}
+@keyframes mp07-pulse {
+  from {opacity:1;}
+  to {opacity:.65;}
+}
+@media(max-width:1330px) {
+  .my-parkings-page .mp07-loading-grid .mp07-skeleton-card:nth-child(3) {display:none;}
+}
+@media(max-width:840px) {
+  .my-parkings-page .mp07-loading-grid .mp07-skeleton-card:nth-child(2) {display:none;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .my-parkings-page .mp07-shade,
+  .my-parkings-page .mp07-count-placeholder {animation:none;}
+}

@@ -21,6 +21,7 @@ import "./MyParkingsMP05.css";
 import "./MyParkingsMP06.css";
 import { myListingDemandArt } from "../utils/myListingDemandArtED14.js";
 import "./MyParkingsDemandArtED14.css";
+import "./MyParkingsLoadingMP07.css";
 
 function MyParkings() {
   const [user, setUser] =
@@ -228,27 +229,7 @@ function MyParkings() {
       searchTerm,
     ]);
 
-  if (loading) {
-    return (
-      <main className="my-parkings-page">
-        <div className="my-parkings-state">
-          <div className="my-parkings-state__icon">
-            ⏳
-          </div>
-
-          <h1>
-            در حال دریافت آگهی‌ها
-          </h1>
-
-          <p>
-            چند لحظه صبر کنید...
-          </p>
-        </div>
-      </main>
-    );
-  }
-
-  if (!user) {
+  if (!user && !loading) {
     return (
       <main className="my-parkings-page">
         <div className="my-parkings-state">
@@ -305,7 +286,8 @@ function MyParkings() {
         </div>
       </section>
 
-      <section className="my-parkings-content">
+      {loading && <span className="mp07-sr-status" role="status">در حال دریافت آگهی‌ها</span>}
+      <section className="my-parkings-content" aria-busy={loading}>
         <div className="container">
           <div className="my-parkings-summary">
             <button
@@ -316,6 +298,7 @@ function MyParkings() {
                   ? "my-parkings-summary-card--selected"
                   : ""
               }`}
+              disabled={loading}
               aria-pressed={statusFilter === "all"}
               onClick={() =>
                 setStatusFilter(
@@ -333,7 +316,7 @@ function MyParkings() {
                 </span>
 
                 <strong>
-                  {counts.all.toLocaleString(
+                  {loading ? <span className="mp07-count-placeholder" aria-hidden="true" /> : counts.all.toLocaleString(
                     "fa-IR"
                   )}
                 </strong>
@@ -348,6 +331,7 @@ function MyParkings() {
                   ? "my-parkings-summary-card--selected"
                   : ""
               }`}
+              disabled={loading}
               aria-pressed={statusFilter === "active"}
               onClick={() =>
                 setStatusFilter(
@@ -365,7 +349,7 @@ function MyParkings() {
                 </span>
 
                 <strong>
-                  {counts.active.toLocaleString(
+                  {loading ? <span className="mp07-count-placeholder" aria-hidden="true" /> : counts.active.toLocaleString(
                     "fa-IR"
                   )}
                 </strong>
@@ -380,6 +364,7 @@ function MyParkings() {
                   ? "my-parkings-summary-card--selected"
                   : ""
               }`}
+              disabled={loading}
               aria-pressed={statusFilter === "rented"}
               onClick={() =>
                 setStatusFilter(
@@ -397,7 +382,7 @@ function MyParkings() {
                 </span>
 
                 <strong>
-                  {counts.rented.toLocaleString(
+                  {loading ? <span className="mp07-count-placeholder" aria-hidden="true" /> : counts.rented.toLocaleString(
                     "fa-IR"
                   )}
                 </strong>
@@ -412,6 +397,7 @@ function MyParkings() {
                   ? "my-parkings-summary-card--selected"
                   : ""
               }`}
+              disabled={loading}
               aria-pressed={statusFilter === "inactive"}
               onClick={() =>
                 setStatusFilter(
@@ -429,7 +415,7 @@ function MyParkings() {
                 </span>
 
                 <strong>
-                  {counts.inactive.toLocaleString(
+                  {loading ? <span className="mp07-count-placeholder" aria-hidden="true" /> : counts.inactive.toLocaleString(
                     "fa-IR"
                   )}
                 </strong>
@@ -464,6 +450,7 @@ function MyParkings() {
 
               <input
                 type="text"
+                disabled={loading}
                 value={
                   searchTerm
                 }
@@ -481,7 +468,26 @@ function MyParkings() {
             </div>
           </div>
 
-          {parkings.length ===
+          {loading ? (
+            <div className="my-parkings-grid mp07-loading-grid" aria-hidden="true">
+              {[0, 1, 2].map((slot) => (
+                <div className="my-parking-card mp07-skeleton-card" key={slot}>
+                  <div className="my-parking-card__media mp07-shade">
+                    <span className="mp07-skeleton-badge mp07-shade" />
+                  </div>
+                  <div className="my-parking-card__body">
+                    <span className="mp07-skeleton-title mp07-shade" />
+                    <span className="mp07-skeleton-meta mp07-shade" />
+                    <div className="mp07-skeleton-price mp07-shade" />
+                    <div className="my-parking-card__actions">
+                      <span className="mp07-skeleton-action mp07-shade" />
+                      <span className="mp07-skeleton-action mp07-shade" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : parkings.length ===
           0 ? (
             <div className="my-parkings-empty">
               <div className="my-parkings-empty__icon">
