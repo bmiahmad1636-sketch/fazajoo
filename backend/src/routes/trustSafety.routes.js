@@ -2,6 +2,7 @@ const express = require("express");
 const { requireAuth, requireAdmin } = require("../middleware/auth.middleware");
 const { trustActionLimiter } = require("../middleware/trustSafetyRateLimit.middleware");
 const s = require("../services/trustSafety.service");
+const centerNT02 = require("../services/notificationCenterNT02.service");
 
 const router = express.Router();
 router.use(requireAuth);
@@ -63,6 +64,26 @@ router.delete("/blocks/:userId", trustActionLimiter, async (req, res) => {
     console.error("Unblock user error:", e);
     return res.status(500).json({ ok: false, message: "رفع مسدودسازی انجام نشد." });
   }
+});
+
+function centerError(res,e) {
+  return res.status(e.status || 500).json({ok:false,message:e.status ? e.message : "ارتباط با مرکز اعلان‌ها انجام نشد."});
+}
+router.get("/notice-center", async (req,res) => {
+  try { return res.json({ok:true,...await centerNT02.list(req.user.id,req.query.filter || "all",Number(req.query.page || 1),req.query.summary === "1")}); }
+  catch(e) { return centerError(res,e); }
+});
+router.patch("/notice-center/read-all", async (req,res) => {
+  try { await centerNT02.markAllRead(req.user.id); return res.json({ok:true}); }
+  catch(e) { return centerError(res,e); }
+});
+router.patch("/notice-center/archive-read", async (req,res) => {
+  try { await centerNT02.archiveRead(req.user.id); return res.json({ok:true}); }
+  catch(e) { return centerError(res,e); }
+});
+router.patch("/notice-center/:kind/:id/archive", async (req,res) => {
+  try { await centerNT02.setArchive(req.user.id,req.params.kind,req.params.id,req.body?.archived); return res.json({ok:true}); }
+  catch(e) { return centerError(res,e); }
 });
 
 router.get("/notices", async (req, res) => {

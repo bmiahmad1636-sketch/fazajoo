@@ -107,3 +107,6 @@ export async function grantAdminNetworkCredits(userId, amount) {
     body: JSON.stringify({ amount }),
   });
 }
+
+export function getNotificationPolicyNT03() { return request('/admin/notification-policy'); }
+export function saveNotificationPolicyNT03(policy) { return request('/admin/notification-policy', {method:'PATCH',body:JSON.stringify(policy)}); }

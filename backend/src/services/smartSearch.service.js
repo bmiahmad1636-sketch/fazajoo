@@ -45,6 +45,10 @@ function ensureSmartSearchSchema() {
         )
       `);
 
+      await query(`ALTER TABLE smart_search_notifications ADD COLUMN IF NOT EXISTS archive_override BOOLEAN`);
+      await query(`ALTER TABLE smart_search_notifications ADD COLUMN IF NOT EXISTS nt03_archived_at TIMESTAMPTZ`);
+      await query(`ALTER TABLE smart_search_notifications ADD COLUMN IF NOT EXISTS nt03_read_at TIMESTAMPTZ`);
+
       await query(`
         CREATE INDEX IF NOT EXISTS idx_smart_notifications_user_read
         ON smart_search_notifications(user_id, is_read, created_at DESC)

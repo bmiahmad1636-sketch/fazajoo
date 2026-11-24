@@ -88,6 +88,10 @@ function ensureTrustSafetySchema() {
         read_at TIMESTAMPTZ
       )`);
 
+      await query(`ALTER TABLE moderation_notices ADD COLUMN IF NOT EXISTS archive_override BOOLEAN`);
+      await query(`ALTER TABLE moderation_notices ADD COLUMN IF NOT EXISTS nt03_archived_at TIMESTAMPTZ`);
+      await query(`ALTER TABLE moderation_notices ADD COLUMN IF NOT EXISTS target_space_id UUID`);
+
       await query(`CREATE TABLE IF NOT EXISTS moderation_actions (
         id UUID PRIMARY KEY,
         report_id UUID NOT NULL REFERENCES abuse_reports(id) ON DELETE CASCADE,
@@ -641,7 +645,7 @@ async function getMyNotices(userId) {
     `SELECT id,notice_type,message,created_at,read_at
      FROM moderation_notices
      WHERE user_id=$1
-     ORDER BY created_at DESC
+     ORDER BY (read_at IS NULL) DESC, created_at DESC
      LIMIT 20`,
     [userId]
   );

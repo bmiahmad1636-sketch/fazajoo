@@ -19,6 +19,7 @@ import {
 } from "../services/adminService";
 
 import "./AdminDashboard.css";
+import AdminNotificationPolicyNT03 from "../components/AdminNotificationPolicyNT03";
 
 
 
@@ -36,6 +37,7 @@ const DOCUMENT_LABELS = {
 
 
 function AdminDashboard() {
+  const [noticePolicyOpen,setNoticePolicyOpen]=useState(false);
   const [users, setUsers] =
     useState([]);
 
@@ -585,7 +587,11 @@ function AdminDashboard() {
               <div><strong>مدیریت کاربران</strong><small>حساب‌ها، وضعیت کاربران و دسترسی‌ها</small></div>
               <b aria-hidden="true">←</b>
             </Link>
+            <button type="button" className="admin-dashboard__quick-link admin-dashboard__quick-link--users" aria-expanded={noticePolicyOpen} onClick={()=>setNoticePolicyOpen(v=>!v)}>
+              <span className="admin-dashboard__quick-icon">◷</span><div><strong>تنظیمات اعلان‌ها</strong><small>مدت آرشیو و نگهداری اعلان‌ها</small></div><b aria-hidden="true">{noticePolicyOpen ? "−" : "+"}</b>
+            </button>
           </div>
+          {noticePolicyOpen && <AdminNotificationPolicyNT03 />}
         </div>
       </nav>
 

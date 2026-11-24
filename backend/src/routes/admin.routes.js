@@ -34,6 +34,16 @@ router.use(
   requireAdmin
 );
 
+const noticePolicy = require("../services/notificationPolicyNT03.service");
+router.get("/notification-policy", async (req,res) => {
+  try { return res.json({ok:true,policy:await noticePolicy.getPolicy(),audit:await noticePolicy.audit()}); }
+  catch(e) { console.error("Notification policy read failed",e.code); return res.status(500).json({ok:false,message:"دریافت تنظیمات اعلان‌ها انجام نشد."}); }
+});
+router.patch("/notification-policy", async (req,res) => {
+  try { return res.json({ok:true,policy:await noticePolicy.savePolicy(req.user.id,req.body)}); }
+  catch(e) { return res.status(e.status || 500).json({ok:false,message:e.status ? e.message : "ذخیره تنظیمات اعلان‌ها انجام نشد."}); }
+});
+
 router.get(
   "/users",
   listUsers

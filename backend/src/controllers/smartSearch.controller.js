@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const { ensurePolicy, lifecycle } = require("../services/notificationPolicyNT03.service");
 const { query } = require("../db/pool");
 const {
   ensureSmartSearchSchema,
@@ -274,6 +275,7 @@ async function remove(req, res) {
 async function notifications(req, res) {
   try {
     await ensureSmartSearchSchema();
+    await ensurePolicy();
     await reconcileSmartSearchNotificationsForUser(req.user.id);
     const result = await query(
       `SELECT n.*,
@@ -282,14 +284,15 @@ async function notifications(req, res) {
               s.category AS space_category,
               s.price AS space_price,
               s.image_url AS space_image_url
-       FROM smart_search_notifications n
+       FROM smart_search_notifications n CROSS JOIN notification_policy_nt03 p
        LEFT JOIN spaces s ON s.id=n.space_id
-       WHERE n.user_id=$1
+       WHERE n.user_id=$1 AND p.id=1 AND NOT ${lifecycle("smart").expired}
        ORDER BY n.created_at DESC
        LIMIT 50`,
       [req.user.id]
     );
-    const unreadCount = result.rows.filter((row) => !row.is_read).length;
+    const countResult = await query(`SELECT COUNT(*)::int AS unread_count FROM smart_search_notifications WHERE user_id=$1 AND NOT is_read`, [req.user.id]);
+    const unreadCount = Number(countResult.rows[0].unread_count || 0);
     return res.json({ ok: true, unreadCount, notifications: result.rows.map(mapNotification) });
   } catch (error) {
     console.error("Smart notifications error:", error);
@@ -301,7 +304,7 @@ async function markRead(req, res) {
   try {
     await ensureSmartSearchSchema();
     await query(
-      `UPDATE smart_search_notifications SET is_read=TRUE WHERE id=$1 AND user_id=$2`,
+      `UPDATE smart_search_notifications SET is_read=TRUE, nt03_read_at=COALESCE(nt03_read_at,NOW()) WHERE id=$1 AND user_id=$2 AND NOT is_read`,
       [req.params.id, req.user.id]
     );
     return res.json({ ok: true });
@@ -314,7 +317,7 @@ async function markRead(req, res) {
 async function markAllRead(req, res) {
   try {
     await ensureSmartSearchSchema();
-    await query(`UPDATE smart_search_notifications SET is_read=TRUE WHERE user_id=$1 AND is_read=FALSE`, [req.user.id]);
+    await query(`UPDATE smart_search_notifications SET is_read=TRUE, nt03_read_at=COALESCE(nt03_read_at,NOW()) WHERE user_id=$1 AND is_read=FALSE`, [req.user.id]);
     return res.json({ ok: true });
   } catch (error) {
     console.error("Mark all smart notifications read error:", error);

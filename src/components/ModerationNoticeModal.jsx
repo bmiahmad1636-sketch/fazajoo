@@ -50,7 +50,7 @@ function ModerationNoticeModal({ user }) {
         <h2 id="moderation-notice-title">پیام مهم از فضاجو</h2>
         <p>{notice.message}</p>
         <div className="moderation-notice-modal__note">
-          این پیام از طرف بخش اعتماد و ایمنی فضاجو ثبت شده است و در مرکز اعلان‌ها و حساب کاربری شما نیز باقی می‌ماند.
+          این پیام از طرف بخش اعتماد و ایمنی فضاجو ثبت شده است و طبق مدت نگهداری تنظیم‌شده در مرکز اعلان‌ها قابل مشاهده است.
         </div>
         <button type="button" onClick={acknowledge} disabled={busy}>
           {busy ? "در حال ثبت..." : "متوجه شدم"}

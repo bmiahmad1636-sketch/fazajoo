@@ -1,26 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getSmartNotifications } from "../services/smartSearchService";
-import { getMyModerationNotices } from "../services/trustSafetyService";
+import { getNoticeCenter } from "../services/trustSafetyService";
 
 function NotificationBell({ onNavigate }) {
-  const [smartUnread, setSmartUnread] = useState(0);
-  const [moderationUnread, setModerationUnread] = useState(0);
+  const [count, setCount] = useState(0);
 
   const load = useCallback(async () => {
-    const [smartResult, moderationResult] = await Promise.allSettled([
-      getSmartNotifications(),
-      getMyModerationNotices(),
-    ]);
-
-    if (smartResult.status === "fulfilled") {
-      setSmartUnread(Number(smartResult.value?.unreadCount || 0));
-    }
-
-    if (moderationResult.status === "fulfilled") {
-      const unread = (moderationResult.value || []).filter((item) => !item.readAt).length;
-      setModerationUnread(unread);
-    }
+    try { const result=await getNoticeCenter("all",1,true); setCount(Number(result.counts.unread || 0)); }
+    catch { /* keep last successful count */ }
   }, []);
 
   useEffect(() => {
@@ -35,7 +22,6 @@ function NotificationBell({ onNavigate }) {
     };
   }, [load]);
 
-  const count = useMemo(() => smartUnread + moderationUnread, [smartUnread, moderationUnread]);
 
   return (
     <Link

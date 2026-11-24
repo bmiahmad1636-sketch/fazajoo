@@ -17,6 +17,7 @@ function ensureSchema() {
       report_id UUID, notice_type VARCHAR(30) NOT NULL DEFAULT 'warning', message VARCHAR(1000) NOT NULL,
       created_by UUID REFERENCES users(id) ON DELETE SET NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), read_at TIMESTAMPTZ
     )`);
+    await query(`ALTER TABLE moderation_notices ADD COLUMN IF NOT EXISTS target_space_id UUID`);
     await query(`CREATE TABLE IF NOT EXISTS admin_direct_actions (
       id UUID PRIMARY KEY, admin_id UUID REFERENCES users(id) ON DELETE SET NULL,
       action_type VARCHAR(40) NOT NULL, target_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -58,9 +59,9 @@ async function userLabel(userId){
   const masked=maskPhone(r.rows[0]?.phone);
   return masked==="کاربر فضاجو" ? masked : `کاربر \u2066${masked}\u2069`;
 }
-async function notice(userId,type,message,adminId){
+async function notice(userId,type,message,adminId,spaceId=null){
   if(!userId) return;
-  await query(`INSERT INTO moderation_notices(id,user_id,report_id,notice_type,message,created_by) VALUES($1,$2,NULL,$3,$4,$5)`,[crypto.randomUUID(),userId,type,message,adminId]);
+  await query(`INSERT INTO moderation_notices(id,user_id,report_id,notice_type,message,created_by,target_space_id) VALUES($1,$2,NULL,$3,$4,$5,$6)`,[crypto.randomUUID(),userId,type,message,adminId,spaceId]);
 }
 async function searchUsers(q){
   await ensureSchema(); const s=String(q||"").trim(); if(s.length<2) return [];
@@ -135,7 +136,7 @@ async function act(adminId,p){
       VALUES($1,$2,$3,$4,'admin_direct',NULL,$5,$6,$7,$8,$9,$10::jsonb)`,
       [crypto.randomUUID(),spaceId,currentVideo.url||null,action,currentStatus,status,reasonCode,note,adminId,JSON.stringify(currentVideo)]);
     await notice(targetUserId,action==="video_disable"?"video_disabled":"video_enabled",
-      action==="video_disable" ? `نمایش ویدئوی آگهی «${String(row.title||"آگهی شما").trim()}» توسط مدیریت فضاجو موقتاً متوقف شد. خود آگهی و تصاویر حذف نشده‌اند.` : `نمایش ویدئوی آگهی «${String(row.title||"آگهی شما").trim()}» دوباره فعال شد.`,adminId);
+      action==="video_disable" ? `نمایش ویدئوی آگهی «${String(row.title||"آگهی شما").trim()}» توسط مدیریت فضاجو موقتاً متوقف شد. خود آگهی و تصاویر حذف نشده‌اند.` : `نمایش ویدئوی آگهی «${String(row.title||"آگهی شما").trim()}» دوباره فعال شد.`,adminId,spaceId);
   }
   if(["listing_disable","listing_enable"].includes(action)){
     if(!spaceId){const e=new Error("آگهی را انتخاب کنید.");e.status=400;throw e;}
@@ -145,7 +146,7 @@ async function act(adminId,p){
     const listingMessage=action==="listing_disable"
       ? `نمایش عمومی آگهی «${listingTitle}» توسط مدیریت فضاجو متوقف شد. آگهی حذف نشده و وضعیت آن در بخش «آگهی‌های من» قابل مشاهده است.`
       : `آگهی «${listingTitle}» توسط مدیریت فضاجو دوباره فعال شد و در صورت نداشتن محدودیت دیگری، امکان نمایش عمومی آن برقرار است.`;
-    await notice(targetUserId,action==="listing_disable"?"listing_disabled":"listing_enabled",listingMessage,adminId);
+    await notice(targetUserId,action==="listing_disable"?"listing_disabled":"listing_enabled",listingMessage,adminId,spaceId);
   }
   const id=crypto.randomUUID();
   await query(`INSERT INTO admin_direct_actions(id,admin_id,action_type,target_user_id,target_chat_id,target_space_id,related_user_id,reason_code,note,metadata) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb)`,[id,adminId,action,targetUserId,chatId,spaceId,relatedUserId,reasonCode,note,JSON.stringify({source:"direct_admin"})]);

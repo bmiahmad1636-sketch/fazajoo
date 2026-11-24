@@ -33,3 +33,14 @@ export const markModerationNoticeRead = async (id) => {
   window.dispatchEvent(new Event("fazajoo:notifications-changed"));
   return data;
 };
+
+// NT02: separate center API; legacy notice consumers are preserved.
+export const getNoticeCenter = (filter="all", page=1, summary=false) => request(`/trust/notice-center?filter=${encodeURIComponent(filter)}&page=${encodeURIComponent(page)}${summary ? "&summary=1" : ""}`);
+export const archiveNoticeCenterItem = (kind,id,archived) => request(`/trust/notice-center/${encodeURIComponent(kind)}/${encodeURIComponent(id)}/archive`, {method:"PATCH",body:JSON.stringify({archived})});
+export const markNoticeCenterAllRead = async () => {
+  const data=await request("/trust/notice-center/read-all",{method:"PATCH"});
+  window.dispatchEvent(new Event("fazajoo:smart-notifications-changed"));
+  return data;
+};
+
+export const archiveReadNoticeCenter = () => request("/trust/notice-center/archive-read", {method:"PATCH"});
