@@ -837,3 +837,86 @@
     min-height: 115px;
   }
 }
+/* AU02 — compact professional agency application; isolated to this page. */
+.agency-access {background:#f1f4ef;color:#16382d;min-height:calc(100vh - 72px);font-family:Estedad,Tahoma,sans-serif;}
+.agency-access .agency-access__container {width:min(calc(100% - 36px),1120px);}
+.agency-access .agency-access__hero {padding:20px 0 22px;background:linear-gradient(145deg,#163b30,#0e2922);}
+.agency-access .agency-access__eyebrow {background:none;border:0;padding:0;border-radius:0;color:#f6b27b;font-size:12px;}
+.agency-access .agency-access__hero h1 {font-size:clamp(23px,3vw,34px);line-height:1.45;margin:5px 0 6px;text-shadow:none;}
+.agency-access .agency-access__hero h1 span {color:#ffb47d;text-shadow:none;}
+.agency-access .agency-access__hero p {color:#e0e9e3;font-size:13px;line-height:1.8;}
+.agency-access .agency-access__content {padding:18px 0 36px;}
+.agency-access .agency-access__grid {grid-template-columns:minmax(0,1fr) minmax(0,2.25fr);gap:16px;}
+.agency-access :is(.agency-access__info,.agency-access__form-card) {min-width:0;padding:20px;border:1px solid #d7e2d8;border-radius:16px;background:#fff;box-shadow:0 8px 24px #17372c09;}
+.agency-access .agency-access__info-icon {width:42px;height:42px;border-radius:10px;background:#eaf1eb;font-size:20px;}
+.agency-access :is(.agency-access__info h2,.agency-access__form-heading h2,.agency-access__pending h2) {color:#16382d;font-size:19px;line-height:1.5;margin:5px 0 7px;font-weight:800;}
+.agency-access :is(.agency-access__info p,.agency-access__form-heading p,.agency-access__pending p) {font-size:13px;color:#52655b;line-height:1.85;}
+.agency-access .agency-access__benefits {margin-top:12px;gap:0;border-top:1px solid #dce5dc;}
+.agency-access .agency-access__benefits span {background:none;border-radius:0;border-bottom:1px solid #dce5dc;color:#365c4c;padding:8px 0;font-size:12px;font-weight:600;}
+.agency-access .agency-access__security-note {margin-top:14px;padding:10px;border-radius:10px;background:#edf4ee;border-color:#d5e3d8;}
+.agency-access .agency-access__security-note strong {font-size:12px;color:#234a3b;}
+.agency-access .agency-access__security-note p {font-size:11px;color:#52655b;}
+.agency-access .agency-access__form-heading>span {font-size:11px;color:#92501d;}
+.agency-access .agency-access__form-card form {margin-top:14px;gap:12px;}
+.agency-access .agency-access__form-card label:not(.agency-access__document-card) {display:grid;grid-template-columns:max-content minmax(0,1fr);align-items:center;column-gap:5px;row-gap:5px;color:#234a3b;font-size:12px;font-weight:700;min-width:0;}
+.agency-access .agency-access__form-card label:not(.agency-access__document-card)>:is(input,textarea,small) {grid-column:1/-1;min-width:0;}
+.agency-access .agency-access__required {justify-self:start;color:#a34820;}
+.agency-access .agency-access__form-card :is(input,textarea) {box-sizing:border-box;border:1px solid #cbdad0;border-radius:9px;background:#f9fbf8;color:#16382d;font-size:16px;padding:8px 11px;}
+.agency-access .agency-access__form-card input {min-height:44px;}
+.agency-access .agency-access__form-card textarea {min-height:72px;}
+.agency-access .agency-access__form-card :is(input,textarea):focus {border-color:#37775b;background:#fff;box-shadow:0 0 0 3px #20574416;}
+.agency-access .agency-access__field-note {color:#52655b;font-size:11px;}
+.agency-access .agency-access__section-title {margin-top:2px;padding:9px 11px;border:1px solid #dce5dc;background:#edf2ed;border-radius:9px;gap:9px;}
+.agency-access .agency-access__section-title>span {width:28px;height:28px;background:#205744;border-radius:7px;font-size:12px;}
+.agency-access .agency-access__section-title strong {color:#234a3b;font-size:13px;}
+.agency-access .agency-access__section-title small {color:#52655b;font-size:11px;}
+.agency-access .agency-access__documents {gap:8px;}
+.agency-access .agency-access__form-card .agency-access__document-card {min-width:0;min-height:112px;padding:9px;gap:5px;border:1px dashed #aebfb2;border-radius:10px;background:#f9fbf8;}
+.agency-access .agency-access__document-card:hover {border-color:#37775b;background:#edf4ee;}
+.agency-access .agency-access__document-card:focus-within {outline:2px solid #37775b;outline-offset:2px;}
+.agency-access .agency-access__document-card div {min-width:0;max-width:100%;}
+.agency-access .agency-access__document-icon {font-size:20px;}
+.agency-access .agency-access__document-card strong {font-size:12px;color:#234a3b;}
+.agency-access .agency-access__document-card small {font-size:11px;color:#52655b;}
+.agency-access .agency-access__document-status {font-size:11px;background:#e6eee7;color:#205744;border-radius:6px;padding:4px 7px;}
+.agency-access .agency-access__privacy {background:#edf4ee;border-color:#d5e3d8;border-radius:9px;padding:9px 11px;}
+.agency-access .agency-access__privacy p {font-size:11px;color:#365c4c;}
+.agency-access .agency-access__message {font-size:12px;border-radius:9px;}
+.agency-access .agency-access__status-box strong {font-size:13px;}
+.agency-access .agency-access__status-box p {font-size:12px;}
+.agency-access :is(.agency-access__form-card button,.agency-access__pending a) {min-height:46px;background:#205744;border-radius:9px;font-size:14px;font-weight:700;}
+.agency-access :is(.agency-access__form-card button:hover:not(:disabled),.agency-access__pending a:hover) {background:#153e30;transform:none;box-shadow:none;}
+.agency-access .agency-access__pending {min-height:300px;padding:15px;}
+.agency-access .agency-access__pending-status span {background:#edf2ed;color:#365c4c;font-size:12px;border-radius:8px;}
+.agency-access :is(button,a):focus-visible {outline:2px solid #b36b32;outline-offset:2px;}
+@media(max-width:900px) {
+ .agency-access .agency-access__grid {grid-template-columns:minmax(0,1fr);}
+ .agency-access .agency-access__info {order:2;}
+ .agency-access .agency-access__form-card {order:1;}
+}
+@media(max-width:820px) {
+ .agency-access .agency-access__form-card form {grid-template-columns:repeat(2,minmax(0,1fr));}
+ .agency-access :is(.agency-access__full-field,.agency-access__section-title,.agency-access__documents,.agency-access__privacy,.agency-access__message,.agency-access__form-card button) {grid-column:1/-1;}
+ .agency-access .agency-access__documents {grid-template-columns:repeat(3,minmax(0,1fr));}
+}
+@media(max-width:560px) {
+ .agency-access .agency-access__container {width:calc(100% - 24px);}
+ .agency-access .agency-access__hero {padding:15px 0 17px;}
+ .agency-access .agency-access__hero h1 {font-size:21px;}
+ .agency-access .agency-access__hero p {font-size:12px;}
+ .agency-access .agency-access__content {padding:12px 0 24px;}
+ .agency-access :is(.agency-access__info,.agency-access__form-card) {padding:14px;border-radius:12px;}
+ .agency-access .agency-access__form-card form {grid-template-columns:minmax(0,1fr);gap:10px;}
+ .agency-access .agency-access__documents {grid-template-columns:minmax(0,1fr);}
+ .agency-access .agency-access__form-card .agency-access__document-card {display:grid;grid-template-columns:26px minmax(0,1fr) auto;min-height:64px;text-align:start;align-items:center;column-gap:8px;}
+ .agency-access .agency-access__document-card>small {grid-column:2/-1;}
+ .agency-access .agency-access__document-status {margin:0;}
+}
+@media(prefers-reduced-motion:reduce) {.agency-access *, .agency-access *::before,.agency-access *::after {transition:none!important;}}
+
+/* AU02 alignment fix: keep identity fields aligned at their top edge. */
+.agency-access .agency-access__form-card label:has(> input[name="nationalId"]),
+.agency-access .agency-access__form-card label:has(> input[name="licenseNumber"]) {
+  align-self: start;
+  align-content: start;
+}

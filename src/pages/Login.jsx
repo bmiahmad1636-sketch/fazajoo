@@ -21,6 +21,7 @@ import {
 } from "../services/authService";
 
 import "./Login.css";
+import "./AuthWorkspaceAU01.css";
 
 
 function Login() {
@@ -532,89 +533,42 @@ function Login() {
 
   return (
     <main
-      className="login-page"
+      className="login-page au01-page"
       dir="rtl"
     >
       <div className="login-background login-background-one" />
       <div className="login-background login-background-two" />
 
-      <section className="login-shell">
-        <aside className="login-intro">
-          <Link
-            className="login-brand"
-            to="/"
-          >
-            <span className="login-brand-icon">
-              ف
-            </span>
-
+      <section className="login-shell au01-shell">
+        <aside className="login-intro au01-intro">
+          <Link className="login-brand au01-brand" to="/" aria-label="بازگشت به صفحه اصلی فضاجو">
+            <img className="au01-logo" src="/fazajoo-logo.png" alt="" width="48" height="48" />
             <span className="login-brand-text">
-              <strong>
-                فضاجو
-              </strong>
-
-              <small>
-                جای پارک، بدون دردسر
-              </small>
+              <strong>فضاجو</strong>
+              <small>هر فضا، یک فرصت</small>
             </span>
           </Link>
-
-          <div className="login-intro-content">
-            <span className="login-badge">
-              ورود به حساب کاربری
-            </span>
-
-            <h1>
-              دوباره خوش آمدید
-              <span>
-                {" "}
-                به فضاجو.
-              </span>
-            </h1>
-
-            <p>
-              با شماره موبایل خود وارد شوید و آگهی‌ها،
-              گفتگوها و حساب کاربری‌تان را مدیریت کنید.
-            </p>
-
-            <div className="login-features">
-              <div className="login-feature">
-                <span>✓</span>
-                <p>
-                  ورود سریع با کد پیامکی
-                </p>
-              </div>
-
-              <div className="login-feature">
-                <span>✓</span>
-                <p>
-                  بدون نیاز به حفظ رمز عبور
-                </p>
-              </div>
-
-              <div className="login-feature">
-                <span>✓</span>
-                <p>
-                  کد ورود یک‌بارمصرف و زمان‌دار
-                </p>
-              </div>
+          <div className="login-intro-content au01-intro-content">
+            <span className="au01-kicker">بازار اجاره فضا</span>
+            <h1>به فضاجو<span>خوش آمدید.</span></h1>
+            <p>به حساب خود وارد شوید و آگهی‌ها، درخواست‌ها و گفتگوهایتان را در یک جا مدیریت کنید.</p>
+            <div className="au01-services" aria-label="خدمات فضاجو">
+              <div><span aria-hidden="true">۰۱</span><p>جست‌وجوی فضای مناسب</p></div>
+              <div><span aria-hidden="true">۰۲</span><p>ثبت عرضه و درخواست فضا</p></div>
+              <div><span aria-hidden="true">۰۳</span><p>گفتگو و مدیریت آگهی‌ها</p></div>
             </div>
           </div>
-
-          <p className="login-intro-footer">
-            اطلاعات حساب شما با امنیت نگهداری می‌شود.
-          </p>
+          <div className="au01-side-foot"><span className="au01-mark" aria-hidden="true" />فضاجو، همراه شما در پیدا کردن فضای مناسب</div>
         </aside>
 
-
-        <section className="login-card">
+        <section className="login-card au01-card">
           <header className="login-card-header">
             <span>
-              ورود کاربران
+              {mode === "reset" ? "بازیابی دسترسی" : "حساب کاربری"}
             </span>
 
             <h2>
-              ورود به فضاجو
+              {mode === "reset" ? "بازیابی رمز عبور" : step === "code" ? "تأیید کد ورود" : "ورود به فضاجو"}
             </h2>
 
             <p>
@@ -630,6 +584,20 @@ function Login() {
             </p>
           </header>
 
+
+          {mode !== "reset" && (
+            <div className="au01-methods" role="group" aria-label="روش ورود">
+              <button type="button" aria-pressed={mode === "otp"} onClick={switchToOtp} disabled={loading || mode === "otp"}>کد پیامکی</button>
+              <button type="button" aria-pressed={mode === "password"} onClick={switchToPassword} disabled={loading || mode === "password"}>رمز عبور</button>
+            </div>
+          )}
+          {(mode === "otp" || mode === "reset") && (
+            <div className="au01-steps" aria-label="مراحل ورود یا بازیابی">
+              <span className={step === "phone" ? "is-current" : "is-complete"} aria-current={step === "phone" ? "step" : undefined}><b>۱</b> شماره موبایل</span>
+              <i aria-hidden="true" />
+              <span className={step === "code" ? "is-current" : ""} aria-current={step === "code" ? "step" : undefined}><b>۲</b> {mode === "reset" ? "کد و رمز جدید" : "تأیید کد"}</span>
+            </div>
+          )}
 
           {error && (
             <div
@@ -669,7 +637,7 @@ function Login() {
 
                   <div className="login-phone-field">
                     <span className="login-country-code">
-                      +98
+                      ایران
                     </span>
 
                     <input
@@ -884,7 +852,7 @@ function Login() {
                 <div className="login-field">
                   <label htmlFor="reset-phone">شماره موبایل</label>
                   <div className="login-phone-field">
-                    <span className="login-country-code">+98</span>
+                    <span className="login-country-code">ایران</span>
                     <input
                       id="reset-phone"
                       type="tel"
@@ -950,6 +918,8 @@ function Login() {
                     />
                   </div>
                 </div>
+
+                <small className="au01-reset-phone">شماره بازیابی: <bdi dir="ltr">{phone}</bdi></small>
 
                 <div className="login-field">
                   <label htmlFor="reset-new-password">رمز عبور جدید</label>
@@ -1070,7 +1040,7 @@ function Login() {
 
                 <div className="login-phone-field">
                   <span className="login-country-code">
-                    +98
+                    ایران
                   </span>
 
                   <input
@@ -1189,27 +1159,6 @@ function Login() {
                 )}
               </button>
             </form>
-          )}
-
-
-          {mode !== "reset" && (
-            <div className="login-register-link">
-              {mode === "otp" ? (
-                <>
-                  <span>ورود با رمز عبور را ترجیح می‌دهید؟</span>
-                  <button type="button" onClick={switchToPassword} disabled={loading}>
-                    ورود با رمز عبور
-                  </button>
-                </>
-              ) : (
-                <>
-                  <span>ورود سریع‌تر و امن‌تر</span>
-                  <button type="button" onClick={switchToOtp} disabled={loading}>
-                    ورود با کد پیامکی
-                  </button>
-                </>
-              )}
-            </div>
           )}
 
 

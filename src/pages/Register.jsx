@@ -8,6 +8,7 @@ import {
 } from "../services/authService";
 
 import "./Register.css";
+import "./AuthWorkspaceAU01.css";
 
 function Register() {
   const navigate = useNavigate();
@@ -149,67 +150,40 @@ function Register() {
   })();
 
   return (
-    <main className="register-page" dir="rtl">
+    <main className="register-page au01-page" dir="rtl">
       <div className="register-decoration register-decoration-one" />
       <div className="register-decoration register-decoration-two" />
 
-      <section className="register-shell">
-        <aside className="register-intro">
-          <Link className="register-brand" to="/">
-            <span className="register-brand-logo">ف</span>
-
+      <section className="register-shell au01-shell">
+        <aside className="register-intro au01-intro">
+          <Link className="register-brand au01-brand" to="/" aria-label="بازگشت به صفحه اصلی فضاجو">
+            <img className="au01-logo" src="/fazajoo-logo.png" alt="" width="48" height="48" />
             <span className="register-brand-text">
               <strong>فضاجو</strong>
-              <small>جای پارک، بدون دردسر</small>
+              <small>هر فضا، یک فرصت</small>
             </span>
           </Link>
-
-          <div className="register-intro-content">
-            <span className="register-intro-badge">
-              عضویت در فضاجو
-            </span>
-
-            <h1>
-              جای پارک مناسب را
-              <span> ساده‌تر پیدا کنید.</span>
-            </h1>
-
-            <p>
-              حساب خود را در چند لحظه بسازید و به پارکینگ‌های
-              اطراف، رزروها و امکانات فضاجو دسترسی داشته باشید.
-            </p>
-
-            <div className="register-benefits">
-              <div className="register-benefit">
-                <span>✓</span>
-                <p>دسترسی سریع به پارکینگ‌های اطراف</p>
-              </div>
-
-              <div className="register-benefit">
-                <span>✓</span>
-                <p>مدیریت ساده آگهی‌ها و رزروها</p>
-              </div>
-
-              <div className="register-benefit">
-                <span>✓</span>
-                <p>آماده برای ورود پیامکی در نسخه نهایی</p>
-              </div>
+          <div className="register-intro-content au01-intro-content">
+            <span className="au01-kicker">بازار اجاره فضا</span>
+            <h1>یک قدم تا<span>فرصت‌های تازه.</span></h1>
+            <p>حساب کاربری بسازید و برای عرضه یا پیدا کردن فضای مورد نیاز خود اقدام کنید.</p>
+            <div className="au01-services" aria-label="خدمات فضاجو">
+              <div><span aria-hidden="true">۰۱</span><p>جست‌وجوی فضای مناسب</p></div>
+              <div><span aria-hidden="true">۰۲</span><p>ثبت عرضه و درخواست فضا</p></div>
+              <div><span aria-hidden="true">۰۳</span><p>گفتگو و مدیریت آگهی‌ها</p></div>
             </div>
           </div>
-
-          <p className="register-intro-footer">
-            اطلاعات حساب شما با امنیت نگهداری می‌شود.
-          </p>
+          <div className="au01-side-foot"><span className="au01-mark" aria-hidden="true" />فضاجو، همراه شما در پیدا کردن فضای مناسب</div>
         </aside>
 
-        <section className="register-card">
+        <section className="register-card au01-card">
           <header className="register-card-header">
             <span>ساخت حساب کاربری</span>
 
             <h2>ثبت‌نام در فضاجو</h2>
 
             <p>
-              برای شروع، اطلاعات زیر را وارد کنید.
+              برای ساخت حساب، اطلاعات زیر را وارد کنید.
             </p>
           </header>
 
@@ -252,7 +226,7 @@ function Register() {
               </label>
 
               <div className="register-phone-input">
-                <span>+98</span>
+                <span className="au01-country">ایران</span>
 
                 <input
                   id="phone"
@@ -269,8 +243,7 @@ function Register() {
               </div>
 
               <small>
-                شماره موبایل بعداً برای ورود پیامکی استفاده خواهد
-                شد.
+                شماره موبایل را با ۰۹ شروع کنید.
               </small>
             </div>
 

@@ -1,0 +1,91 @@
+/* AU01 — scoped visual system for the two public authentication pages. */
+.au01-page:is(.login-page,.register-page) { --ink:#16382d; --muted:#52655b; --orange:#ec8c43; --line:#dce5dc; background:#f1f4ef; min-height:calc(100vh - 72px); padding:clamp(20px,3.5vw,48px) 18px; align-items:center; font-family:Estedad,Tahoma,sans-serif; }
+.au01-page .login-background,.au01-page .register-decoration {display:none}
+.au01-page .au01-shell {width:min(1060px,100%); min-height:0; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); border:1px solid #d7e2d8; border-radius:22px; box-shadow:0 18px 48px rgba(23,55,44,.09); background:#fff;}
+.au01-page .au01-shell>* {min-width:0}
+.au01-page .au01-intro {padding:32px 34px 24px; gap:30px; background:linear-gradient(145deg,#163b30,#0e2922); isolation:isolate;}
+.au01-page .au01-intro::after {width:230px;height:230px;left:-126px;bottom:-100px;background:transparent;border:1px solid rgba(255,255,255,.13);border-radius:32px;transform:rotate(35deg);box-shadow:0 0 0 28px rgba(255,255,255,.025),0 0 0 57px rgba(255,255,255,.025);z-index:-1;}
+.au01-page .au01-brand {gap:12px; width:fit-content; align-items:center;}
+.au01-page .au01-brand .au01-logo {width:48px;height:48px;object-fit:contain;background:#f4e7d4;border-radius:10px;flex:none;}
+.au01-page .au01-brand strong {color:#fff;font-size:20px;font-weight:800;line-height:1.4;}
+.au01-page .au01-brand small {color:#d1ded5;font-size:11px;}
+.au01-page .au01-intro-content {margin:auto 0;}
+.au01-kicker {color:#f6b27b;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:8px;}
+.au01-page .au01-intro h1 {font-size:clamp(30px,3.1vw,43px);line-height:1.45;margin:15px 0 12px;font-weight:800!important;letter-spacing:-.035em;color:#fff!important;}
+.au01-page .au01-intro h1 span {display:block;color:#ffb47d!important;}
+.au01-page .au01-intro-content>p {font-size:13px;line-height:2;color:#e0e9e3;max-width:32ch;}
+.au01-services {display:grid;gap:0;margin-top:26px;border-top:1px solid rgba(255,255,255,.16);}
+.au01-services>div {display:flex;align-items:center;gap:12px;min-height:43px;border-bottom:1px solid rgba(255,255,255,.13);}
+.au01-services span {font-size:11px;color:#f4ad73;font-variant-numeric:tabular-nums;}
+.au01-services p {margin:0;font-size:12px;color:#eaf1ec;}
+.au01-side-foot {position:relative;z-index:1;display:flex;align-items:center;gap:7px;font-size:10px;color:#b8cfc1;}
+.au01-mark {width:7px;height:7px;border-radius:2px;background:#ec9a5d;flex:none;}
+.au01-page .au01-card {padding:34px clamp(24px,4.4vw,62px);justify-content:center;min-width:0;}
+.au01-page .au01-card :is(.login-card-header,.register-card-header) {margin-bottom:17px;}
+.au01-page .au01-card :is(.login-card-header,.register-card-header)>span {background:none;padding:0;color:#9d531e;font-size:11px;font-weight:800;border-radius:0;}
+.au01-page .au01-card :is(.login-card-header,.register-card-header) h2 {font-size:clamp(24px,2.6vw,32px);margin:5px 0 4px;color:#16382d;line-height:1.55;font-weight:800;}
+.au01-page .au01-card :is(.login-card-header,.register-card-header) p {font-size:13px;line-height:1.85;color:#52655b;}
+.au01-methods {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:4px;margin-bottom:14px;background:#edf2ed;border:1px solid #dce5dc;border-radius:12px;}
+.au01-methods button {font:inherit;font-size:13px;font-weight:700;min-height:40px;border:1px solid transparent;border-radius:8px;background:transparent;color:#365c4c;cursor:pointer;}
+.au01-methods button[aria-pressed="true"] {background:#fff;color:#174b38;border-color:#cbdcd0;box-shadow:0 2px 4px #183c3010;cursor:default;}
+.au01-methods button:disabled:not([aria-pressed="true"]) {opacity:.55;cursor:not-allowed;}
+.au01-steps {display:flex;align-items:center;gap:10px;margin:0 0 15px;color:#687a6e;font-size:11px;}
+.au01-steps span {display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.au01-steps b {display:grid;place-items:center;width:23px;height:23px;border:1px solid #d4dfd6;border-radius:50%;font-size:11px;font-weight:700;}
+.au01-steps .is-current {color:#174c38;font-weight:800;}
+.au01-steps .is-current b {background:#205744;color:#fff;border-color:#205744;}
+.au01-steps .is-complete b {background:#e1eee2;color:#205744;border-color:#aac8af;}
+.au01-steps i {height:1px;flex:1;background:#cbd9ce;}
+.au01-page :is(.login-form,.register-form) {gap:12px;}
+.au01-page :is(.login-field,.register-field) {gap:5px;min-width:0;}
+.au01-page :is(.login-field,.register-field) label {font-size:12px;color:#234a3b;font-weight:700;}
+.au01-page :is(.login-field,.register-field) small {font-size:11px;color:#53685c;line-height:1.6;}
+.au01-page :is(.login-phone-field,.login-password-field,.register-phone-input,.register-password-input,.register-field>input) {height:49px;min-width:0;border-radius:10px;background:#f9fbf8;border:1px solid #cbdad0;}
+.au01-page :is(.login-phone-field,.login-password-field,.register-phone-input,.register-password-input):focus-within,.au01-page .register-field>input:focus {border-color:#37775b;background:#fff;box-shadow:0 0 0 3px #20574416;outline:0;}
+.au01-page :is(.login-phone-field,.login-password-field,.register-phone-input,.register-password-input) input {font-size:16px;min-width:0;padding:0 12px;}
+.au01-page .register-field>input {font:inherit;font-size:16px;padding:0 12px;}
+.au01-page :is(.login-country-code,.au01-country) {flex:none;padding:0 12px;border-left:1px solid #dce5dc;color:#53685c;font-size:12px;}
+.au01-page :is(.login-password-field,.register-password-input) button {font:inherit;font-size:11px;min-height:32px;padding:5px 10px;flex:none;border-radius:7px;}
+.au01-page .login-otp-field input {font-size:21px;letter-spacing:6px;}
+.au01-page .login-otp-field input::placeholder {font-size:14px;letter-spacing:0;}
+.au01-page :is(.login-primary-button,.register-submit-button) {min-height:48px;height:auto;padding:11px 14px;margin-top:2px;border-radius:10px;background:#205744;box-shadow:none;font-size:14px;}
+.au01-page :is(.login-primary-button,.register-submit-button):disabled {opacity:.55;}
+.au01-page :is(.login-primary-button,.register-submit-button):hover:not(:disabled) {background:#153e30;transform:none;}
+.au01-page .login-otp-timer {min-height:0;padding:8px 12px;border-radius:10px;justify-content:flex-start;gap:9px;}
+.au01-page .login-otp-timer__icon {width:30px;height:30px;flex:0 0 30px;font-size:15px;}
+.au01-page .login-otp-timer__text strong {font-size:13px;}
+.au01-page .login-secondary-button {min-height:40px;border-radius:9px;}
+.au01-page :is(.login-text-button,.login-forgot-button) {min-height:32px;margin:0;font-size:12px;color:#92501d;}
+.au01-page .login-text-button {margin-inline:auto;}
+.au01-reset-phone {color:#52655b;font-size:11px;}
+.au01-page :is(.login-message,.register-alert) {display:flex;align-items:flex-start;gap:9px;margin:0 0 12px;border-radius:9px;padding:10px 12px;font-size:12px;overflow-wrap:anywhere;}
+.au01-page :is(.login-message,.register-alert) p {margin:0;font-size:12px;line-height:1.8;}
+.au01-page :is(.login-register-link,.register-login-link) {margin-top:17px;padding-top:13px;border-color:#dce5dc;flex-wrap:wrap;align-items:center;font-size:12px;color:#52655b;}
+.au01-page :is(.login-register-link,.register-login-link) a {color:#205744;text-decoration:underline;text-underline-offset:3px;font-weight:800;}
+.au01-page .login-terms {font-size:10px;color:#53685c;margin:9px 0 0;}
+.au01-page .register-rules {display:flex;align-items:flex-start;text-align:start;gap:8px;font-size:11px;color:#52655b;line-height:1.8;cursor:pointer;}
+.au01-page .register-rules input {margin:3px 0 0;accent-color:#205744;flex:none;width:16px;height:16px;}
+.au01-page .register-strength-bars span.active {background:#427b5c;}
+.au01-page :is(button,a,input):focus-visible {outline:2px solid #b36b32;outline-offset:2px;}
+.au01-page :is(.login-phone-field,.login-password-field,.register-phone-input,.register-password-input) input:focus-visible {outline:none;}
+@media(max-width:800px) {
+ .au01-page:is(.login-page,.register-page) {padding:16px 12px;min-height:0;align-items:start;}
+ .au01-page .au01-shell {grid-template-columns:minmax(0,1fr);max-width:530px;border-radius:16px;}
+ .au01-page .au01-intro {min-height:0;padding:15px 20px;gap:10px;}
+ .au01-page .au01-brand .au01-logo {width:40px;height:40px;}
+ .au01-page .au01-brand strong {font-size:17px;}
+ .au01-page .au01-brand small {font-size:10px;}
+ .au01-page .au01-intro-content {margin:0;}
+ .au01-page .au01-intro h1 {font-size:19px;line-height:1.55;margin:0;letter-spacing:0;}
+ .au01-page .au01-intro h1 span {display:inline;margin-inline-start:5px;}
+ .au01-page .au01-intro-content>p,.au01-kicker,.au01-services,.au01-side-foot {display:none;}
+ .au01-page .au01-card {padding:22px 18px;}
+ .au01-page .au01-card :is(.login-card-header,.register-card-header) h2 {font-size:25px;}
+ .au01-page .au01-card :is(.login-card-header,.register-card-header) {margin-bottom:13px;}
+ .au01-page :is(.login-form,.register-form) {gap:11px;}
+ .au01-methods {margin-bottom:11px;}
+ .au01-steps {margin-bottom:12px;}
+ .au01-page .login-otp-field input {letter-spacing:4px;}
+}
+@media(max-width:360px) {.au01-page:is(.login-page,.register-page){padding-inline:8px}.au01-page .au01-card{padding-inline:14px}.au01-page .au01-intro{padding-inline:14px}.au01-steps{gap:5px}.au01-steps span{gap:3px}}
+@media(prefers-reduced-motion:reduce) {.au01-page *, .au01-page *::before, .au01-page *::after {transition:none!important;}}

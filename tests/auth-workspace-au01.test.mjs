@@ -1,0 +1,27 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const read = path => readFileSync(new URL('../'+path, import.meta.url),'utf8').replace(/\r\n?/g,'\n').replace(/^\uFEFF/,'');
+const login = read('src/pages/Login.jsx'), register = read('src/pages/Register.jsx'), css = read('src/pages/AuthWorkspaceAU01.css');
+const compact = text => text.replace(/\s+/g,'');
+test('all five login forms still submit the original handler',()=>{
+ const bindings=[...login.matchAll(/onSubmit=\{\s*(\w+)\s*\}/g)].map(x=>x[1]);
+ assert.deepEqual(bindings,['handleRequestOtp','handleVerifyOtp','handleRequestPasswordReset','handleConfirmPasswordReset','handlePasswordLogin']);
+});
+test('register preserves submit binding and acceptance checkbox',()=>{assert.match(register,/onSubmit=\{handleRegister\}/);assert.match(register,/checked=\{acceptedRules\}/);assert.match(register,/!acceptedRules/);});
+test('login mode buttons call original handlers and expose active state',()=>{assert.match(login,/aria-pressed=\{mode === "otp"\} onClick=\{switchToOtp\}/);assert.match(login,/aria-pressed=\{mode === "password"\} onClick=\{switchToPassword\}/);assert.match(login,/onClick=\{switchToPasswordReset\}/);});
+test('both code fields retain mobile OTP autocomplete and maximum length',()=>{assert.equal((login.match(/autoComplete="one-time-code"/g)||[]).length,2);assert.match(login,/id="otp-code"[\s\S]*?maxLength=\{6\}/);assert.match(login,/id="reset-code"[\s\S]*?maxLength=\{6\}/);});
+test('both pages use shared scoped style and existing local logo',()=>{for(const text of [login,register]){assert.match(text,/import "\.\/AuthWorkspaceAU01\.css"/);assert.match(text,/src="\/fazajoo-logo\.png"/);assert.match(text,/هر فضا، یک فرصت/);assert.doesNotMatch(text,/جای پارک، بدون دردسر/);}assert.match(css,/\.au01-page \.au01-shell/);assert.match(css,/@media\(max-width:800px\)/);});
+test('login and registration routes still cross-link',()=>{assert.match(login,/to="\/register"/);assert.match(register,/to="\/login"/);});
+test('request and verify handlers still use the original phone and code payloads',()=>{const text=compact(login);assert.ok(text.includes('awaitrequestOtpCode({phone,})'));assert.ok(text.includes('awaitverifyOtpCode({phone,code,})'));});
+test('password login passes phone and password to the existing service',()=>assert.ok(compact(login).includes('awaitloginWithPhoneAndPassword({phone,password,})')));
+test('password reset uses the separate reset request and confirm services',()=>{const text=compact(login);assert.ok(text.includes('awaitrequestPasswordResetCode({phone})'));assert.ok(text.includes('awaitconfirmPasswordReset({phone,code,newPassword,})'));});
+test('registration payload still includes name phone and password',()=>assert.ok(compact(register).includes('awaitregisterWithPhoneAndPassword({displayName:formData.displayName,phone:formData.phone,password:formData.password,})')));
+test('OTP resend controls remain disabled during requests and waiting period',()=>{const text=compact(login);assert.ok(text.includes('onClick={handleResendOtp}disabled={loading||resendSeconds>0}'));assert.ok(text.includes('onClick={handleResendPasswordReset}disabled={loading||resendSeconds>0}'));});
+test('both one-time-code forms retain code focus and edit-number controls',()=>{assert.equal((login.match(/ref=\{\s*codeInputRef\s*\}/g)||[]).length,2);assert.equal((login.match(/onClick=\{\s*handleEditPhone\s*\}/g)||[]).length,2);});
+test('new password and confirmation retain autofill semantics and matching validation',()=>{assert.equal((login.match(/autoComplete="new-password"/g)||[]).length,2);assert.equal((register.match(/autoComplete="new-password"/g)||[]).length,2);assert.match(login,/newPassword !== confirmNewPassword/);assert.match(register,/password !== confirmPassword/);});
+test('error and success statuses remain accessible',()=>{assert.match(login,/role="alert"/);assert.match(login,/role="status"/);assert.match(register,/role="alert"/);});
+test('two-stage progress reflects the actual step state',()=>{assert.match(login,/aria-current=\{step === "phone" \? "step" : undefined\}/);assert.match(login,/aria-current=\{step === "code" \? "step" : undefined\}/);});
+test('new method controls cannot change during a pending request',()=>{assert.match(login,/disabled=\{loading \|\| mode === "otp"\}/);assert.match(login,/disabled=\{loading \|\| mode === "password"\}/);});
+test('existing route protection and authentication checks remain wired',()=>{const app=read('src/App.jsx');for(const [path,component] of [['register','Register'],['login','Login']]) {const start=app.indexOf(`path="/${path}"`);assert.ok(start>=0);const route=app.slice(start,app.indexOf('/>',app.indexOf(`<${component}`,start))+2);assert.match(route,/authLoading/);assert.match(route,/user \?/);assert.match(route,/<Navigate/);}});
+test('existing server OTP endpoints retain both request and phone-level limiters',()=>{const s=compact(read('backend/src/routes/auth.routes.js'));assert.ok(s.includes('router.post("/otp/request",otpRequestLimiter,otpPhoneRequestLimiter,requestOtp)'));assert.ok(s.includes('router.post("/otp/verify",otpVerifyLimiter,otpPhoneVerifyLimiter,verifyOtp)'));});
