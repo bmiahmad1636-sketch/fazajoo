@@ -38,7 +38,7 @@ test('authenticated shortcuts and actual listing entry point', () => {
 test('one footer outside Routes, no replacement of route guards', () => {
   assert.equal([...app.matchAll(/<SiteFooterFT01\b/g)].length,1);
   assert.match(app, /<\/Routes>\s*<SiteFooterFT01 user=\{user\} userProfile=\{userProfile\} profileLoading=\{profileLoading\}/);
-  assert.match(component,/if \(!showPublicFooter\(pathname\)\) return null/);
+  assert.match(component,/if \(!showPublicFooter\(pathname, content\)\) return null/);
 });
 test('semantic footer, original local logo, no external links or dummy targets', () => {
   assert.match(component,/<footer className="fj-ft01" dir="rtl"/);

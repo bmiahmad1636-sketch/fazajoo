@@ -34,6 +34,9 @@ function httpsUrl(value) {
     return url.protocol === 'https:' && url.hostname && !url.username && !url.password ? url.href : null;
   } catch { return null; }
 }
+function rasterData(value) {
+  return typeof value === "string" && value.length <= 131112 && /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(value) ? value : null;
+}
 function localImage(value) {
   return typeof value === 'string' && /^\/(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_-]+\.(?:png|webp|jpe?g|svg)$/i.test(value) ? value : null;
 }
@@ -64,7 +67,7 @@ export function resolveFooterContent({ development = false, content = footerCont
     contacts: select(content.contacts, contactValue),
     licenses: select(content.licenses, item => {
       const href = httpsUrl(item.verificationUrl);
-      return href ? { href, imagePath: localImage(item.imagePath) } : null;
+      return href ? { href, imagePath: rasterData(item.imageData) || localImage(item.imagePath) } : null;
     }),
   };
 }

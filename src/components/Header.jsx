@@ -17,6 +17,7 @@ function Header({
   userProfile = null,
   profileLoading = false,
   onLogout = null,
+  adminMode = false,
 }) {
   const [menuOpen, setMenuOpen] =
     useState(false);
@@ -105,7 +106,26 @@ function Header({
       : "/agency-access";
 
   return (
-    <header className="fazajoo-header">
+    <header className={adminMode ? "fazajoo-header fazajoo-admin-header" : "fazajoo-header"}>
+      {adminMode ? (
+        <div className="fazajoo-admin-header__inner" dir="rtl">
+          <Link to="/admin" className="fazajoo-admin-header__identity" aria-label="بازگشت به مرکز مدیریت فضاجو">
+            <img src="/fazajoo-logo.png" alt="" />
+            <span><strong>مدیریت فضاجو</strong><small>میز کار مدیریت</small></span>
+          </Link>
+          <div className="fazajoo-admin-header__actions">
+            <Link to="/account" className="fazajoo-admin-header__account" aria-label="حساب و امنیت مدیر" title="حساب و امنیت مدیر">
+              <span className="fazajoo-admin-header__avatar" aria-hidden="true">{userTitle.slice(0, 1)}</span>
+              <span className="fazajoo-admin-header__account-text"><small>حساب مدیر</small><strong>{userTitle}</strong></span>
+            </Link>
+            <Link to="/" className="fazajoo-admin-header__return" aria-label="بازگشت به سایت فضاجو">
+              <span>بازگشت به سایت</span>
+              <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5m7-7-7 7 7 7" /></svg>
+            </Link>
+            <button type="button" className="fazajoo-admin-header__logout" onClick={openLogoutModal}>خروج</button>
+          </div>
+        </div>
+      ) : (
       <div className="fazajoo-header__container">
 
         <Link
@@ -391,6 +411,7 @@ function Header({
         </div>
 
       </div>
+      )}
 
       {logoutModalOpen && (
         <div

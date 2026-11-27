@@ -7,8 +7,8 @@ const nav=read('src/components/AdminNavigationADM06.jsx');
 const css=read('src/components/AdminNavigationADM06.css');
 const policyCss=read('src/components/AdminNotificationPolicyNT03.css');
 const guard=app.slice(app.indexOf('function AdminRoute('),app.indexOf('function App()'));
-const routes=['/admin','/admin/direct-management','/admin/moderation','/admin/legal','/admin/featured','/admin/notification-policy','/admin/chat-policy'];
-test('all seven admin destinations are actual registered routes and unique',()=>{
+const routes=['/admin','/admin/direct-management','/admin/moderation','/admin/legal','/admin/featured','/admin/notification-policy','/admin/chat-policy','/admin/site-content'];
+test('all eight admin destinations are actual registered routes and unique',()=>{
  const paths=[...nav.matchAll(/to: "([^"]+)"/g)].map(m=>m[1]);
  assert.deepEqual(paths,routes);
  for(const p of paths)assert.ok(app.includes(`path="${p}"`));
@@ -34,7 +34,7 @@ test('active page and keyboard focus have explicit visual styles',()=>{
  assert.match(nav,/aria-label="ناوبری بخش مدیریت فضاجو"/);
 });
 test('compact mobile rail stays in flow, uses responsive flexible columns, print hides it',()=>{
- assert.match(css,/repeat\(7,minmax\(0,1fr\)\)/);assert.match(css,/@media\(max-width:620px\)/);assert.match(css,/repeat\(4,minmax\(0,1fr\)\)/);
+ assert.match(css,/repeat\(8,minmax\(0,1fr\)\)/);assert.match(css,/@media\(max-width:620px\)/);assert.match(css,/repeat\(4,minmax\(0,1fr\)\)/);
  assert.doesNotMatch(css,/position\s*:\s*(fixed|sticky)|z-index/);
  assert.match(css,/@media print\{\.adm06-nav\{display:none;\}\}/);
 });

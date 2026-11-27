@@ -123,6 +123,9 @@ app.use(
 |--------------------------------------------------------------------------
 */
 
+// CMS01 has its own authenticated request size limit.
+app.use("/api/site-content", require("./routes/siteContentCMS01.routes"));
+
 app.use(
   express.json({
     limit:

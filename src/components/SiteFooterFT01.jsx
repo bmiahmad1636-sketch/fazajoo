@@ -44,8 +44,8 @@ function FooterLicense({ item }) {
   );
 }
 
-function FooterPublicInformation({ development }) {
-  const { pages, contacts, licenses } = resolveFooterContent({ development });
+function FooterPublicInformation({ development, content }) {
+  const { pages, contacts, licenses } = resolveFooterContent({ development, content });
   const guide = pages.filter(item => item.id !== "contact");
   const contactPage = pages.find(item => item.id === "contact");
   if (!pages.length && !contacts.length && !licenses.length) return null;
@@ -73,9 +73,9 @@ function FooterPublicInformation({ development }) {
   );
 }
 
-export default function SiteFooterFT01({ user, userProfile, profileLoading }) {
+export default function SiteFooterFT01({ user, userProfile, profileLoading, content }) {
   const { pathname } = useLocation();
-  if (!showPublicFooter(pathname)) return null;
+  if (!showPublicFooter(pathname, content)) return null;
   const { browse, services } = footerLinks({ user, userProfile, profileLoading });
 
   return (
@@ -96,7 +96,7 @@ export default function SiteFooterFT01({ user, userProfile, profileLoading }) {
             <p>فضا و مدارک طرف مقابل را بررسی کنید و پیش از اطمینان از شرایط، وجهی پرداخت نکنید.</p>
           </div>
         </div>
-        <FooterPublicInformation development={import.meta.env.DEV} />
+        <FooterPublicInformation development={import.meta.env.DEV} content={content} />
         <div className="fj-ft01__bottom">
           <p>کلیه حقوق این وب‌سایت متعلق به فضاجو است.</p>
           <span className="fj-ft01__domain" dir="ltr">FAZAJOO.IR</span>

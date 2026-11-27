@@ -610,6 +610,7 @@ function AdminDashboard() {
             <div className="adm01-tool-group"><h2>سیاست‌های نگهداری</h2>
               <Link to="/admin/notification-policy" className="adm01-tool"><span className="adm01-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></span><span><strong>تنظیمات اعلان‌ها</strong><small>مدت آرشیو و نگهداری</small></span><b aria-hidden="true">←</b></Link>
               <Link to="/admin/chat-policy" className="adm01-tool"><span className="adm01-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 4H4a1 1 0 0 0-1 1v12l5-4h12a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1Z M8 8h8"/></svg></span><span><strong>تنظیمات گفتگوها</strong><small>آرشیو و سیاست پیام‌ها</small></span><b aria-hidden="true">←</b></Link>
+              <Link to="/admin/site-content" className="adm01-tool"><span className="adm01-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><span><strong>محتوا و هویت سایت</strong><small>مجوزها، تماس و صفحات عمومی</small></span><b aria-hidden="true">←</b></Link>
             </div>
           </nav>
         </aside>

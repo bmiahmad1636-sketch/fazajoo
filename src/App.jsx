@@ -7,10 +7,16 @@ import {
   Navigate,
   Route,
   Routes,
+  useLocation,
 } from "react-router-dom";
 
 import Header from "./components/Header";
+import { shouldUseAdminHeader } from "./components/adminHeaderCMS02";
 import SiteFooterFT01 from "./components/SiteFooterFT01";
+import {usePublishedSiteContentCMS01} from "./components/usePublishedSiteContentCMS01";
+import {toFooterContent} from "./utils/siteContentCMS01";
+import AdminSiteContentCMS01 from "./pages/AdminSiteContentCMS01";
+import PublicContentCMS01 from "./pages/PublicContentCMS01";
 import Hero from "./components/Hero";
 
 import Parking from "./pages/parking";
@@ -209,6 +215,8 @@ function AdminRoute({
 }
 
 function App() {
+  const { pathname } = useLocation();
+  const siteContent = usePublishedSiteContentCMS01();
   const [parkings, setParkings] =
     useState([]);
 
@@ -392,10 +400,16 @@ function App() {
     );
   };
 
+  const adminHeaderMode = shouldUseAdminHeader(pathname, {
+    user, userProfile, authLoading, profileLoading,
+  });
+
   return (
     <>
       <Header
         user={user}
+        key={adminHeaderMode ? "admin" : "public"}
+        adminMode={adminHeaderMode}
         userProfile={userProfile}
         profileLoading={profileLoading}
         onLogout={logoutUser}
@@ -655,6 +669,18 @@ function App() {
         />
 
 
+        <Route path="/admin/site-content" element={
+          <AdminRoute user={user} authLoading={authLoading} userProfile={userProfile} profileLoading={profileLoading}>
+            <AdminSiteContentCMS01 />
+          </AdminRoute>
+        } />
+        <Route path="/about" element={<PublicContentCMS01 id="about" state={siteContent} />} />
+        <Route path="/faq" element={<PublicContentCMS01 id="faq" state={siteContent} />} />
+        <Route path="/guide" element={<PublicContentCMS01 id="guide" state={siteContent} />} />
+        <Route path="/terms" element={<PublicContentCMS01 id="terms" state={siteContent} />} />
+        <Route path="/privacy" element={<PublicContentCMS01 id="privacy" state={siteContent} />} />
+        <Route path="/contact" element={<PublicContentCMS01 id="contact" state={siteContent} />} />
+
         <Route path="/admin/notification-policy" element={
           <AdminRoute user={user} authLoading={authLoading} userProfile={userProfile} profileLoading={profileLoading}>
             <AdminPolicyWorkspaceADM07 key="notification" kind="notification" />
@@ -800,7 +826,7 @@ function App() {
         />
       </Routes>
 
-      <SiteFooterFT01 user={user} userProfile={userProfile} profileLoading={profileLoading} />
+      <SiteFooterFT01 user={user} userProfile={userProfile} profileLoading={profileLoading} content={toFooterContent(siteContent.content)} />
     </>
   );
 }

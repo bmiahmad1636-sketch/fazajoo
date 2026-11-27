@@ -259,3 +259,41 @@
     justify-content: space-between;
   }
 }
+
+/* CMS02 — compact administrator identity bar; no public navigation overrides. */
+.fazajoo-admin-header { background:#fbfcfa; }
+.fazajoo-admin-header__inner { width:min(1320px,calc(100% - 36px)); min-height:66px; margin-inline:auto; display:flex; align-items:center; justify-content:space-between; gap:12px; padding-block:6px; }
+.fazajoo-admin-header__identity, .fazajoo-admin-header__actions, .fazajoo-admin-header__account, .fazajoo-admin-header__return { display:flex; align-items:center; gap:9px; min-width:0; }
+.fazajoo-admin-header__identity { color:#173e34; text-decoration:none; flex:0 1 auto; }
+.fazajoo-admin-header__identity img { width:44px; height:44px; object-fit:contain; border-radius:8px; flex:none; }
+.fazajoo-admin-header__identity span, .fazajoo-admin-header__account-text { display:flex; flex-direction:column; gap:1px; min-width:0; line-height:1.5; }
+.fazajoo-admin-header__identity strong { font-size:1rem; font-weight:800; white-space:nowrap; }
+.fazajoo-admin-header__identity small, .fazajoo-admin-header__account-text small { font-size:.67rem; color:#536960; font-weight:500; }
+.fazajoo-admin-header__actions { gap:8px; flex:0 1 auto; }
+.fazajoo-admin-header__account { max-width:210px; text-decoration:none; color:#173e34; border-inline-end:1px solid #dce5df; padding-inline-end:14px; }
+.fazajoo-admin-header__avatar { width:34px; height:34px; display:grid; place-items:center; border-radius:50%; background:#e1ede4; color:#205746; flex:none; font-weight:800; }
+.fazajoo-admin-header__account-text strong { font-size:.76rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.fazajoo-admin-header__return, .fazajoo-admin-header__logout { justify-content:center; min-height:40px; padding:7px 12px; border:1px solid #d5e2d8; border-radius:8px; text-decoration:none; white-space:nowrap; font:inherit; font-size:.76rem; font-weight:750; line-height:1.5; cursor:pointer; box-shadow:none; }
+.fazajoo-admin-header__return { color:#205746; background:#eef4ef; }
+.fazajoo-admin-header__return svg { flex:none; }
+.fazajoo-admin-header__logout { color:#536960; background:transparent; }
+.fazajoo-admin-header__return:hover { color:#173e34; background:#e1ede4; }
+.fazajoo-admin-header__logout:hover { color:#9f3629; background:#fcf1ee; border-color:#efd8d2; }
+.fazajoo-admin-header__inner :is(a,button):focus-visible { outline:2px solid #28745a; outline-offset:2px; }
+@media(max-width:620px){
+ .fazajoo-admin-header__inner { width:calc(100% - 20px); min-height:58px; gap:6px; }
+ .fazajoo-admin-header__identity, .fazajoo-admin-header__actions { gap:5px; }
+ .fazajoo-admin-header__identity img { width:35px; height:35px; }
+ .fazajoo-admin-header__identity strong { font-size:.8rem; }
+ .fazajoo-admin-header__identity small, .fazajoo-admin-header__account-text { display:none; }
+ .fazajoo-admin-header__account { padding-inline-end:0; border:0; }
+ .fazajoo-admin-header__avatar { width:30px; height:30px; font-size:.75rem; }
+ .fazajoo-admin-header__return, .fazajoo-admin-header__logout { font-size:.68rem; min-height:36px; padding:6px 7px; gap:4px; }
+ .fazajoo-admin-header__return svg { display:none; }
+}
+@media(max-width:360px){
+ .fazajoo-admin-header__inner { flex-wrap:wrap; }
+ .fazajoo-admin-header__actions { margin-inline-start:auto; }
+ .fazajoo-admin-header__identity img { width:30px; height:30px; }
+}
+@media print{.fazajoo-admin-header{display:none;}}
