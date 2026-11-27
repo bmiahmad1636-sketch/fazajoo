@@ -52,7 +52,7 @@ function MessageBadge({ onNavigate, isApprovedAgent = false }) {
       }
       title={label}
     >
-      <span className="message-badge__icon" aria-hidden="true">💬</span>
+      <span className="message-badge__icon" aria-hidden="true"><svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M20.5 11.5a8.5 8.5 0 0 1-8.5 8.5 8.8 8.8 0 0 1-3.4-.7L4 21l1.7-4.6a8.5 8.5 0 1 1 14.8-4.9Z" /><path d="M8 11.5h8" /></svg></span>
       <span className="message-badge__text">{label}</span>
       {!loading && unreadCount > 0 && (
         <span className="message-badge__count">

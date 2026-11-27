@@ -1,566 +1,193 @@
+/* HD01 — shared header only. Keep the existing sticky position and logo. */
 .fazajoo-header {
+  --hd-ink: #173e34;
+  --hd-muted: #536960;
+  --hd-line: #dce5df;
+  --hd-soft: #eef4ef;
   position: sticky;
   top: 0;
   z-index: 1000;
   width: 100%;
-  border-bottom: 1px solid rgba(23, 33, 31, 0.08);
-  background: rgba(248, 246, 240, 0.93);
-  box-shadow: 0 8px 26px rgba(23, 33, 31, 0.07);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--hd-line);
+  background: #fbfcfa;
+  box-shadow: 0 3px 14px rgba(23,62,52,.045);
 }
-
 .fazajoo-header__container {
-  width: min(calc(100% - 24px), 1240px);
-  min-height: 80px;
+  width: min(calc(100% - 32px), 1240px);
+  min-height: 76px;
   margin-inline: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 14px;
 }
-
 .fazajoo-header__brand {
   flex: 0 0 auto;
-  min-width: 128px;
-  height: 70px;
+  width: 84px;
+  height: 56px;
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  overflow: visible;
 }
-
 .fazajoo-header__logo {
-  width: 126px;
-  height: 70px;
+  width: 84px;
+  height: 56px;
   display: block;
   object-fit: contain;
   mix-blend-mode: multiply;
-  filter: saturate(1.15) contrast(1.04);
-  transition:
-    transform 0.25s ease,
-    filter 0.25s ease;
 }
-
-.fazajoo-header__brand:hover .fazajoo-header__logo {
-  transform: translateY(-1px) scale(1.02);
-  filter: saturate(1.25) contrast(1.06);
-}
-
 .fazajoo-header__menu {
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 7px;
+  justify-content: space-between;
+  gap: 12px;
 }
-
 .fazajoo-header__nav {
-  flex: 0 1 auto;
-  min-width: 0;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 2px;
 }
-
-.fazajoo-header__nav-link {
+.fazajoo-header .fazajoo-header__nav-link {
   position: relative;
-  min-height: 40px;
+  min-height: 44px !important; /* overrides compact.css for this control only */
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 5px;
   padding: 7px 9px;
-  border-radius: 11px;
-  color: #53605b;
-  font-size: 0.74rem;
-  font-weight: 850;
+  border-radius: 8px;
+  color: var(--hd-muted);
+  font-size: .77rem;
+  font-weight: 600;
   white-space: nowrap;
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  line-height: 1.5;
+  transition: color .18s, background-color .18s;
 }
-
-.fazajoo-header__nav-link:hover {
-  color: #d9542d;
-  background: rgba(232, 97, 54, 0.09);
-  transform: translateY(-1px);
-}
-
-.fazajoo-header__nav-link--active {
-  color: #c84c27;
-  background: rgba(232, 97, 54, 0.12);
-  box-shadow:
-    inset 0 0 0 1px rgba(232, 97, 54, 0.08);
-}
-
+.fazajoo-header__nav-link:hover { color: var(--hd-ink); background: var(--hd-soft); }
+.fazajoo-header__nav-link--active { color: var(--hd-ink); background: var(--hd-soft); font-weight: 700; }
 .fazajoo-header__nav-link--active::after {
   content: "";
   position: absolute;
-  right: 12px;
-  bottom: 4px;
-  left: 12px;
+  bottom: 3px;
+  left: calc(50% - 9px);
+  width: 18px;
   height: 2px;
-  border-radius: 999px;
-  background:
-    linear-gradient(
-      90deg,
-      #ef7951,
-      #d9542d
-    );
+  border-radius: 2px;
+  background: #d66a29;
 }
-
-.fazajoo-header__divider {
-  flex: 0 0 auto;
-  width: 1px;
-  height: 30px;
-  background: rgba(73, 55, 42, 0.1);
-}
-
-.fazajoo-header__account,
-.fazajoo-header__guest-actions {
+.fazajoo-header__divider { flex: 0 0 1px; width: 1px; height: 28px; background: var(--hd-line); }
+.fazajoo-header__account, .fazajoo-header__guest-actions {
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 5px;
-}
-
-.fazajoo-header__user {
-  flex: 0 1 auto;
-  max-width: 128px;
-  display: flex;
-  align-items: center;
+  justify-content: flex-end;
   gap: 6px;
-  padding: 5px 7px;
-  border: 1px solid rgba(78, 59, 45, 0.08);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow:
-    0 4px 12px rgba(93, 62, 39, 0.04);
 }
-
-.fazajoo-header__user:hover {
-  border-color: rgba(232, 97, 54, 0.3);
-  background: #f4f5ef;
-  transform: translateY(-1px);
-}
-
-.fazajoo-header__user-avatar {
+.fazajoo-header__user, .fazajoo-header__agency-button,
+.fazajoo-header__publish-button, .fazajoo-header__login-button, .fazajoo-header__logout-button,
+.fazajoo-header .message-badge, .fazajoo-header__smart-bell {
+  box-sizing: border-box;
   flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background:
-    linear-gradient(135deg, #24312e, #17211f);
-  color: white;
-  font-size: 0.72rem;
-  font-weight: 950;
-  box-shadow:
-    0 6px 14px rgba(239, 111, 20, 0.2);
-}
-
-.fazajoo-header__user-text {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.fazajoo-header__user-text small {
-  color: #7b8581;
-  font-size: 0.52rem;
-  line-height: 1.4;
-}
-
-.fazajoo-header__user-text strong {
-  overflow: hidden;
-  color: #17211f;
-  font-size: 0.62rem;
-  font-weight: 900;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.fazajoo-header__agency-button {
-  flex: 0 1 auto;
-  min-height: 44px;
+  min-height: 44px !important;
+  height: 44px;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  justify-content: center;
+  gap: 6px;
   padding: 5px 9px;
-  border: 1px solid rgba(133, 82, 48, 0.22);
-  border-radius: 13px;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,0.92),
-      rgba(255,245,236,0.96)
-    );
-  color: #35413d;
-  box-shadow:
-    0 7px 18px rgba(79, 47, 27, 0.07),
-    inset 0 0 0 1px rgba(255,255,255,0.55);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--hd-ink);
+  box-shadow: none;
+  font-family: inherit;
+  font-size: .75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  transition: color .18s, background-color .18s, border-color .18s;
 }
-
-.fazajoo-header__agency-button:hover {
-  transform: translateY(-1px);
-  border-color: rgba(232, 97, 54, 0.34);
-  box-shadow:
-    0 10px 22px rgba(79, 47, 27, 0.1),
-    inset 0 0 0 1px rgba(255,255,255,0.68);
+.fazajoo-header__user:hover, .fazajoo-header__agency-button:hover,
+.fazajoo-header__login-button:hover, .fazajoo-header__logout-button:hover,
+.fazajoo-header .message-badge:hover, .fazajoo-header__smart-bell:hover {
+  color: var(--hd-ink);
+  background: var(--hd-soft);
+  border-color: var(--hd-line);
+  transform: none;
+  box-shadow: none;
 }
-
-.fazajoo-header__agency-button--approved {
-  border-color: rgba(232, 97, 54, 0.32);
-  background:
-    linear-gradient(
-      145deg,
-      #eef3ed,
-      #f8f6f0
-    );
-}
-
-.fazajoo-header__agency-icon {
-  flex: 0 0 auto;
+.fazajoo-header__user { max-width: 132px; justify-content: flex-start; }
+.fazajoo-header__user-avatar, .fazajoo-header__agency-icon, .fazajoo-header .message-badge__icon {
+  flex: 0 0 30px;
   width: 30px;
   height: 30px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 9px;
-  background:
-    linear-gradient(
-      135deg,
-      #17211f,
-      #35413d
-    );
-  font-size: 0.85rem;
-  box-shadow:
-    0 5px 12px rgba(65, 42, 29, 0.15);
+  background: var(--hd-soft);
+  color: var(--hd-ink);
+  box-shadow: none;
+  font-weight: 700;
+  font-size: .8rem;
 }
-
-.fazajoo-header__agency-text {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  line-height: 1.18;
-}
-
-.fazajoo-header__agency-text small {
-  color: #7b8581;
-  font-size: 0.47rem;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.fazajoo-header__agency-text strong {
-  margin-top: 1px;
-  color: #35413d;
-  font-size: 0.61rem;
-  font-weight: 950;
-  white-space: nowrap;
-}
-
-.fazajoo-header__publish-button,
-.fazajoo-header__login-button,
-.fazajoo-header__logout-button {
-  flex: 0 0 auto;
-  min-height: 40px;
+.fazajoo-header__user-avatar { border-radius: 50%; background: #dfece2; }
+.fazajoo-header__user-text, .fazajoo-header__agency-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.45; }
+.fazajoo-header__user-text small, .fazajoo-header__agency-text small { color: var(--hd-muted); font-size: .57rem; font-weight: 500; }
+.fazajoo-header__user-text strong, .fazajoo-header__agency-text strong { color: var(--hd-ink); font-size: .69rem; font-weight: 700; }
+.fazajoo-header__user-text strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fazajoo-header__agency-button { border-color: var(--hd-line); background: #f5f8f5; }
+.fazajoo-header__agency-button--approved { background: #e8f1ea; border-color: #c7ddce; }
+.fazajoo-header__agency-button[aria-disabled="true"] { opacity: .7; }
+.fazajoo-header__publish-button { padding-inline: 12px; background: #1e5745; color: #fff; border-color: #1e5745; font-weight: 700; }
+.fazajoo-header__publish-button:hover { background: #164636; color: #fff; border-color: #164636; }
+.fazajoo-header__logout-button { cursor: pointer; color: var(--hd-muted); }
+.fazajoo-header__logout-button:hover { color: #9f3629; background: #fcf1ee; border-color: #efd8d2; }
+.fazajoo-header .message-badge { position: relative; }
+.fazajoo-header .message-badge__icon { background: transparent; flex-basis: 23px; width: 23px; }
+.fazajoo-header .message-badge__text { font-weight: 600; }
+.fazajoo-header__smart-bell { position: relative; width: 44px; padding: 0; }
+.fazajoo-header__smart-bell > span { display: inline-flex; align-items: center; justify-content: center; }
+.fazajoo-header .message-badge__count, .fazajoo-header__smart-bell b {
+  position: absolute;
+  top: -3px;
+  inset-inline-start: 1px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 8px 10px;
-  border: none;
-  border-radius: 11px;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.67rem;
-  font-weight: 900;
-  white-space: nowrap;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-
-.fazajoo-header__publish-button {
-  background:
-    linear-gradient(135deg, #24312e, #17211f);
+  border: 2px solid #fbfcfa;
+  border-radius: 999px;
+  background: #b83232;
   color: white;
-  box-shadow:
-    0 9px 20px rgba(23, 33, 31, 0.18);
+  font-size: .6rem;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: none;
+  margin: 0;
 }
-
-.fazajoo-header__publish-button:hover {
-  transform: translateY(-1px);
-  background:
-    linear-gradient(135deg, #31413d, #17211f);
-  box-shadow:
-    0 12px 26px rgba(23, 33, 31, 0.23);
-}
-
-.fazajoo-header__login-button,
-.fazajoo-header__logout-button {
-  border: 1px solid rgba(73, 55, 42, 0.1);
-  background: rgba(255, 255, 255, 0.8);
-  color: #35413d;
-}
-
-.fazajoo-header__login-button:hover,
-.fazajoo-header__logout-button:hover {
-  color: #d9542d;
-  border-color: rgba(244, 122, 31, 0.22);
-  background: rgba(255, 244, 235, 0.95);
-  transform: translateY(-1px);
-}
-
+.fazajoo-header__nav-link svg, .fazajoo-header__account svg { flex-shrink: 0; width: 18px; height: 18px; display: block; }
+.fazajoo-header__publish-button > span, .fazajoo-header__login-button > span { display: inline-flex; align-items: center; }
 .fazajoo-header__menu-button {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   display: none;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   gap: 5px;
-  border: 1px solid rgba(73, 55, 42, 0.1);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--hd-line);
+  border-radius: 10px;
+  background: white;
   cursor: pointer;
-  box-shadow:
-    0 6px 16px rgba(77, 56, 42, 0.05);
 }
-
-.fazajoo-header__menu-button span {
-  width: 20px;
-  height: 2px;
-  border-radius: 999px;
-  background:
-    linear-gradient(
-      90deg,
-      #35413d,
-      #e86136
-    );
-}
-
-@media (max-width: 1180px) {
-  .fazajoo-header__container {
-    width: min(calc(100% - 18px), 1240px);
-    gap: 7px;
-  }
-
-  .fazajoo-header__brand {
-    min-width: 112px;
-  }
-
-  .fazajoo-header__logo {
-    width: 110px;
-  }
-
-  .fazajoo-header__nav-link {
-    padding-inline: 7px;
-    font-size: 0.68rem;
-  }
-
-  .fazajoo-header__user {
-    max-width: 108px;
-  }
-
-  .fazajoo-header__agency-text small {
-    display: none;
-  }
-
-  .fazajoo-header__agency-button {
-    padding-inline: 7px;
-  }
-
-  .fazajoo-header__publish-button,
-  .fazajoo-header__login-button,
-  .fazajoo-header__logout-button {
-    padding-inline: 8px;
-    font-size: 0.63rem;
-  }
-}
-
-@media (max-width: 1000px) {
-  .fazajoo-header__user-text {
-    display: none;
-  }
-
-  .fazajoo-header__user {
-    padding: 5px;
-  }
-
-  .fazajoo-header__nav-link {
-    padding-inline: 6px;
-  }
-}
-
-@media (max-width: 930px) {
-  .fazajoo-header__container {
-    min-height: 78px;
-  }
-
-  .fazajoo-header__brand {
-    min-width: 124px;
-    height: 68px;
-  }
-
-  .fazajoo-header__logo {
-    width: 122px;
-    height: 68px;
-  }
-
-  .fazajoo-header__menu-button {
-    display: inline-flex;
-  }
-
-  .fazajoo-header__menu {
-    position: absolute;
-    top: 78px;
-    right: 12px;
-    left: 12px;
-    display: none;
-    align-items: stretch;
-    flex-direction: column;
-    gap: 10px;
-    padding: 16px;
-    border: 1px solid rgba(73, 55, 42, 0.11);
-    border-radius: 20px;
-    background: rgba(255, 250, 245, 0.99);
-    box-shadow:
-      0 22px 54px rgba(61, 49, 40, 0.16);
-    backdrop-filter: blur(18px);
-  }
-
-  .fazajoo-header__menu--open {
-    display: flex;
-  }
-
-  .fazajoo-header__nav {
-    width: 100%;
-    align-items: stretch;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .fazajoo-header__nav-link {
-    width: 100%;
-    min-height: 42px;
-    font-size: 0.76rem;
-  }
-
-  .fazajoo-header__divider {
-    width: 100%;
-    height: 1px;
-  }
-
-  .fazajoo-header__account,
-  .fazajoo-header__guest-actions {
-    width: 100%;
-    align-items: stretch;
-    flex-direction: column;
-    gap: 7px;
-  }
-
-  .fazajoo-header__user,
-  .fazajoo-header__agency-button {
-    width: 100%;
-    max-width: none;
-  }
-
-  .fazajoo-header__user-text {
-    display: flex;
-  }
-
-  .fazajoo-header__agency-text small {
-    display: block;
-  }
-
-  .fazajoo-header__publish-button,
-  .fazajoo-header__login-button,
-  .fazajoo-header__logout-button {
-    width: 100%;
-    min-height: 44px;
-    font-size: 0.72rem;
-  }
-}
-
-@media (max-width: 520px) {
-  .fazajoo-header__container {
-    width: calc(100% - 18px);
-    min-height: 72px;
-  }
-
-  .fazajoo-header__brand {
-    min-width: 118px;
-    height: 62px;
-  }
-
-  .fazajoo-header__logo {
-    width: 116px;
-    height: 62px;
-  }
-
-  .fazajoo-header__menu {
-    top: 72px;
-    right: 9px;
-    left: 9px;
-  }
-}
-/* Smart-search notification bell */
-.fazajoo-header__smart-bell {
-  position: relative;
-  flex: 0 0 40px;
-  width: 40px;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(239, 116, 27, 0.18);
-  border-radius: 11px;
-  background: rgba(255, 248, 241, 0.92);
-  color: #35413d;
-  font-size: 1rem;
-  box-shadow: 0 5px 14px rgba(93, 62, 39, 0.05);
-  transition: transform .2s ease, background-color .2s ease, box-shadow .2s ease;
-}
-
-.fazajoo-header__smart-bell:hover {
-  transform: translateY(-1px);
-  background: #fff0e9;
-  box-shadow: 0 8px 18px rgba(239, 116, 27, 0.12);
-}
-
-.fazajoo-header__smart-bell b {
-  position: absolute;
-  top: -5px;
-  left: -5px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #f8f6f0;
-  border-radius: 999px;
-  background: #d9542d;
-  color: #fff;
-  font-size: .52rem;
-  font-weight: 950;
-  line-height: 1;
-}
-
-/* Shake only when unread notifications exist; one short shake every 3 seconds. */
+.fazajoo-header__menu-button span { width: 20px; height: 2px; border-radius: 2px; background: var(--hd-ink); }
+.fazajoo-header__container a:focus-visible, .fazajoo-header__container button:focus-visible { outline: 2px solid #28745a; outline-offset: 2px; }
 @keyframes fazajooBellNudge {
   0%, 86%, 100% { transform: rotate(0deg); }
   89% { transform: rotate(-10deg); }
@@ -568,7 +195,67 @@
   95% { transform: rotate(-6deg); }
   98% { transform: rotate(4deg); }
 }
-.fazajoo-header__smart-bell.has-unread > span { display: inline-block; transform-origin: 50% 12%; animation: fazajooBellNudge 3s ease-in-out infinite; }
+.fazajoo-header__smart-bell.has-unread > span { transform-origin: 50% 12%; animation: fazajooBellNudge 3s ease-in-out infinite; }
+@media (min-width: 1151px) and (max-width: 1200px) {
+  .fazajoo-header__container { gap: 8px; width: calc(100% - 24px); }
+  .fazajoo-header__menu { gap: 6px; }
+  .fazajoo-header__account { gap: 3px; }
+  .fazajoo-header .fazajoo-header__nav-link { padding-inline: 6px; }
+  .fazajoo-header__user { max-width: 105px; }
+  .fazajoo-header__agency-text small { display: none; }
+  .fazajoo-header__agency-button, .fazajoo-header .message-badge { padding-inline: 6px; }
+}
+@media (max-width: 1150px) {
+  .fazajoo-header__container { min-height: 78px; }
+  .fazajoo-header__menu-button { display: inline-flex; }
+  .fazajoo-header__menu {
+    position: absolute;
+    top: 100%;
+    right: 12px;
+    left: 12px;
+    display: none;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--hd-line);
+    border-radius: 15px;
+    background: #fbfcfa;
+    box-shadow: 0 14px 36px rgba(23,62,52,.12);
+    max-height: calc(100vh - 90px);
+    max-height: calc(100dvh - 90px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .fazajoo-header__menu--open { display: flex; justify-content: flex-start; }
+  .fazajoo-header__nav, .fazajoo-header__account, .fazajoo-header__guest-actions { width: 100%; align-items: stretch; flex-direction: column; gap: 4px; flex-shrink: 0; }
+  .fazajoo-header .fazajoo-header__nav-link { justify-content: flex-start; font-size: .82rem; }
+  .fazajoo-header__nav-link--active::after { left: auto; right: 0; top: 12px; bottom: 12px; height: auto; width: 2px; }
+  .fazajoo-header__divider { flex: 0 0 1px; width: 100%; height: 1px; }
+  .fazajoo-header__user, .fazajoo-header__agency-button, .fazajoo-header .message-badge,
+  .fazajoo-header__publish-button, .fazajoo-header__login-button, .fazajoo-header__logout-button, .fazajoo-header__smart-bell { width: 100%; max-width: none; font-size: .8rem; }
+  .fazajoo-header__agency-button, .fazajoo-header .message-badge { justify-content: flex-start; }
+  .fazajoo-header__smart-bell { justify-content: flex-start; padding-inline: 12px; gap: 8px; }
+  .fazajoo-header__smart-bell::after { content: "اعلان‌های فضاجو"; }
+  .fazajoo-header .message-badge__count, .fazajoo-header__smart-bell b { top: 12px; inset-inline-start: auto; inset-inline-end: 9px; }
+  .fazajoo-header__user-text strong, .fazajoo-header__agency-text strong { font-size: .77rem; }
+}
+@media (max-width: 520px) {
+  .fazajoo-header__container { width: calc(100% - 20px); min-height: 72px; }
+  .fazajoo-header__menu { right: 9px; left: 9px; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .fazajoo-header__smart-bell.has-unread > span { animation: none; }
+  .fazajoo-header *, .fazajoo-header *::after { transition: none; animation: none; }
+}
+
+/* HD02 — distribute spare desktop width inside the signed-in groups, not around the divider. */
+@media (min-width: 1151px) {
+  .fazajoo-header__menu:has(> .fazajoo-header__account) {
+    justify-content: flex-start;
+  }
+  .fazajoo-header__menu:has(> .fazajoo-header__account) > .fazajoo-header__nav,
+  .fazajoo-header__menu > .fazajoo-header__account {
+    flex: 1 0 auto;
+    justify-content: space-between;
+  }
 }

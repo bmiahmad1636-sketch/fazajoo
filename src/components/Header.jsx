@@ -207,15 +207,7 @@ function Header({
                     closeMenu
                   }
                 >
-                  <span
-                    aria-hidden="true"
-                    style={{
-                      marginLeft:
-                        "5px",
-                    }}
-                  >
-                    ♥
-                  </span>
+                  <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M20.8 8.6c0 4.1-8.8 9.5-8.8 9.5S3.2 12.7 3.2 8.6a4.8 4.8 0 0 1 8.8-2.7 4.8 4.8 0 0 1 8.8 2.7Z" /></svg>
 
                   علاقه‌مندی‌های من
                 </NavLink>
@@ -287,7 +279,7 @@ function Header({
                   title="مدیریت فضاجو"
                 >
                   <span>
-                    ⚙
+                    <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1m-8.6 8.6-2.1 2.1" /></svg>
                   </span>
 
                   مدیریت
@@ -317,7 +309,7 @@ function Header({
               >
 
                 <span className="fazajoo-header__agency-icon">
-                  🏢
+                  <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="3" width="14" height="18" rx="2" /><path d="M9 7h1m4 0h1M9 11h1m4 0h1M9 15h1m4 0h1M10 21v-3h4v3" /></svg>
                 </span>
 
 
@@ -348,7 +340,7 @@ function Header({
                 }
               >
                 <span>
-                  ＋
+                  <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>
                 </span>
 
                 ثبت آگهی
