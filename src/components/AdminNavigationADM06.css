@@ -1,0 +1,25 @@
+/* Shared admin-only navigation. No sticky layer or global element overrides. */
+.adm06-nav {
+  --nav-ink:#173d31; --nav-green:#205744; --nav-border:#d5e2d8;
+  background:#f8faf7; color:var(--nav-ink); border-bottom:1px solid var(--nav-border);
+  font-family:inherit; text-align:right;
+}
+.adm06-nav *, .adm06-nav *::before, .adm06-nav *::after {box-sizing:border-box;}
+.adm06-nav__inner {width:min(1320px,calc(100% - 36px));margin-inline:auto;display:flex;align-items:center;gap:18px;padding:6px 0;min-width:0;}
+.adm06-nav__brand {font-size:.76rem;font-weight:850;white-space:nowrap;border-inline-end:1px solid var(--nav-border);padding-inline-end:17px;color:#4c6859;}
+.adm06-nav__links {display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;flex:1;min-width:0;}
+.adm06-nav .adm06-nav__link {min-width:0;display:flex;align-items:center;justify-content:center;gap:7px;min-height:43px;padding:6px 9px;border:1px solid transparent;border-radius:8px;color:var(--nav-ink);text-decoration:none;line-height:1.5;font-size:.81rem;font-weight:750;overflow-wrap:anywhere;}
+.adm06-nav .adm06-nav__link:hover {background:#e9f0e9;border-color:#cfdfd1;}
+.adm06-nav .adm06-nav__link[aria-current="page"] {background:var(--nav-green);border-color:var(--nav-green);color:#fff;box-shadow:inset 0 -3px #d99254;}
+.adm06-nav .adm06-nav__link:focus-visible {outline:2px solid #b95a18;outline-offset:2px;}
+.adm06-nav__link svg {width:19px;height:19px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.adm06-nav__short {display:none;}
+@media(max-width:1050px){.adm06-nav__brand{display:none;}.adm06-nav__inner{gap:0;}}
+@media(max-width:620px){
+  .adm06-nav__inner{width:calc(100% - 16px);padding:5px 0;}
+  .adm06-nav__links{gap:3px;grid-template-columns:repeat(4,minmax(0,1fr));}
+  .adm06-nav .adm06-nav__link{flex-direction:column;gap:3px;min-height:48px;padding:5px 2px;font-size:.69rem;text-align:center;border-radius:7px;}
+  .adm06-nav__link svg{width:17px;height:17px;}
+  .adm06-nav__full{display:none;}.adm06-nav__short{display:inline;}
+}
+@media print{.adm06-nav{display:none;}}

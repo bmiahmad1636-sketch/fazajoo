@@ -1,3 +1,25 @@
 .nt03-admin{background:#fff;border:1px solid #d4e1d7;border-radius:18px;padding:18px;margin-top:14px;color:#173d32;text-align:right}.nt03-admin header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.nt03-admin h2,.nt03-admin h3{margin:0 0 8px;font-size:1.1rem}.nt03-admin p{margin:8px 0;line-height:1.8;font-size:.88rem}.nt03-admin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}.nt03-admin-grid label{background:#f3f7f3;border:1px solid #dbe6dc;border-radius:12px;padding:12px;display:grid;gap:8px;font-size:.9rem}.nt03-admin-grid label div{display:flex;gap:8px;align-items:center}.nt03-admin input{width:100%;min-width:0;padding:8px;border:1px solid #bdd1c2;border-radius:8px;background:white;color:#173d32;font:inherit}.nt03-admin button{border:1px solid #c4d5c8;background:#edf3ee;color:#173d32;padding:9px 15px;border-radius:9px;font:inherit;cursor:pointer}.nt03-admin button.nt03-admin-save{background:#173d32;color:white;margin:8px 0 18px}.nt03-admin button:disabled{opacity:.5;cursor:default}.nt03-admin ul{padding:0;list-style:none}.nt03-admin li{border-top:1px solid #e2e8e2;padding:10px 0;display:grid;gap:5px;font-size:.82rem}.nt03-admin-error{color:#9c2525}.nt03-admin :focus-visible{outline:2px solid #b85b17;outline-offset:2px}@media(max-width:600px){.nt03-admin-grid{grid-template-columns:1fr}.nt03-admin{padding:12px}}
 
 .admin-dashboard__quick-nav button.admin-dashboard__quick-link{font:inherit;text-align:right;cursor:pointer;width:100%;}
+
+/* ADM06: shared visual treatment of NT03 and CM03, scoped to the dashboard.
+   Fields, validators, confirmation flows, API calls and audit data stay unchanged. */
+.adm01 .nt03-admin {margin:14px 0 0;padding:16px;border:1px solid #dce5dd;border-radius:15px;box-shadow:0 4px 16px #123c3108;min-width:0;color:#173d31;}
+.adm01 .nt03-admin > header {padding-bottom:11px;border-bottom:2px solid #205744;align-items:flex-start;gap:10px;}
+.adm01 .nt03-admin > header > div {flex:1 1 210px;min-width:0;}
+.adm01 .nt03-admin h2 {font-size:1.06rem;line-height:1.6;margin:0;}
+.adm01 .nt03-admin h3 {font-size:.91rem;margin:10px 0 4px;}
+.adm01 .nt03-admin p {font-size:.79rem;line-height:1.9;color:#536b5d;margin:5px 0;overflow-wrap:anywhere;}
+.adm01 .nt03-admin-grid {gap:9px;margin:12px 0;}
+.adm01 .nt03-admin-grid label {min-width:0;border-radius:9px;padding:10px;background:#f3f6f2;border-color:#dce5dd;gap:6px;font-size:.77rem;font-weight:750;}
+.adm01 .nt03-admin-grid label div {min-width:0;}
+.adm01 .nt03-admin input {min-height:42px;max-width:100%;font-size:.88rem;font-variant-numeric:tabular-nums;direction:ltr;text-align:right;}
+.adm01 .nt03-admin button {min-height:40px;border-radius:8px;padding:7px 12px;font-size:.77rem;font-weight:750;line-height:1.7;max-width:100%;white-space:normal;}
+.adm01 .nt03-admin button.nt03-admin-save {background:#205744;border-color:#205744;margin:10px 0 12px;color:#fff;}
+.adm01 .nt03-admin form > p {border-inline-start:3px solid #83a28d;background:#f2f6f1;border-radius:6px;padding:8px 10px;}
+.adm01 .nt03-admin [role="alert"] {color:#8c3531;background:#fff3f1;border:1px solid #ecc7c1;border-radius:8px;padding:8px 10px;}
+.adm01 .nt03-admin [role="status"] {background:#edf4ed;border:1px solid #d4e1d6;border-radius:8px;padding:8px 10px;color:#315e46;}
+.adm01 .nt03-admin ul {margin:8px 0 0;display:grid;gap:6px;}
+.adm01 .nt03-admin li {background:#f8faf7;border:1px solid #dce5dd;border-radius:8px;padding:9px 10px;font-size:.75rem;overflow-wrap:anywhere;}
+.adm01 .nt03-admin li strong {color:#205744;}
+@media(max-width:730px){.adm01 .nt03-admin{padding:11px;border-radius:12px;}.adm01 .nt03-admin-grid{grid-template-columns:minmax(0,1fr);}.adm01 .nt03-admin > header > div{flex-basis:100%;}.adm01 .nt03-admin button.nt03-admin-save{width:100%;}}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   applyAdminModerationAction,
@@ -7,6 +7,7 @@ import {
   updateAdminReport,
 } from "../services/trustSafetyService";
 import { showInSiteAlert } from "../utils/inSiteDialog";
+import { REPORT_LIMIT, REPORT_STATUSES, REPORT_TARGETS, filterReports, reportPage, countReportStatuses } from "../utils/moderationWorkspaceADM03";
 import "./AdminModeration.css";
 
 const reasonLabels = {
@@ -56,7 +57,8 @@ function actionHelp(action) {
 
 function faDate(value) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("fa-IR-u-ca-persian", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "—" : new Intl.DateTimeFormat("fa-IR-u-ca-persian", { dateStyle: "medium", timeStyle: "short" }).format(date);
 }
 
 function availableActions(report) {
@@ -89,6 +91,12 @@ export default function AdminModeration() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
   const [working, setWorking] = useState("");
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [target, setTarget] = useState("");
+  const [page, setPage] = useState(1);
+  const requestId = useRef(0);
+  const lock = useRef(false);
   const [chatPreview, setChatPreview] = useState(null);
   const [chatPreviewLoading, setChatPreviewLoading] = useState(false);
   const [actionModal, setActionModal] = useState(null);
@@ -108,36 +116,54 @@ export default function AdminModeration() {
   }
 
   const load = useCallback(async () => {
+    const id = ++requestId.current;
+    setLoading(true);
+    setError("");
     try {
-      setLoading(true);
-      setReports(await getAdminReports(filter));
+      const data = await getAdminReports(filter);
+      if (id !== requestId.current) return false;
+      setReports(data);
+      return true;
     } catch (e) {
-      showInSiteAlert(e.message);
+      if (id === requestId.current) {
+        setReports([]);
+        setError(e.message || "دریافت گزارش‌ها ناموفق بود.");
+      }
+      return false;
     } finally {
-      setLoading(false);
+      if (id === requestId.current) setLoading(false);
     }
   }, [filter]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+    return () => { requestId.current++; };
+  }, [load]);
 
-  const counts = useMemo(
-    () => reports.reduce((a, r) => ((a[r.status] = (a[r.status] || 0) + 1), a), {}),
-    [reports]
-  );
+  const counts = useMemo(() => countReportStatuses(reports), [reports]);
+  const filtered = useMemo(() => filterReports(reports, target, search, reasonLabels), [reports, target, search]);
+  const listing = reportPage(filtered, page);
+  const busy = Boolean(working || chatPreviewLoading || loading);
+  const fa = n => n.toLocaleString("fa-IR");
 
   async function change(r, status) {
+    if (lock.current || loading) return;
+    lock.current = true;
     try {
       setWorking(r.id);
       await updateAdminReport(r.id, status, r.resolution_note || "");
-      await load();
+      if (!await load()) showInSiteAlert("وضعیت گزارش ثبت شد، اما تازه‌سازی فهرست ناموفق بود. عملیات را تکرار نکنید و ابتدا فهرست را تازه کنید.");
     } catch (e) {
       showInSiteAlert(e.message);
     } finally {
+      lock.current = false;
       setWorking("");
     }
   }
 
   async function openChatPreview(report) {
+    if (lock.current || loading) return;
+    lock.current = true;
     try {
       setChatPreviewLoading(true);
       const data = await getAdminReportChat(report.id);
@@ -145,11 +171,13 @@ export default function AdminModeration() {
     } catch (e) {
       showInSiteAlert(e.message);
     } finally {
+      lock.current = false;
       setChatPreviewLoading(false);
     }
   }
 
   function openActionModal(report) {
+    if (lock.current || loading) return;
     const first = availableActions(report)[0]?.[0] || "refer_legal";
     setSelectedAction(first);
     setActionNote("");
@@ -158,51 +186,67 @@ export default function AdminModeration() {
 
   async function submitAction(event) {
     event.preventDefault();
-    if (!actionModal) return;
+    if (!actionModal || lock.current || loading || actionNote.trim().length < 3) return;
+    lock.current = true;
     try {
       setWorking(actionModal.id);
       const result = await applyAdminModerationAction(actionModal.id, selectedAction, actionNote);
       setActionModal(null);
       setActionNote("");
-      await load();
-      showInSiteAlert(result?.message || "اقدام مدیریتی ثبت و اجرا شد.");
+      const refreshed = await load();
+      showInSiteAlert(refreshed ? (result?.message || "اقدام مدیریتی ثبت و اجرا شد.") : "اقدام ثبت شد، اما تازه‌سازی فهرست ناموفق بود. عملیات را تکرار نکنید و ابتدا فهرست را تازه کنید.");
     } catch (e) {
       showInSiteAlert(e.message);
     } finally {
+      lock.current = false;
       setWorking("");
     }
   }
 
   return (
-    <main className="moderation">
-      <section className="moderation__hero">
-        <div><span>🛡 اعتماد و ایمنی</span><h1>مرکز رسیدگی به گزارش‌ها</h1><p>گزارش را بررسی کنید، اقدام متناسب انجام دهید و سابقه تصمیم را نگه دارید.</p></div>
-        <Link to="/admin">بازگشت به پنل مدیریت</Link>
-      </section>
-
-      <section className="moderation__body">
-        <div className="moderation__stats">
-          <article><span>نمایش فعلی</span><strong>{reports.length.toLocaleString("fa-IR")}</strong></article>
-          <article><span>جدید</span><strong>{(counts.new || 0).toLocaleString("fa-IR")}</strong></article>
-          <article><span>در حال بررسی</span><strong>{(counts.reviewing || 0).toLocaleString("fa-IR")}</strong></article>
+    <main className="moderation adm03">
+      <header className="ad3-header">
+        <div className="ad3-width ad3-head">
+          <div><small>فضاجو / اعتماد و ایمنی</small><h1>مرکز رسیدگی به گزارش‌ها</h1><p>بررسی مستندات، تصمیم متناسب و ثبت سابقه رسیدگی</p></div>
+          <Link to="/admin">بازگشت به مدیریت</Link>
         </div>
-
-        <div className="moderation__filters">
-          {[["", "همه"], ["new", "جدید"], ["reviewing", "در حال بررسی"], ["resolved", "رسیدگی‌شده"], ["dismissed", "ردشده"]].map(([v, l]) => (
-            <button className={filter === v ? "active" : ""} onClick={() => setFilter(v)} key={v}>{l}</button>
+      </header>
+      <section className="ad3-width ad3-body">
+        <div className="moderation__stats" aria-label="آمار فهرست دریافت‌شده">
+          {[["نمایش فعلی", reports.length, "all"], ["جدید",counts.new,"new"], ["در حال بررسی",counts.reviewing,"reviewing"], ["رسیدگی‌شده",counts.resolved,"resolved"], ["ردشده",counts.dismissed,"dismissed"]].map(([label,n,k]) => (
+            <article key={k} data-kind={k}><span>{label}</span><strong>{loading || error || (filter && k !== "all" && k !== filter) ? "—" : fa(n)}</strong><small>در فهرست دریافتی</small></article>
           ))}
         </div>
-
+        <div className="ad3-workspace">
+          <aside className="ad3-sidebar">
+            <div className="ad3-panel">
+              <small className="ad3-kicker">صف رسیدگی</small><h2>وضعیت گزارش‌ها</h2>
+              <nav className="moderation__filters" aria-label="فیلتر وضعیت گزارش">
+                {REPORT_STATUSES.map(([v,l]) => <button type="button" aria-pressed={filter === v} className={filter === v ? "active" : ""} disabled={busy} onClick={() => {setFilter(v);setPage(1);}} key={v}>{l}<span aria-hidden="true">‹</span></button>)}
+              </nav>
+              <p className="ad3-muted">فیلتر وضعیت از سرور دریافت می‌شود. هر فهرست حداکثر {fa(REPORT_LIMIT)} گزارش دارد.</p>
+            </div>
+            <div className="ad3-panel ad3-guide"><h2>راهنمای رسیدگی</h2><p>ابتدا گزارش و مستندات را بررسی کنید؛ سپس وضعیت پرونده یا اقدام مدیریتی متناسب را انتخاب کنید.</p><Link to="/admin/legal">مرکز امور حقوقی</Link></div>
+          </aside>
+          <section className="ad3-main">
+            <div className="ad3-panel ad3-toolbar">
+              <div className="ad3-section-head"><div><small className="ad3-kicker">میز کار نظارت</small><h2>{REPORT_STATUSES.find(([v]) => v === filter)?.[1]}</h2></div><button type="button" className="ad3-secondary" disabled={busy} onClick={load}>تازه‌سازی</button></div>
+              <div className="ad3-search"><label htmlFor="ad3-search">جستجو در گزارش‌های دریافت‌شده<input id="ad3-search" value={search} onChange={e => {setSearch(e.target.value);setPage(1);}} placeholder="نام، شماره گزارش‌دهنده، علت یا توضیحات" /></label><label htmlFor="ad3-target">موضوع گزارش<select id="ad3-target" value={target} onChange={e => {setTarget(e.target.value);setPage(1);}}>{REPORT_TARGETS.map(([v,l]) => <option key={v} value={v}>{l}</option>)}</select></label></div>
+              <div className="ad3-results"><span>{loading || error ? "—" : `${fa(filtered.length)} نتیجه از ${fa(reports.length)} گزارش دریافت‌شده`}</span>{(search || target) && <button type="button" className="ad3-text-button" onClick={() => {setSearch("");setTarget("");setPage(1);}}>پاک کردن جستجو و موضوع</button>}</div>
+              {!loading && !error && reports.length >= REPORT_LIMIT && <p className="ad3-limit">به سقف دریافت سرور رسیده‌اید؛ این فهرست لزوماً شامل همه گزارش‌ها نیست.</p>}
+            </div>
         {loading ? (
-          <div className="moderation__empty">در حال دریافت گزارش‌ها...</div>
-        ) : reports.length === 0 ? (
-          <div className="moderation__empty">گزارشی در این بخش وجود ندارد.</div>
+          <div className="moderation__empty" role="status">در حال دریافت گزارش‌ها...</div>
+        ) : error ? (
+          <div className="moderation__empty ad3-error" role="alert"><strong>دریافت اطلاعات ناموفق بود</strong><p>{error}</p><button type="button" className="ad3-secondary" disabled={busy} onClick={load}>تلاش مجدد</button></div>
+        ) : filtered.length === 0 ? (
+          <div className="moderation__empty">{reports.length ? "گزارشی مطابق جستجو و فیلتر موضوع پیدا نشد." : "گزارشی در این بخش وجود ندارد."}</div>
         ) : (
           <div className="moderation__list">
-            {reports.map((r) => (
+            {listing.rows.map((r) => (
               <article className="report-card" key={r.id}>
                 <div className="report-card__top">
-                  <div><span className={`status status--${r.status}`}>{statusLabels[r.status]}</span><strong>{reasonLabels[r.reason] || r.reason}</strong></div>
+                  <div><span className={`status status--${r.status}`}>{statusLabels[r.status] || r.status}</span><strong>{reasonLabels[r.reason] || r.reason}</strong></div>
                   <time>{faDate(r.created_at)}</time>
                 </div>
                 <div className="report-card__meta">
@@ -210,11 +254,12 @@ export default function AdminModeration() {
                   <span>گزارش‌دهنده: {r.reporter_name || "کاربر فضاجو"}</span>
                   <span>کاربر گزارش‌شده: {r.reported_name || "—"}</span>
                 </div>
-                {r.details && <p>{r.details}</p>}
+                {r.details && <p className="ad3-detail"><strong>شرح گزارش</strong>{r.details}</p>}
+                {r.resolution_note && <p className="ad3-detail"><strong>یادداشت رسیدگی</strong>{r.resolution_note}</p>}
 
                 {Array.isArray(r.actions) && r.actions.length > 0 && (
-                  <div className="report-card__history">
-                    <strong>سابقه اقدام مدیریتی</strong>
+                  <details className="report-card__history">
+                    <summary>سابقه اقدام مدیریتی ({fa(r.actions.length)})</summary>
                     {r.actions.slice(0, visibleHistoryCount(r.id)).map((a) => (
                       <div key={a.id}>
                         <span>{actionLabels[a.actionType] || a.actionType}</span>
@@ -231,17 +276,17 @@ export default function AdminModeration() {
                         نمایش بیشتر ({Math.min(20, r.actions.length - visibleHistoryCount(r.id)).toLocaleString("fa-IR")} مورد بعدی)
                       </button>
                     )}
-                  </div>
+                  </details>
                 )}
 
                 <div className="report-card__actions">
-                  <button disabled={working === r.id} onClick={() => change(r, "reviewing")}>شروع بررسی</button>
-                  <button className="ok" disabled={working === r.id} onClick={() => change(r, "resolved")}>رسیدگی شد</button>
-                  <button className="muted" disabled={working === r.id} onClick={() => change(r, "dismissed")}>رد گزارش</button>
-                  <button className="action" disabled={working === r.id} onClick={() => openActionModal(r)}>اقدام مدیریتی</button>
+                  <button disabled={busy} onClick={() => change(r, "reviewing")}>شروع بررسی</button>
+                  <button className="ok" disabled={busy} onClick={() => change(r, "resolved")}>رسیدگی شد</button>
+                  <button className="muted" disabled={busy} onClick={() => change(r, "dismissed")}>رد گزارش</button>
+                  <button className="action" disabled={busy} onClick={() => openActionModal(r)}>اقدام مدیریتی</button>
                   {r.target_type === "listing" && <Link to={`/parking/${r.target_id}`}>مشاهده آگهی</Link>}
                   {r.target_type === "chat" && (
-                    <button className="dark" disabled={chatPreviewLoading} onClick={() => openChatPreview(r)}>
+                    <button className="dark" disabled={busy} onClick={() => openChatPreview(r)}>
                       {chatPreviewLoading ? "در حال دریافت..." : "مشاهده امن گفتگو"}
                     </button>
                   )}
@@ -250,15 +295,18 @@ export default function AdminModeration() {
             ))}
           </div>
         )}
+        {!loading && !error && listing.pages > 1 && <nav className="ad3-pager" aria-label="صفحه‌بندی گزارش‌ها"><button type="button" disabled={busy || listing.page === 1} onClick={() => setPage(listing.page-1)}>صفحه قبل</button><span>صفحه {fa(listing.page)} از {fa(listing.pages)}</span><button type="button" disabled={busy || listing.page === listing.pages} onClick={() => setPage(listing.page+1)}>صفحه بعد</button></nav>}
+          </section>
+        </div>
       </section>
 
       {chatPreview && (
-        <div className="moderation-chat-modal" role="dialog" aria-modal="true">
+        <div className="moderation-chat-modal" role="dialog" aria-modal="true" aria-labelledby="ad3-chat-title">
           <div className="moderation-chat-modal__backdrop" onClick={() => setChatPreview(null)} />
           <section className="moderation-chat-modal__card">
             <header>
-              <div><span>نمایش امن مدیر</span><h2>گفتگوی گزارش‌شده</h2></div>
-              <button onClick={() => setChatPreview(null)}>×</button>
+              <div><span>نمایش امن مدیر</span><h2 id="ad3-chat-title">گفتگوی گزارش‌شده</h2></div>
+              <button aria-label="بستن گفتگو" onClick={() => setChatPreview(null)}>×</button>
             </header>
             {!chatPreview.exists ? (
               <div className="moderation-chat-modal__empty">رکورد این گفتگو دیگر وجود ندارد.</div>
@@ -268,6 +316,7 @@ export default function AdminModeration() {
                   <strong>{chatPreview.chat?.spaceTitle || "آگهی فضاجو"}</strong>
                   <span>{chatPreview.chat?.ownerName || "آگهی‌دهنده"} ↔ {chatPreview.chat?.requesterName || "متقاضی"}</span>
                 </div>
+                <p className="ad3-preview-limit">{fa(chatPreview.messages?.length || 0)} پیام دریافت‌شده • حداکثر {fa(REPORT_LIMIT)} پیام نخست به ترتیب زمان</p>
                 <div className="moderation-chat-modal__messages">
                   {chatPreview.messages?.length ? chatPreview.messages.map((m) => (
                     <article key={m.id}>
@@ -283,12 +332,12 @@ export default function AdminModeration() {
       )}
 
       {actionModal && (
-        <div className="moderation-action-modal" role="dialog" aria-modal="true">
-          <div className="moderation-action-modal__backdrop" onClick={() => setActionModal(null)} />
+        <div className="moderation-action-modal" role="dialog" aria-modal="true" aria-labelledby="ad3-action-title">
+          <div className="moderation-action-modal__backdrop" onClick={() => {if (!lock.current) setActionModal(null);}} />
           <form className="moderation-action-modal__card" onSubmit={submitAction}>
             <header>
-              <div><span>تصمیم اجرایی مدیر</span><h2>اقدام مدیریتی</h2></div>
-              <button type="button" onClick={() => setActionModal(null)}>×</button>
+              <div><span>تصمیم اجرایی مدیر</span><h2 id="ad3-action-title">اقدام مدیریتی</h2></div>
+              <button type="button" aria-label="بستن اقدام" disabled={Boolean(working)} onClick={() => setActionModal(null)}>×</button>
             </header>
 
             <div className="moderation-action-modal__summary">
@@ -298,7 +347,7 @@ export default function AdminModeration() {
 
             <label>
               <span>نوع اقدام</span>
-              <select value={selectedAction} onChange={(e) => setSelectedAction(e.target.value)}>
+              <select disabled={Boolean(working)} value={selectedAction} onChange={(e) => setSelectedAction(e.target.value)}>
                 {availableActions(actionModal).map(([value, label]) => <option value={value} key={value}>{label}</option>)}
               </select>
             </label>
@@ -312,6 +361,7 @@ export default function AdminModeration() {
             <label>
               <span>توضیح داخلی مدیر</span>
               <textarea
+                disabled={Boolean(working)}
                 rows="4"
                 maxLength="1000"
                 value={actionNote}
@@ -329,8 +379,8 @@ export default function AdminModeration() {
             )}
 
             <div className="moderation-action-modal__buttons">
-              <button type="button" className="cancel" onClick={() => setActionModal(null)}>انصراف</button>
-              <button type="submit" disabled={working === actionModal.id || actionNote.trim().length < 3}>
+              <button type="button" className="cancel" disabled={Boolean(working)} onClick={() => setActionModal(null)}>انصراف</button>
+              <button type="submit" disabled={busy || actionNote.trim().length < 3}>
                 {working === actionModal.id ? "در حال اجرا..." : "ثبت و اجرای اقدام"}
               </button>
             </div>

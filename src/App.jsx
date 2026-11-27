@@ -26,6 +26,8 @@ import AgencyDashboard from "./pages/AgencyDashboard";
 import AgencyApplicants from "./pages/AgencyApplicants";
 import AgencyAccess from "./pages/AgencyAccess";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminNavigationADM06 from "./components/AdminNavigationADM06";
+import AdminPolicyWorkspaceADM07 from "./pages/AdminPolicyWorkspaceADM07";
 import FeaturedShowcaseAdmin from "./pages/FeaturedShowcaseAdmin";
 import LegalCenterJalali from "./pages/LegalCenterJalali";
 import FindForMe from "./pages/FindForMe";
@@ -197,7 +199,12 @@ function AdminRoute({
     return <Navigate to="/" replace />;
   }
 
-  return children;
+  return (
+    <>
+      <AdminNavigationADM06 />
+      {children}
+    </>
+  );
 }
 
 function App() {
@@ -646,6 +653,17 @@ function App() {
           }
         />
 
+
+        <Route path="/admin/notification-policy" element={
+          <AdminRoute user={user} authLoading={authLoading} userProfile={userProfile} profileLoading={profileLoading}>
+            <AdminPolicyWorkspaceADM07 key="notification" kind="notification" />
+          </AdminRoute>
+        } />
+        <Route path="/admin/chat-policy" element={
+          <AdminRoute user={user} authLoading={authLoading} userProfile={userProfile} profileLoading={profileLoading}>
+            <AdminPolicyWorkspaceADM07 key="chat" kind="chat" />
+          </AdminRoute>
+        } />
 
         <Route path="/admin/featured" element={
           <AdminRoute user={user} authLoading={authLoading} userProfile={userProfile} profileLoading={profileLoading}>

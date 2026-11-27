@@ -2,6 +2,7 @@ import { showInSiteAlert, showInSiteConfirm } from "../utils/inSiteDialog";
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -19,8 +20,8 @@ import {
 } from "../services/adminService";
 
 import "./AdminDashboard.css";
-import AdminNotificationPolicyNT03 from "../components/AdminNotificationPolicyNT03";
-import AdminChatPolicyCM03 from "../components/AdminChatPolicyCM03";
+import "./AdminWorkspaceADM01.css";
+import { filterAdminAgents, adminPage, adminCount } from "../utils/adminWorkspaceADM01";
 
 
 
@@ -38,8 +39,9 @@ const DOCUMENT_LABELS = {
 
 
 function AdminDashboard() {
-  const [noticePolicyOpen,setNoticePolicyOpen]=useState(false);
-  const [chatPolicyOpen,setChatPolicyOpen]=useState(false);
+  const [workspaceView,setWorkspaceView]=useState("pending");
+  const [workspaceQuery,setWorkspaceQuery]=useState("");
+  const [workspacePage,setWorkspacePage]=useState(1);
   const [users, setUsers] =
     useState([]);
 
@@ -85,6 +87,19 @@ function AdminDashboard() {
   const [networkCreditsError, setNetworkCreditsError] = useState("");
   const [grantAmounts, setGrantAmounts] = useState({});
   const [grantWorkingId, setGrantWorkingId] = useState("");
+  // Invalidate outstanding requests and release private preview URLs on exit.
+  const documentSession = useRef({ generation: 0, urls: {} });
+  useEffect(() => {
+    const session = documentSession.current;
+    return () => {
+      session.generation += 1;
+      Object.values(session.urls).forEach(item => {
+        if (item.url) URL.revokeObjectURL(item.url);
+      });
+      session.urls = {};
+    };
+  }, []);
+
 
 
   useEffect(() => {
@@ -234,6 +249,7 @@ function AdminDashboard() {
           await approveAgentApi(user.id);
 
         if (result?.user) {
+          closeDocuments();
           setUsers((currentUsers) =>
             currentUsers.map((currentUser) =>
               currentUser.id === user.id
@@ -288,6 +304,7 @@ function AdminDashboard() {
           await rejectAgentApi(user.id);
 
         if (result?.user) {
+          closeDocuments();
           setUsers((currentUsers) =>
             currentUsers.map((currentUser) =>
               currentUser.id === user.id
@@ -394,131 +411,116 @@ function AdminDashboard() {
     };
 
 
-  const closeDocuments =
-    () => {
-      revokeDocumentLinks(
-        documentLinks
-      );
+  const closeDocuments = () => {
+    const session = documentSession.current;
+    session.generation += 1;
+    revokeDocumentLinks(session.urls);
+    session.urls = {};
+    setDocumentsUserId("");
+    setDocumentLinks({});
+    setDocumentsError("");
+    setDocumentsLoading(false);
+  };
 
-      setDocumentsUserId("");
+  const toggleDocuments = async (user) => {
+    if (documentsLoading || workingUserId || grantWorkingId) return;
+    if (documentsUserId === user.id) {
+      closeDocuments();
+      return;
+    }
+    closeDocuments();
+    const session = documentSession.current;
+    const generation = session.generation;
+    setDocumentsUserId(user.id);
+    setDocumentsLoading(true);
 
-      setDocumentLinks({});
-
-      setDocumentsError("");
-    };
-
-
-  const toggleDocuments =
-    async (user) => {
-      if (
-        documentsUserId ===
-        user.id
-      ) {
-        closeDocuments();
-        return;
+    try {
+      const records = user.agencyDocuments || {};
+      const availableEntries = Object.keys(DOCUMENT_LABELS)
+        .map(key => [key, records[key]])
+        .filter(([, record]) => Boolean(record?.key || record?.url));
+      if (!availableEntries.length) {
+        throw new Error("برای آخرین درخواست این مشاور مدرکی ثبت نشده است.");
       }
+      const results = await Promise.allSettled(availableEntries.map(
+        async ([key]) => (await getAdminDocumentBlob(user.id, key)).blob
+      ));
+      if (session.generation !== generation) return;
+      const links = {};
+      // Keep successful previews even when another file is unavailable.
+      session.urls = links;
+      results.forEach((result, index) => {
+        const [key, record] = availableEntries[index];
+        links[key] = result.status === "fulfilled"
+          ? { url: URL.createObjectURL(result.value), record }
+          : { error: true };
+      });
+      setDocumentLinks(links);
+    } catch (documentError) {
+      if (session.generation !== generation) return;
+      revokeDocumentLinks(session.urls);
+      session.urls = {};
+      setDocumentsError(documentError?.message || "دریافت مدارک انجام نشد.");
+    } finally {
+      if (session.generation === generation) setDocumentsLoading(false);
+    }
+  };
 
-      setDocumentsUserId(
-        user.id
-      );
+  const renderDocumentsButton = user => (
+    <button
+      type="button"
+      className="admin-dashboard__documents-button adm01-documents-button"
+      disabled={Boolean(workingUserId || grantWorkingId || documentsLoading)}
+      aria-expanded={documentsUserId === user.id}
+      onClick={() => toggleDocuments(user)}
+    >
+      {documentsUserId === user.id ? "بستن مدارک" : "🔐 مشاهده مدارک"}
+    </button>
+  );
 
-      revokeDocumentLinks(
-        documentLinks
-      );
-
-      setDocumentLinks({});
-      setDocumentsError("");
-      setDocumentsLoading(true);
-
-      try {
-        const records =
-          user.agencyDocuments ||
-          {};
-
-        const documentEntries =
-          Object.entries({
-            nationalCardFront:
-              records.nationalCardFront,
-
-            nationalCardBack:
-              records.nationalCardBack,
-
-            businessLicense:
-              records.businessLicense,
-          });
-
-        const availableEntries =
-          documentEntries.filter(
-            ([
-              ,
-              record,
-            ]) =>
-              Boolean(
-                record?.key ||
-                record?.url
-              )
-          );
-
-        if (
-          availableEntries.length ===
-          0
-        ) {
-          throw new Error(
-            "برای این درخواست مدرکی ثبت نشده است."
-          );
-        }
-
-        const results =
-          await Promise.all(
-            availableEntries.map(
-              async ([
-                key,
-                record,
-              ]) => {
-                const { blob } =
-                  await getAdminDocumentBlob(
-                    user.id,
-                    key
-                  );
-
-                return [
-                  key,
-                  {
-                    url:
-                      URL.createObjectURL(
-                        blob
-                      ),
-                    record,
-                  },
-                ];
-              }
-            )
-          );
-
-        setDocumentLinks(
-          Object.fromEntries(
-            results
-          )
-        );
-
-      } catch (documentError) {
-        console.error(
-          "Load agency documents error:",
-          documentError
-        );
-
-        setDocumentsError(
-          documentError?.message ||
-            "دریافت مدارک انجام نشد."
-        );
-
-      } finally {
-        setDocumentsLoading(
-          false
-        );
-      }
-    };
-
+  const renderDocumentsPanel = user => documentsUserId === user.id && (
+    <section className="admin-dashboard__documents-panel adm01-shared-documents" aria-label="مدارک آخرین درخواست مشاور">
+      <div className="admin-dashboard__documents-heading">
+        <div><span>🔐 پرونده احراز</span><h4>مدارک هویتی و صنفی</h4><small>آخرین درخواست ثبت‌شده</small></div>
+        <small>دسترسی فقط برای مدیر</small>
+      </div>
+      {documentsLoading ? (
+        <div className="admin-dashboard__documents-state" role="status">در حال ساخت دسترسی امن به مدارک...</div>
+      ) : documentsError ? (
+        <div className="admin-dashboard__documents-state admin-dashboard__documents-state--error" role="alert">{documentsError}</div>
+      ) : (
+        <div className="admin-dashboard__documents-grid">
+          {Object.entries(DOCUMENT_LABELS).map(([key, title]) => {
+            const entry = documentLinks[key];
+            if (!entry?.url) return (
+              <div key={key} className="admin-dashboard__document-card admin-dashboard__document-card--missing">
+                <span>{entry?.error ? "دریافت امن مدرک ناموفق بود" : "مدرک موجود نیست"}</span>
+                <strong>{title}</strong>
+              </div>
+            );
+            return (
+              <div key={key} className="admin-dashboard__document-card">
+                <div className="admin-dashboard__document-image-wrap">
+                  <img src={entry.url} alt={title} className="admin-dashboard__document-image" />
+                </div>
+                <div className="admin-dashboard__document-info">
+                  <strong>{title}</strong>
+                  <span>{entry.record?.originalFilename || "مدرک احراز"}</span>
+                  <div className="admin-dashboard__document-links">
+                    <a href={entry.url} target="_blank" rel="noreferrer">مشاهده بزرگ</a>
+                    <a href="#" onClick={event => { event.preventDefault(); downloadDocument(user.id, key, entry.record, title); }}>دانلود</a>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      <div className="admin-dashboard__documents-note">
+        <span>⚠️</span><p>این مدارک فقط برای بررسی احراز هویت مشاور استفاده شوند و نباید در اختیار کاربران دیگر قرار بگیرند.</p>
+      </div>
+    </section>
+  );
 
 
   const grantNetworkCredits = async (user) => {
@@ -556,193 +558,77 @@ function AdminDashboard() {
   };
 
 
+  const currentRows = workspaceView === "approved" ? approvedAgents : workspaceView === "rejected" ? rejectedRequests : pendingRequests;
+  const filteredRows = useMemo(() => filterAdminAgents(currentRows, workspaceQuery), [currentRows, workspaceQuery]);
+  const page = adminPage(filteredRows, workspacePage);
+  const navigationLocked = Boolean(documentsLoading || workingUserId || grantWorkingId);
+  function changeView(view) {
+    if (navigationLocked) return;
+    closeDocuments();
+    setWorkspaceView(view);
+    setWorkspacePage(1);
+  }
+  function changeQuery(value) {
+    if (navigationLocked) return;
+    closeDocuments();
+    setWorkspaceQuery(value);
+    setWorkspacePage(1);
+  }
+  function changePage(value) {
+    if (navigationLocked) return;
+    closeDocuments();
+    setWorkspacePage(value);
+  }
+  const tabs = [
+    { id: "pending", title: "در انتظار بررسی", count: pendingRequests.length },
+    { id: "approved", title: "مشاوران تأییدشده", count: approvedAgents.length },
+    { id: "rejected", title: "درخواست‌های ردشده", count: rejectedRequests.length },
+  ];
+  const count = value => adminCount(value, loading, Boolean(error));
+  const activeTab = tabs.find(item => item.id === workspaceView);
+
   return (
-    <main className="admin-dashboard">
-      <nav className="admin-dashboard__quick-nav" aria-label="دسترسی‌های مدیریت">
-        <div className="admin-dashboard__container">
-          <div className="admin-dashboard__quick-nav-heading">
-            <div>
-              <span className="admin-dashboard__quick-nav-kicker">دسترسی سریع مدیر</span>
-              <h2>ابزارهای مدیریت فضاجو</h2>
-            </div>
-            <p>بخش موردنظر را برای بررسی و مدیریت مستقیم انتخاب کنید.</p>
-          </div>
-
-          <div className="admin-dashboard__quick-nav-inner">
-            <Link to="/admin/featured" className="admin-dashboard__quick-link admin-dashboard__quick-link--users">
-              <span className="admin-dashboard__quick-icon">✦</span>
-              <div><strong>ویترین ویژه</strong><small>ظرفیت، درآمد دستی، صف و گردش آگهی‌های ویژه</small></div>
-              <b aria-hidden="true">←</b>
-            </Link>
-            <Link to="/admin/legal" className="admin-dashboard__quick-link admin-dashboard__quick-link--legal">
-              <span className="admin-dashboard__quick-icon">⚖️</span>
-              <div><strong>امور حقوقی</strong><small>پرونده‌ها، دستورات قضایی و محدودیت‌ها</small></div>
-              <b aria-hidden="true">←</b>
-            </Link>
-            <Link to="/admin/moderation" className="admin-dashboard__quick-link admin-dashboard__quick-link--moderation">
-              <span className="admin-dashboard__quick-icon">🛡️</span>
-              <div><strong>مرکز تخلفات</strong><small>گزارش‌ها، رسیدگی و اقدامات نظارتی</small></div>
-              <b aria-hidden="true">←</b>
-            </Link>
-            <Link to="/admin/direct-management" className="admin-dashboard__quick-link admin-dashboard__quick-link--users">
-              <span className="admin-dashboard__quick-icon">👤</span>
-              <div><strong>مدیریت کاربران</strong><small>حساب‌ها، وضعیت کاربران و دسترسی‌ها</small></div>
-              <b aria-hidden="true">←</b>
-            </Link>
-            <button type="button" className="admin-dashboard__quick-link admin-dashboard__quick-link--users" aria-expanded={noticePolicyOpen} onClick={()=>setNoticePolicyOpen(v=>!v)}>
-              <span className="admin-dashboard__quick-icon">◷</span><div><strong>تنظیمات اعلان‌ها</strong><small>مدت آرشیو و نگهداری اعلان‌ها</small></div><b aria-hidden="true">{noticePolicyOpen ? "−" : "+"}</b>
-            </button>
-            <button type="button" className="admin-dashboard__quick-link admin-dashboard__quick-link--users" aria-expanded={chatPolicyOpen} onClick={()=>setChatPolicyOpen(v=>!v)}>
-              <span className="admin-dashboard__quick-icon">◷</span><div><strong>تنظیمات گفتگوها</strong><small>آرشیو و سیاست نگهداری پیام‌ها</small></div><b aria-hidden="true">{chatPolicyOpen ? "−" : "+"}</b>
-            </button>
-          </div>
-          {noticePolicyOpen && <AdminNotificationPolicyNT03 />}
-          {chatPolicyOpen && <AdminChatPolicyCM03 />}
+    <main className="admin-dashboard adm01" dir="rtl">
+      <header className="adm01-header">
+        <div className="adm01-header-inner">
+          <div><span className="adm01-kicker">فضاجو / مدیریت عملیات</span><h1>مرکز مدیریت فضاجو</h1><p>رسیدگی به درخواست‌ها، نظارت و مدیریت خدمات در یک میز کار</p></div>
+          <Link to="/" className="adm01-home">بازگشت به فضاجو <span aria-hidden="true">←</span></Link>
         </div>
-      </nav>
-
-      <section className="admin-dashboard__hero">
-
-        <div className="admin-dashboard__container">
-
-          <div>
-
-            <span className="admin-dashboard__eyebrow">
-              مدیریت فضاجو
-            </span>
-
-
-            <h1>
-              پنل مدیریت
-              <span>
-                {" "}
-                مشاوران املاک
-              </span>
-            </h1>
-
-
-            <p>
-              درخواست‌های فعال‌سازی
-              مشاوران را بررسی،
-              مدارک را مشاهده و
-              سپس تأیید یا رد کنید.
-            </p>
-
-          </div>
-
-
-          <div className="admin-dashboard__hero-badge">
-
-            <span>
-              🛡️
-            </span>
-
-
-            <div>
-
-              <small>
-                دسترسی ویژه
-              </small>
-
-              <strong>
-                مدیر فضاجو
-              </strong>
-
+      </header>
+      <div className="adm01-layout">
+        <aside className="adm01-sidebar" aria-label="ابزارهای مدیریت فضاجو">
+          <div className="adm01-sidebar-head"><span>دسترسی مدیریتی</span><strong>ابزارهای عملیات</strong></div>
+          <nav className="adm01-tools" aria-label="دسترسی‌های مدیریت">
+            <div className="adm01-tool-group"><h2>عملیات و خدمات</h2>
+              <Link to="/admin/direct-management" className="adm01-tool"><span className="adm01-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M17 6a3 3 0 0 1 0 6m1 3a5 5 0 0 1 3 5"/></svg></span><span><strong>مدیریت کاربران</strong><small>حساب‌ها و دسترسی‌ها</small></span><b aria-hidden="true">←</b></Link>
+              <Link to="/admin/featured" className="adm01-tool"><span className="adm01-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2-5.5-3-5.5 3 1-6.2L3 9.6l6.2-.9Z"/></svg></span><span><strong>ویترین ویژه</strong><small>ظرفیت، صف و درآمد دستی</small></span><b aria-hidden="true">←</b></Link>
             </div>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <section className="admin-dashboard__content">
-
-        <div className="admin-dashboard__container">
-
-
-          <div className="admin-dashboard__stats">
-
-            <article>
-
-              <span>
-                در انتظار بررسی
-              </span>
-
-              <strong>
-                {pendingRequests.length.toLocaleString(
-                  "fa-IR"
-                )}
-              </strong>
-
-              <small>
-                درخواست جدید
-              </small>
-
-            </article>
-
-
-            <article>
-
-              <span>
-                مشاوران تأییدشده
-              </span>
-
-              <strong>
-                {approvedAgents.length.toLocaleString(
-                  "fa-IR"
-                )}
-              </strong>
-
-              <small>
-                حساب حرفه‌ای فعال
-              </small>
-
-            </article>
-
-
-            <article>
-
-              <span>
-                درخواست‌های ردشده
-              </span>
-
-              <strong>
-                {rejectedRequests.length.toLocaleString(
-                  "fa-IR"
-                )}
-              </strong>
-
-              <small>
-                نیازمند اقدام مجدد
-              </small>
-
-            </article>
-
-
-            <article>
-
-              <span>
-                کل درخواست‌ها
-              </span>
-
-              <strong>
-                {agencyUsers.length.toLocaleString(
-                  "fa-IR"
-                )}
-              </strong>
-
-              <small>
-                سابقه درخواست مشاور
-              </small>
-
-            </article>
-
-          </div>
-
-
-          {(loading || error || pendingRequests.length > 0) && (
+            <div className="adm01-tool-group"><h2>نظارت و حقوقی</h2>
+              <Link to="/admin/legal" className="adm01-tool"><span className="adm01-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 21h14M3 7h18M5 7l-3 7h6L5 7Zm14 0-3 7h6l-3-7Z"/></svg></span><span><strong>امور حقوقی</strong><small>پرونده‌ها و دستورات قضایی</small></span><b aria-hidden="true">←</b></Link>
+              <Link to="/admin/moderation" className="adm01-tool"><span className="adm01-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span><strong>مرکز تخلفات</strong><small>گزارش‌ها و رسیدگی نظارتی</small></span><b aria-hidden="true">←</b></Link>
+            </div>
+            <div className="adm01-tool-group"><h2>سیاست‌های نگهداری</h2>
+              <Link to="/admin/notification-policy" className="adm01-tool"><span className="adm01-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></span><span><strong>تنظیمات اعلان‌ها</strong><small>مدت آرشیو و نگهداری</small></span><b aria-hidden="true">←</b></Link>
+              <Link to="/admin/chat-policy" className="adm01-tool"><span className="adm01-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 4H4a1 1 0 0 0-1 1v12l5-4h12a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1Z M8 8h8"/></svg></span><span><strong>تنظیمات گفتگوها</strong><small>آرشیو و سیاست پیام‌ها</small></span><b aria-hidden="true">←</b></Link>
+            </div>
+          </nav>
+        </aside>
+        <div className="adm01-main">
+          <section className="adm01-overview" aria-label="خلاصه درخواست‌های مشاوران">
+            <div className="adm01-overview-head"><div><span className="adm01-label">خلاصه عملیاتی</span><h2>وضعیت مشاوران</h2></div><span className="adm01-source" role="status">{loading ? "در حال دریافت…" : error ? "اطلاعات در دسترس نیست" : "بر اساس اطلاعات دریافت‌شده"}</span></div>
+            <div className="adm01-stats">
+              {tabs.map(tab => <button key={tab.id} type="button" className={`adm01-stat adm01-stat--${tab.id}`} aria-pressed={workspaceView===tab.id} disabled={navigationLocked} onClick={()=>changeView(tab.id)}><span>{tab.title}</span><strong>{count(tab.count)}</strong><small>مشاهده فهرست <span aria-hidden="true">←</span></small></button>)}
+              <div className="adm01-stat adm01-stat--total"><span>حساب‌های دارای درخواست</span><strong>{count(agencyUsers.length)}</strong><small>آخرین وضعیت هر حساب</small></div>
+            </div>
+          </section>
+          <section className="adm01-workspace" aria-label="میز کار مشاوران">
+            <div className="adm01-workspace-head"><div><span className="adm01-label">میز کار / احراز و سهمیه</span><h2>مدیریت مشاوران</h2></div><span className="adm01-source">{!loading && !error ? `${filteredRows.length.toLocaleString("fa-IR")} نتیجه` : "—"}</span></div>
+            <div className="adm01-toolbar">
+              <div className="adm01-tabs" role="group" aria-label="وضعیت درخواست"><span className="adm01-sr">وضعیت درخواست</span>{tabs.map(tab=><button key={tab.id} type="button" aria-pressed={workspaceView===tab.id} disabled={navigationLocked} onClick={()=>changeView(tab.id)}>{tab.title}<span>{count(tab.count)}</span></button>)}</div>
+              <label className="adm01-search"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><span className="adm01-sr">جست‌وجوی مشاور</span><input type="search" placeholder="نام، موبایل، شهر یا شماره جواز" value={workspaceQuery} disabled={navigationLocked} onChange={e=>changeQuery(e.target.value)}/></label>
+            </div>
+            {loading ? <p className="adm01-state" role="status">در حال دریافت اطلاعات مشاوران…</p> : error ? <p className="adm01-state adm01-state--error" role="alert">{error} برای تلاش دوباره، صفحه را تازه کنید.</p> : <>
+          {workspaceView === "pending" && (
           <section className="admin-dashboard__panel">
 
             <div className="admin-dashboard__panel-heading">
@@ -779,7 +665,7 @@ function AdminDashboard() {
                 {error}
               </div>
 
-            ) : pendingRequests.length ===
+            ) : filteredRows.length ===
             0 ? (
 
               <div className="admin-dashboard__empty">
@@ -789,12 +675,11 @@ function AdminDashboard() {
                 </span>
 
                 <h3>
-                  درخواست معوقی نداریم
+                  {workspaceQuery.trim() ? "نتیجه‌ای پیدا نشد" : "درخواست معوقی نداریم"}
                 </h3>
 
                 <p>
-                  تمام درخواست‌های
-                  مشاوران بررسی شده‌اند.
+                  {workspaceQuery.trim() ? "عبارت دیگری را جست‌وجو کنید." : "تمام درخواست‌های مشاوران بررسی شده‌اند."}
                 </p>
 
               </div>
@@ -803,15 +688,12 @@ function AdminDashboard() {
 
               <div className="admin-dashboard__requests">
 
-                {pendingRequests.map(
+                {page.rows.map(
                   (user) => {
                     const working =
                       workingUserId ===
                       user.id;
 
-                    const documentsOpen =
-                      documentsUserId ===
-                      user.id;
 
 
                     return (
@@ -945,33 +827,12 @@ function AdminDashboard() {
                         <div className="admin-dashboard__request-actions">
 
 
-                          <button
-                            type="button"
-                            className="admin-dashboard__documents-button"
-                            disabled={
-                              working ||
-                              documentsLoading
-                            }
-                            onClick={() =>
-                              toggleDocuments(
-                                user
-                              )
-                            }
-                          >
-
-                            {documentsOpen
-                              ? "بستن مدارک"
-                              : "🔐 مشاهده مدارک"}
-
-                          </button>
-
+                          {renderDocumentsButton(user)}
 
                           <button
                             type="button"
                             className="admin-dashboard__approve-button"
-                            disabled={
-                              working
-                            }
+                            disabled={Boolean(workingUserId) || documentsLoading}
                             onClick={() =>
                               approveAgent(
                                 user
@@ -989,9 +850,7 @@ function AdminDashboard() {
                           <button
                             type="button"
                             className="admin-dashboard__reject-button"
-                            disabled={
-                              working
-                            }
+                            disabled={Boolean(workingUserId) || documentsLoading}
                             onClick={() =>
                               rejectAgent(
                                 user
@@ -1006,187 +865,7 @@ function AdminDashboard() {
                         </div>
 
 
-                        {documentsOpen && (
-
-                          <section className="admin-dashboard__documents-panel">
-
-
-                            <div className="admin-dashboard__documents-heading">
-
-                              <div>
-
-                                <span>
-                                  🔐 پرونده احراز
-                                </span>
-
-                                <h4>
-                                  مدارک هویتی و صنفی
-                                </h4>
-
-                              </div>
-
-
-                              <small>
-                                دسترسی فقط برای مدیر
-                              </small>
-
-                            </div>
-
-
-                            {documentsLoading ? (
-
-                              <div className="admin-dashboard__documents-state">
-                                در حال ساخت دسترسی امن به مدارک...
-                              </div>
-
-                            ) : documentsError ? (
-
-                              <div className="admin-dashboard__documents-state admin-dashboard__documents-state--error">
-                                {documentsError}
-                              </div>
-
-                            ) : (
-
-                              <div className="admin-dashboard__documents-grid">
-
-
-                                {Object.entries(
-                                  DOCUMENT_LABELS
-                                ).map(
-                                  ([
-                                    key,
-                                    title,
-                                  ]) => {
-                                    const document =
-                                      documentLinks[
-                                        key
-                                      ];
-
-
-                                    if (!document) {
-                                      return (
-                                        <article
-                                          key={
-                                            key
-                                          }
-                                          className="admin-dashboard__document-card admin-dashboard__document-card--missing"
-                                        >
-
-                                          <span>
-                                            مدرک موجود نیست
-                                          </span>
-
-                                          <strong>
-                                            {title}
-                                          </strong>
-
-                                        </article>
-                                      );
-                                    }
-
-
-                                    return (
-                                      <article
-                                        key={
-                                          key
-                                        }
-                                        className="admin-dashboard__document-card"
-                                      >
-
-                                        <div className="admin-dashboard__document-image-wrap">
-
-                                          <img
-                                            src={
-                                              document.url
-                                            }
-                                            alt={
-                                              title
-                                            }
-                                            className="admin-dashboard__document-image"
-                                          />
-
-                                        </div>
-
-
-                                        <div className="admin-dashboard__document-info">
-
-                                          <strong>
-                                            {title}
-                                          </strong>
-
-
-                                          <span>
-                                            {document
-                                              .record
-                                              ?.originalFilename ||
-                                              "مدرک احراز"}
-                                          </span>
-
-
-                                          <div className="admin-dashboard__document-links">
-
-                                            <a
-                                              href={
-                                                document.url
-                                              }
-                                              target="_blank"
-                                              rel="noreferrer"
-                                            >
-                                              مشاهده بزرگ
-                                            </a>
-
-
-                                            <a
-                                              href="#"
-                                              onClick={(
-                                                event
-                                              ) => {
-                                                event.preventDefault();
-
-                                                downloadDocument(
-                                                  user.id,
-                                                  key,
-                                                  document.record,
-                                                  title
-                                                );
-                                              }}
-                                            >
-                                              دانلود
-                                            </a>
-
-                                          </div>
-
-                                        </div>
-
-                                      </article>
-                                    );
-                                  }
-                                )}
-
-
-                              </div>
-
-                            )}
-
-
-                            <div className="admin-dashboard__documents-note">
-
-                              <span>
-                                ⚠️
-                              </span>
-
-                              <p>
-                                این مدارک فقط برای بررسی احراز هویت مشاور
-                                استفاده شوند و نباید در اختیار کاربران دیگر
-                                قرار بگیرند.
-                              </p>
-
-                            </div>
-
-
-                          </section>
-
-                        )}
+                        {renderDocumentsPanel(user)}
 
 
                       </article>
@@ -1202,7 +881,7 @@ function AdminDashboard() {
           )}
 
 
-          <section className="admin-dashboard__panel admin-dashboard__panel--approved">
+          {workspaceView === "approved" && <section className="admin-dashboard__panel admin-dashboard__panel--approved">
 
             <div className="admin-dashboard__panel-heading">
 
@@ -1227,19 +906,18 @@ function AdminDashboard() {
               </div>
             )}
 
-            {approvedAgents.length ===
+            {filteredRows.length ===
             0 ? (
 
               <div className="admin-dashboard__empty admin-dashboard__empty--small">
-                هنوز مشاوری تأیید
-                نشده است.
+                {workspaceQuery.trim() ? "نتیجه‌ای پیدا نشد." : "هنوز مشاوری تأیید نشده است."}
               </div>
 
             ) : (
 
               <div className="admin-dashboard__approved-list">
 
-                {approvedAgents.map(
+                {page.rows.map(
                   (user) => (
                     <article
                       key={
@@ -1278,23 +956,25 @@ function AdminDashboard() {
                             <div className="admin-dashboard__network-credit-stats">
                               <span>
                                 سهمیه باقی‌مانده
-                                <strong>{credit ? credit.totalRemaining.toLocaleString("fa-IR") : "…"}</strong>
+                                <strong>{credit ? credit.totalRemaining.toLocaleString("fa-IR") : networkCreditsLoading ? "…" : "—"}</strong>
                               </span>
                               <small>
-                                رایگان: {credit ? credit.freeRemaining.toLocaleString("fa-IR") : "…"}
+                                رایگان: {credit ? credit.freeRemaining.toLocaleString("fa-IR") : "—"}
                                 {" • "}
-                                شارژی: {credit ? credit.paidRemaining.toLocaleString("fa-IR") : "…"}
+                                شارژی: {credit ? credit.paidRemaining.toLocaleString("fa-IR") : "—"}
                                 {" • "}
-                                دریافت‌شده: {credit ? credit.unlockCount.toLocaleString("fa-IR") : "…"}
+                                دریافت‌شده: {credit ? credit.unlockCount.toLocaleString("fa-IR") : "—"}
                               </small>
                             </div>
 
+                            {!credit && !networkCreditsLoading && <small role="status">سهمیه در دسترس نیست؛ صفحه را تازه کنید.</small>}
                             <div className="admin-dashboard__network-grant">
                               <input
                                 type="number"
                                 min="1"
                                 max="10000"
                                 placeholder="مثلاً ۵۰"
+                                aria-label={`تعداد سهمیه ${user.agencyName || user.agentName || user.phone || "مشاور"}`}
                                 value={grantAmounts[user.id] || ""}
                                 onChange={(event) =>
                                   setGrantAmounts((current) => ({
@@ -1305,7 +985,7 @@ function AdminDashboard() {
                               />
                               <button
                                 type="button"
-                                disabled={grantWorkingId === user.id || networkCreditsLoading}
+                                disabled={Boolean(grantWorkingId) || networkCreditsLoading || Boolean(networkCreditsError) || !credit}
                                 onClick={() => grantNetworkCredits(user)}
                               >
                                 {grantWorkingId === user.id ? "در حال شارژ..." : "افزودن سهمیه"}
@@ -1314,6 +994,8 @@ function AdminDashboard() {
                           </div>
                         );
                       })()}
+                      <div className="adm01-documents-actions">{renderDocumentsButton(user)}</div>
+                      {renderDocumentsPanel(user)}
 
                     </article>
                   )
@@ -1323,16 +1005,18 @@ function AdminDashboard() {
 
             )}
 
+          </section>}
+          {workspaceView === "rejected" && <section className="admin-dashboard__panel adm01-rejected" aria-label="درخواست‌های ردشده">
+            <div className="admin-dashboard__panel-heading"><div><span>آخرین وضعیت درخواست</span><h2>درخواست‌های ردشده</h2></div></div>
+            {page.rows.length ? <div className="adm01-rejected-list">{page.rows.map(user=><article key={user.id}><div><strong>{user.agencyName || user.agentName || "نام ثبت نشده"}</strong><span>{user.agencyCity || "شهر نامشخص"} · {user.phone || "بدون شماره"}</span></div><div><span>تاریخ درخواست</span><strong>{formatDate(user.agencyRequestedAt)}</strong></div><span className="adm01-rejected-tag">رد شده</span><div className="adm01-documents-actions">{renderDocumentsButton(user)}</div>{renderDocumentsPanel(user)}</article>)}</div> : <p className="adm01-state">{workspaceQuery.trim()?"نتیجه‌ای پیدا نشد.":"درخواست ردشده‌ای وجود ندارد."}</p>}
+          </section>}
+          {page.totalPages > 1 && <nav className="adm01-pagination" aria-label={`صفحه‌بندی ${activeTab.title}`}><button type="button" disabled={navigationLocked || page.number===1} onClick={()=>changePage(page.number-1)}>صفحه قبل</button><span role="status">{page.number.toLocaleString("fa-IR")} از {page.totalPages.toLocaleString("fa-IR")}</span><button type="button" disabled={navigationLocked || page.number===page.totalPages} onClick={()=>changePage(page.number+1)}>صفحه بعد</button></nav>}
+          </>}
           </section>
-
-
         </div>
-
-      </section>
-
+      </div>
     </main>
   );
 }
-
 
 export default AdminDashboard;

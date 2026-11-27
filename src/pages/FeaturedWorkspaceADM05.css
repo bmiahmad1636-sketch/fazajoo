@@ -1,0 +1,46 @@
+/* ADM05: scoped to the admin-only featured workspace. */
+.hp03-admin.adm05 {background:#f2f5f1;color:#233c31;padding:16px 16px 48px;line-height:1.75;min-width:0}
+.adm05 *, .adm05 *::before,.adm05 *::after{box-sizing:border-box;min-width:0}
+.adm05 [hidden]{display:none!important}
+.adm05 .hp03-admin__inner{max-width:1440px}
+.adm05 .hp03-admin__header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:#153b30;border-radius:16px;padding:15px 21px;margin:0 0 12px}
+.adm05 .hp03-admin__header h1{font-size:clamp(20px,2vw,26px);line-height:1.5;margin:1px 0;color:white}
+.adm05 .hp03-admin__header p{font-size:12px;color:#dbe7dd}
+.adm05 .hp03-admin__back{border:1px solid #6b8a78;color:white;border-radius:9px;padding:7px 12px;font-size:12px}
+.adm05 .hp03-admin__metrics{gap:10px;margin:0 0 13px;grid-template-columns:repeat(4,minmax(0,1fr))}
+.adm05 .hp03-admin__metrics>div,.adm05 .hp03-admin__metrics>button{display:flex;align-items:center;justify-content:space-between;flex-direction:row;gap:8px;padding:10px 13px;min-height:67px;background:#fff;border:1px solid #dce5dc;border-radius:12px;box-shadow:0 3px 12px #173b3008;color:#205744;text-align:right;font:inherit}
+.adm05 .hp03-admin__metrics strong{font-size:clamp(17px,2vw,24px);font-weight:850;white-space:nowrap}
+.adm05 .hp03-admin__metrics span{font-size:12px;color:#62736a}
+.adm05 .hp03-admin__metrics button{cursor:pointer}.adm05 .hp03-admin__metrics button:hover:not(:disabled){border-color:#205744;background:#f8faf7}
+.adm05-workspace{display:grid;grid-template-columns:minmax(230px,290px) minmax(0,1fr);align-items:start;gap:13px}
+.adm05-rail,.adm05-main{display:flex;flex-direction:column;gap:12px;min-width:0}
+.adm05 .hp03-admin__panel{border:1px solid #dce5dc;border-radius:14px;padding:15px;gap:11px;box-shadow:0 3px 12px #173b3008}
+.adm05 .hp03-admin__panel h2{font-size:16px;line-height:1.5;margin:0;color:#153b30;overflow-wrap:anywhere}
+.adm05 .adm05-nav h2,.adm05 .adm05-summary h2,.adm05 fieldset>h2{border-bottom:2px solid #205744;padding-bottom:8px}
+.adm05 .hp03-admin__panel button{border-radius:9px;min-height:39px;font-size:13px;line-height:1.6;padding:8px 12px;white-space:normal}
+.adm05 .adm05-nav button{background:#eef3ee;color:#205744;text-align:right;border:1px solid #d5e2d7}
+.adm05 .adm05-nav button[aria-pressed=true]{background:#205744;color:white;border-color:#205744}
+.adm05 .adm05-nav button.adm05-secondary{background:#fff;border-style:dashed}
+.adm05-summary strong{font-size:16px;color:#205744;overflow-wrap:anywhere}
+.adm05 .adm05-state[data-enabled=false]{color:#8c551e}.adm05 .adm05-total{font-size:18px;unicode-bidi:plaintext}
+.adm05-capacity{height:7px;background:#e3eae2;border-radius:10px;overflow:hidden}.adm05-capacity span{display:block;height:100%;background:#205744;border-radius:10px}
+.adm05 .hp03-admin__bookings{margin:0}.adm05-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border-bottom:2px solid #205744;padding-bottom:9px}
+.adm05-filters{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:10px}
+.adm05 .hp03-admin__panel input:not([type=checkbox]),.adm05 .hp03-admin__panel select,.adm05 .hp03-admin__panel textarea{padding:9px 10px;border-radius:9px;min-height:40px;font-size:13px}
+.adm05 fieldset{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;min-width:0}
+.adm05-booking-list{display:grid;gap:8px}.adm05-booking{border:1px solid #dce5dc;border-radius:11px;padding:11px 12px;display:flex;flex-direction:column;gap:8px;background:#fff}
+.adm05-booking-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.adm05-booking-head a,.adm05-booking-head strong{color:#153b30;font-size:14px;font-weight:800;overflow-wrap:anywhere}.adm05-booking-head small{display:block}
+.adm05-status{font-size:11px;padding:3px 8px;border-radius:7px;background:#eff1ef;color:#58665e;flex-shrink:0;max-width:48%;overflow-wrap:anywhere}
+.adm05-status[data-status=active]{background:#e5f0e7;color:#205744}.adm05-status[data-status=queued]{background:#fff1db;color:#92551e}.adm05-status[data-status=cancelled]{background:#f9eae8;color:#943f38}
+.adm05-booking-meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0;padding:8px 0;border-top:1px solid #e4ebe3}
+.adm05-booking-meta dt{font-size:11px;color:#62736a}.adm05-booking-meta dd{font-size:12px;margin:0;color:#233c31;overflow-wrap:anywhere}
+.adm05-booking-foot{display:flex;align-items:flex-start;justify-content:space-between;gap:9px;flex-wrap:wrap}.adm05-booking-foot details{flex:1;font-size:12px;overflow-wrap:anywhere}.adm05-booking-foot summary{cursor:pointer;color:#205744}.adm05-booking-foot p{margin:5px 0;white-space:pre-wrap}
+.adm05 .hp03-admin__panel .hp03-admin__cancel{margin-inline-start:auto;min-height:34px;background:#fff3f2;border:1px solid #efd8d4;color:#973e36}
+.adm05-pagination{display:flex;justify-content:center;align-items:center;gap:12px;font-size:12px}.adm05 .adm05-pagination button{background:#eef3ee;color:#205744;border:1px solid #dce5dc}
+.adm05-empty{margin:0;text-align:center;color:#62736a;padding:28px 8px;background:#f8faf7;border:1px dashed #dce5dc;border-radius:10px}
+.adm05 .hp03-admin__alert{font-size:13px;margin:0 0 12px;overflow-wrap:anywhere}
+.adm05 button:disabled,.adm05 fieldset:disabled button{opacity:.48;cursor:not-allowed}.adm05 :is(button,input,select,textarea,a,summary):focus-visible{outline:2px solid #bc783a;outline-offset:2px}
+@media(max-width:850px){.adm05-workspace{grid-template-columns:1fr}.adm05-rail{display:grid;grid-template-columns:1fr 1fr;gap:8px}.adm05 .adm05-nav{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.adm05 .adm05-nav h2,.adm05 .adm05-nav .adm05-secondary{grid-column:1/-1}.adm05 .adm05-nav button{text-align:center}.adm05 .hp03-admin__metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:500px){.hp03-admin.adm05{padding:10px 9px 30px}.adm05 .hp03-admin__header{padding:12px}.adm05 .hp03-admin__metrics>div,.adm05 .hp03-admin__metrics>button{flex-direction:column;align-items:flex-start;gap:2px;min-height:60px;padding:7px 10px}.adm05 .hp03-admin__panel{padding:10px;gap:8px}.adm05 .adm05-summary h2{font-size:13px}.adm05 .adm05-summary strong{font-size:13px}.adm05 .adm05-nav button{font-size:11px;padding:7px 3px}.adm05-booking-meta{grid-template-columns:repeat(2,minmax(0,1fr))}.adm05-filters{grid-template-columns:1fr}.adm05 .hp04-admin__selected-card{flex-wrap:wrap}.adm05 .hp04-admin__space{flex-wrap:wrap}.adm05 .hp04-admin__select-indicator{margin-inline-start:auto}.adm05 .hp04-admin__money>span{padding:0 8px}}
+
+@media(max-width:850px){.adm05-workspace{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.adm05-rail{display:contents}.adm05-main{grid-column:1/-1;order:1}.adm05-summary{order:2}.adm05 .hp03-admin__metrics strong{white-space:normal}}
