@@ -73,11 +73,11 @@ async function getUser(id){
   const u=(await query(`SELECT id,phone,full_name,account_type,system_role,agency_status,is_active,created_at FROM users WHERE id=$1`,[id])).rows[0];
   if(!u){const e=new Error("کاربر پیدا نشد.");e.status=404;throw e;}
   const spaces=(await query(`SELECT id,title,category,status,city,created_at,media_items FROM spaces WHERE owner_id=$1 ORDER BY created_at DESC LIMIT 50`,[id])).rows;
-  const chats=(await query(`SELECT c.id,c.space_id,c.owner_id,c.requester_id,c.moderation_mode,c.updated_at,s.title,
+  const chats=(await query(`SELECT c.id,COALESCE(c.space_id,c.original_space_id) AS space_id,c.owner_id,c.requester_id,c.moderation_mode,c.updated_at,COALESCE(s.title,c.deleted_space_title) AS title,
     CASE WHEN c.owner_id=$1 THEN c.requester_id ELSE c.owner_id END AS other_user_id,
     CASE WHEN c.owner_id=$1 THEN ur.full_name ELSE uo.full_name END AS other_name,
     CASE WHEN c.owner_id=$1 THEN ur.phone ELSE uo.phone END AS other_phone
-    FROM chats c JOIN spaces s ON s.id=c.space_id JOIN users uo ON uo.id=c.owner_id JOIN users ur ON ur.id=c.requester_id
+    FROM chats c LEFT JOIN spaces s ON s.id=c.space_id JOIN users uo ON uo.id=c.owner_id JOIN users ur ON ur.id=c.requester_id
     WHERE c.owner_id=$1 OR c.requester_id=$1 ORDER BY c.updated_at DESC LIMIT 50`,[id])).rows;
   const history=(await query(`SELECT a.*,ad.full_name admin_name,ru.full_name related_name FROM admin_direct_actions a
     LEFT JOIN users ad ON ad.id=a.admin_id LEFT JOIN users ru ON ru.id=a.related_user_id

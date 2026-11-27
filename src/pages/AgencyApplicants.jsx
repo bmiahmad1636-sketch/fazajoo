@@ -6,49 +6,15 @@ import {
   scoreMatch,
 } from "../utils/matchingEngine";
 
-import { formatRialPrice } from "../utils/priceFormatter";
-import { readResidentialRequest, residentialRequestAreaText, residentialRequestBudgetText } from "../utils/residentialRequest";
-import { readGardenRequest, gardenRequestAreaText, gardenRequestBudgetText, gardenRequestLabel, GARDEN_REQUEST_PURPOSES } from "../utils/gardenRequest";
-import { readOtherRequest, otherRequestAreaText, otherRequestBudgetText } from "../utils/otherRequest";
+import { AgencyShell, AgencyPager, AgencySpace, AgencyScore, AgencyReasons, agencyPage } from "./AgencyWorkspaceAG01.jsx";
+import { agencyRequestSummary } from "../utils/agencyRequestSummaryAG01.js";
+import "./AgencyWorkspaceAG01.css";
 
-import "./AgencyApplicants.css";
-
-function residentialRequestSummary(request) {
-  if (request?.listingType !== "wanted" || request.category !== "residential") return null;
-  const parsed = readResidentialRequest(request.description);
-  if (!parsed.hasMetadata) return null;
-  return {
-    area: residentialRequestAreaText(parsed.data),
-    budget: residentialRequestBudgetText(parsed.data),
-    description: [parsed.data.requirements, parsed.description].filter(Boolean).join(" • ") || "جزئیات بیشتر در صفحه درخواست",
-  };
-}
-
-function gardenRequestSummary(request) {
-  if (request?.listingType !== "wanted" || request.category !== "garden") return null;
-  const parsed = readGardenRequest(request.description);
-  if (!parsed.hasMetadata) return null;
-  const data = parsed.data;
-  return {
-    area: gardenRequestAreaText(data),
-    budget: gardenRequestBudgetText(data),
-    description: [data.purpose === "other" ? data.otherPurpose : gardenRequestLabel(GARDEN_REQUEST_PURPOSES, data.purpose), data.requirements, parsed.description].filter(Boolean).join(" • ") || "جزئیات بیشتر در صفحه درخواست",
-  };
-}
-function otherRequestSummary(request) {
-  if (request?.listingType !== "wanted" || request.category !== "other") return null;
-  const parsed = readOtherRequest(request.description, request.area, request.price, request.priceType);
-  if (!parsed.hasMetadata) return null;
-  return {
-    area: otherRequestAreaText(parsed.data) || "توافقی / نامشخص",
-    budget: otherRequestBudgetText(parsed.data),
-    description: [parsed.data.requestText, parsed.data.requirements, parsed.description].filter(Boolean).join(" • "),
-  };
-}
 function AgencyApplicants({
   parkings = [],
   currentUser = null,
 }) {
+  const [page, setPage] = useState(1);
   const [selectedCity, setSelectedCity] =
     useState("");
   const [selectedCategory, setSelectedCategory] =
@@ -147,6 +113,7 @@ function AgencyApplicants({
 
   const categories = [
     { value: "residential", label: "مسکونی" },
+    { value: "villa", label: "ویلا" },
     { value: "parking", label: "پارکینگ" },
     { value: "storage", label: "انبار" },
     { value: "warehouse", label: "سوله" },
@@ -157,326 +124,35 @@ function AgencyApplicants({
   ];
 
   const clearFilters = () => {
+    setPage(1);
     setSelectedCity("");
     setSelectedCategory("");
     setMinimumScore(0);
   };
 
-  return (
-    <main className="agency-applicants">
-      <section className="agency-applicants__hero">
-        <div className="agency-applicants__container agency-applicants__hero-inner">
-          <div>
-            <span className="agency-applicants__eyebrow">
-              🔎 متقاضی‌های مناسب فایل‌های شما
-            </span>
-
-            <h1>
-              هر درخواست را با
-              <span> بهترین فایل خودت </span>
-              مقایسه کن
-            </h1>
-
-            <p>
-              فضاجو نوع فضا، شهر، متراژ و بودجه را
-              بررسی می‌کند و بهترین فایل شما را برای هر
-              متقاضی پیشنهاد می‌دهد.
-            </p>
-          </div>
-
-          <Link
-            to="/agency"
-            className="agency-applicants__back"
-          >
-            بازگشت به پنل مشاور ←
-          </Link>
-        </div>
-      </section>
-
-      <section className="agency-applicants__content">
-        <div className="agency-applicants__container">
-          <div className="agency-applicants__stats">
-            <article>
-              <span>درخواست‌های متقاضی</span>
-              <strong>
-                {applicants.length.toLocaleString(
-                  "fa-IR"
-                )}
-              </strong>
-              <small>درخواست‌های فعال دیگران</small>
-            </article>
-
-            <article>
-              <span>فایل‌های من</span>
-              <strong>
-                {myOffers.length.toLocaleString(
-                  "fa-IR"
-                )}
-              </strong>
-              <small>فایل‌های فعال قابل تطبیق</small>
-            </article>
-
-            <article>
-              <span>تطبیق مناسب</span>
-              <strong>
-                {matchedCount.toLocaleString("fa-IR")}
-              </strong>
-              <small>امتیاز ۴۵٪ و بالاتر</small>
-            </article>
-          </div>
-
-          <div className="agency-applicants__filters">
-            <div>
-              <span>فیلتر حرفه‌ای</span>
-              <h2>متقاضی موردنظر را سریع‌تر پیدا کن</h2>
-            </div>
-
-            <label>
-              <span>شهر</span>
-              <select
-                value={selectedCity}
-                onChange={(event) =>
-                  setSelectedCity(event.target.value)
-                }
-              >
-                <option value="">همه شهرها</option>
-                {cities.map((city) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              <span>نوع فضا</span>
-              <select
-                value={selectedCategory}
-                onChange={(event) =>
-                  setSelectedCategory(
-                    event.target.value
-                  )
-                }
-              >
-                <option value="">همه فضاها</option>
-                {categories.map((category) => (
-                  <option
-                    key={category.value}
-                    value={category.value}
-                  >
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              <span>حداقل تطبیق</span>
-              <select
-                value={minimumScore}
-                onChange={(event) =>
-                  setMinimumScore(event.target.value)
-                }
-              >
-                <option value="0">همه نتایج</option>
-                <option value="45">۴۵٪ به بالا</option>
-                <option value="60">۶۰٪ به بالا</option>
-                <option value="75">۷۵٪ به بالا</option>
-                <option value="90">۹۰٪ به بالا</option>
-              </select>
-            </label>
-
-            <button
-              type="button"
-              onClick={clearFilters}
-            >
-              پاک‌کردن فیلترها
-            </button>
-          </div>
-
-          <div className="agency-applicants__heading">
-            <div>
-              <span>نتیجه تطبیق</span>
-              <h2>متقاضی‌ها</h2>
-            </div>
-
-            <strong>
-              {filteredApplicants.length.toLocaleString(
-                "fa-IR"
-              )}{" "}
-              نتیجه
-            </strong>
-          </div>
-
-          {filteredApplicants.length ? (
-            <div className="agency-applicants__list">
-              {filteredApplicants.map(
-                ({
-                  request,
-                  bestMatch,
-                  eligible,
-                }) => (
-                  <article
-                    key={request.id}
-                    className="agency-applicants__card"
-                  >
-                    <div className="agency-applicants__request">
-                      <div className="agency-applicants__request-top">
-                        <span className="agency-applicants__request-badge">
-                          🔎 دنبال فضا
-                        </span>
-
-                        <span className="agency-applicants__category">
-                          {getCategoryLabel(request)}
-                        </span>
-                      </div>
-
-                      <h3>
-                        {request.title ||
-                          `دنبال ${getCategoryLabel(
-                            request
-                          )}`}
-                      </h3>
-
-                      <div className="agency-applicants__request-info">
-                        <span>
-                          📍 {request.city || "شهر ثبت نشده"}
-                        </span>
-                        <span>
-                          ↔ {otherRequestSummary(request)?.area || gardenRequestSummary(request)?.area || residentialRequestSummary(request)?.area || `${request.area || "—"} متر`}
-                        </span>
-                        <span>
-                          💰 {otherRequestSummary(request)?.budget || gardenRequestSummary(request)?.budget || residentialRequestSummary(request)?.budget || formatRialPrice(request.price, {
-                            priceType:
-                              request.priceType ||
-                              "monthly",
-                            fallback: "توافقی",
-                          })}
-                        </span>
-                      </div>
-
-                      <p>
-                        {otherRequestSummary(request)?.description || gardenRequestSummary(request)?.description || residentialRequestSummary(request)?.description || request.description ||
-                          "توضیحی برای این درخواست ثبت نشده است."}
-                      </p>
-
-                      <div className="agency-applicants__request-actions">
-                        <Link
-                          to={`/parking/${request.id}`}
-                          className="agency-applicants__request-link"
-                        >
-                          مشاهده جزئیات درخواست
-                        </Link>
-
-                        <Link
-                          to={`/chat/${request.id}?chatType=agency`}
-                          className="agency-applicants__request-link agency-applicants__request-link--work"
-                        >
-                          💬 شروع گفتگوی کاری
-                        </Link>
-                      </div>
-                    </div>
-
-                    <div
-                      className={`agency-applicants__match ${
-                        eligible
-                          ? "agency-applicants__match--good"
-                          : "agency-applicants__match--weak"
-                      }`}
-                    >
-                      {bestMatch ? (
-                        <>
-                          <div className="agency-applicants__score">
-                            <strong>
-                              {bestMatch.score.toLocaleString(
-                                "fa-IR"
-                              )}
-                              ٪
-                            </strong>
-                            <span>تطبیق</span>
-                          </div>
-
-                          <div className="agency-applicants__match-main">
-                            <span>
-                              {eligible
-                                ? "بهترین فایل پیشنهادی شما"
-                                : "نزدیک‌ترین فایل شما"}
-                            </span>
-
-                            <h4>
-                              {bestMatch.offer.title ||
-                                getCategoryLabel(
-                                  bestMatch.offer
-                                )}
-                            </h4>
-
-                            <p>
-                              📍 {bestMatch.offer.city || "—"}
-                              {bestMatch.offer.area
-                                ? ` • ${bestMatch.offer.area} متر`
-                                : ""}
-                            </p>
-
-                            {bestMatch.reasons.length ? (
-                              <div className="agency-applicants__reasons">
-                                {bestMatch.reasons.map(
-                                  (reason) => (
-                                    <span key={reason}>
-                                      ✓ {reason}
-                                    </span>
-                                  )
-                                )}
-                              </div>
-                            ) : (
-                              <small>
-                                این فایل از نظر شهر یا نوع فضا تطابق کافی ندارد.
-                              </small>
-                            )}
-
-                            <Link
-                              to={`/parking/${bestMatch.offer.id}`}
-                              className="agency-applicants__offer-link"
-                            >
-                              مشاهده فایل پیشنهادی
-                            </Link>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="agency-applicants__no-offer">
-                          <span>📁</span>
-                          <strong>هنوز فایل فعالی ندارید</strong>
-                          <p>
-                            برای محاسبه تطبیق، ابتدا یک فایل عرضه ثبت کنید.
-                          </p>
-                          <Link to="/add-parking">
-                            ثبت فایل جدید
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                  </article>
-                )
-              )}
-            </div>
-          ) : (
-            <div className="agency-applicants__empty">
-              <span>✨</span>
-              <h3>متقاضی مطابق این فیلتر پیدا نشد</h3>
-              <p>
-                فیلترها را تغییر بده یا با ثبت درخواست‌های بیشتر دوباره بررسی کن.
-              </p>
-              <button
-                type="button"
-                onClick={clearFilters}
-              >
-                نمایش همه متقاضی‌ها
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
-    </main>
-  );
+  const visible = agencyPage(filteredApplicants, page);
+  return <AgencyShell active="applicants" title="متقاضیان فضا" subtitle="درخواست‌ها را با بهترین فایل فعال خود مقایسه کنید."
+    stats={[["درخواست‌ها",applicants.length],["فایل‌های فعال من",myOffers.length],["تطبیق مناسب",matchedCount]]}>
+    <section className="ag01-panel">
+      <header className="ag01-section-head"><div><h2>جستجوی متقاضیان</h2><p>فیلتر شهر، نوع فضا و حداقل امتیاز تطبیق</p></div><span>{filteredApplicants.length.toLocaleString("fa-IR")} نتیجه</span></header>
+      <div className="ag01-filters">
+        <label>شهر<select value={selectedCity} onChange={e=>{setSelectedCity(e.target.value);setPage(1);}}><option value="">همه شهرها</option>{cities.map(city=><option key={city} value={city}>{city}</option>)}</select></label>
+        <label>نوع فضا<select value={selectedCategory} onChange={e=>{setSelectedCategory(e.target.value);setPage(1);}}><option value="">همه فضاها</option>{categories.map(category=><option key={category.value} value={category.value}>{category.label}</option>)}</select></label>
+        <label>حداقل تطبیق<select value={minimumScore} onChange={e=>{setMinimumScore(e.target.value);setPage(1);}}><option value="0">همه نتایج</option><option value="45">۴۵٪ به بالا</option><option value="60">۶۰٪ به بالا</option><option value="75">۷۵٪ به بالا</option><option value="90">۹۰٪ به بالا</option></select></label>
+        <button type="button" className="ag01-secondary" onClick={clearFilters}>پاک‌کردن فیلترها</button>
+      </div>
+      {visible.items.length ? <div className="ag01-list">{visible.items.map(({request,bestMatch,eligible})=>{
+        const summary = agencyRequestSummary(request);
+        const { area, budget } = summary;
+        return <article className="ag01-pair" key={request.id}>
+          <div className="ag01-pair-head"><span>{getCategoryLabel(request)} · {request.city || "شهر ثبت نشده"}</span>{bestMatch && <AgencyScore score={bestMatch.score} eligible={eligible}/>}</div>
+          <div className="ag01-compare"><AgencySpace item={request} kind="wanted" label="درخواست متقاضی" canOpen area={area} budget={budget}/><span className="ag01-connector" aria-hidden="true">↔</span>{bestMatch ? <AgencySpace item={bestMatch.offer} kind="offer" label={eligible ? "بهترین فایل پیشنهادی شما" : "نزدیک‌ترین فایل شما"} canOpen/> : <div className="ag01-space ag01-space--offer"><small>فایل‌های شما</small><strong>هنوز فایل فعالی ندارید</strong><Link to="/add-parking">ثبت فایل جدید ←</Link></div>}</div>
+          <div className="ag01-pair-foot"><AgencyReasons reasons={bestMatch?.reasons || []}/><Link className="ag01-primary" to={`/chat/${request.id}?chatType=agency`}>شروع گفتگوی کاری</Link></div>
+          {summary?.description && <details className="ag01-alternatives"><summary>توضیحات درخواست</summary><p>{summary.description}</p></details>}
+        </article>;
+      })}</div> : <div className="ag01-empty"><span aria-hidden="true">⌕</span><h3>متقاضی مطابق این فیلتر پیدا نشد</h3><p>فیلترها را تغییر دهید یا همه متقاضیان را ببینید.</p><button className="ag01-secondary" type="button" onClick={clearFilters}>نمایش همه متقاضیان</button></div>}
+      <AgencyPager data={visible} onPage={setPage}/>
+    </section>
+  </AgencyShell>;
 }
-
 export default AgencyApplicants;

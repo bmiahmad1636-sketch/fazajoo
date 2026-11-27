@@ -2,6 +2,8 @@ const crypto = require("crypto");
 const { query } = require("../db/pool");
 const { getBlockStatus } = require("../services/trustSafety.service");
 
+const { getPolicy, ACTIVITY_JOIN, ARCHIVE_JOIN, ARCHIVED_SQL, SET_ARCHIVE_SQL } = require("../services/chatLifecycleCM03.service");
+
 let chatSchemaPromise = null;
 
 function ensureChatSchema() {
@@ -78,7 +80,9 @@ function mapChat(row, currentUserId) {
   const isOwner = row.owner_id === currentUserId;
   return {
     id: row.id,
-    parkingId: row.space_id,
+    parkingId: row.space_id || row.original_space_id,
+    listingDeleted: !row.space_id,
+    archived: Boolean(row.archived),
     parkingTitle: row.space_title || "آگهی فضاجو",
     parkingCity: row.space_city || "",
     parkingImageUrl: row.space_image_url || "",
@@ -108,19 +112,20 @@ function mapChat(row, currentUserId) {
   };
 }
 
-const CHAT_SELECT = `
+const CHAT_SELECT = (withArchive = false) => `
   SELECT
-    c.id, c.space_id, c.owner_id, c.requester_id, c.chat_type, c.legal_mode, c.legal_hold, c.moderation_mode, c.created_at, c.updated_at,
-    s.title AS space_title, s.city AS space_city, s.image_url AS space_image_url,
-    s.listing_type AS space_listing_type,
+    c.id, c.space_id, c.original_space_id, c.owner_id, c.requester_id, c.chat_type, c.legal_mode, c.legal_hold, c.moderation_mode, c.created_at, c.updated_at,
+    COALESCE(s.title,c.deleted_space_title) AS space_title, COALESCE(s.city,c.deleted_space_city) AS space_city, s.image_url AS space_image_url,
+    COALESCE(s.listing_type,c.deleted_space_listing_type) AS space_listing_type,
     ou.full_name AS owner_name, ou.phone AS owner_phone,
     ru.full_name AS requester_name, ru.phone AS requester_phone,
     CASE WHEN lm.deleted_for_all_at IS NOT NULL THEN 'این پیام حذف شده است' ELSE lm.text END AS last_message,
     lm.sender_id AS last_message_sender_id,
     lm.created_at AS last_message_at,
     COALESCE(uc.unread_count, 0) AS unread_count
+    ${withArchive ? `, ${ARCHIVED_SQL} AS archived` : ""}
   FROM chats c
-  JOIN spaces s ON s.id = c.space_id
+  LEFT JOIN spaces s ON s.id = c.space_id
   JOIN users ou ON ou.id = c.owner_id
   JOIN users ru ON ru.id = c.requester_id
   LEFT JOIN LATERAL (
@@ -128,7 +133,7 @@ const CHAT_SELECT = `
     FROM messages m
     WHERE m.chat_id = c.id
       AND NOT EXISTS (SELECT 1 FROM message_hidden_for_user h WHERE h.message_id=m.id AND h.user_id=$1)
-    ORDER BY m.created_at DESC
+    ORDER BY m.created_at DESC, m.id DESC
     LIMIT 1
   ) lm ON TRUE
   LEFT JOIN LATERAL (
@@ -140,13 +145,14 @@ const CHAT_SELECT = `
       AND m.deleted_for_all_at IS NULL
       AND NOT EXISTS (SELECT 1 FROM message_hidden_for_user h WHERE h.message_id=m.id AND h.user_id=$1)
   ) uc ON TRUE
+  ${withArchive ? `${ACTIVITY_JOIN} ${ARCHIVE_JOIN}` : ""}
 `;
 
 async function getChatRow(chatId, userId) {
   await ensureChatSchema();
 
   const result = await query(
-    `${CHAT_SELECT}
+    `${CHAT_SELECT()}
      WHERE c.id = $2
        AND (c.owner_id = $1 OR c.requester_id = $1)
      LIMIT 1`,
@@ -180,7 +186,7 @@ async function list(req, res) {
       // همه گفتگوهای واقعی او، چه قدیمی چه جدید، گفتگوی کاری محسوب می‌شوند.
       typeCondition = `c.chat_type IN ('personal', 'agency')`;
     } else {
-      // صندوق شخصی فقط متعلق به کاربران عادی است.
+      // صندوق کاربران عادی شامل تمام گفتگوهایی است که خودشان طرف آن هستند.
       if (isApprovedAgent) {
         return res.json({
           ok: true,
@@ -189,11 +195,12 @@ async function list(req, res) {
         });
       }
 
-      typeCondition = `c.chat_type = 'personal'`;
+      typeCondition = `c.chat_type IN ('personal', 'agency')`;
     }
 
+    const policy = await getPolicy();
     const result = await query(
-      `${CHAT_SELECT}
+      `${CHAT_SELECT(true)}
        WHERE (c.owner_id = $1 OR c.requester_id = $1)
          AND ${typeCondition}
          AND EXISTS (
@@ -202,7 +209,7 @@ async function list(req, res) {
            WHERE visible_message.chat_id = c.id
          )
        ORDER BY COALESCE(lm.created_at, c.updated_at, c.created_at) DESC`,
-      [currentUserId]
+      [currentUserId, isApprovedAgent ? policy.agencyDays : policy.personalDays]
     );
 
     const safeRows = result.rows.filter((row) => {
@@ -223,6 +230,22 @@ async function list(req, res) {
       ok: false,
       message: "دریافت گفتگوها انجام نشد.",
     });
+  }
+}
+
+async function setArchive(req, res) {
+  try {
+    if (typeof req.body?.archived !== "boolean") return res.status(400).json({ok:false,message:"وضعیت آرشیو معتبر نیست."});
+    const chat = await getChatRow(req.params.id, req.user.id);
+    if (!chat) return res.status(404).json({ok:false,message:"گفتگو پیدا نشد."});
+    const result = await query(SET_ARCHIVE_SQL,[req.user.id,req.params.id,req.body.archived]);
+    if (!result.rowCount) return res.status(409).json({ok:false,message:"گفتگوی خوانده‌نشده، تحت محدودیت یا بدون پیام قابل آرشیو نیست."});
+    const io = req.app.get("io");
+    if (io) io.to(`user:${req.user.id}`).emit("inbox:changed",{chatId:req.params.id});
+    return res.json({ok:true});
+  } catch (error) {
+    console.error("Chat archive error:", error.code || error.name);
+    return res.status(500).json({ok:false,message:"تغییر آرشیو انجام نشد."});
   }
 }
 
@@ -619,7 +642,7 @@ async function unreadCount(req, res) {
         });
       }
 
-      typeCondition = `c.chat_type = 'personal'`;
+      typeCondition = `c.chat_type IN ('personal', 'agency')`;
     }
 
     const result = await query(
@@ -648,4 +671,4 @@ async function unreadCount(req, res) {
   }
 }
 
-module.exports = { list, getOne, createOrGet, messages, send, deleteForAll, hideForMe, markRead, unreadCount, legalStatus };
+module.exports = { list, getOne, createOrGet, messages, send, deleteForAll, hideForMe, markRead, unreadCount, legalStatus, setArchive };

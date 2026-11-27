@@ -5,7 +5,7 @@ const read = f => readFileSync(new URL('../' + f,import.meta.url),'utf8');
 const inbox=read('src/pages/Inbox.jsx'), item=read('src/components/chat/InboxItem.jsx'), chat=read('src/pages/Chat.jsx');
 const inboxCss=read('src/pages/Inbox.css'), itemCss=read('src/components/chat/InboxItem.css'), chatCss=read('src/pages/Chat.css');
 test('directory filter combines unread and text search and retains auth/agency scope',()=>{
- for(const s of ['unreadOnly ? chats.filter','return pool.filter','[chats, searchText, unreadOnly]','aria-pressed={!unreadOnly}','aria-pressed={unreadOnly}','subscribeInboxChanged(load)','currentUserIds.has(String(chat?.ownerId','getChats(isAgencyMode ? "agency" : "personal")','cm02-skeleton-grid']) assert.ok(inbox.includes(s),s);
+ for(const s of ['unreadOnly ? chats.filter','return pool.filter','[chats, searchText, unreadOnly, archiveOnly]','aria-pressed={!unreadOnly && !archiveOnly}','aria-pressed={unreadOnly}','subscribeInboxChanged(load)','currentUserIds.has(String(chat?.ownerId','getChats(isAgencyMode ? "agency" : "personal")','cm02-skeleton-grid']) assert.ok(inbox.includes(s),s);
 });
 test('conversation links keep old route and mode; empty conversations labelled correctly',()=>{
  for(const s of ['`/chat/${chat.parkingId}?conversationId=${chat.id}', '"&chatType=agency"','chat.lastMessage ? "خوانده‌شده" : "بدون پیام"','cm02-listing-line']) assert.ok(item.includes(s),s);

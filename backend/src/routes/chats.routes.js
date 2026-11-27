@@ -23,5 +23,6 @@ router.post(
 router.delete("/:id/messages/:messageId", controller.deleteForAll);
 router.delete("/:id/messages/:messageId/for-me", controller.hideForMe);
 router.post("/:id/read", controller.markRead);
+router.post("/:id/archive", controller.setArchive);
 
 module.exports = router;

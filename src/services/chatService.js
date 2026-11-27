@@ -37,6 +37,9 @@ export async function getChats(chatType = "personal") {
   const type = chatType === "agency" ? "agency" : "personal";
   return (await request(`/chats?type=${encodeURIComponent(type)}`)).chats || [];
 }
+export async function setChatArchive(id, archived) {
+  return request(`/chats/${encodeURIComponent(id)}/archive`, {method:"POST",body:JSON.stringify({archived})});
+}
 export async function getChat(id) { return (await request(`/chats/${id}`)).chat; }
 export async function createOrGetChat(spaceId, chatType = "personal") {
   const type = chatType === "agency" ? "agency" : "personal";

@@ -1090,3 +1090,4 @@
   .fj-chat-cm02 .chat-box__messages, .fj-chat-cm02 .chat-box__messages--empty { height: clamp(140px, 30dvh, 340px); }
   .fj-chat-cm02 .chat-ad-card__notice p { font-size: .66rem; line-height: 1.55; }
 }
+.fj-chat-cm02 .cm03-deleted-listing { margin: 8px 0 0; color: #765321; font-size: 13px; line-height: 1.8; }

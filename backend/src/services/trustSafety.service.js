@@ -363,8 +363,8 @@ async function getAdminReportChat(reportId) {
 
   const chatResult = await query(
     `SELECT
-       c.id,c.space_id,c.owner_id,c.requester_id,c.chat_type,c.moderation_mode,c.created_at,
-       s.title AS space_title,
+       c.id,COALESCE(c.space_id,c.original_space_id) AS space_id,c.owner_id,c.requester_id,c.chat_type,c.moderation_mode,c.created_at,
+       COALESCE(s.title,c.deleted_space_title) AS space_title,
        ou.full_name AS owner_name,
        ru.full_name AS requester_name
      FROM chats c

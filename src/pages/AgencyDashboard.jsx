@@ -6,7 +6,8 @@ import {
   getCategoryLabel,
 } from "../utils/matchingEngine";
 
-import "./AgencyDashboard.css";
+import { AgencyShell, AgencyPager, AgencySpace, AgencyScore, AgencyReasons, agencyPage } from "./AgencyWorkspaceAG01.jsx";
+import "./AgencyWorkspaceAG01.css";
 import { API_BASE_URL } from "../config/api";
 
 const TAB_CONFIG = {
@@ -53,194 +54,31 @@ function getAuthToken() {
 
 function MatchGroup({ items = [], activeTab, networkState = {} }) {
   const config = TAB_CONFIG[activeTab];
-
-  if (!items.length) {
-    return (
-      <div className="agency-dashboard__empty">
-        <span className="agency-dashboard__empty-icon">⌁</span>
-        <h3>{config.emptyTitle}</h3>
-        <p>{config.emptyText}</p>
+  if (!items.length) return <div className="ag01-empty"><span aria-hidden="true">↔</span><h3>{config.emptyTitle}</h3><p>{config.emptyText}</p></div>;
+  return <div className="ag01-list">{items.map(({ request, candidates }) => {
+    const first = candidates?.[0];
+    if (!first?.offer) return null;
+    const { offer, score, reasons = [] } = first;
+    const network = activeTab === "network";
+    const unlocked = !network || networkState.isUnlocked(request.id, offer.id);
+    const myFile = activeTab === "my-offers";
+    const key = `${request.id}:${offer.id}`;
+    return <article className="ag01-pair" key={key}>
+      <div className="ag01-pair-head"><span>{getCategoryLabel(request)} · {request.city || "شهر ثبت نشده"}</span><AgencyScore score={score}/>{network && <span className="ag01-lock" data-open={unlocked}>{unlocked ? "فرصت دریافت‌شده" : "فرصت دریافت‌نشده"}</span>}</div>
+      <div className="ag01-compare">
+        <AgencySpace item={myFile ? offer : request} label={myFile ? "فایل شما" : network ? "متقاضی شبکه" : "متقاضی شما"} kind={myFile ? "offer" : "wanted"} canOpen={unlocked}/>
+        <span className="ag01-connector" aria-hidden="true">↔</span>
+        <AgencySpace item={myFile ? request : offer} label={myFile ? "متقاضی مناسب" : network ? "فایل شبکه" : "بهترین فایل پیشنهادی"} kind={myFile ? "wanted" : "offer"} canOpen={unlocked}/>
       </div>
-    );
-  }
-
-  return (
-    <div className="agency-dashboard__match-list">
-      {items.slice(0, 8).map(({ request, candidates }) => {
-        const primaryCandidate = candidates?.[0];
-        const offer = primaryCandidate?.offer;
-        const score = primaryCandidate?.score;
-        const reasons = primaryCandidate?.reasons || [];
-
-        if (!offer) return null;
-
-        return (
-          <article className="agency-dashboard__match-row" key={`${request.id}-${offer.id}`}>
-            {activeTab === "my-offers" ? (
-              <>
-                <div className="agency-dashboard__side-card agency-dashboard__side-card--my-file">
-                  <div className="agency-dashboard__role-head">
-                    <span className="agency-dashboard__card-label">فایل شما</span>
-                    <span className="agency-dashboard__property-match-badge" title="درصد تطبیق این فایل با متقاضی">
-                      <b>{faNumber(score)}٪</b>
-                      <small>تطبیق فایل</small>
-                    </span>
-                  </div>
-                  <h3 className="agency-dashboard__file-title">
-                    {offer.title || getCategoryLabel(offer)}
-                  </h3>
-                  <p>
-                    {offer.city || "شهر ثبت نشده"}
-                    {offer.area ? ` • ${faNumber(offer.area)} متر` : ""}
-                  </p>
-
-                  {!!reasons.length && (
-                    <div className="agency-dashboard__reasons">
-                      {reasons.slice(0, 3).map((reason) => (
-                        <span key={reason}>✓ {reason}</span>
-                      ))}
-                    </div>
-                  )}
-
-                  <Link to={`/parking/${offer.id}`}>مشاهده فایل شما</Link>
-                </div>
-
-                <div className="agency-dashboard__match-connector" aria-hidden="true">
-                  <span>↔</span>
-                </div>
-
-                <div className="agency-dashboard__side-card agency-dashboard__side-card--matched-applicant">
-                  <span className="agency-dashboard__card-label">متقاضی مناسب این فایل</span>
-                  <h3 className="agency-dashboard__applicant-title">
-                    {request.title || `دنبال ${getCategoryLabel(request)}`}
-                  </h3>
-                  <p>
-                    {request.city || "شهر ثبت نشده"}
-                    {request.area ? ` • ${faNumber(request.area)} متر` : ""}
-                  </p>
-                  <Link to={`/parking/${request.id}`}>مشاهده متقاضی</Link>
-                </div>
-              </>
-            ) : activeTab === "network" ? (
-              <>
-                <div className="agency-dashboard__side-card agency-dashboard__side-card--network-request">
-                  <span className="agency-dashboard__card-label">متقاضی شبکه فضاجو</span>
-                  <h3 className="agency-dashboard__applicant-title">
-                    {request.title || `دنبال ${getCategoryLabel(request)}`}
-                  </h3>
-                  <p>
-                    {request.city || "شهر ثبت نشده"}
-                    {request.area ? ` • ${faNumber(request.area)} متر` : ""}
-                  </p>
-                  {networkState.isUnlocked(request.id, offer.id) ? (
-                    <Link to={`/parking/${request.id}`}>مشاهده متقاضی</Link>
-                  ) : (
-                    <span className="agency-dashboard__locked-link">اطلاعات کامل پس از دریافت فرصت</span>
-                  )}
-                </div>
-
-                <div className="agency-dashboard__network-match-score" aria-label={`درصد تطبیق ${faNumber(score)} درصد`}>
-                  <b>{faNumber(score)}٪</b>
-                  <small>تطبیق</small>
-                </div>
-
-                <div className="agency-dashboard__side-card agency-dashboard__side-card--network-offer">
-                  <span className="agency-dashboard__card-label">فایل شبکه فضاجو</span>
-                  <h3 className="agency-dashboard__file-title">
-                    {offer.title || getCategoryLabel(offer)}
-                  </h3>
-                  <p>
-                    {offer.city || "شهر ثبت نشده"}
-                    {offer.area ? ` • ${faNumber(offer.area)} متر` : ""}
-                  </p>
-
-                  {!!reasons.length && (
-                    <div className="agency-dashboard__reasons">
-                      {reasons.slice(0, 3).map((reason) => (
-                        <span key={reason}>✓ {reason}</span>
-                      ))}
-                    </div>
-                  )}
-
-                  {networkState.isUnlocked(request.id, offer.id) ? (
-                    <Link to={`/parking/${offer.id}`}>مشاهده فایل</Link>
-                  ) : (
-                    <button
-                      type="button"
-                      className="agency-dashboard__unlock-button"
-                      disabled={networkState.unlockingKey === `${request.id}:${offer.id}`}
-                      onClick={() => networkState.unlock(request.id, offer.id)}
-                    >
-                      {networkState.unlockingKey === `${request.id}:${offer.id}`
-                        ? "در حال دریافت..."
-                        : "دریافت فرصت"}
-                    </button>
-                  )}
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="agency-dashboard__side-card agency-dashboard__side-card--request agency-dashboard__side-card--my-applicant">
-                  <div className="agency-dashboard__role-head">
-                    <span className="agency-dashboard__card-label">متقاضی شما</span>
-                    <span className="agency-dashboard__applicant-match-badge" title="درصد تطبیق متقاضی شما با این فایل">
-                      <b>{faNumber(primaryCandidate?.score)}٪</b>
-                      <small>تطبیق متقاضی</small>
-                    </span>
-                  </div>
-                  <h3 className="agency-dashboard__applicant-title">
-                    {request.title || `دنبال ${getCategoryLabel(request)}`}
-                  </h3>
-                  <p>
-                    {request.city || "شهر ثبت نشده"}
-                    {request.area ? ` • ${faNumber(request.area)} متر` : ""}
-                  </p>
-                  <Link to={`/parking/${request.id}`}>مشاهده درخواست</Link>
-                </div>
-
-                <div className="agency-dashboard__match-connector" aria-hidden="true">
-                  <span>↔</span>
-                  <small>تطبیق فضاجو</small>
-                </div>
-
-                <div className="agency-dashboard__candidate-stack">
-                  {candidates.slice(0, 3).map(({ offer, reasons }, index) => (
-                    <div className="agency-dashboard__side-card agency-dashboard__side-card--offer" key={offer.id}>
-                      <div className="agency-dashboard__offer-head">
-                        <span className="agency-dashboard__card-label">
-                          {index === 0 ? "بهترین آگهی پیشنهادی" : "آگهی پیشنهادی"}
-                        </span>
-                      </div>
-
-                      <h3 className="agency-dashboard__file-title">{offer.title || getCategoryLabel(offer)}</h3>
-                      <p>
-                        {offer.city || "شهر ثبت نشده"}
-                        {offer.area ? ` • ${faNumber(offer.area)} متر` : ""}
-                      </p>
-
-                      {!!reasons?.length && (
-                        <div className="agency-dashboard__reasons">
-                          {reasons.slice(0, 3).map((reason) => (
-                            <span key={reason}>✓ {reason}</span>
-                          ))}
-                        </div>
-                      )}
-
-                      <Link to={`/parking/${offer.id}`}>مشاهده آگهی</Link>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </article>
-        );
-      })}
-    </div>
-  );
+      <div className="ag01-pair-foot"><AgencyReasons reasons={reasons.slice(0,3)}/>{network && !unlocked && <button className="ag01-primary" type="button" disabled={Boolean(networkState.unlockingKey) || !networkState.ready} onClick={() => networkState.unlock(request.id, offer.id)}>{networkState.unlockingKey === key ? "در حال دریافت..." : "دریافت فرصت"}</button>}</div>
+      {activeTab === "my-requests" && candidates.length > 1 && <details className="ag01-alternatives"><summary>فایل‌های پیشنهادی دیگر ({faNumber(Math.min(candidates.length, 3)-1)})</summary>{candidates.slice(1,3).map(candidate => <div className="ag01-alternative" key={candidate.offer.id}><AgencySpace item={candidate.offer} label="آگهی پیشنهادی" kind="offer" canOpen/><AgencyScore score={candidate.score}/><AgencyReasons reasons={(candidate.reasons || []).slice(0,3)}/></div>)}</details>}
+    </article>;
+  })}</div>;
 }
 
 function AgencyDashboard({ parkings = [], currentUser = null }) {
   const [activeTab, setActiveTab] = useState("my-offers");
+  const [page, setPage] = useState(1);
   const [networkQuota, setNetworkQuota] = useState(null);
   const [networkError, setNetworkError] = useState("");
   const [unlockingKey, setUnlockingKey] = useState("");
@@ -384,93 +222,21 @@ function AgencyDashboard({ parkings = [], currentUser = null }) {
     currentUser?.name ||
     "مشاور فضاجو";
 
-  return (
-    <main className="agency-dashboard">
-      <section className="agency-dashboard__hero">
-        <div className="agency-dashboard__container agency-dashboard__hero-inner">
-          <div>
-            <span className="agency-dashboard__eyebrow">پنل حرفه‌ای مشاور املاک</span>
-            <h1 className="agency-dashboard__welcome-title">
-              <strong>سلام {displayName}</strong>
-              <span>، فرصت‌های مناسب را یکجا ببینید</span>
-            </h1>
-            <p>
-              فضاجو فایل‌ها و درخواست‌ها را کنار هم می‌گذارد تا سریع‌تر به
-              متقاضی، آگهی و فرصت مناسب برسید.
-            </p>
-          </div>
-
-          <div className="agency-dashboard__hero-actions">
-            <Link to="/add-parking" className="agency-dashboard__primary-action">
-              + ثبت فایل یا درخواست
-            </Link>
-            <Link to="/agency/inbox" className="agency-dashboard__secondary-action">
-              گفتگوهای کاری
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="agency-dashboard__content">
-        <div className="agency-dashboard__container">
-          <nav className="agency-dashboard__section-tabs" aria-label="بخش‌های تطبیق مشاور">
-            {Object.entries(TAB_CONFIG).map(([key, item]) => (
-              <button
-                key={key}
-                type="button"
-                className={
-                  activeTab === key
-                    ? "agency-dashboard__section-tab agency-dashboard__section-tab--active"
-                    : "agency-dashboard__section-tab"
-                }
-                onClick={() => setActiveTab(key)}
-              >
-                <span className="agency-dashboard__section-tab-copy">
-                  <small>{item.eyebrow}</small>
-                  <strong>{item.title}</strong>
-                </span>
-                <span className="agency-dashboard__section-tab-count">
-                  {faNumber(tabCounts[key])}
-                </span>
-              </button>
-            ))}
-          </nav>
-
-          <div className="agency-dashboard__workspace">
-            <section className="agency-dashboard__results">
-              <header className="agency-dashboard__results-heading">
-                <div>
-                  <span>{activeConfig.eyebrow}</span>
-                  <h2>{activeConfig.title}</h2>
-                  <p>{activeConfig.description}</p>
-                </div>
-                <strong>{faNumber(tabCounts[activeTab])} نتیجه</strong>
-              </header>
-
+  const visible = agencyPage(tabItems[activeTab], page);
+  return <AgencyShell active="dashboard" title="میز کار مشاور" subtitle={`سلام ${displayName}؛ فایل‌ها و فرصت‌های مناسب را یکجا مدیریت کنید.`}
+    stats={[["فایل‌های من", dashboardData.myOffers.length], ["درخواست‌های من", dashboardData.myRequests.length]]}>
+    <nav className="ag01-tabs" aria-label="بخش‌های تطبیق مشاور">
+      {Object.entries(TAB_CONFIG).map(([key,item]) => <button key={key} type="button" aria-pressed={activeTab === key} onClick={() => {setActiveTab(key); setPage(1);}}><span><small>{item.eyebrow}</small><strong>{item.title}</strong></span><b>{faNumber(tabCounts[key])}</b></button>)}
+    </nav>
+    <section className="ag01-panel">
+      <header className="ag01-section-head"><div><h2>{activeConfig.title}</h2><p>{activeConfig.description}</p></div><span>{faNumber(tabCounts[activeTab])} نتیجه</span></header>
+      {activeTab === "network" && <>
+        <div className="ag01-quota"><div><small>سهمیه فرصت‌های شبکه</small><strong>{networkQuota ? `${faNumber(networkQuota.totalRemaining)} فرصت باقی‌مانده` : networkError ? "سهمیه نامشخص" : "در حال دریافت سهمیه..."}</strong><p>{networkQuota ? `${faNumber(networkQuota.freeRemaining)} رایگان${networkQuota.paidRemaining ? ` + ${faNumber(networkQuota.paidRemaining)} خریداری‌شده` : ""}` : "مشاهده خلاصه، سهمیه مصرف نمی‌کند."}</p></div>{!networkQuota && networkError && <button type="button" className="ag01-secondary" onClick={loadNetworkQuota}>تلاش دوباره</button>}</div>
+        <p className="ag01-note">مشاهده خلاصه رایگان است. دریافت هر فرصت جدید یک سهمیه مصرف می‌کند؛ هر فرصت حداکثر برای سه مشاور قابل دریافت است.</p>
+      </>}
               {activeTab === "network" && (
-                <div className="agency-dashboard__quota-card">
-                  <div>
-                    <span>سهمیه فرصت‌های شبکه</span>
-                    <strong>
-                      {networkQuota
-                        ? `${faNumber(networkQuota.totalRemaining)} فرصت باقی‌مانده`
-                        : "در حال دریافت سهمیه..."}
-                    </strong>
-                    <small>
-                      {networkQuota
-                        ? `${faNumber(networkQuota.freeRemaining)} رایگان${networkQuota.paidRemaining ? ` + ${faNumber(networkQuota.paidRemaining)} خریداری‌شده` : ""}`
-                        : "دیدن خلاصه فرصت از سهمیه کم نمی‌کند."}
-                    </small>
-                  </div>
-                  <span className="agency-dashboard__quota-badge">
-                    {networkQuota ? faNumber(networkQuota.totalRemaining) : "…"}
-                  </span>
-                </div>
-              )}
-
-              {activeTab === "network" && (
-                <div className="agency-dashboard__quota-purchase">
-                  <strong>خرید سهمیه با کیف پول</strong>
+                <details className="ag01-purchase agency-dashboard__quota-purchase">
+                  <summary>خرید آزمایشی سهمیه با کیف پول</summary>
                   <p>خرید سهمیه فقط در محیط آزمایشی فعال می‌شود؛ پرداخت بانکی انجام نمی‌شود.</p>
                   {purchaseConfig?.enabled ? (
                     <div className="agency-dashboard__quota-purchase-controls">
@@ -488,88 +254,14 @@ function AgencyDashboard({ parkings = [], currentUser = null }) {
                   ) : <small>خرید تا تعیین قیمت آزمایشی و فعال‌سازی امن در لوکال غیرفعال است.</small>}
                   {purchaseMessage && <p role="status">{purchaseMessage}</p>}
                   <Link to="/wallet">مشاهده کیف پول و سوابق تراکنش‌ها</Link>
-                </div>
+                </details>
               )}
 
-              {networkError && (
-                <div className="agency-dashboard__network-error">{networkError}</div>
-              )}
-
-              <MatchGroup
-                items={tabItems[activeTab]}
-                activeTab={activeTab}
-                networkState={{
-                  isUnlocked: isNetworkUnlocked,
-                  unlock: unlockNetworkOpportunity,
-                  unlockingKey,
-                }}
-              />
-            </section>
-
-            <aside className="agency-dashboard__tools">
-              <div className="agency-dashboard__tools-heading">
-                <span>دسترسی سریع</span>
-                <h2>ابزارهای کاری شما</h2>
-              </div>
-
-              <div className="agency-dashboard__tool-list">
-                <Link to="/agency/applicants">
-                  <span>⌕</span>
-                  <div>
-                    <strong>متقاضیان ثبت‌شده</strong>
-                    <small>درخواست‌های دنبال فضا را ببینید</small>
-                  </div>
-                </Link>
-
-                <Link to="/add-parking">
-                  <span>＋</span>
-                  <div>
-                    <strong>ثبت فایل جدید</strong>
-                    <small>فایل عرضه یا نیاز مشتری ثبت کنید</small>
-                  </div>
-                </Link>
-
-                <Link to="/agency/inbox">
-                  <span>◌</span>
-                  <div>
-                    <strong>گفتگوهای کاری</strong>
-                    <small>پیام‌های واقعی حساب مشاور</small>
-                  </div>
-                </Link>
-
-                <Link to="/my-parkings">
-                  <span>▣</span>
-                  <div>
-                    <strong>مدیریت فایل‌های من</strong>
-                    <small>آگهی‌ها و درخواست‌های خودتان</small>
-                  </div>
-                </Link>
-              </div>
-
-              <div className="agency-dashboard__summary">
-                <span>خلاصه حساب</span>
-                <div>
-                  <p>فایل‌های من <strong>{faNumber(dashboardData.myOffers.length)}</strong></p>
-                  <p>درخواست‌های من <strong>{faNumber(dashboardData.myRequests.length)}</strong></p>
-                </div>
-              </div>
-            </aside>
-          </div>
-
-          {activeTab === "network" && (
-            <div className="agency-dashboard__network-note">
-              <strong>فرصت‌های شبکه فضاجو</strong>
-              <p>
-                خلاصه فرصت‌ها رایگان دیده می‌شود. فقط با انتخاب «دریافت فرصت»
-                یک سهمیه مصرف می‌شود و اطلاعات کامل همان تطبیق برای شما باز می‌شود.
-                هر فرصت شبکه حداکثر برای سه مشاور قابل دریافت است.
-              </p>
-            </div>
-          )}
-        </div>
-      </section>
-    </main>
-  );
+      {activeTab === "network" && networkError && <div className="ag01-error" role="alert">{networkError}</div>}
+      <MatchGroup items={visible.items} activeTab={activeTab} networkState={{ isUnlocked: isNetworkUnlocked, unlock: unlockNetworkOpportunity, unlockingKey, ready: Boolean(networkQuota) }}/>
+      <AgencyPager data={visible} onPage={setPage}/>
+    </section>
+  </AgencyShell>;
 }
 
 export default AgencyDashboard;

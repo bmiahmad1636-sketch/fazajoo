@@ -312,7 +312,7 @@ function Chat({ parkings = [] }) {
     }
   };
 
-  const ad = parking || (chat ? {
+  const ad = (!chat?.listingDeleted && parking) || (chat ? {
     id: chat.parkingId,
     title: chat.parkingTitle,
     city: chat.parkingCity,
@@ -320,7 +320,7 @@ function Chat({ parkings = [] }) {
   } : null);
 
   const chatModeLabel = chat?.chatType === "agency" ? "گفتگوی کاری" : "گفتگوی شخصی";
-  const chatHomePath = chat?.chatType === "agency" || requestedChatType === "agency" ? "/agency/inbox" : "/inbox";
+  const chatHomePath = user?.accountType === "agent" && user?.agencyStatus === "approved" ? "/agency/inbox" : "/inbox";
   const safeMessageCount = messages.length.toLocaleString("fa-IR");
 
   if (loading) {
@@ -392,7 +392,7 @@ function Chat({ parkings = [] }) {
                   <span>📍 {ad?.city || "شهر ثبت نشده"}</span>
 
                 </div>
-                <Link to={`/parking/${ad?.id || parkingId}`}>مشاهده آگهی ←</Link>
+                {chat?.listingDeleted ? <p className="cm03-deleted-listing">آگهی حذف شده است؛ سابقه گفتگو محفوظ است.</p> : <Link to={`/parking/${ad?.id || parkingId}`}>مشاهده آگهی ←</Link>}
               </div>
 
               <div className="chat-ad-card__notice">

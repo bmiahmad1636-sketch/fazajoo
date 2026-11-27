@@ -269,7 +269,7 @@ io.on(
 );
 
 
-server.listen(
+require("./services/chatLifecycleCM03.service").ensureChatLifecycle().then(() => server.listen(
   env.PORT,
   env.HOST,
   () => {
@@ -305,7 +305,10 @@ server.listen(
       "=======================================\n"
     );
   }
-);
+)).catch((error) => {
+  console.error("CM03 startup protection failed:", error.code || error.name);
+  process.exit(1);
+});
 
 
 function shutdown(

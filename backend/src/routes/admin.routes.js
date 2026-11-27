@@ -44,6 +44,16 @@ router.patch("/notification-policy", async (req,res) => {
   catch(e) { return res.status(e.status || 500).json({ok:false,message:e.status ? e.message : "ذخیره تنظیمات اعلان‌ها انجام نشد."}); }
 });
 
+const chatPolicyCM03 = require("../services/chatLifecycleCM03.service");
+router.get("/chat-policy", async (req,res) => {
+  try { return res.json({ok:true,policy:await chatPolicyCM03.getPolicy(),audit:await chatPolicyCM03.policyAudit()}); }
+  catch(e) { console.error("CM03 policy read failed",e.code || e.name); return res.status(500).json({ok:false,message:"دریافت تنظیمات گفتگوها انجام نشد."}); }
+});
+router.patch("/chat-policy", async (req,res) => {
+  try { return res.json({ok:true,policy:await chatPolicyCM03.savePolicy(req.user.id,req.body)}); }
+  catch(e) { return res.status(e.status || 500).json({ok:false,message:e.status ? e.message : "ذخیره تنظیمات گفتگوها انجام نشد."}); }
+});
+
 router.get(
   "/users",
   listUsers

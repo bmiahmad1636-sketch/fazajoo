@@ -182,7 +182,7 @@ async function exportUserData(adminId, caseId, userId, from, to, scope='both'){
   if(Number.isNaN(fromDate.getTime()) || Number.isNaN(toDate.getTime())){const e=new Error('بازه زمانی خروجی معتبر نیست.');e.status=400;throw e;}
   if(fromDate>toDate){const e=new Error('«از تاریخ» نمی‌تواند بعد از «تا تاریخ» باشد.');e.status=400;throw e;}
 
-  const messages=scope==='spaces'?[]:(await query(`SELECT m.id,m.chat_id,m.sender_id,m.text,m.created_at,m.read_at,c.space_id,c.owner_id,c.requester_id,c.chat_type
+  const messages=scope==='spaces'?[]:(await query(`SELECT m.id,m.chat_id,m.sender_id,m.text,m.created_at,m.read_at,COALESCE(c.space_id,c.original_space_id) AS space_id,c.owner_id,c.requester_id,c.chat_type
     FROM messages m JOIN chats c ON c.id=m.chat_id
     WHERE (c.owner_id=$1 OR c.requester_id=$1) AND m.created_at >= $2::timestamptz AND m.created_at <= $3::timestamptz
     ORDER BY m.created_at ASC`,[userId,from,to])).rows;
@@ -248,7 +248,7 @@ async function lookupByPhone(adminId, caseId, phone){
   if(!/^09\d{9}$/.test(normalized)){const e=new Error('شماره موبایل معتبر وارد کنید.');e.status=400;throw e;}
   const user=(await query(`SELECT id,phone,full_name,account_type,agency_status,is_active FROM users WHERE regexp_replace(COALESCE(phone,''),'[^0-9]','','g')=$1 LIMIT 1`,[normalized])).rows[0];
   if(!user){const e=new Error('کاربری با این شماره موبایل پیدا نشد.');e.status=404;throw e;}
-  const chats=(await query(`SELECT c.id,c.space_id,c.chat_type,c.legal_mode,s.title AS space_title, GREATEST(MAX(m.created_at),c.created_at) AS last_activity FROM chats c LEFT JOIN spaces s ON s.id=c.space_id LEFT JOIN messages m ON m.chat_id=c.id WHERE c.owner_id=$1 OR c.requester_id=$1 GROUP BY c.id,s.title ORDER BY last_activity DESC NULLS LAST LIMIT 100`,[user.id])).rows;
+  const chats=(await query(`SELECT c.id,COALESCE(c.space_id,c.original_space_id) AS space_id,c.chat_type,c.legal_mode,COALESCE(s.title,c.deleted_space_title) AS space_title, GREATEST(MAX(m.created_at),c.created_at) AS last_activity FROM chats c LEFT JOIN spaces s ON s.id=c.space_id LEFT JOIN messages m ON m.chat_id=c.id WHERE c.owner_id=$1 OR c.requester_id=$1 GROUP BY c.id,s.title ORDER BY last_activity DESC NULLS LAST LIMIT 100`,[user.id])).rows;
   const spaces=(await query(`SELECT id,title,city,status,listing_type FROM spaces WHERE owner_id=$1 ORDER BY created_at DESC LIMIT 100`,[user.id])).rows;
   await audit({adminId,caseId,action:'legal_target_lookup',targetType:'user',targetId:user.id,metadata:{phone:normalized}});
   return {user,chats,spaces};

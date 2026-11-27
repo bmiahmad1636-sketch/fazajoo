@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getCurrentSessionUser, subscribeToAuth } from "../services/authService";
-import { getChats, subscribeInboxChanged } from "../services/chatService";
+import { getChats, subscribeInboxChanged, setChatArchive } from "../services/chatService";
 import InboxItem from "../components/chat/InboxItem";
 import "./Inbox.css";
 
@@ -12,6 +12,11 @@ function Inbox({ mode = "personal" }) {
   const [error, setError] = useState("");
   const [searchText, setSearchText] = useState("");
   const [unreadOnly, setUnreadOnly] = useState(false);
+  const [archiveOnly, setArchiveOnly] = useState(false);
+  const [actionError, setActionError] = useState("");
+  const [busyChat, setBusyChat] = useState(null);
+  const [reload, setReload] = useState(0);
+  const [visibleLimit, setVisibleLimit] = useState(20);
   const isAgencyMode = mode === "agency";
 
   useEffect(() => subscribeToAuth(setUser), []);
@@ -65,7 +70,7 @@ function Inbox({ mode = "personal" }) {
       active = false;
       unsubscribeRealtime();
     };
-  }, [user, isAgencyMode]);
+  }, [user, isAgencyMode, reload]);
 
   const formatTime = (value) => {
     const date = value ? new Date(value) : null;
@@ -85,7 +90,7 @@ function Inbox({ mode = "personal" }) {
 
   const filteredChats = useMemo(() => {
     const q = searchText.trim().toLowerCase();
-    const pool = unreadOnly ? chats.filter((chat) => Number(chat.unreadCount || 0) > 0) : chats;
+    const pool = unreadOnly ? chats.filter((chat) => !chat.archived && Number(chat.unreadCount || 0) > 0) : chats.filter((chat) => Boolean(chat.archived) === archiveOnly);
     if (!q) return pool;
     return pool.filter((chat) =>
       [
@@ -98,8 +103,26 @@ function Inbox({ mode = "personal" }) {
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(q))
     );
-  }, [chats, searchText, unreadOnly]);
+  }, [chats, searchText, unreadOnly, archiveOnly]);
 
+  const archiveCount = chats.filter((chat) => chat.archived).length;
+  const activeCount = chats.length - archiveCount;
+  const chooseFilter = (filter) => {
+    setUnreadOnly(filter === "unread");
+    setArchiveOnly(filter === "archive");
+    setVisibleLimit(20);
+  };
+  const changeArchive = async (chat) => {
+    if (busyChat) return;
+    setBusyChat(chat.id);
+    setActionError("");
+    try {
+      await setChatArchive(chat.id, !chat.archived);
+      setReload((n) => n + 1);
+    } catch (e) {
+      setActionError(e.message || "تغییر آرشیو انجام نشد.");
+    } finally { setBusyChat(null); }
+  };
   const totalUnread = chats.reduce(
     (sum, chat) => sum + Number(chat.unreadCount || 0),
     0
@@ -120,12 +143,14 @@ function Inbox({ mode = "personal" }) {
     : "پیام‌ها و مذاکره‌های شما درباره فضاها";
   const emptyTitle = searchText
     ? "گفتگویی پیدا نشد"
+    : archiveOnly ? "آرشیو گفتگوها خالی است"
     : unreadOnly ? "پیام خوانده‌نشده‌ای ندارید"
     : isAgencyMode
       ? "هنوز گفتگوی کاری ندارید"
       : "هنوز گفتگویی ندارید";
   const emptyText = searchText
     ? "عبارت جستجو را تغییر بده یا پاک کن تا گفت‌وگوهای بیشتری ببینی."
+    : archiveOnly ? "گفتگوهای قدیمی یا آرشیوشده شما در این بخش نمایش داده می‌شوند."
     : unreadOnly ? "برای مشاهده سایر گفتگوها، همه گفتگوها را انتخاب کنید."
     : isAgencyMode
       ? "از بخش متقاضی‌ها، گفتگوی کاری را با مشتری موردنظر شروع کنید."
@@ -202,8 +227,8 @@ function Inbox({ mode = "personal" }) {
           </div>
           <div className="inbox-hero__stats">
             <div className="inbox-hero__count">
-              <strong>{chats.length.toLocaleString("fa-IR")}</strong>
-              <span>گفتگو</span>
+              <strong>{activeCount.toLocaleString("fa-IR")}</strong>
+              <span>گفتگوی فعال</span>
             </div>
             <div className="inbox-hero__count inbox-hero__count--unread">
               <strong>{totalUnread.toLocaleString("fa-IR")}</strong>
@@ -218,8 +243,9 @@ function Inbox({ mode = "personal" }) {
           <div className="inbox-toolbar">
             <div className="inbox-toolbar__info">
               <div className="inbox-toolbar__chips" aria-label="فیلتر گفتگوها">
-                <button type="button" aria-pressed={!unreadOnly} onClick={() => setUnreadOnly(false)}>همه گفتگوها</button>
-                <button type="button" aria-pressed={unreadOnly} onClick={() => setUnreadOnly(true)}>خوانده‌نشده‌ها <span>{unreadChatCount.toLocaleString("fa-IR")}</span></button>
+                <button type="button" aria-pressed={!unreadOnly && !archiveOnly} onClick={() => chooseFilter("active")}>گفتگوهای فعال</button>
+                <button type="button" aria-pressed={unreadOnly} onClick={() => chooseFilter("unread")}>خوانده‌نشده‌ها <span>{unreadChatCount.toLocaleString("fa-IR")}</span></button>
+                <button type="button" aria-pressed={archiveOnly} onClick={() => chooseFilter("archive")}>آرشیو <span>{archiveCount.toLocaleString("fa-IR")}</span></button>
                 {searchText.trim() ? <em>{`نتیجه: ${filteredChats.length.toLocaleString("fa-IR")} · خوانده‌نشده: ${filteredUnreadCount.toLocaleString("fa-IR")}`}</em> : null}
               </div>
             </div>
@@ -228,7 +254,7 @@ function Inbox({ mode = "personal" }) {
               <span className="inbox-search__icon">⌕</span>
               <input
                 value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
+                onChange={(e) => { setSearchText(e.target.value); setVisibleLimit(20); }}
                 placeholder={isAgencyMode ? "جستجو در گفتگوهای کاری..." : "جستجو در گفتگوها..."}
                 aria-label="جستجو در گفتگوها"
               />
@@ -237,7 +263,7 @@ function Inbox({ mode = "personal" }) {
                   type="button"
                   className="inbox-search__clear"
                   aria-label="پاک کردن جستجو"
-                  onClick={() => setSearchText("")}
+                  onClick={() => { setSearchText(""); setVisibleLimit(20); }}
                 >
                   ×
                 </button>
@@ -246,21 +272,24 @@ function Inbox({ mode = "personal" }) {
           </div>
 
           {error && <div className="inbox-error" role="alert">{error}</div>}
+          {actionError && <div className="inbox-error" role="alert">{actionError}</div>}
+          {archiveOnly && <p className="cm03-archive-note">آرشیو فقط برای شماست؛ گفتگوهای خوانده‌نشده و تحت حفاظت فعال می‌مانند. با پیام جدید، گفتگو به صندوق فعال برمی‌گردد.</p>}
 
           {!error && filteredChats.length === 0 ? (
             <div className="inbox-empty">
               <div className="inbox-empty__icon">💬</div>
               <h2>{emptyTitle}</h2>
               <p>{emptyText}</p>
-              {searchText || unreadOnly ? (
-                <button type="button" className="inbox-empty__button" onClick={() => { setSearchText(""); setUnreadOnly(false); }}>نمایش همه گفتگوها</button>
+              {searchText || unreadOnly || archiveOnly ? (
+                <button type="button" className="inbox-empty__button" onClick={() => { setSearchText(""); chooseFilter("active"); }}>نمایش همه گفتگوها</button>
               ) : <Link to={emptyLink} className="inbox-empty__button">{emptyLinkText}</Link>}
             </div>
           ) : (
+            <>
             <div className="inbox-list">
-              {filteredChats.map((chat) => (
+              {filteredChats.slice(0, visibleLimit).map((chat) => (
+                <div key={chat.id} className="cm03-inbox-entry">
                 <InboxItem
-                  key={chat.id}
                   chat={chat}
                   otherUserName={chat.otherUserName}
                   otherUserRole={chat.otherUserRole}
@@ -272,8 +301,17 @@ function Inbox({ mode = "personal" }) {
                     chat.lastMessageSenderId === user.backendId
                   }
                 />
+                <div className="cm03-inbox-action">
+                  {chat.listingDeleted && <span>آگهی حذف شده</span>}
+                  {chat.archived || (!chat.unreadCount && !chat.legalHold && chat.legalMode === "active" && chat.moderationMode === "active") ? (
+                    <button type="button" disabled={busyChat !== null} onClick={() => changeArchive(chat)}>{busyChat === chat.id ? "در حال ثبت…" : chat.archived ? "بازگردانی به صندوق" : "انتقال به آرشیو"}</button>
+                  ) : null}
+                </div>
+                </div>
               ))}
             </div>
+            {filteredChats.length > visibleLimit && <div className="cm03-inbox-more"><button type="button" onClick={() => setVisibleLimit((n) => n + 20)}>نمایش گفتگوهای بیشتر</button></div>}
+            </>
           )}
         </div>
       </section>

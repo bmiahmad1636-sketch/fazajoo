@@ -20,6 +20,7 @@ import {
 
 import "./AdminDashboard.css";
 import AdminNotificationPolicyNT03 from "../components/AdminNotificationPolicyNT03";
+import AdminChatPolicyCM03 from "../components/AdminChatPolicyCM03";
 
 
 
@@ -38,6 +39,7 @@ const DOCUMENT_LABELS = {
 
 function AdminDashboard() {
   const [noticePolicyOpen,setNoticePolicyOpen]=useState(false);
+  const [chatPolicyOpen,setChatPolicyOpen]=useState(false);
   const [users, setUsers] =
     useState([]);
 
@@ -590,8 +592,12 @@ function AdminDashboard() {
             <button type="button" className="admin-dashboard__quick-link admin-dashboard__quick-link--users" aria-expanded={noticePolicyOpen} onClick={()=>setNoticePolicyOpen(v=>!v)}>
               <span className="admin-dashboard__quick-icon">◷</span><div><strong>تنظیمات اعلان‌ها</strong><small>مدت آرشیو و نگهداری اعلان‌ها</small></div><b aria-hidden="true">{noticePolicyOpen ? "−" : "+"}</b>
             </button>
+            <button type="button" className="admin-dashboard__quick-link admin-dashboard__quick-link--users" aria-expanded={chatPolicyOpen} onClick={()=>setChatPolicyOpen(v=>!v)}>
+              <span className="admin-dashboard__quick-icon">◷</span><div><strong>تنظیمات گفتگوها</strong><small>آرشیو و سیاست نگهداری پیام‌ها</small></div><b aria-hidden="true">{chatPolicyOpen ? "−" : "+"}</b>
+            </button>
           </div>
           {noticePolicyOpen && <AdminNotificationPolicyNT03 />}
+          {chatPolicyOpen && <AdminChatPolicyCM03 />}
         </div>
       </nav>
 
