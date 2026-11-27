@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 
 import Header from "./components/Header";
+import SiteFooterFT01 from "./components/SiteFooterFT01";
 import Hero from "./components/Hero";
 
 import Parking from "./pages/parking";
@@ -798,6 +799,8 @@ function App() {
           }
         />
       </Routes>
+
+      <SiteFooterFT01 user={user} userProfile={userProfile} profileLoading={profileLoading} />
     </>
   );
 }
